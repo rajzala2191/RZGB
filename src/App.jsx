@@ -52,6 +52,11 @@ import NCRReportingPage from '@/pages/NCRReportingPage';
 import SupplierJobsPage from '@/pages/SupplierJobsPage';
 import TenderDetailsPage from '@/pages/TenderDetailsPage';
 import SupplierDocumentsPortal from '@/pages/SupplierDocumentsPortal';
+import MaterialUpdatePage from '@/pages/MaterialUpdatePage';
+import CastingPage from '@/pages/CastingPage';
+import MachiningPage from '@/pages/MachiningPage';
+import QCPage from '@/pages/QCPage';
+import DispatchPage from '@/pages/DispatchPage';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -111,6 +116,11 @@ function App() {
                 <Route path="/supplier-hub/job-tracking/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><JobDetailsPage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
                 <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/material-update/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><MaterialUpdatePage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/casting/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><CastingPage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/machining/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><MachiningPage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/qc/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><QCPage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/dispatch/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><DispatchPage /></ProtectedRoute>} />
               </Routes>
                 <Toaster />
               </ClientProvider>
