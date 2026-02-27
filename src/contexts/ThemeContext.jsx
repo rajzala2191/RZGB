@@ -3,29 +3,35 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(true);
-
-  // Initialize from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('rz-portal-theme');
-    if (savedTheme === 'light') {
-      setIsDark(false);
-      document.documentElement.classList.remove('dark');
-    } else {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
+  const [isDark, setIsDark] = useState(() => {
+    // Check localStorage on initial render
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('rz-portal-theme');
+      return saved !== 'light';
     }
-  }, []);
+    return true; // Default to dark
+  });
+
+  // Apply theme on mount and whenever isDark changes
+  useEffect(() => {
+    const html = document.documentElement;
+    if (isDark) {
+      html.classList.remove('light');
+      html.classList.add('dark');
+      html.style.colorScheme = 'dark';
+      document.body.style.colorScheme = 'dark';
+      localStorage.setItem('rz-portal-theme', 'dark');
+    } else {
+      html.classList.remove('dark');
+      html.classList.add('light');
+      html.style.colorScheme = 'light';
+      document.body.style.colorScheme = 'light';
+      localStorage.setItem('rz-portal-theme', 'light');
+    }
+  }, [isDark]);
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (isDark) {
-      localStorage.setItem('rz-portal-theme', 'light');
-      document.documentElement.classList.remove('dark');
-    } else {
-      localStorage.setItem('rz-portal-theme', 'dark');
-      document.documentElement.classList.add('dark');
-    }
+    setIsDark(prev => !prev);
   };
 
   return (

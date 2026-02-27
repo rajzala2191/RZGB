@@ -6,39 +6,46 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light Theme */
+/* CSS Variables for Theming */
 :root {
-    --bg-primary: #f8fafc;
-    --bg-secondary: #f1f5f9;
-    --bg-tertiary: #e2e8f0;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --border-color: #cbd5e1;
-    --shadow: rgba(15, 23, 42, 0.05);
-}
-
-/* Dark Theme */
-:root.dark {
+    /* Dark Theme (Default) */
     --bg-primary: #020617;
     --bg-secondary: #0f172a;
     --bg-tertiary: #1e293b;
     --text-primary: #f1f5f9;
     --text-secondary: #cbd5e1;
     --border-color: #334155;
-    --shadow: rgba(0, 0, 0, 0.5);
+}
+
+:root.light {
+    /* Light Theme */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --bg-tertiary: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --border-color: #cbd5e1;
 }
 
 html {
-    @apply transition-colors duration-200;
+    transition: background-color 300ms ease, color 300ms ease;
+    color-scheme: dark;
+    background-color: #020617;
+}
+
+html.light {
+    color-scheme: light;
+    background-color: #f8fafc;
 }
 
 body {
-    @apply bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 
-           dark:text-slate-100 text-slate-900 bg-slate-50;
+    background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #0f172a 100%);
+    color: #f1f5f9;
     font-family: 'DM Sans', sans-serif;
+    transition: background-color 300ms ease, color 300ms ease, background-image 300ms ease;
 }
 
-/* Light theme adjustments */
-body:not(.dark) {
-    @apply bg-gradient-to-br from-blue-50 via-slate-50 to-slate-100;
+html.light body {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+    color: #0f172a;
 }

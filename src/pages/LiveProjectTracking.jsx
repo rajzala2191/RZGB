@@ -8,7 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import {
   Loader2, ArrowLeft, CheckCircle2, Clock, AlertCircle, Package,
   Truck, FileText, TrendingUp, Calendar, DollarSign, MapPin,
-  FileCheck, Zap, BarChart3, Hourglass
+  FileCheck, Zap, BarChart3, Hourglass, ShieldCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -32,7 +32,7 @@ const LiveProjectTracking = () => {
     { id: 'MATERIAL', label: 'Material Sourcing', color: 'sky', icon: Package },
     { id: 'CASTING', label: 'Casting', color: 'orange', icon: Zap },
     { id: 'MACHINING', label: 'Machining', color: 'violet', icon: Hourglass },
-    { id: 'QC', label: 'Quality Control', color: 'emerald', icon: Quality },
+    { id: 'QC', label: 'Quality Control', color: 'emerald', icon: ShieldCheck },
     { id: 'DISPATCH', label: 'Dispatch', color: 'blue', icon: Truck },
     { id: 'DELIVERED', label: 'Delivered', color: 'green', icon: CheckCircle2 },
   ];
