@@ -81,6 +81,10 @@ const ReportsPage = () => {
   };
 
   return (
+    <ControlCentreLayout>
+      <Helmet>
+        <title>Reports - Ghost Portal</title>
+      </Helmet>
 
       {error && (
         <div className="mb-6 bg-red-950/30 border border-red-500/30 rounded-lg p-4 flex items-start gap-3">
@@ -92,10 +96,6 @@ const ReportsPage = () => {
           <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">×</button>
         </div>
       )}
-    <ControlCentreLayout>
-      <Helmet>
-        <title>Reports - Ghost Portal</title>
-      </Helmet>
 
       <div className="space-y-8">
         <div>
