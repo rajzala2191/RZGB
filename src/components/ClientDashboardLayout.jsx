@@ -15,6 +15,7 @@ import {
   FolderPlus
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import ThemeToggle from '@/components/ThemeToggle';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 const ClientDashboardLayout = ({ children }) => {
@@ -120,10 +121,14 @@ const ClientDashboardLayout = ({ children }) => {
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm border border-cyan-500/20">
                     {userCompanyName ? userCompanyName.charAt(0).toUpperCase() : 'C'}
                   </div>
-                  <div className="overflow-hidden">
+                  <div className="overflow-hidden flex-1">
                     <p className="text-sm font-bold text-slate-200 truncate">{userCompanyName || 'Valued Client'}</p>
                     <p className="text-xs text-slate-500 truncate font-mono">{currentUser?.email}</p>
                   </div>
+                </div>
+                <div className="flex gap-2 mb-3">
+                  <ThemeToggle />
+                  <div className="flex-1" />
                 </div>
                 <div className="flex gap-2">
                   <button className="flex-1 flex items-center justify-center py-2 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors border border-slate-800">

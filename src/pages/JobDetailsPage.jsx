@@ -79,6 +79,52 @@ const JobDetailsPage = () => {
       </div>
 
       <div className="grid gap-6">
+        {/* Manufacturing Workflow Navigation */}
+        <div className="bg-gradient-to-r from-slate-950/80 to-slate-900/80 border border-slate-800 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <span className="w-8 h-8 bg-sky-500/20 border border-sky-500 rounded-lg flex items-center justify-center text-sky-400 text-sm font-bold">✦</span>
+            Manufacturing Workflow
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <button
+              onClick={() => navigate(`/supplier-hub/job-tracking/${rz_job_id}`)}
+              className="p-3 rounded-lg bg-slate-800 hover:bg-blue-900/30 border border-slate-700 hover:border-blue-500 text-slate-300 hover:text-blue-400 transition-all font-bold text-sm text-center"
+            >
+              📋 Job Tracking
+            </button>
+            <button
+              onClick={() => navigate(`/supplier-hub/material-update/${rz_job_id}`)}
+              className="p-3 rounded-lg bg-slate-800 hover:bg-cyan-900/30 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-400 transition-all font-bold text-sm text-center"
+            >
+              📦 Material Update
+            </button>
+            <button
+              onClick={() => navigate(`/supplier-hub/casting/${rz_job_id}`)}
+              className="p-3 rounded-lg bg-slate-800 hover:bg-amber-900/30 border border-slate-700 hover:border-amber-500 text-slate-300 hover:text-amber-400 transition-all font-bold text-sm text-center"
+            >
+              🔥 Casting
+            </button>
+            <button
+              onClick={() => navigate(`/supplier-hub/machining/${rz_job_id}`)}
+              className="p-3 rounded-lg bg-slate-800 hover:bg-purple-900/30 border border-slate-700 hover:border-purple-500 text-slate-300 hover:text-purple-400 transition-all font-bold text-sm text-center"
+            >
+              ⚙️ Machining
+            </button>
+            <button
+              onClick={() => navigate(`/supplier-hub/qc/${rz_job_id}`)}
+              className="p-3 rounded-lg bg-slate-800 hover:bg-emerald-900/30 border border-slate-700 hover:border-emerald-500 text-slate-300 hover:text-emerald-400 transition-all font-bold text-sm text-center"
+            >
+              ✓ QC
+            </button>
+            <button
+              onClick={() => navigate(`/supplier-hub/dispatch/${rz_job_id}`)}
+              className="p-3 rounded-lg bg-slate-800 hover:bg-blue-900/30 border border-slate-700 hover:border-blue-500 text-slate-300 hover:text-blue-400 transition-all font-bold text-sm text-center"
+            >
+              🚚 Dispatch
+            </button>
+          </div>
+        </div>
+
         {/* Milestones */}
         <MilestoneUpdater 
           orderId={job.id} 

@@ -12,6 +12,7 @@ import {
   FolderOpen
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import ThemeToggle from '@/components/ThemeToggle';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 const ControlCentreLayout = ({ children }) => {
@@ -114,10 +115,14 @@ const ControlCentreLayout = ({ children }) => {
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center text-white font-bold text-sm shadow-lg border border-cyan-500/20">
                     {currentUser?.email?.charAt(0).toUpperCase() || 'A'}
                   </div>
-                  <div className="overflow-hidden">
+                  <div className="overflow-hidden flex-1">
                     <p className="text-sm font-medium text-slate-200 truncate">{currentUser?.email}</p>
                     <p className="text-xs text-slate-500 truncate">{userCompanyName || 'Administrator'}</p>
                   </div>
+                </div>
+                <div className="flex gap-2 mb-3">
+                  <ThemeToggle />
+                  <div className="flex-1" />
                 </div>
                 <button
                   onClick={handleLogout}

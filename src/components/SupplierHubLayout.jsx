@@ -16,6 +16,7 @@ import {
   X 
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const SupplierHubLayout = ({ children }) => {
   const { currentUser, userCompanyName, logout } = useAuth();
@@ -116,10 +117,14 @@ const SupplierHubLayout = ({ children }) => {
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-700 flex items-center justify-center text-white font-bold text-sm shadow-lg border border-emerald-500/20">
                   {userCompanyName ? userCompanyName.charAt(0).toUpperCase() : 'S'}
                 </div>
-                <div className="overflow-hidden">
+                <div className="overflow-hidden flex-1">
                   <p className="text-sm font-medium text-slate-200 truncate">{userCompanyName || 'Supplier'}</p>
                   <p className="text-xs text-slate-500 truncate font-mono">{currentUser?.id?.slice(0, 8)}...</p>
                 </div>
+              </div>
+              <div className="flex gap-2 mb-3">
+                <ThemeToggle />
+                <div className="flex-1" />
               </div>
               <button
                 onClick={handleLogout}

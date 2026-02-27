@@ -5,6 +5,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { AdminProvider } from '@/contexts/AdminContext';
 import { SupplierProvider } from '@/contexts/SupplierContext';
 import { ClientProvider } from '@/contexts/ClientContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -44,6 +45,7 @@ import ClientRFQUploadPage from '@/pages/ClientRFQUploadPage';
 import ClientOrderCreationPage from '@/pages/ClientOrderCreationPage';
 import ClientOrderDetailsPage from '@/pages/ClientOrderDetailsPage';
 import ProjectTrackingPage from '@/pages/ProjectTrackingPage';
+import LiveProjectTracking from '@/pages/LiveProjectTracking';
 
 // Supplier Pages
 import SupplierDashboard from '@/pages/SupplierDashboard';
@@ -63,11 +65,12 @@ import { Toaster } from '@/components/ui/toaster';
 function App() {
   return (
     <ErrorBoundary>
-      <Router>
-        <AuthProvider>
-          <AdminProvider>
-            <SupplierProvider>
-              <ClientProvider>
+      <ThemeProvider>
+        <Router>
+          <AuthProvider>
+            <AdminProvider>
+              <SupplierProvider>
+                <ClientProvider>
                 <ScrollToTop />
                 <Routes>
                 {/* Root & Auth */}
@@ -97,7 +100,8 @@ function App() {
                 <Route path="/client-dashboard/create-order" element={<ProtectedRoute requiredRole="client"><ClientOrderCreationPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/orders/:orderId" element={<ProtectedRoute requiredRole="client"><ClientOrderDetailsPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/projects" element={<ProtectedRoute requiredRole="client"><ProjectsOverviewPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/projects/:projectId/tracking" element={<ProtectedRoute requiredRole="client"><ProjectTrackingPage /></ProtectedRoute>} />
+                <Route path="/client-dashboard/projects/:projectId/tracking" element={<ProtectedRoute requiredRole="client"><LiveProjectTracking /></ProtectedRoute>} />
+                <Route path="/client-dashboard/projects/:projectId/tracking-legacy" element={<ProtectedRoute requiredRole="client"><ProjectTrackingPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/create-project" element={<ProtectedRoute requiredRole="client"><ClientProjectCreationPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/projects/:projectId/upload-rfq" element={<ProtectedRoute requiredRole="client"><ClientRFQUploadPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><ClientOrderHistoryPage /></ProtectedRoute>} />
@@ -128,6 +132,7 @@ function App() {
           </AdminProvider>
         </AuthProvider>
       </Router>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }
