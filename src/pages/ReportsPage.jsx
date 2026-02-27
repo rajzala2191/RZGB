@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
-import { FileText, Download, Calendar, Loader2 } from 'lucide-react';
+import { FileText, Download, Calendar, Loader2, AlertCircle } from 'lucide-react';
+import { ErrorState } from '@/components/ErrorState';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
@@ -9,6 +10,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 
 const ReportsPage = () => {
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState(null);
   const [reportHistory, setReportHistory] = useState([]); // In real app, fetch from DB
 
   const templates = [
@@ -19,6 +21,7 @@ const ReportsPage = () => {
 
   const handleGenerate = async (templateId) => {
     setGenerating(true);
+    setError(null);
     try {
       // Fetch data based on template
       let data = [];
@@ -26,13 +29,15 @@ const ReportsPage = () => {
       let title = '';
 
       if (templateId === 'user_summary') {
-        const { data: profiles } = await supabase.from('profiles').select('email, role, company_name, created_at');
+        const { data: profiles, error: profileError } = await supabase.from('profiles').select('email, role, company_name, created_at');
+        if (profileError) throw profileError;
         data = profiles.map(p => [p.email, p.role, p.company_name, format(new Date(p.created_at), 'yyyy-MM-dd')]);
         headers = [['Email', 'Role', 'Company', 'Joined Date']];
         title = 'User Summary Report';
       } else if (templateId === 'activity') {
-        const { data: logs } = await supabase.from('activity_logs').select('created_at, action, details, status').limit(50);
-        data = logs.map(l => [format(new Date(l.created_at), 'Pp'), l.action, l.details, l.status]);
+        const { data: logs, error: logsError } = await supabase.from('activity_logs').select('created_at, action, details, status').limit(50);
+        if (logsError) throw logsError;
+        data = logs?.map(l => [format(new Date(l.created_at), 'Pp'), l.action, l.details, l.status]) || [];
         headers = [['Timestamp', 'Action', 'Details', 'Status']];
         title = 'Activity Report';
       } else {
@@ -69,12 +74,24 @@ const ReportsPage = () => {
 
     } catch (err) {
       console.error('Report generation failed:', err);
+      setError(err.message || 'Failed to generate report');
     } finally {
       setGenerating(false);
     }
   };
 
   return (
+
+      {error && (
+        <div className="mb-6 bg-red-950/30 border border-red-500/30 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
+          <div className="flex-1">
+            <p className="text-red-400 font-medium">Error generating report</p>
+            <p className="text-red-300/80 text-sm">{error}</p>
+          </div>
+          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">×</button>
+        </div>
+      )}
     <ControlCentreLayout>
       <Helmet>
         <title>Reports - Ghost Portal</title>

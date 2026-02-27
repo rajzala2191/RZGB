@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet';
 import SupplierHubLayout from '@/components/SupplierHubLayout';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, ArrowRight, Briefcase, FileText, CheckCircle, Package, Clock, LayoutDashboard } from 'lucide-react';
+import { Loader2, ArrowRight, Briefcase, FileText, CheckCircle, Package, Clock, LayoutDashboard, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -12,6 +12,7 @@ const SupplierDashboard = () => {
   const [stats, setStats] = useState({ openTenders: 0, activeBids: 0, awarded: 0, completed: 0 });
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const SupplierDashboard = () => {
         
         if (activityRes.data) setActivities(activityRes.data);
       } catch (err) {
+        setError('Failed to load dashboard data. Please refresh the page.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -73,7 +75,21 @@ const SupplierDashboard = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center p-20"><Loader2 className="animate-spin text-cyan-500 w-10 h-10" /></div>
+        <derror ? (
+        <div className="flex flex-col items-center justify-center p-20 h-full">
+          <div className="bg-[#0f172a] border border-red-500/30 rounded-xl p-8 max-w-md w-full text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-slate-100 mb-2">Unable to Load Dashboard</h2>
+            <p className="text-slate-400 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-2 px-4 rounded-lg transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : iv className="flex justify-center p-20"><Loader2 className="animate-spin text-cyan-500 w-10 h-10" /></div>
       ) : (
         <div className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

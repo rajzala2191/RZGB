@@ -24,6 +24,26 @@ const ClientDashboardPage = () => {
     );
   }
 
+  if (error) {
+    return (
+      <ClientDashboardLayout>
+        <div className="flex flex-col items-center justify-center p-24 h-full">
+          <div className="bg-[#0f172a] border border-red-500/30 rounded-xl p-8 max-w-md w-full text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-slate-100 mb-2">Unable to Load Dashboard</h2>
+            <p className="text-slate-400 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-2 px-4 rounded-lg transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </ClientDashboardLayout>
+    );
+  }
+
   const activeOrders = orders.filter(o => o.status !== 'completed' && o.order_status !== 'COMPLETED').length;
   const completedOrders = orders.filter(o => o.status === 'completed' || o.order_status === 'COMPLETED').length;
   const pendingReview = orders.filter(o => o.order_status === 'PENDING_ADMIN_SCRUB').length;

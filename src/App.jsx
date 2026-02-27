@@ -7,6 +7,7 @@ import { SupplierProvider } from '@/contexts/SupplierContext';
 import { ClientProvider } from '@/contexts/ClientContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import RootRedirect from '@/pages/RootRedirect';
 import LoginPage from '@/pages/LoginPage';
 
@@ -56,13 +57,14 @@ import { Toaster } from '@/components/ui/toaster';
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <AdminProvider>
-          <SupplierProvider>
-            <ClientProvider>
-              <ScrollToTop />
-              <Routes>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <AdminProvider>
+            <SupplierProvider>
+              <ClientProvider>
+                <ScrollToTop />
+                <Routes>
                 {/* Root & Auth */}
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="/login" element={<LoginPage />} />
@@ -110,12 +112,13 @@ function App() {
                 <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
                 <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
               </Routes>
-              <Toaster />
-            </ClientProvider>
-          </SupplierProvider>
-        </AdminProvider>
-      </AuthProvider>
-    </Router>
+                <Toaster />
+              </ClientProvider>
+            </SupplierProvider>
+          </AdminProvider>
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
