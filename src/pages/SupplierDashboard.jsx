@@ -75,7 +75,8 @@ const SupplierDashboard = () => {
       </div>
 
       {loading ? (
-        <derror ? (
+        <div className="flex justify-center p-20"><Loader2 className="animate-spin text-cyan-500 w-10 h-10" /></div>
+      ) : error ? (
         <div className="flex flex-col items-center justify-center p-20 h-full">
           <div className="bg-[#0f172a] border border-red-500/30 rounded-xl p-8 max-w-md w-full text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -89,7 +90,6 @@ const SupplierDashboard = () => {
             </button>
           </div>
         </div>
-      ) : iv className="flex justify-center p-20"><Loader2 className="animate-spin text-cyan-500 w-10 h-10" /></div>
       ) : (
         <div className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
