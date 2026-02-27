@@ -1,0 +1,136 @@
+import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet';
+import SupplierHubLayout from '@/components/SupplierHubLayout';
+import { supabase } from '@/lib/customSupabaseClient';
+import { useAuth } from '@/contexts/AuthContext';
+import { Loader2, ArrowRight, Briefcase, FileText, CheckCircle, Package, Clock, LayoutDashboard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+
+const SupplierDashboard = () => {
+  const { currentUser, userCompanyName } = useAuth();
+  const [stats, setStats] = useState({ openTenders: 0, activeBids: 0, awarded: 0, completed: 0 });
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!currentUser) return;
+      
+      try {
+        const [tendersRes, bidsRes, awardedRes, activityRes] = await Promise.all([
+          supabase.from('orders').select('id', {count: 'exact'}).eq('order_status', 'OPEN_FOR_BIDDING'),
+          supabase.from('bid_submissions').select('id', {count: 'exact'}).eq('supplier_id', currentUser.id),
+          supabase.from('orders').select('id', {count: 'exact'}).eq('supplier_id', currentUser.id).eq('order_status', 'IN_PRODUCTION'),
+          supabase.from('orders').select('id, ghost_public_name, order_status, updated_at').eq('supplier_id', currentUser.id).order('updated_at', { ascending: false }).limit(5)
+        ]);
+
+        setStats({
+          openTenders: tendersRes.count || 0,
+          activeBids: bidsRes.count || 0,
+          awarded: awardedRes.count || 0,
+          completed: 0 // Mock for now
+        });
+        
+        if (activityRes.data) setActivities(activityRes.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [currentUser]);
+
+  const StatCard = ({ icon: Icon, title, value, color, path }) => (
+    <div 
+      onClick={() => navigate(path)}
+      className="bg-[#0f172a] border border-slate-800 p-6 rounded-xl shadow-lg hover:border-cyan-500/30 transition-all cursor-pointer group"
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-slate-400 text-sm font-medium mb-1">{title}</p>
+          <h3 className="text-3xl font-bold text-slate-100">{value}</h3>
+        </div>
+        <div className={`p-3 rounded-lg bg-slate-900 border border-slate-800 group-hover:scale-110 transition-transform ${color}`}>
+          <Icon size={24} />
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <SupplierHubLayout>
+      <Helmet><title>Dashboard - RZ Supplier Hub</title></Helmet>
+
+      <div className="mb-8 flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-100 mb-2">Welcome back, {userCompanyName || 'Supplier'}</h1>
+          <p className="text-slate-400">Here's what's happening with your manufacturing pipeline today.</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center p-20"><Loader2 className="animate-spin text-cyan-500 w-10 h-10" /></div>
+      ) : (
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard icon={Briefcase} title="Open Tenders" value={stats.openTenders} color="text-cyan-400" path="/supplier-hub/jobs" />
+            <StatCard icon={FileText} title="Active Bids" value={stats.activeBids} color="text-amber-400" path="/supplier-hub/bids" />
+            <StatCard icon={Package} title="In Production" value={stats.awarded} color="text-emerald-400" path="/supplier-hub/awarded" />
+            <StatCard icon={CheckCircle} title="Completed Jobs" value={stats.completed} color="text-slate-400" path="/supplier-hub/awarded" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-[#0f172a] border border-slate-800 rounded-xl p-6 shadow-xl">
+               <div className="flex justify-between items-center mb-6">
+                 <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2"><Clock size={20} className="text-cyan-500" /> Recent Activity</h2>
+               </div>
+               <div className="space-y-4">
+                 {activities.map((act, idx) => (
+                   <div key={idx} className="flex items-center justify-between p-4 bg-[#1e293b] rounded-lg border border-slate-800">
+                     <div className="flex items-center gap-4">
+                       <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-400">
+                         <LayoutDashboard size={18} />
+                       </div>
+                       <div>
+                         <p className="text-sm font-semibold text-slate-200">{act.ghost_public_name || 'Unnamed Order'}</p>
+                         <p className="text-xs text-slate-400">Status changed to <span className="text-cyan-400">{act.order_status?.replace(/_/g, ' ')}</span></p>
+                       </div>
+                     </div>
+                     <span className="text-xs text-slate-500">{new Date(act.updated_at).toLocaleDateString()}</span>
+                   </div>
+                 ))}
+                 {activities.length === 0 && (
+                   <div className="text-center py-8 text-slate-500">No recent activity found.</div>
+                 )}
+               </div>
+            </div>
+
+            <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-6 shadow-xl">
+               <h2 className="text-lg font-bold text-slate-100 mb-6">Quick Actions</h2>
+               <div className="space-y-3">
+                 <Button onClick={() => navigate('/supplier-hub/jobs')} className="w-full justify-between bg-[#1e293b] hover:bg-cyan-900/30 text-slate-300 hover:text-cyan-400 border border-slate-800 hover:border-cyan-800">
+                   View Available Tenders <ArrowRight size={16} />
+                 </Button>
+                 <Button onClick={() => navigate('/supplier-hub/bids')} className="w-full justify-between bg-[#1e293b] hover:bg-cyan-900/30 text-slate-300 hover:text-cyan-400 border border-slate-800 hover:border-cyan-800">
+                   Manage My Bids <ArrowRight size={16} />
+                 </Button>
+                 <Button onClick={() => navigate('/supplier-hub/awarded')} className="w-full justify-between bg-[#1e293b] hover:bg-cyan-900/30 text-slate-300 hover:text-cyan-400 border border-slate-800 hover:border-cyan-800">
+                   Production Jobs <ArrowRight size={16} />
+                 </Button>
+                 <Button onClick={() => navigate('/supplier-hub/documents')} className="w-full justify-between bg-[#1e293b] hover:bg-cyan-900/30 text-slate-300 hover:text-cyan-400 border border-slate-800 hover:border-cyan-800">
+                   Document Portal <ArrowRight size={16} />
+                 </Button>
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </SupplierHubLayout>
+  );
+};
+
+export default SupplierDashboard;
