@@ -30,31 +30,57 @@ export default function SupplierProjectManager() {
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [error, setError] = useState(null);
   const [supplierId, setSupplierId] = useState(null);
+  const [debugInfo, setDebugInfo] = useState('');
 
   useEffect(() => {
     const fetchSupplierIdAndProjects = async () => {
       try {
+        let suppId = null;
+        console.log('Current user:', currentUser);
+        console.log('Company name:', userCompanyName);
+        
         // Get supplier ID from suppliers table using company name
         if (userCompanyName) {
           const { data: supplierData, error: supplierError } = await supabase
             .from('suppliers')
-            .select('id')
+            .select('id, company_name')
             .eq('company_name', userCompanyName)
             .single();
+
+          console.log('Supplier lookup result:', { data: supplierData, error: supplierError });
+          setDebugInfo(`Looking up supplier by name: "${userCompanyName}"`);
 
           if (supplierError && supplierError.code !== 'PGRST116') {
             throw supplierError;
           }
 
           if (supplierData) {
-            setSupplierId(supplierData.id);
-            await fetchAwardedProjects(supplierData.id);
+            suppId = supplierData.id;
+            setSupplierId(suppId);
+            setDebugInfo(`Found supplier ID: ${suppId}`);
+          } else {
+            // Fallback: try to get all suppliers and show them
+            const { data: allSuppliers } = await supabase
+              .from('suppliers')
+              .select('id, company_name')
+              .limit(5);
+            
+            console.log('Available suppliers:', allSuppliers);
+            setDebugInfo(`Supplier not found. Looking for: "${userCompanyName}". Available: ${allSuppliers?.map(s => s.company_name).join(', ')}`);
           }
+        } else {
+          setDebugInfo('No company name available from auth context');
+        }
+
+        if (suppId) {
+          await fetchAwardedProjects(suppId);
+        } else {
+          setLoading(false);
+          setError('Could not identify your supplier account. Please contact support.');
         }
       } catch (err) {
         console.error('Error fetching supplier ID:', err);
-        setError('Failed to identify supplier account');
-      } finally {
+        setError(`Failed to identify supplier account: ${err.message}`);
         setLoading(false);
       }
     };
@@ -64,6 +90,9 @@ export default function SupplierProjectManager() {
 
   const fetchAwardedProjects = async (suppId) => {
     try {
+      setDebugInfo(`Fetching projects for supplier ID: ${suppId}`);
+      console.log('Fetching awarded projects for supplier:', suppId);
+
       const { data, error: err } = await supabase
         .from('orders')
         .select(`
@@ -72,15 +101,18 @@ export default function SupplierProjectManager() {
           supplier_doc_status, supplier_notes
         `)
         .eq('supplier_id', suppId)
-        .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED'])
-        .order('created_at', { ascending: false });
+        .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED']);
+
+      console.log('Projects query result:', { data, error: err });
 
       if (err) throw err;
+      
       setProjects(data || []);
+      setDebugInfo(`Found ${data?.length || 0} awarded projects`);
       setError(null);
     } catch (err) {
       console.error('Error fetching projects:', err);
-      setError('Failed to load projects');
+      setError(`Failed to load projects: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -185,18 +217,28 @@ export default function SupplierProjectManager() {
           </p>
         </div>
 
-        {error && (
-          <div className="bg-red-950/30 border border-red-500/50 rounded-lg p-4 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-            <p className="text-red-300">{error}</p>
+        {debugInfo && (
+          <div className="bg-blue-950/30 border border-blue-500/30 rounded-lg p-3 text-sm text-blue-300">
+            <p><strong>Debug:</strong> {debugInfo}</p>
           </div>
         )}
 
-        {projects.length === 0 ? (
+        {error && (
+          <div className="bg-red-950/30 border border-red-500/50 rounded-lg p-4 flex gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+            <div>
+              <p className="text-red-300 font-semibold">Error</p>
+              <p className="text-red-300 text-sm mt-1">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {projects.length === 0 && !error ? (
           <Card className="bg-slate-900 border-slate-700">
             <CardContent className="pt-12 text-center">
               <Package className="w-12 h-12 text-slate-500 mx-auto mb-4" />
               <p className="text-slate-400">No awarded projects yet</p>
+              <p className="text-slate-500 text-sm mt-2">Check back after your bids are accepted</p>
             </CardContent>
           </Card>
         ) : (
