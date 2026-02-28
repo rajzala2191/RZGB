@@ -29,6 +29,7 @@ import SupplierManagementPage from '@/pages/SupplierManagementPage';
 import SanitisationGatePage from '@/pages/SanitisationGatePage';
 import SanitisationReviewPage from '@/pages/SanitisationReviewPage';
 import SupplierPoolPage from '@/pages/SupplierPoolPage';
+import AdminDocumentReview from '@/pages/AdminDocumentReview';
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
@@ -54,6 +55,8 @@ import NCRReportingPage from '@/pages/NCRReportingPage';
 import SupplierJobsPage from '@/pages/SupplierJobsPage';
 import TenderDetailsPage from '@/pages/TenderDetailsPage';
 import SupplierDocumentsPortal from '@/pages/SupplierDocumentsPortal';
+import SupplierProjectManager from '@/pages/SupplierProjectManager';
+// Keeping old pages as fallback (deprecated - use SupplierProjectManager instead)
 import MaterialUpdatePage from '@/pages/MaterialUpdatePage';
 import CastingPage from '@/pages/CastingPage';
 import MachiningPage from '@/pages/MachiningPage';
@@ -82,6 +85,7 @@ function App() {
                 <Route path="/control-centre/intake-gate" element={<ProtectedRoute requiredRole="admin"><IntakeGatePage /></ProtectedRoute>} />
                 <Route path="/control-centre/sanitisation-gate" element={<ProtectedRoute requiredRole="admin"><SanitisationGatePage /></ProtectedRoute>} />
                 <Route path="/control-centre/sanitisation-gate/review/:orderId" element={<ProtectedRoute requiredRole="admin"><SanitisationReviewPage /></ProtectedRoute>} />
+                <Route path="/control-centre/document-review" element={<ProtectedRoute requiredRole="admin"><AdminDocumentReview /></ProtectedRoute>} />
                 <Route path="/control-centre/supplier-pool" element={<ProtectedRoute requiredRole="admin"><SupplierPoolPage /></ProtectedRoute>} />
                 <Route path="/control-centre/linkage" element={<ProtectedRoute requiredRole="admin"><LinkageDashboard /></ProtectedRoute>} />
                 <Route path="/control-centre/sanitisation" element={<ProtectedRoute requiredRole="admin"><SanitisationEngine /></ProtectedRoute>} />
@@ -115,11 +119,13 @@ function App() {
                 {/* --- SUPPLIER ROUTES --- */}
                 <Route path="/supplier-hub" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
                 <Route path="/supplier-hub/dashboard" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
+                <Route path="/supplier-hub/projects" element={<ProtectedRoute requiredRole="supplier"><SupplierProjectManager /></ProtectedRoute>} />
                 <Route path="/supplier-hub/jobs" element={<ProtectedRoute requiredRole="supplier"><SupplierJobsPage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/jobs/:tenderId" element={<ProtectedRoute requiredRole="supplier"><TenderDetailsPage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/job-tracking/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><JobDetailsPage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
                 <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
+                {/* Legacy routes - deprecated, use SupplierProjectManager instead */}
                 <Route path="/supplier-hub/material-update/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><MaterialUpdatePage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/casting/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><CastingPage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/machining/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><MachiningPage /></ProtectedRoute>} />

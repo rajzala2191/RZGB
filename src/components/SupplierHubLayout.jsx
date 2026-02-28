@@ -31,13 +31,9 @@ const SupplierHubLayout = ({ children }) => {
 
   const navItems = [
     { path: '/supplier-hub', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/supplier-hub/jobs', label: 'My Jobs', icon: Briefcase },
+    { path: '/supplier-hub/projects', label: 'Awarded Projects', icon: Briefcase },
+    { path: '/supplier-hub/jobs', label: 'Available Jobs', icon: FolderOpen },
     { path: '/supplier-hub/job-tracking', label: 'Job Details', icon: ClipboardList },
-    { path: '/supplier-hub/material-update', label: 'Material Update', icon: FolderOpen },
-    { path: '/supplier-hub/casting', label: 'Casting', icon: Hammer },
-    { path: '/supplier-hub/machining', label: 'Machining', icon: Cog },
-    { path: '/supplier-hub/qc', label: 'QC & Quality', icon: CheckCircle },
-    { path: '/supplier-hub/dispatch', label: 'Dispatch', icon: Truck },
     { path: '/supplier-hub/documents', label: 'Documents Portal', icon: FolderOpen },
   ];
 

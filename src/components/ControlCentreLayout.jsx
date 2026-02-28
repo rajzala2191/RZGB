@@ -31,8 +31,8 @@ const ControlCentreLayout = ({ children }) => {
   const navItems = [
     { path: '/control-centre', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/control-centre/sanitisation-gate', label: 'Sanitisation Gate', icon: ShieldCheck },
+    { path: '/control-centre/document-review', label: 'Document Review', icon: FolderOpen },
     { path: '/control-centre/supplier-pool', label: 'Supplier Pool', icon: Network },
-    { path: '/control-centre/documents', label: 'Documents Portal', icon: FolderOpen },
   ];
 
   return (
