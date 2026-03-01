@@ -31,46 +31,45 @@ export default function SupplierProjectManager() {
   const [error, setError] = useState(null);
   const [debugInfo, setDebugInfo] = useState('');
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        if (!currentUser?.id) {
-          setError('User not authenticated. Please log in again.');
-          setLoading(false);
-          return;
-        }
-
-        setDebugInfo(`User ID: ${currentUser.id}`);
-        console.log('Current user ID:', currentUser.id);
-
-        // Fetch awarded projects using user ID (which is supplier_id in orders table)
-        const { data, error: err } = await supabase
-          .from('orders')
-          .select(`
-            id, rz_job_id, part_name, material, order_status, 
-            created_at, client:client_id(company_name),
-            supplier_doc_status, supplier_notes
-          `)
-          .eq('supplier_id', currentUser.id)
-          .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED'])
-          .order('created_at', { ascending: false });
-
-        console.log('Projects query result:', { data, error: err });
-
-        if (err) throw err;
-        
-        setProjects(data || []);
-        setDebugInfo(`Found ${data?.length || 0} awarded projects for supplier ${currentUser.id}`);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching projects:', err);
-        setError(`Failed to load projects: ${err.message}`);
-      } finally {
-        setLoading(false);
+  const fetchAwardedProjects = async () => {
+    try {
+      if (!currentUser?.id) {
+        setError('User not authenticated. Please log in again.');
+        return;
       }
-    };
 
-    fetchProjects();
+      setDebugInfo(`User ID: ${currentUser.id}`);
+      console.log('Current user ID:', currentUser.id);
+
+      // Fetch awarded projects using user ID (which is supplier_id in orders table)
+      const { data, error: err } = await supabase
+        .from('orders')
+        .select(`
+          id, rz_job_id, part_name, material, order_status, 
+          created_at, client:client_id(company_name),
+          supplier_doc_status, supplier_notes
+        `)
+        .eq('supplier_id', currentUser.id)
+        .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED'])
+        .order('created_at', { ascending: false });
+
+      console.log('Projects query result:', { data, error: err });
+
+      if (err) throw err;
+      
+      setProjects(data || []);
+      setDebugInfo(`Found ${data?.length || 0} awarded projects for supplier ${currentUser.id}`);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching projects:', err);
+      setError(`Failed to load projects: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAwardedProjects();
   }, [currentUser]);
 
   const updateProjectStatus = async (projectId, newStatus) => {

@@ -15,7 +15,6 @@ import {
   FolderPlus
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import ThemeToggle from '@/components/ThemeToggle';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 const ClientDashboardLayout = ({ children }) => {
@@ -127,7 +126,6 @@ const ClientDashboardLayout = ({ children }) => {
                   </div>
                 </div>
                 <div className="flex gap-2 mb-3">
-                  <ThemeToggle />
                   <div className="flex-1" />
                 </div>
                 <div className="flex gap-2">
