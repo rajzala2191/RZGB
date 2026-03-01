@@ -97,7 +97,7 @@ export default function SupplierProjectManager() {
         .from('orders')
         .select(`
           id, rz_job_id, part_name, material, order_status, 
-          delivery_days, created_at, client:client_id(company_name),
+          created_at, client:client_id(company_name),
           supplier_doc_status, supplier_notes
         `)
         .eq('supplier_id', suppId)
@@ -234,7 +234,7 @@ export default function SupplierProjectManager() {
         )}
 
         {projects.length === 0 && !error ? (
-          <Card className="bg-slate-900 border-slate-700">
+          <Card className="bg-[#0f172a] border-slate-700">
             <CardContent className="pt-12 text-center">
               <Package className="w-12 h-12 text-slate-500 mx-auto mb-4" />
               <p className="text-slate-400">No awarded projects yet</p>
@@ -250,7 +250,7 @@ export default function SupplierProjectManager() {
               return (
                 <Card
                   key={project.id}
-                  className="bg-slate-900 border-slate-700 hover:border-cyan-500/50 transition-colors cursor-pointer"
+                  className="bg-[#0f172a] border-slate-800 hover:border-cyan-500/50 transition-colors cursor-pointer"
                   onClick={() =>
                     setExpandedProject(isExpanded ? null : project.id)
                   }

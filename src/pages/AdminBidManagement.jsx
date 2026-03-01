@@ -29,10 +29,10 @@ export default function AdminBidManagement() {
         .from('orders')
         .select(`
           id, rz_job_id, ghost_public_name, part_name, material, 
-          quantity, delivery_days, created_at, updated_at, order_status,
+          quantity, created_at, updated_at, order_status,
           client:client_id(company_name)
         `)
-        .in('order_status', ['BIDDING', 'AWARDED'])
+        .in('order_status', ['OPEN_FOR_BIDDING', 'BIDDING', 'AWARDED'])
         .order('updated_at', { ascending: false });
 
       if (orderError) throw orderError;
@@ -41,7 +41,7 @@ export default function AdminBidManagement() {
       const { data: bidData, error: bidError } = await supabase
         .from('bid_submissions')
         .select(`
-          id, tender_id, supplier_id, quote_price, delivery_days, 
+          id, tender_id, supplier_id, quote_price, lead_time_days, 
           notes, created_at, supplier:supplier_id(company_name, email)
         `)
         .order('created_at', { ascending: false });
@@ -69,7 +69,7 @@ export default function AdminBidManagement() {
   };
 
   const filteredOrders = orders.filter(order => {
-    if (filter === 'bidding') return order.order_status === 'BIDDING';
+    if (filter === 'bidding') return order.order_status === 'BIDDING' || order.order_status === 'OPEN_FOR_BIDDING';
     if (filter === 'awarded') return order.order_status === 'AWARDED';
     return true;
   });
@@ -132,7 +132,7 @@ export default function AdminBidManagement() {
         </div>
 
         {filteredOrders.length === 0 ? (
-          <Card className="bg-slate-900 border-slate-700">
+          <Card className="bg-[#0f172a] border-slate-700">
             <CardContent className="pt-12 text-center">
               <TrendingUp className="w-12 h-12 text-slate-500 mx-auto mb-4" />
               <p className="text-slate-400">
@@ -153,7 +153,7 @@ export default function AdminBidManagement() {
               return (
                 <Card
                   key={order.id}
-                  className="bg-slate-900 border-slate-700 hover:border-cyan-500/50 transition-colors"
+                  className="bg-[#0f172a] border-slate-800 hover:border-cyan-500/50 transition-colors"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
@@ -185,27 +185,27 @@ export default function AdminBidManagement() {
                   <CardContent className="space-y-4">
                     {/* Bid Summary */}
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-slate-800/50 rounded p-3">
+                      <div className="bg-[#1e293b] rounded p-3 border border-slate-700">
                         <p className="text-xs text-slate-400 mb-1">Total Bids</p>
                         <p className="text-2xl font-bold text-cyan-400">{orderBids.length}</p>
                       </div>
                       {lowestBid ? (
                         <>
-                          <div className="bg-slate-800/50 rounded p-3">
+                          <div className="bg-[#1e293b] rounded p-3 border border-slate-700">
                             <p className="text-xs text-slate-400 mb-1">Lowest Bid</p>
                             <p className="text-2xl font-bold text-emerald-400">
                               ${lowestBid.quote_price.toLocaleString()}
                             </p>
                           </div>
-                          <div className="bg-slate-800/50 rounded p-3">
+                          <div className="bg-[#1e293b] rounded p-3 border border-slate-700">
                             <p className="text-xs text-slate-400 mb-1">Delivery (days)</p>
                             <p className="text-2xl font-bold text-blue-400">
-                              {lowestBid.delivery_days}
+                              {lowestBid.lead_time_days || 'N/A'}
                             </p>
                           </div>
                         </>
                       ) : (
-                        <div className="col-span-2 bg-slate-800/50 rounded p-3 text-center text-slate-400">
+                        <div className="col-span-2 bg-[#1e293b] rounded p-3 border border-slate-700 text-center text-slate-400">
                           Waiting for supplier bids...
                         </div>
                       )}
@@ -217,14 +217,14 @@ export default function AdminBidManagement() {
                         <p className="text-sm font-semibold text-slate-300 mb-2">Supplier Bids</p>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
                           {orderBids.map(bid => (
-                            <div key={bid.id} className="bg-slate-800/30 rounded p-3 flex justify-between items-center">
+                            <div key={bid.id} className="bg-[#1e293b] rounded p-3 border border-slate-700 flex justify-between items-center hover:border-slate-600 transition-colors">
                               <div>
                                 <p className="font-medium text-slate-200">{bid.supplier?.company_name}</p>
                                 <p className="text-xs text-slate-400">{bid.supplier?.email}</p>
                               </div>
                               <div className="text-right">
                                 <p className="font-bold text-cyan-400">${bid.quote_price.toLocaleString()}</p>
-                                <p className="text-xs text-slate-400">{bid.delivery_days} days</p>
+                                <p className="text-xs text-slate-400">{bid.lead_time_days || 'N/A'} days</p>
                               </div>
                             </div>
                           ))}
@@ -233,7 +233,7 @@ export default function AdminBidManagement() {
                     )}
 
                     {/* Action Button */}
-                    {order.order_status === 'BIDDING' && orderBids.length > 0 ? (
+                    {(order.order_status === 'BIDDING' || order.order_status === 'OPEN_FOR_BIDDING') && orderBids.length > 0 ? (
                       <Button
                         onClick={() => navigate(`/control-centre/bid-comparison/${order.id}`)}
                         className="w-full bg-cyan-600 hover:bg-cyan-700"
@@ -252,7 +252,7 @@ export default function AdminBidManagement() {
                         Contract Awarded
                       </Button>
                     ) : (
-                      <div className="bg-slate-800/50 rounded p-3 text-center text-slate-400 text-sm">
+                      <div className="bg-[#1e293b] rounded p-3 border border-slate-700 text-center text-slate-400 text-sm">
                         <Clock className="w-4 h-4 inline mr-2" />
                         Awaiting supplier bids...
                       </div>
