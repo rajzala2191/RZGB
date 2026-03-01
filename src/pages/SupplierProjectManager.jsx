@@ -29,94 +29,49 @@ export default function SupplierProjectManager() {
   const [document, setDocument] = useState(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [error, setError] = useState(null);
-  const [supplierId, setSupplierId] = useState(null);
   const [debugInfo, setDebugInfo] = useState('');
 
   useEffect(() => {
-    const fetchSupplierIdAndProjects = async () => {
+    const fetchProjects = async () => {
       try {
-        let suppId = null;
-        console.log('Current user:', currentUser);
-        console.log('Company name:', userCompanyName);
-        
-        // Get supplier ID from suppliers table using company name
-        if (userCompanyName) {
-          const { data: supplierData, error: supplierError } = await supabase
-            .from('suppliers')
-            .select('id, company_name')
-            .eq('company_name', userCompanyName)
-            .single();
-
-          console.log('Supplier lookup result:', { data: supplierData, error: supplierError });
-          setDebugInfo(`Looking up supplier by name: "${userCompanyName}"`);
-
-          if (supplierError && supplierError.code !== 'PGRST116') {
-            throw supplierError;
-          }
-
-          if (supplierData) {
-            suppId = supplierData.id;
-            setSupplierId(suppId);
-            setDebugInfo(`Found supplier ID: ${suppId}`);
-          } else {
-            // Fallback: try to get all suppliers and show them
-            const { data: allSuppliers } = await supabase
-              .from('suppliers')
-              .select('id, company_name')
-              .limit(5);
-            
-            console.log('Available suppliers:', allSuppliers);
-            setDebugInfo(`Supplier not found. Looking for: "${userCompanyName}". Available: ${allSuppliers?.map(s => s.company_name).join(', ')}`);
-          }
-        } else {
-          setDebugInfo('No company name available from auth context');
-        }
-
-        if (suppId) {
-          await fetchAwardedProjects(suppId);
-        } else {
+        if (!currentUser?.id) {
+          setError('User not authenticated. Please log in again.');
           setLoading(false);
-          setError('Could not identify your supplier account. Please contact support.');
+          return;
         }
+
+        setDebugInfo(`User ID: ${currentUser.id}`);
+        console.log('Current user ID:', currentUser.id);
+
+        // Fetch awarded projects using user ID (which is supplier_id in orders table)
+        const { data, error: err } = await supabase
+          .from('orders')
+          .select(`
+            id, rz_job_id, part_name, material, order_status, 
+            created_at, client:client_id(company_name),
+            supplier_doc_status, supplier_notes
+          `)
+          .eq('supplier_id', currentUser.id)
+          .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED'])
+          .order('created_at', { ascending: false });
+
+        console.log('Projects query result:', { data, error: err });
+
+        if (err) throw err;
+        
+        setProjects(data || []);
+        setDebugInfo(`Found ${data?.length || 0} awarded projects for supplier ${currentUser.id}`);
+        setError(null);
       } catch (err) {
-        console.error('Error fetching supplier ID:', err);
-        setError(`Failed to identify supplier account: ${err.message}`);
+        console.error('Error fetching projects:', err);
+        setError(`Failed to load projects: ${err.message}`);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchSupplierIdAndProjects();
-  }, [userCompanyName]);
-
-  const fetchAwardedProjects = async (suppId) => {
-    try {
-      setDebugInfo(`Fetching projects for supplier ID: ${suppId}`);
-      console.log('Fetching awarded projects for supplier:', suppId);
-
-      const { data, error: err } = await supabase
-        .from('orders')
-        .select(`
-          id, rz_job_id, part_name, material, order_status, 
-          created_at, client:client_id(company_name),
-          supplier_doc_status, supplier_notes
-        `)
-        .eq('supplier_id', suppId)
-        .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED']);
-
-      console.log('Projects query result:', { data, error: err });
-
-      if (err) throw err;
-      
-      setProjects(data || []);
-      setDebugInfo(`Found ${data?.length || 0} awarded projects`);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching projects:', err);
-      setError(`Failed to load projects: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchProjects();
+  }, [currentUser]);
 
   const updateProjectStatus = async (projectId, newStatus) => {
     setUpdatingProject(projectId);
