@@ -30,13 +30,13 @@ export default function TenderDetailsPage() {
     if (currentUser && tData) {
       const { data: bData } = await supabase.from('bid_submissions')
         .select('*')
-        .eq('tender_id', tenderId)
+        .eq('order_id', tenderId)
         .eq('supplier_id', currentUser.id)
         .maybeSingle();
       
       if (bData) {
         setExistingBid(bData);
-        setBidForm({ price: bData.quote_price, leadTime: bData.lead_time_days, notes: bData.notes || '' });
+        setBidForm({ price: bData.unit_price, leadTime: bData.lead_time_days, notes: bData.notes || '' });
       }
     }
   };
@@ -46,7 +46,7 @@ export default function TenderDetailsPage() {
     try {
       if (existingBid) {
         await supabase.from('bid_submissions').update({
-          quote_price: parseFloat(bidForm.price),
+          unit_price: parseFloat(bidForm.price),
           lead_time_days: parseInt(bidForm.leadTime, 10),
           notes: bidForm.notes
         }).eq('id', existingBid.id);
@@ -54,14 +54,14 @@ export default function TenderDetailsPage() {
       } else {
         await supabase.from('bid_submissions').insert([{
           supplier_id: currentUser.id,
-          tender_id: tenderId,
-          quote_price: parseFloat(bidForm.price),
+          order_id: tenderId,
+          unit_price: parseFloat(bidForm.price),
           lead_time_days: parseInt(bidForm.leadTime, 10),
           notes: bidForm.notes,
-          status: 'SUBMITTED'
+          status: 'pending'
         }]);
         toast({ title: 'Success', description: 'Bid submitted successfully.' });
-        fetchTenderAndBid(); // refresh
+        navigate('/supplier-hub/jobs');
       }
     } catch (err) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });

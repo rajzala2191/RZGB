@@ -24,7 +24,7 @@ export default function BidComparisonPage() {
     const { data: ord } = await supabase.from('orders').select('*').eq('id', orderId).single();
     if (ord) setOrder(ord);
 
-    const { data: bds } = await supabase.from('bid_submissions').select('*, supplier:supplier_id(company_name, email)').eq('tender_id', orderId);
+    const { data: bds } = await supabase.from('bid_submissions').select('*, supplier:supplier_id(company_name, email)').eq('order_id', orderId);
     if (bds) setBids(bds);
   };
 
@@ -40,19 +40,21 @@ export default function BidComparisonPage() {
       await supabase.from('orders').update({
         order_status: 'AWARDED',
         supplier_id: selectedBid.supplier_id,
-        buy_price: selectedBid.quote_price,
+        buy_price: selectedBid.unit_price,
         rz_job_id: `RZ-JOB-${Math.floor(Math.random() * 100000)}`
       }).eq('id', orderId);
 
-      await supabase.from('supplier_order_link').insert([{
-        order_id: orderId,
-        supplier_id: selectedBid.supplier_id,
-        bid_id: selectedBidId,
-        admin_id: currentUser.id
-      }]);
+      // Update winning bid status
+      await supabase.from('bid_submissions').update({ status: 'accepted' }).eq('id', selectedBidId);
+
+      // Update losing bid statuses
+      const losingBidIds = bids.filter(b => b.id !== selectedBidId).map(b => b.id);
+      if (losingBidIds.length > 0) {
+        await supabase.from('bid_submissions').update({ status: 'rejected' }).in('id', losingBidIds);
+      }
 
       toast({ title: 'Success', description: 'Contract awarded successfully.' });
-      navigate('/control-centre/bid-analysis');
+      navigate('/control-centre/bid-management');
     } catch (err) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     }
@@ -101,8 +103,8 @@ export default function BidComparisonPage() {
                     <input type="radio" name="bidSelection" checked={selectedBidId === bid.id} onChange={() => setSelectedBidId(bid.id)} className="h-5 w-5 rounded-full border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500 cursor-pointer" />
                   </td>
                   <td className="p-4 font-semibold text-slate-100">{bid.supplier?.company_name || bid.supplier?.email || 'Unknown'}</td>
-                  <td className={`p-4 font-bold ${parseFloat(bid.quote_price) <= parseFloat(order.target_sell_price) ? 'text-green-400' : 'text-amber-400'}`}>
-                    ${bid.quote_price}
+                  <td className={`p-4 font-bold ${parseFloat(bid.unit_price) <= parseFloat(order.target_sell_price) ? 'text-green-400' : 'text-amber-400'}`}>
+                    ${bid.unit_price}
                   </td>
                   <td className="p-4">{bid.lead_time_days} days</td>
                   <td className="p-4 text-slate-400 text-xs max-w-xs truncate">{bid.notes || 'N/A'}</td>

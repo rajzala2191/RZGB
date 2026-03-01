@@ -29,7 +29,6 @@ export default function SupplierProjectManager() {
   const [document, setDocument] = useState(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [error, setError] = useState(null);
-  const [debugInfo, setDebugInfo] = useState('');
   const [savingNotes, setSavingNotes] = useState({});
 
   const fetchAwardedProjects = async () => {
@@ -38,9 +37,6 @@ export default function SupplierProjectManager() {
         setError('User not authenticated. Please log in again.');
         return;
       }
-
-      setDebugInfo(`User ID: ${currentUser.id}`);
-      console.log('Current user ID:', currentUser.id);
 
       // Fetch awarded projects using user ID (which is supplier_id in orders table)
       const { data, error: err } = await supabase
@@ -54,12 +50,9 @@ export default function SupplierProjectManager() {
         .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED'])
         .order('created_at', { ascending: false });
 
-      console.log('Projects query result:', { data, error: err });
-
       if (err) throw err;
       
       setProjects(data || []);
-      setDebugInfo(`Found ${data?.length || 0} awarded projects for supplier ${currentUser.id}`);
       setError(null);
     } catch (err) {
       console.error('Error fetching projects:', err);
@@ -195,12 +188,6 @@ export default function SupplierProjectManager() {
           </p>
         </div>
 
-        {debugInfo && (
-          <div className="bg-blue-950/30 border border-blue-500/30 rounded-lg p-3 text-sm text-blue-300">
-            <p><strong>Debug:</strong> {debugInfo}</p>
-          </div>
-        )}
-
         {error && (
           <div className="bg-red-950/30 border border-red-500/50 rounded-lg p-4 flex gap-3">
             <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
@@ -289,9 +276,10 @@ export default function SupplierProjectManager() {
                                     !isClickable ||
                                     updatingProject === project.id
                                   }
-                                  onClick={() =>
-                                    updateProjectStatus(project.id, stage.id)
-                                  }
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    updateProjectStatus(project.id, stage.id);
+                                  }}
                                   variant={
                                     stageIndex === currentIndex
                                       ? 'default'
@@ -368,9 +356,9 @@ export default function SupplierProjectManager() {
                           className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-slate-200 placeholder-slate-500"
                         />
                         <Button
-                          onClick={() => {
-                            const project = projects.find(p => p.id === expandedProject);
-                            if (project) saveNotes(project.id, project.supplier_notes);
+                          onClick={e => {
+                            e.stopPropagation();
+                            saveNotes(project.id, project.supplier_notes);
                           }}
                           disabled={savingNotes[project.id]}
                           size="sm"

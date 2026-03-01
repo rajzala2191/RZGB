@@ -24,10 +24,9 @@ const LiveProjectTracking = () => {
 
   // Pipeline stages in order
   const STAGES = [
-    { id: 'INTAKE', label: 'Order Received', color: 'blue', icon: Package },
-    { id: 'SCRUBBING', label: 'Sanitizing', color: 'purple', icon: FileCheck },
-    { id: 'SANITISED', label: 'Ready for Bid', color: 'indigo', icon: Zap },
-    { id: 'BIDDING', label: 'Supplier Bidding', color: 'cyan', icon: TrendingUp },
+    { id: 'PENDING_ADMIN_SCRUB', label: 'Order Received', color: 'blue', icon: Package },
+    { id: 'SANITIZED', label: 'Sanitizing', color: 'purple', icon: FileCheck },
+    { id: 'OPEN_FOR_BIDDING', label: 'Ready for Bid', color: 'indigo', icon: Zap },
     { id: 'AWARDED', label: 'Order Awarded', color: 'amber', icon: CheckCircle2 },
     { id: 'MATERIAL', label: 'Material Sourcing', color: 'sky', icon: Package },
     { id: 'CASTING', label: 'Casting', color: 'orange', icon: Zap },
@@ -39,8 +38,23 @@ const LiveProjectTracking = () => {
 
   useEffect(() => {
     fetchProjectData();
-    const interval = setInterval(fetchProjectData, 5000); // Refresh every 5 seconds
-    return () => clearInterval(interval);
+
+    // Set up realtime subscription for job_updates
+    const channel = supabase
+      .channel(`live-tracking-${projectId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'job_updates' },
+        () => fetchProjectData()
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${projectId}` },
+        () => fetchProjectData()
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
   }, [projectId]);
 
   const fetchProjectData = async () => {
