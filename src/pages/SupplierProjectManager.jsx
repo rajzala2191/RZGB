@@ -30,6 +30,7 @@ export default function SupplierProjectManager() {
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [error, setError] = useState(null);
   const [debugInfo, setDebugInfo] = useState('');
+  const [savingNotes, setSavingNotes] = useState({});
 
   const fetchAwardedProjects = async () => {
     try {
@@ -148,6 +149,29 @@ export default function SupplierProjectManager() {
       setError('Failed to upload document');
     } finally {
       setUploadingDoc(false);
+    }
+  };
+
+  const saveNotes = async (projectId, notes) => {
+    setSavingNotes(prev => ({ ...prev, [projectId]: true }));
+    try {
+      const { error: err } = await supabase
+        .from('orders')
+        .update({
+          supplier_notes: notes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', projectId);
+
+      if (err) throw err;
+
+      setError(null);
+      // Optionally show a brief toast/notification
+    } catch (err) {
+      console.error('Error saving notes:', err);
+      setError('Failed to save notes');
+    } finally {
+      setSavingNotes(prev => ({ ...prev, [projectId]: false }));
     }
   };
 
@@ -333,7 +357,6 @@ export default function SupplierProjectManager() {
                           rows="3"
                           placeholder="Add notes about this stage..."
                           defaultValue={project.supplier_notes || ''}
-                          className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-slate-200 placeholder-slate-500"
                           onChange={e => {
                             const updated = projects.map(p =>
                               p.id === project.id
@@ -342,7 +365,26 @@ export default function SupplierProjectManager() {
                             );
                             setProjects(updated);
                           }}
+                          className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-slate-200 placeholder-slate-500"
                         />
+                        <Button
+                          onClick={() => {
+                            const project = projects.find(p => p.id === expandedProject);
+                            if (project) saveNotes(project.id, project.supplier_notes);
+                          }}
+                          disabled={savingNotes[project.id]}
+                          size="sm"
+                          className="mt-2 bg-cyan-600 hover:bg-cyan-500 text-white"
+                        >
+                          {savingNotes[project.id] ? (
+                            <>
+                              <Loader2 className="w-3 h-3 animate-spin mr-2" />
+                              Saving...
+                            </>
+                          ) : (
+                            'Save Notes'
+                          )}
+                        </Button>
                       </div>
 
                       {/* Status Info */}
