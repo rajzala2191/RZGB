@@ -113,7 +113,7 @@ export default function AdminBidManagement() {
           >
             Open for Bidding
             <span className="ml-2 text-xs">
-              ({orders.filter(o => o.order_status === 'OPEN_FOR_BIDDING').length})
+              ({orders.filter(o => o.order_status === 'BIDDING' || o.order_status === 'OPEN_FOR_BIDDING').length})
             </span>
           </button>
           <button

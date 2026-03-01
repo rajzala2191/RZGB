@@ -45,10 +45,9 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
         deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       }]);
 
-      // Update order status
-      await supabase.from('orders').update({ 
-        order_status: 'OPEN_FOR_BIDDING',
-        supplier_id: selectedSupplierId // Assigning directly for simplified flow
+      // Update order status to open for bidding (supplier_id set only when contract is awarded)
+      await supabase.from('orders').update({
+        order_status: 'OPEN_FOR_BIDDING'
       }).eq('id', order.id);
 
       toast({ title: 'Success', description: 'Order released to supplier successfully.' });

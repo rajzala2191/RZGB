@@ -103,8 +103,14 @@ const LiveProjectTracking = () => {
     </ClientDashboardLayout>
   );
 
-  // Calculate current stage index
-  const currentStageIndex = STAGES.findIndex(s => s.id === project.order_status);
+  // Map DB order_status values to pipeline stage IDs
+  const STATUS_TO_STAGE_ID = {
+    'PENDING_ADMIN_SCRUB': 'INTAKE',
+    'SANITIZED': 'SANITISED',
+    'OPEN_FOR_BIDDING': 'BIDDING',
+  };
+  const currentStageId = STATUS_TO_STAGE_ID[project.order_status] || project.order_status;
+  const currentStageIndex = STAGES.findIndex(s => s.id === currentStageId);
 
   // Group updates by stage
   const updatesByStage = {};
@@ -263,20 +269,16 @@ const LiveProjectTracking = () => {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <p className="text-sm font-bold text-white">{update.stage?.replace(/_/g, ' ')}</p>
-                      <p className="text-xs text-slate-400">{update.update_type?.replace(/_/g, ' ')}</p>
+                      <p className="text-xs text-slate-400 capitalize">{update.status?.replace(/_/g, ' ')}</p>
                     </div>
                     <p className="text-xs text-slate-500">{format(new Date(update.created_at), 'MMM dd, HH:mm')}</p>
                   </div>
-                  
-                  {update.data && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                      {Object.entries(update.data).slice(0, 6).map(([key, value]) => (
-                        <div key={key} className="bg-slate-800/50 p-2 rounded">
-                          <p className="text-slate-500 capitalize">{key.replace(/_/g, ' ')}</p>
-                          <p className="text-slate-200 font-semibold truncate">{String(value)}</p>
-                        </div>
-                      ))}
-                    </div>
+
+                  {update.notes && (
+                    <p className="text-sm text-slate-300 bg-slate-800/50 rounded p-3 mt-2">{update.notes}</p>
+                  )}
+                  {update.created_by && (
+                    <p className="text-xs text-slate-500 mt-2">Updated by: {update.created_by}</p>
                   )}
                 </div>
               ))}

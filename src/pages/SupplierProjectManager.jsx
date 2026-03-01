@@ -35,6 +35,7 @@ export default function SupplierProjectManager() {
     try {
       if (!currentUser?.id) {
         setError('User not authenticated. Please log in again.');
+        setLoading(false);
         return;
       }
 
@@ -51,7 +52,7 @@ export default function SupplierProjectManager() {
         .order('created_at', { ascending: false });
 
       if (err) throw err;
-      
+
       setProjects(data || []);
       setError(null);
     } catch (err) {
@@ -244,7 +245,7 @@ export default function SupplierProjectManager() {
                           {currentStage?.icon && (
                             <currentStage.icon className="w-3 h-3" />
                           )}
-                          {currentStage?.label}
+                          {currentStage?.label || project.order_status.replace(/_/g, ' ')}
                         </div>
                       </div>
                     </div>
@@ -266,7 +267,7 @@ export default function SupplierProjectManager() {
                               const currentIndex = STAGES.findIndex(
                                 s => s.id === project.order_status
                               );
-                              const isClickable = stageIndex > currentIndex;
+                              const isClickable = stageIndex === currentIndex + 1;
 
                               return (
                                 <Button
