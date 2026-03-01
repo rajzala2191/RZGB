@@ -110,6 +110,7 @@ function App() {
                 <Route path="/client-dashboard/projects" element={<ProtectedRoute requiredRole="client"><ProjectsOverviewPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/projects/:projectId/tracking" element={<ProtectedRoute requiredRole="client"><LiveProjectTracking /></ProtectedRoute>} />
                 <Route path="/client-dashboard/projects/:projectId/tracking-legacy" element={<ProtectedRoute requiredRole="client"><ProjectTrackingPage /></ProtectedRoute>} />
+                <Route path="/client-dashboard/projects/:orderId" element={<ProtectedRoute requiredRole="client"><ClientOrderDetailsPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/create-project" element={<ProtectedRoute requiredRole="client"><ClientProjectCreationPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/projects/:projectId/upload-rfq" element={<ProtectedRoute requiredRole="client"><ClientRFQUploadPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><ClientOrderHistoryPage /></ProtectedRoute>} />

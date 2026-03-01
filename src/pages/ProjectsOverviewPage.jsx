@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Helmet } from 'react-helmet';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
-import { useClientProjects } from '@/contexts/ClientContext';
-import { Briefcase, ArrowRight, Clock, CheckCircle, Loader2, AlertCircle, Folder, Plus } from 'lucide-react';
+import { useClientOrders } from '@/contexts/ClientContext';
+import { ArrowRight, Loader2, AlertCircle, Folder, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ProjectsOverviewPage = () => {
-  const { projects, loading, error } = useClientProjects();
+  const { orders, loading, error } = useClientOrders();
   const navigate = useNavigate();
 
   if (loading) {
@@ -37,11 +37,16 @@ const ProjectsOverviewPage = () => {
 
   const getStatusColor = (status) => {
     switch (status?.toUpperCase()) {
-      case 'DRAFT': return 'bg-slate-800 text-slate-300 border-slate-700';
-      case 'ACTIVE': return 'bg-cyan-950 text-cyan-400 border-cyan-900';
-      case 'IN_PROGRESS': return 'bg-blue-950 text-blue-400 border-blue-900';
-      case 'COMPLETED': return 'bg-emerald-950 text-emerald-400 border-emerald-900';
-      case 'ON_HOLD': return 'bg-yellow-950 text-yellow-400 border-yellow-900';
+      case 'PENDING_ADMIN_SCRUB': return 'bg-yellow-950 text-yellow-400 border-yellow-900';
+      case 'SANITIZED': return 'bg-indigo-950 text-indigo-400 border-indigo-900';
+      case 'OPEN_FOR_BIDDING': return 'bg-cyan-950 text-cyan-400 border-cyan-900';
+      case 'AWARDED': return 'bg-amber-950 text-amber-400 border-amber-900';
+      case 'MATERIAL':
+      case 'CASTING':
+      case 'MACHINING':
+      case 'QC':
+      case 'DISPATCH': return 'bg-blue-950 text-blue-400 border-blue-900';
+      case 'DELIVERED': return 'bg-emerald-950 text-emerald-400 border-emerald-900';
       default: return 'bg-slate-800 text-slate-400 border-slate-700';
     }
   };
@@ -56,64 +61,61 @@ const ProjectsOverviewPage = () => {
             <Folder className="text-cyan-500" size={32} />
             Projects Overview
           </h1>
-          <p className="text-slate-400">Manage and track your overarching projects and their associated orders.</p>
+          <p className="text-slate-400">Track all your manufacturing orders and their progress.</p>
         </div>
         <button 
-           onClick={() => navigate('/client-dashboard/create-project')}
+           onClick={() => navigate('/client-dashboard/create-order')}
            className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
         >
-           <Plus size={18} /> New Project
+           <Plus size={18} /> New Order
         </button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-         {projects.length === 0 ? (
-            <div className="col-span-full p-16 text-center text-slate-500 bg-[#0f172a] border border-slate-800 rounded-xl flex flex-col items-center justify-center gap-4">
-               <Folder size={48} className="text-slate-700" />
-               <p>No projects found. Create one to organize your orders and RFQs.</p>
-            </div>
-         ) : projects.map(project => {
-            const status = project.status || 'DRAFT';
-            
-            return (
-              <div key={project.id} className="bg-[#0f172a] border border-slate-800 rounded-xl p-6 hover:border-cyan-500/50 transition-all group relative flex flex-col h-full">
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors">{project.project_name || 'Unnamed Project'}</h3>
-                      <p className="text-slate-500 font-mono text-xs mt-1">ID: {project.id.slice(0, 8)}</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${getStatusColor(status)}`}>
-                      {status.replace(/_/g, ' ')}
-                    </span>
-                </div>
-
-                <div className="flex-1 space-y-4">
-                    <p className="text-sm text-slate-400 line-clamp-3">
-                      {project.description || 'No description provided for this project.'}
-                    </p>
-
-                    {project.expected_completion_date && (
-                      <div className="flex items-center gap-2 text-sm text-slate-300 bg-[#1e293b] p-2 rounded-md border border-slate-700">
-                        <Clock size={16} className="text-cyan-500" />
-                        <span>Due: {new Date(project.expected_completion_date).toLocaleDateString()}</span>
-                      </div>
-                    )}
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center">
-                    <span className="text-xs text-slate-500">
-                      Created {new Date(project.created_at).toLocaleDateString()}
-                    </span>
-                    <button 
-                      onClick={() => navigate(`/client-dashboard/projects/${project.id}`)} 
-                      className="text-cyan-400 hover:text-cyan-300 font-medium text-sm flex items-center gap-1 group-hover:underline"
-                    >
-                      View Details <ArrowRight size={14} />
-                    </button>
-                </div>
-              </div>
-            );
-         })}
+      <div className="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-300">
+            <tr>
+              <th className="p-4">Order ID</th>
+              <th className="p-4">Part Name</th>
+              <th className="p-4">Material</th>
+              <th className="p-4">Quantity</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Created</th>
+              <th className="p-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800 text-slate-200">
+            {orders.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="p-16 text-center text-slate-500">
+                  <Folder size={48} className="text-slate-700 mx-auto mb-4" />
+                  <p>No orders yet. Create one to get started.</p>
+                </td>
+              </tr>
+            ) : orders.map(order => (
+              <tr key={order.id} className="hover:bg-slate-800/50 transition-colors">
+                <td className="p-4 font-mono text-xs text-slate-500">{order.id.slice(0, 8)}</td>
+                <td className="p-4 font-semibold text-slate-100">{order.part_name}</td>
+                <td className="p-4 text-slate-300">{order.material}</td>
+                <td className="p-4 text-slate-300">{order.quantity}</td>
+                <td className="p-4">
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${getStatusColor(order.order_status)}`}>
+                    {order.order_status?.replace(/_/g, ' ')}
+                  </span>
+                </td>
+                <td className="p-4 text-slate-400">{new Date(order.created_at).toLocaleDateString()}</td>
+                <td className="p-4">
+                  <button
+                    onClick={() => navigate(`/client-dashboard/projects/${order.id}/tracking`)}
+                    className="text-cyan-400 hover:text-cyan-300 font-medium text-sm flex items-center gap-1"
+                  >
+                    Track <ArrowRight size={14} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </ClientDashboardLayout>
   );

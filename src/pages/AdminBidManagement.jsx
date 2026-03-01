@@ -41,7 +41,7 @@ export default function AdminBidManagement() {
       const { data: bidData, error: bidError } = await supabase
         .from('bid_submissions')
         .select(`
-          id, tender_id, supplier_id, quote_price, lead_time_days, 
+          id, order_id, supplier_id, unit_price, lead_time_days, 
           notes, created_at, supplier:supplier_id(company_name, email)
         `)
         .order('created_at', { ascending: false });
@@ -53,10 +53,10 @@ export default function AdminBidManagement() {
       // Group bids by order
       const bidsByOrder = {};
       (bidData || []).forEach(bid => {
-        if (!bidsByOrder[bid.tender_id]) {
-          bidsByOrder[bid.tender_id] = [];
+        if (!bidsByOrder[bid.order_id]) {
+          bidsByOrder[bid.order_id] = [];
         }
-        bidsByOrder[bid.tender_id].push(bid);
+        bidsByOrder[bid.order_id].push(bid);
       });
       setBids(bidsByOrder);
       setError(null);
@@ -113,7 +113,7 @@ export default function AdminBidManagement() {
           >
             Open for Bidding
             <span className="ml-2 text-xs">
-              ({orders.filter(o => o.order_status === 'BIDDING').length})
+              ({orders.filter(o => o.order_status === 'OPEN_FOR_BIDDING').length})
             </span>
           </button>
           <button
@@ -147,7 +147,7 @@ export default function AdminBidManagement() {
             {filteredOrders.map(order => {
               const orderBids = bids[order.id] || [];
               const lowestBid = orderBids.length > 0 
-                ? orderBids.reduce((min, bid) => bid.quote_price < min.quote_price ? bid : min)
+                ? orderBids.reduce((min, bid) => (bid.unit_price ?? Infinity) < (min.unit_price ?? Infinity) ? bid : min)
                 : null;
 
               return (
@@ -194,7 +194,7 @@ export default function AdminBidManagement() {
                           <div className="bg-[#1e293b] rounded p-3 border border-slate-700">
                             <p className="text-xs text-slate-400 mb-1">Lowest Bid</p>
                             <p className="text-2xl font-bold text-emerald-400">
-                              ${lowestBid.quote_price.toLocaleString()}
+                              ${lowestBid.unit_price?.toLocaleString()}
                             </p>
                           </div>
                           <div className="bg-[#1e293b] rounded p-3 border border-slate-700">
@@ -223,7 +223,7 @@ export default function AdminBidManagement() {
                                 <p className="text-xs text-slate-400">{bid.supplier?.email}</p>
                               </div>
                               <div className="text-right">
-                                <p className="font-bold text-cyan-400">${bid.quote_price.toLocaleString()}</p>
+                                <p className="font-bold text-cyan-400">${bid.unit_price?.toLocaleString()}</p>
                                 <p className="text-xs text-slate-400">{bid.lead_time_days || 'N/A'} days</p>
                               </div>
                             </div>
