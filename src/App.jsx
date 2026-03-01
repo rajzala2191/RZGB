@@ -30,6 +30,8 @@ import SanitisationGatePage from '@/pages/SanitisationGatePage';
 import SanitisationReviewPage from '@/pages/SanitisationReviewPage';
 import SupplierPoolPage from '@/pages/SupplierPoolPage';
 import AdminDocumentReview from '@/pages/AdminDocumentReview';
+import AdminBidManagement from '@/pages/AdminBidManagement';
+import BidComparisonPage from '@/pages/BidComparisonPage';
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
@@ -86,6 +88,8 @@ function App() {
                 <Route path="/control-centre/sanitisation-gate" element={<ProtectedRoute requiredRole="admin"><SanitisationGatePage /></ProtectedRoute>} />
                 <Route path="/control-centre/sanitisation-gate/review/:orderId" element={<ProtectedRoute requiredRole="admin"><SanitisationReviewPage /></ProtectedRoute>} />
                 <Route path="/control-centre/document-review" element={<ProtectedRoute requiredRole="admin"><AdminDocumentReview /></ProtectedRoute>} />
+                <Route path="/control-centre/bid-management" element={<ProtectedRoute requiredRole="admin"><AdminBidManagement /></ProtectedRoute>} />
+                <Route path="/control-centre/bid-comparison/:orderId" element={<ProtectedRoute requiredRole="admin"><BidComparisonPage /></ProtectedRoute>} />
                 <Route path="/control-centre/supplier-pool" element={<ProtectedRoute requiredRole="admin"><SupplierPoolPage /></ProtectedRoute>} />
                 <Route path="/control-centre/linkage" element={<ProtectedRoute requiredRole="admin"><LinkageDashboard /></ProtectedRoute>} />
                 <Route path="/control-centre/sanitisation" element={<ProtectedRoute requiredRole="admin"><SanitisationEngine /></ProtectedRoute>} />

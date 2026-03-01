@@ -9,7 +9,8 @@ import {
   X, 
   ShieldCheck, 
   Network,
-  FolderOpen
+  FolderOpen,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -31,6 +32,7 @@ const ControlCentreLayout = ({ children }) => {
   const navItems = [
     { path: '/control-centre', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/control-centre/sanitisation-gate', label: 'Sanitisation Gate', icon: ShieldCheck },
+    { path: '/control-centre/bid-management', label: 'Bid Management', icon: TrendingUp },
     { path: '/control-centre/document-review', label: 'Document Review', icon: FolderOpen },
     { path: '/control-centre/supplier-pool', label: 'Supplier Pool', icon: Network },
   ];
