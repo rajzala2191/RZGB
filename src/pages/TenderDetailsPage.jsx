@@ -52,14 +52,23 @@ export default function TenderDetailsPage() {
         }).eq('id', existingBid.id);
         toast({ title: 'Success', description: 'Bid updated successfully.' });
       } else {
-        await supabase.from('bid_submissions').insert([{
+        // Insert bid submission
+        const { error: bidInsertError } = await supabase.from('bid_submissions').insert([{
           supplier_id: currentUser.id,
           order_id: tenderId,
           unit_price: parseFloat(bidForm.price),
           lead_time_days: parseInt(bidForm.leadTime, 10),
           notes: bidForm.notes,
-          status: 'pending'
+          status: 'SUBMITTED'
         }]);
+        if (bidInsertError) throw bidInsertError;
+
+        // Update order status so admin can see bids have been received
+        await supabase.from('orders').update({
+          order_status: 'OPEN_FOR_BIDDING',
+          updated_at: new Date().toISOString()
+        }).eq('id', tenderId);
+
         toast({ title: 'Success', description: 'Bid submitted successfully.' });
         navigate('/supplier-hub/jobs');
       }

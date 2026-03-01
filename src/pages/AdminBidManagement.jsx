@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import {
   Loader2, AlertCircle, TrendingUp, DollarSign, Users,
-  Clock, CheckCircle2, ArrowRight, Filter
+  Clock, CheckCircle2, ArrowRight, Filter, RefreshCw
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -18,12 +18,10 @@ export default function AdminBidManagement() {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('bidding'); // 'bidding' | 'awarded'
 
-  useEffect(() => {
-    fetchBidData();
-  }, []);
-
-  const fetchBidData = async () => {
+  const fetchBidData = useCallback(async () => {
     try {
+      setLoading(true);
+
       // Get orders in BIDDING status
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -36,27 +34,41 @@ export default function AdminBidManagement() {
         .order('updated_at', { ascending: false });
 
       if (orderError) throw orderError;
+      setOrders(orderData || []);
 
-      // Get all bids
-      const { data: bidData, error: bidError } = await supabase
+      // Get all bids - try with supplier join first, fall back to raw query
+      let bidData = null;
+      const { data: bidsWithSupplier, error: bidJoinError } = await supabase
         .from('bid_submissions')
         .select(`
           id, order_id, supplier_id, unit_price, lead_time_days, 
-          notes, created_at, supplier:supplier_id(company_name, email)
+          notes, status, created_at, supplier:supplier_id(company_name, email)
         `)
         .order('created_at', { ascending: false });
 
-      if (bidError) throw bidError;
+      if (bidJoinError) {
+        console.warn('Bid FK join failed, fetching without join:', bidJoinError.message);
+        // Fallback: fetch bids without the FK join
+        const { data: rawBids, error: rawBidError } = await supabase
+          .from('bid_submissions')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      setOrders(orderData || []);
+        if (rawBidError) throw rawBidError;
+        bidData = rawBids;
+      } else {
+        bidData = bidsWithSupplier;
+      }
 
       // Group bids by order
       const bidsByOrder = {};
       (bidData || []).forEach(bid => {
-        if (!bidsByOrder[bid.order_id]) {
-          bidsByOrder[bid.order_id] = [];
+        const orderId = bid.order_id;
+        if (!orderId) return; // Skip bids without a valid order_id
+        if (!bidsByOrder[orderId]) {
+          bidsByOrder[orderId] = [];
         }
-        bidsByOrder[bid.order_id].push(bid);
+        bidsByOrder[orderId].push(bid);
       });
       setBids(bidsByOrder);
       setError(null);
@@ -66,7 +78,31 @@ export default function AdminBidManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Fetch on mount
+  useEffect(() => {
+    fetchBidData();
+  }, [fetchBidData]);
+
+  // Real-time subscription for new/updated bids
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-bid-updates')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bid_submissions' },
+        (payload) => {
+          console.log('Bid update received:', payload);
+          fetchBidData(); // Re-fetch all data when any bid changes
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchBidData]);
 
   const filteredOrders = orders.filter(order => {
     if (filter === 'bidding') return order.order_status === 'BIDDING' || order.order_status === 'OPEN_FOR_BIDDING';
@@ -87,11 +123,23 @@ export default function AdminBidManagement() {
   return (
     <ControlCentreLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Bid Management</h1>
-          <p className="text-slate-400 mt-1">
-            View supplier bids and award contracts
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Bid Management</h1>
+            <p className="text-slate-400 mt-1">
+              View supplier bids and award contracts
+            </p>
+          </div>
+          <Button
+            onClick={fetchBidData}
+            variant="outline"
+            size="sm"
+            className="border-slate-700 bg-slate-800 text-slate-300 hover:text-white"
+            disabled={loading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
 
         {error && (

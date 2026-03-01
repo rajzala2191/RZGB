@@ -17,16 +17,19 @@ export default function SupplierBidsPage() {
 
   const fetchBids = async () => {
     if (!currentUser) return;
-    const { data } = await supabase.from('bid_submissions').select('*, tender:tender_id(ghost_public_name, id)').eq('supplier_id', currentUser.id).order('created_at', { ascending: false });
+    const { data } = await supabase.from('bid_submissions').select('*, order:order_id(ghost_public_name, id)').eq('supplier_id', currentUser.id).order('created_at', { ascending: false });
     if (data) setBids(data);
   };
 
   const getStatusBadge = (status) => {
-    switch(status) {
-      case 'SUBMITTED': return <span className="bg-blue-900/30 text-blue-400 border border-blue-800 px-2 py-1 rounded-full text-xs font-bold">Under Review</span>;
-      case 'AWARDED': return <span className="bg-emerald-900/30 text-emerald-400 border border-emerald-800 px-2 py-1 rounded-full text-xs font-bold">Awarded</span>;
+    const s = status?.toUpperCase();
+    switch(s) {
+      case 'SUBMITTED':
+      case 'PENDING': return <span className="bg-blue-900/30 text-blue-400 border border-blue-800 px-2 py-1 rounded-full text-xs font-bold">Under Review</span>;
+      case 'AWARDED':
+      case 'ACCEPTED': return <span className="bg-emerald-900/30 text-emerald-400 border border-emerald-800 px-2 py-1 rounded-full text-xs font-bold">Awarded</span>;
       case 'REJECTED': return <span className="bg-red-900/30 text-red-400 border border-red-800 px-2 py-1 rounded-full text-xs font-bold">Rejected</span>;
-      default: return <span className="bg-slate-800 text-slate-400 px-2 py-1 rounded-full text-xs">{status}</span>;
+      default: return <span className="bg-slate-800 text-slate-400 px-2 py-1 rounded-full text-xs">{status || 'Unknown'}</span>;
     }
   };
 
@@ -42,7 +45,7 @@ export default function SupplierBidsPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-300">
               <tr>
-                <th className="p-4">Tender ID</th>
+                <th className="p-4">Order ID</th>
                 <th className="p-4">Ghost Name</th>
                 <th className="p-4">Quoted COGS</th>
                 <th className="p-4">Lead Time</th>
@@ -54,15 +57,15 @@ export default function SupplierBidsPage() {
             <tbody className="divide-y divide-slate-800 text-slate-200">
               {bids.map(bid => (
                 <tr key={bid.id} className="hover:bg-slate-800/50 transition-colors">
-                  <td className="p-4 font-mono text-xs text-slate-500">{bid.tender?.id?.slice(0, 8)}</td>
-                  <td className="p-4 font-semibold text-cyan-400">{bid.tender?.ghost_public_name}</td>
-                  <td className="p-4 font-bold">${bid.quote_price}</td>
+                  <td className="p-4 font-mono text-xs text-slate-500">{bid.order?.id?.slice(0, 8) || bid.order_id?.slice(0, 8)}</td>
+                  <td className="p-4 font-semibold text-cyan-400">{bid.order?.ghost_public_name || 'N/A'}</td>
+                  <td className="p-4 font-bold">${bid.unit_price}</td>
                   <td className="p-4">{bid.lead_time_days} days</td>
                   <td className="p-4 text-slate-400">{new Date(bid.created_at).toLocaleDateString()}</td>
                   <td className="p-4">{getStatusBadge(bid.status)}</td>
                   <td className="p-4">
                     <div className="flex gap-2">
-                      <Button onClick={() => navigate(`/supplier-hub/jobs/${bid.tender_id}`)} size="sm" variant="outline" className="border-slate-700 bg-slate-800 text-slate-300 hover:text-white">
+                      <Button onClick={() => navigate(`/supplier-hub/jobs/${bid.order_id}`)} size="sm" variant="outline" className="border-slate-700 bg-slate-800 text-slate-300 hover:text-white">
                         <Eye size={14} className="mr-1"/> View
                       </Button>
                     </div>
