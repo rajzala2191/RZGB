@@ -32,8 +32,8 @@ const ClientDashboardLayout = ({ children }) => {
 
   const navItems = [
     { path: '/client-dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-    { path: '/client-dashboard/create-order', label: 'Create New Project', icon: FolderPlus, highlight: true },
-    { path: '/client-dashboard/projects', label: 'My Projects', icon: Briefcase },
+    { path: '/client-dashboard/create-order', label: 'Create New Order', icon: FolderPlus, highlight: true },
+    { path: '/client-dashboard/orders', label: 'My Orders', icon: Briefcase },
     { path: '/client-dashboard/documents', label: 'Documents', icon: Library }
   ];
 
@@ -73,7 +73,7 @@ const ClientDashboardLayout = ({ children }) => {
                   />
                   <h2 className="text-lg font-bold text-slate-100 tracking-wider">CLIENT PORTAL</h2>
                   <div className="mt-2 px-3 py-1 rounded-full bg-cyan-950/30 border border-cyan-500/30 text-[10px] text-cyan-400 font-bold uppercase tracking-widest">
-                    Projects
+                    Orders
                   </div>
                 </div>
               </div>

@@ -33,8 +33,8 @@ export default function SupplierPoolPage() {
       <div className="p-8 space-y-6">
         <div className="flex justify-between items-end border-b border-slate-800 pb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-100">Supplier Pool</h1>
-            <p className="text-slate-400">Release sanitized orders to the supplier network.</p>
+            <h1 className="text-3xl font-bold text-slate-100">Assign to Supplier</h1>
+            <p className="text-slate-400">Assign sanitized orders directly to suppliers.</p>
           </div>
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
@@ -74,8 +74,8 @@ export default function SupplierPoolPage() {
                     </span>
                   </td>
                   <td className="p-4">
-                    <Button size="sm" onClick={() => handleOpenModal(order)} className="bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-2">
-                      <Send size={14} /> Release to Supplier
+                    <Button size="sm" onClick={() => handleOpenModal(order)} className="bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2">
+                      <Send size={14} /> Assign Supplier
                     </Button>
                   </td>
                 </tr>

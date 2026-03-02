@@ -139,7 +139,7 @@ export default function QCPage() {
   return (
     <SupplierHubLayout>
       <Helmet>
-        <title>Quality Control - {job.part_name}</title>
+        <title>{`Quality Control - ${job.part_name || 'Job'}`}</title>
       </Helmet>
 
       <div className="max-w-4xl mx-auto">

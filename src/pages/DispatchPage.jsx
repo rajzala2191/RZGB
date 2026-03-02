@@ -142,7 +142,7 @@ export default function DispatchPage() {
   return (
     <SupplierHubLayout>
       <Helmet>
-        <title>Dispatch - {job.part_name}</title>
+        <title>{`Dispatch - ${job.part_name || 'Job'}`}</title>
       </Helmet>
 
       <div className="max-w-4xl mx-auto">

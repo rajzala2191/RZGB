@@ -78,7 +78,7 @@ const UserManagementPage = () => {
               <h4 className="text-white font-semibold mb-2">Access Control Notes</h4>
               <ul className="text-sm text-gray-400 space-y-2 list-disc pl-4">
                 <li>Admins have full system access.</li>
-                <li>Clients can only see their own projects.</li>
+                <li>Clients can only see their own orders.</li>
                 <li>Suppliers are restricted to assigned jobs.</li>
                 <li>Invited users receive an email to set their password.</li>
               </ul>

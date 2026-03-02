@@ -54,7 +54,7 @@ export default function SanitisationReviewPage() {
         order_id: orderId, admin_id: currentUser.id, ghost_name: formData.ghost_public_name, status: 'COMPLETED'
       }]);
 
-      toast({ title: 'Success', description: 'Order sanitized successfully! Next: Select suppliers and release.' });
+      toast({ title: 'Success', description: 'Order sanitized successfully! Next: Assign a supplier.' });
       navigate('/control-centre/supplier-pool');
     } catch (err) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -103,15 +103,15 @@ export default function SanitisationReviewPage() {
               <Input value={formData.ghost_description} onChange={e => setFormData({...formData, ghost_description: e.target.value})} className="text-slate-100 bg-[#1e293b] border-slate-700 placeholder-slate-500" />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-300">Target Sell Price (RZ Margin applied)</Label>
-              <Input type="number" value={formData.target_sell_price} onChange={e => setFormData({...formData, target_sell_price: e.target.value})} className="text-slate-100 bg-[#1e293b] border-slate-700 placeholder-slate-500" />
+              <Label className="text-slate-300">Selling Price Per Piece</Label>
+              <Input type="number" value={formData.target_sell_price} onChange={e => setFormData({...formData, target_sell_price: e.target.value})} placeholder="Enter selling price per piece" className="text-slate-100 bg-[#1e293b] border-slate-700 placeholder-slate-500" />
             </div>
           </div>
         </div>
 
         <Button onClick={handleAuthorise} size="lg" className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold flex items-center justify-center gap-2">
           <CheckSquare size={20} />
-          AUTHORISE FOR TENDER (MARK SANITIZED)
+          AUTHORISE & MARK SANITIZED
         </Button>
       </div>
     </ControlCentreLayout>

@@ -132,7 +132,7 @@ export default function MachiningPage() {
   return (
     <SupplierHubLayout>
       <Helmet>
-        <title>Machining - {job.part_name}</title>
+        <title>{`Machining - ${job.part_name || 'Job'}`}</title>
       </Helmet>
 
       <div className="max-w-4xl mx-auto">

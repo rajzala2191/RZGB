@@ -76,11 +76,10 @@ export default function AdminDocumentReview() {
 
       if (docErr) throw docErr;
 
-      // Update order to show admin has sanitized docs
+      // Update order timestamp
       const { error: orderErr } = await supabase
         .from('orders')
         .update({
-          supplier_doc_status: 'approved',
           admin_sanitized_at: new Date().toISOString(),
         })
         .eq('id', orderId);
@@ -124,7 +123,7 @@ export default function AdminDocumentReview() {
       const { error: orderErr } = await supabase
         .from('orders')
         .update({
-          supplier_doc_status: 'rejected',
+          updated_at: new Date().toISOString(),
         })
         .eq('id', orderId);
 

@@ -72,7 +72,7 @@ const ClientDocumentLibraryPage = () => {
               <Library className="text-cyan-500" size={32} />
               Document Library
            </h1>
-           <p className="text-slate-400 mt-1">Central repository for all project files.</p>
+           <p className="text-slate-400 mt-1">Central repository for all order files.</p>
         </div>
         <div className="flex gap-2">
            <button onClick={handleExportCSV} className="px-4 py-2 bg-slate-800 rounded-lg text-slate-300 border border-slate-700 hover:text-white transition-colors">

@@ -128,7 +128,7 @@ export default function CastingPage() {
   return (
     <SupplierHubLayout>
       <Helmet>
-        <title>Casting - {job.part_name}</title>
+        <title>{`Casting - ${job.part_name || 'Job'}`}</title>
       </Helmet>
 
       <div className="max-w-4xl mx-auto">

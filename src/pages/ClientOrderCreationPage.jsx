@@ -83,8 +83,8 @@ export default function ClientOrderCreationPage() {
          }
       }
 
-      toast({ title: 'Success', description: 'Project successfully created and submitted.' });
-      navigate(`/client-dashboard/projects/${data.id}/tracking`);
+      toast({ title: 'Success', description: 'Order successfully created and submitted.' });
+      navigate(`/client-dashboard/orders/${data.id}/tracking`);
     } catch (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -95,16 +95,16 @@ export default function ClientOrderCreationPage() {
   return (
     <ClientDashboardLayout>
       <div className="max-w-4xl mx-auto py-8">
-        <h1 className="text-3xl font-black mb-2 text-slate-100">Create New Project</h1>
-        <p className="text-slate-400 mb-8">Fill in the details below to initiate a new manufacturing project.</p>
+        <h1 className="text-3xl font-black mb-2 text-slate-100">Create New Order</h1>
+        <p className="text-slate-400 mb-8">Fill in the details below to initiate a new manufacturing order.</p>
 
         <form onSubmit={handleSubmit} className="space-y-8 bg-[#0f172a] p-8 rounded-2xl shadow-2xl border border-slate-800">
           
           <div className="space-y-6">
-            <h2 className="text-xl font-bold border-b border-slate-800 pb-2 text-cyan-400">Project Details</h2>
+            <h2 className="text-xl font-bold border-b border-slate-800 pb-2 text-cyan-400">Order Details</h2>
             <div className="grid grid-cols-1 gap-6">
               <div className="space-y-2">
-                <Label className="text-slate-300 font-bold">Project Name *</Label>
+                <Label className="text-slate-300 font-bold">Part Name *</Label>
                 <Input required value={formData.part_name} onChange={e => setFormData({...formData, part_name: e.target.value})} className="text-slate-100 bg-[#1e293b] border-slate-700 placeholder-slate-500 focus:border-cyan-500" placeholder="e.g. Aluminum Enclosure V2" />
               </div>
               <div className="space-y-2">
@@ -114,7 +114,7 @@ export default function ClientOrderCreationPage() {
                   value={formData.description} 
                   onChange={e => setFormData({...formData, description: e.target.value})} 
                   className="w-full rounded-md text-slate-100 bg-[#1e293b] border border-slate-700 p-3 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" 
-                  placeholder="Provide a brief description of the project"
+                  placeholder="Provide a brief description of the order"
                 />
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function ClientOrderCreationPage() {
               Cancel
             </Button>
             <Button type="submit" className="w-2/3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold" disabled={loading}>
-              {loading ? <><Loader2 className="animate-spin mr-2" size={18} /> Processing...</> : 'Submit Project'}
+              {loading ? <><Loader2 className="animate-spin mr-2" size={18} /> Processing...</> : 'Submit Order'}
             </Button>
           </div>
         </form>

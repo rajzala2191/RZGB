@@ -118,7 +118,7 @@ export default function MaterialUpdatePage() {
   return (
     <SupplierHubLayout>
       <Helmet>
-        <title>Material Update - {job.part_name}</title>
+        <title>{`Material Update - ${job.part_name || 'Job'}`}</title>
       </Helmet>
 
       <div className="max-w-4xl mx-auto">

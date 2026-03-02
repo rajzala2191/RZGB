@@ -8,16 +8,17 @@ import { useToast } from '@/components/ui/use-toast';
 import {
   Loader2, ArrowLeft, CheckCircle2, Clock, AlertCircle, Package,
   Truck, FileText, TrendingUp, Calendar, DollarSign, MapPin,
-  FileCheck, Zap, BarChart3, Hourglass, ShieldCheck
+  FileCheck, Zap, BarChart3, Hourglass, ShieldCheck, XCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
+import OrderTimeline from '@/components/OrderTimeline';
 
-const LiveProjectTracking = () => {
-  const { projectId } = useParams();
+const LiveOrderTracking = () => {
+  const { orderId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { toast } = useToast();
-  const [project, setProject] = useState(null);
+  const [order, setOrder] = useState(null);
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,8 +27,7 @@ const LiveProjectTracking = () => {
   const STAGES = [
     { id: 'PENDING_ADMIN_SCRUB', label: 'Order Received', color: 'blue', icon: Package },
     { id: 'SANITIZED', label: 'Sanitizing', color: 'purple', icon: FileCheck },
-    { id: 'OPEN_FOR_BIDDING', label: 'Ready for Bid', color: 'indigo', icon: Zap },
-    { id: 'AWARDED', label: 'Order Awarded', color: 'amber', icon: CheckCircle2 },
+    { id: 'AWARDED', label: 'Supplier Assigned', color: 'amber', icon: CheckCircle2 },
     { id: 'MATERIAL', label: 'Material Sourcing', color: 'sky', icon: Package },
     { id: 'CASTING', label: 'Casting', color: 'orange', icon: Zap },
     { id: 'MACHINING', label: 'Machining', color: 'violet', icon: Hourglass },
@@ -37,50 +37,62 @@ const LiveProjectTracking = () => {
   ];
 
   useEffect(() => {
-    fetchProjectData();
+    if (!currentUser) return;
+    fetchOrderData();
 
     // Set up realtime subscription for job_updates
     const channel = supabase
-      .channel(`live-tracking-${projectId}`)
+      .channel(`live-tracking-${orderId}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'job_updates' },
-        () => fetchProjectData()
+        () => fetchOrderData()
       )
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${projectId}` },
-        () => fetchProjectData()
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` },
+        () => fetchOrderData()
       )
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, [projectId]);
+  }, [orderId, currentUser]);
 
-  const fetchProjectData = async () => {
+  const fetchOrderData = async () => {
+    if (!currentUser?.id) return;
     try {
-      const { data: projectData, error: projectError } = await supabase
+      // Use maybeSingle to avoid PGRST116 error when RLS filters out the row
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .select('*')
-        .eq('id', projectId)
-        .single();
+        .eq('id', orderId)
+        .maybeSingle();
 
-      if (projectError) throw projectError;
-      setProject(projectData);
+      if (orderError) throw orderError;
+      if (!orderData) {
+        setError('Order not found or you do not have permission to view it.');
+        setLoading(false);
+        return;
+      }
+      setOrder(orderData);
 
-      // Fetch job updates
-      const { data: updatesData, error: updatesError } = await supabase
-        .from('job_updates')
-        .select('*')
-        .eq('rz_job_id', projectData.rz_job_id)
-        .order('created_at', { ascending: true });
+      // Fetch job updates only if the order has an rz_job_id
+      if (orderData.rz_job_id) {
+        const { data: updatesData, error: updatesError } = await supabase
+          .from('job_updates')
+          .select('*')
+          .eq('rz_job_id', orderData.rz_job_id)
+          .order('created_at', { ascending: true });
 
-      if (updatesError) throw updatesError;
-      setUpdates(updatesData || []);
+        if (updatesError) console.error('Failed to load updates:', updatesError);
+        setUpdates(updatesData || []);
+      } else {
+        setUpdates([]);
+      }
       setError(null);
     } catch (err) {
-      console.error(err);
-      setError('Unable to load project data');
+      console.error('LiveOrderTracking fetch error:', err);
+      setError(err.message || 'Unable to load order data');
     } finally {
       setLoading(false);
     }
@@ -94,22 +106,35 @@ const LiveProjectTracking = () => {
     </ClientDashboardLayout>
   );
 
-  if (error || !project) return (
+  if (error || !order) return (
     <ClientDashboardLayout>
       <div className="bg-red-950/30 border border-red-500/50 rounded-xl p-8 text-center">
         <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-        <p className="text-red-300 font-semibold">{error}</p>
+        <p className="text-red-300 font-semibold mb-2">{error || 'Order not found'}</p>
+        <div className="flex justify-center gap-3 mt-4">
+          <button
+            onClick={() => { setLoading(true); setError(null); fetchOrderData(); }}
+            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-medium transition-colors text-sm"
+          >
+            Retry
+          </button>
+          <button
+            onClick={() => navigate('/client-dashboard/orders')}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition-colors text-sm border border-slate-700"
+          >
+            Back to Orders
+          </button>
+        </div>
       </div>
     </ClientDashboardLayout>
   );
 
   // Map DB order_status values to pipeline stage IDs
   const STATUS_TO_STAGE_ID = {
-    'PENDING_ADMIN_SCRUB': 'INTAKE',
-    'SANITIZED': 'SANITISED',
-    'OPEN_FOR_BIDDING': 'BIDDING',
+    'PENDING_ADMIN_SCRUB': 'PENDING_ADMIN_SCRUB',
+    'SANITIZED': 'SANITIZED',
   };
-  const currentStageId = STATUS_TO_STAGE_ID[project.order_status] || project.order_status;
+  const currentStageId = STATUS_TO_STAGE_ID[order.order_status] || order.order_status;
   const currentStageIndex = STAGES.findIndex(s => s.id === currentStageId);
 
   // Group updates by stage
@@ -122,15 +147,15 @@ const LiveProjectTracking = () => {
   });
 
   // Calculate days remaining
-  const daysRequested = project.delivery_days || 60;
-  const orderDate = new Date(project.created_at);
+  const daysRequested = order.delivery_days || 60;
+  const orderDate = new Date(order.created_at);
   const dueDate = new Date(orderDate.getTime() + daysRequested * 24 * 60 * 60 * 1000);
   const daysRemaining = Math.ceil((dueDate - new Date()) / (1000 * 60 * 60 * 24));
   const isOnTrack = daysRemaining > 0;
 
   return (
     <ClientDashboardLayout>
-      <Helmet><title>{project.ghost_public_name} - Project Tracking</title></Helmet>
+      <Helmet><title>{`${order.ghost_public_name || 'Order'} - Order Tracking`}</title></Helmet>
 
       <div className="space-y-6">
         {/* Header */}
@@ -140,15 +165,20 @@ const LiveProjectTracking = () => {
           </button>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-black text-white font-mono tracking-tight mb-2">{project.ghost_public_name}</h1>
-              <p className="text-slate-400 text-sm">RZ Job ID: <span className="text-cyan-400 font-mono">{project.rz_job_id}</span></p>
+              <h1 className="text-4xl font-black text-white font-mono tracking-tight mb-2">{order.ghost_public_name || order.part_name || 'Order'}</h1>
+              <p className="text-slate-400 text-sm">RZ Job ID: <span className="text-cyan-400 font-mono">{order.rz_job_id || 'Pending'}</span></p>
             </div>
             <div className={`px-4 py-2 rounded-lg font-bold text-sm border ${
-              isOnTrack 
-                ? 'bg-emerald-950/50 border-emerald-500 text-emerald-400' 
-                : 'bg-red-950/50 border-red-500 text-red-400'
+              order.order_status === 'WITHDRAWN'
+                ? 'bg-red-950/50 border-red-500 text-red-400'
+                : isOnTrack 
+                  ? 'bg-emerald-950/50 border-emerald-500 text-emerald-400' 
+                  : 'bg-red-950/50 border-red-500 text-red-400'
             }`}>
-              {isOnTrack ? '✓ On Track' : '⚠ At Risk'} • {Math.abs(daysRemaining)} days {isOnTrack ? 'remaining' : 'overdue'}
+              {order.order_status === 'WITHDRAWN' 
+                ? '✕ Withdrawn'
+                : isOnTrack ? '✓ On Track' : '⚠ At Risk'
+              }{order.order_status !== 'WITHDRAWN' && ` • ${Math.abs(daysRemaining)} days ${isOnTrack ? 'remaining' : 'overdue'}`}
             </div>
           </div>
         </div>
@@ -161,8 +191,8 @@ const LiveProjectTracking = () => {
               <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Quantity</p>
               <Package className="text-blue-400" size={18} />
             </div>
-            <p className="text-2xl font-black text-slate-100">{project.quantity.toLocaleString()}</p>
-            <p className="text-xs text-slate-400 mt-2">{project.material}</p>
+            <p className="text-2xl font-black text-slate-100">{order.quantity ? order.quantity.toLocaleString() : '—'}</p>
+            <p className="text-xs text-slate-400 mt-2">{order.material}</p>
           </div>
 
           {/* Unit Price */}
@@ -171,8 +201,8 @@ const LiveProjectTracking = () => {
               <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Unit Price</p>
               <DollarSign className="text-emerald-400" size={18} />
             </div>
-            <p className="text-2xl font-black text-slate-100">£{project.unit_price}</p>
-            <p className="text-xs text-slate-400 mt-2">Total: £{(project.quantity * project.unit_price).toLocaleString()}</p>
+            <p className="text-2xl font-black text-slate-100">{order.unit_price ? `£${order.unit_price}` : '—'}</p>
+            <p className="text-xs text-slate-400 mt-2">{order.quantity && order.unit_price ? `Total: £${(order.quantity * order.unit_price).toLocaleString()}` : 'Pending bid award'}</p>
           </div>
 
           {/* Delivery */}
@@ -191,7 +221,7 @@ const LiveProjectTracking = () => {
               <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Location</p>
               <MapPin className="text-cyan-400" size={18} />
             </div>
-            <p className="text-lg font-black text-slate-100">{project.delivery_to || 'To your door'}</p>
+            <p className="text-lg font-black text-slate-100">{order.delivery_to || 'To your door'}</p>
             <p className="text-xs text-slate-400 mt-2">Delivery method</p>
           </div>
         </div>
@@ -203,51 +233,13 @@ const LiveProjectTracking = () => {
             Manufacturing Pipeline
           </h2>
 
-          {/* Timeline */}
-          <div className="relative">
-            <div className="absolute top-6 left-0 w-full h-1 bg-slate-800 -z-10" />
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
-              {STAGES.map((stage, idx) => {
-                const isCompleted = idx <= currentStageIndex && project.order_status !== 'CANCELLED';
-                const isCurrent = idx === currentStageIndex;
-                const hasUpdates = updatesByStage[stage.id];
-                const StageIcon = stage.icon;
-
-                return (
-                  <div key={stage.id} className="relative">
-                    <div className={`
-                      w-full p-4 rounded-lg border-2 transition-all duration-300 text-center
-                      ${isCurrent 
-                        ? `bg-${stage.color}-950/50 border-${stage.color}-500 shadow-lg shadow-${stage.color}-900/30`
-                        : isCompleted
-                        ? `bg-emerald-950/30 border-emerald-500/50 text-emerald-400`
-                        : `bg-slate-900 border-slate-700`
-                      }
-                    `}>
-                      <StageIcon className={`w-6 h-6 mx-auto mb-2 ${
-                        isCurrent ? `text-${stage.color}-400` :
-                        isCompleted ? 'text-emerald-400' :
-                        'text-slate-500'
-                      }`} />
-                      <p className={`text-xs font-bold uppercase tracking-wider ${
-                        isCurrent ? `text-${stage.color}-400` :
-                        isCompleted ? 'text-emerald-300' :
-                        'text-slate-500'
-                      }`}>
-                        {stage.label}
-                      </p>
-                      {hasUpdates && (
-                        <p className="text-[10px] text-slate-400 mt-1">
-                          {hasUpdates.length} update{hasUpdates.length !== 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <OrderTimeline 
+            currentStatus={order.order_status}
+            createdAt={order.created_at}
+            updatedAt={order.updated_at}
+            updates={updates}
+            isWithdrawn={order.order_status === 'WITHDRAWN'}
+          />
         </div>
 
         {/* Real-time Updates Feed */}
@@ -296,14 +288,14 @@ const LiveProjectTracking = () => {
               </h3>
             </div>
             <div className={`text-center p-4 rounded-lg ${
-              project.is_qc_approved 
+              order.is_qc_approved 
                 ? 'bg-emerald-950/50 border border-emerald-500/50' 
                 : 'bg-amber-950/50 border border-amber-500/50'
             }`}>
               <p className={`text-2xl font-black ${
-                project.is_qc_approved ? 'text-emerald-400' : 'text-amber-400'
+                order.is_qc_approved ? 'text-emerald-400' : 'text-amber-400'
               }`}>
-                {project.is_qc_approved ? '✓ APPROVED' : '⟳ PENDING'}
+                {order.is_qc_approved ? '✓ APPROVED' : '⟳ PENDING'}
               </p>
             </div>
           </div>
@@ -336,4 +328,4 @@ const LiveProjectTracking = () => {
   );
 };
 
-export default LiveProjectTracking;
+export default LiveOrderTracking;

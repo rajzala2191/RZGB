@@ -47,7 +47,7 @@ const ClientDashboardPage = () => {
   const activeOrders = orders.filter(o => o.status !== 'completed' && o.order_status !== 'COMPLETED').length;
   const completedOrders = orders.filter(o => o.status === 'completed' || o.order_status === 'COMPLETED').length;
   const pendingReview = orders.filter(o => o.order_status === 'PENDING_ADMIN_SCRUB').length;
-  const totalProjects = orders.length;
+  const totalOrders = orders.length;
 
   const recentOrders = orders.slice(0, 5);
 
@@ -60,32 +60,32 @@ const ClientDashboardPage = () => {
           <h1 className="text-4xl font-black text-slate-100 mb-2 tracking-tight">
             Welcome back, <span className="text-cyan-400">{userCompanyName || 'Partner'}</span>
           </h1>
-          <p className="text-slate-400 text-lg">Manage and track your overarching projects and manufacturing pipeline.</p>
+          <p className="text-slate-400 text-lg">Manage and track your manufacturing orders.</p>
         </div>
         <button 
            onClick={() => navigate('/client-dashboard/create-order')}
            className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-cyan-900/40 hover:scale-105"
         >
-           <PlusCircle size={20} /> Create New Project
+           <PlusCircle size={20} /> Create New Order
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <MetricCard title="Total Projects" value={totalProjects} icon={LayoutDashboard} color="blue" />
+        <MetricCard title="Total Orders" value={totalOrders} icon={LayoutDashboard} color="blue" />
         <MetricCard title="In Progress" value={activeOrders} icon={TrendingUp} color="cyan" />
         <MetricCard title="Completed" value={completedOrders} icon={CheckCircle} color="emerald" />
         <MetricCard title="Pending Review" value={pendingReview} icon={Clock} color="amber" />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
-        {/* Recent Projects List */}
+        {/* Recent Orders List */}
         <div className="xl:col-span-2 bg-[#0f172a] border border-slate-800 rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
             <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-              <Package className="text-cyan-500" size={24} /> Recent Projects
+              <Package className="text-cyan-500" size={24} /> Recent Orders
             </h2>
             <button 
-              onClick={() => navigate('/client-dashboard/projects')}
+              onClick={() => navigate('/client-dashboard/orders')}
               className="text-sm font-bold text-cyan-500 hover:text-cyan-400 flex items-center gap-1 transition-colors"
             >
               View All <ArrowRight size={16} />
@@ -101,7 +101,7 @@ const ClientDashboardPage = () => {
                         <FileText size={20} />
                      </div>
                      <div>
-                       <h4 className="text-slate-200 font-bold group-hover:text-cyan-400 transition-colors">{order.part_name || 'Unnamed Project'}</h4>
+                       <h4 className="text-slate-200 font-bold group-hover:text-cyan-400 transition-colors">{order.part_name || 'Unnamed Order'}</h4>
                        <p className="text-xs text-slate-500 mt-1 font-mono">ID: {order.id.slice(0, 8)} | {new Date(order.created_at).toLocaleDateString()}</p>
                      </div>
                    </div>
@@ -109,14 +109,14 @@ const ClientDashboardPage = () => {
                      <span className="px-3 py-1 bg-slate-800 text-slate-300 rounded-full text-xs font-bold uppercase tracking-wider border border-slate-700">
                        {(order.order_status || order.status || 'Draft').replace(/_/g, ' ')}
                      </span>
-                     <button onClick={() => navigate(`/client-dashboard/projects/${order.id}/tracking`)} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+                     <button onClick={() => navigate(`/client-dashboard/orders/${order.id}/tracking`)} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
                         <ArrowRight size={18} />
                      </button>
                    </div>
                 </div>
               ))
             ) : (
-              <div className="text-center text-slate-500 py-12 italic">No recent projects found.</div>
+              <div className="text-center text-slate-500 py-12 italic">No recent orders found.</div>
             )}
           </div>
         </div>
@@ -137,7 +137,7 @@ const ClientDashboardPage = () => {
                       <div className="font-bold text-slate-200 text-sm">Status Update</div>
                       <time className="text-xs font-mono text-slate-500">{new Date(order.updated_at).toLocaleDateString()}</time>
                     </div>
-                    <div className="text-xs text-slate-400">Project <span className="text-cyan-400">{order.part_name || order.id.slice(0,6)}</span> moved to {order.order_status?.replace(/_/g, ' ') || 'Pending'}</div>
+                    <div className="text-xs text-slate-400">Order <span className="text-cyan-400">{order.part_name || order.id.slice(0,6)}</span> moved to {order.order_status?.replace(/_/g, ' ') || 'Pending'}</div>
                   </div>
                </div>
              ))}

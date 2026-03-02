@@ -13,8 +13,21 @@ export default function SanitisationGatePage() {
   }, []);
 
   const fetchPendingOrders = async () => {
-    const { data } = await supabase.from('orders').select('*, client:client_id(company_name)').eq('order_status', 'PENDING_ADMIN_SCRUB');
-    if (data) setOrders(data);
+    const { data, error } = await supabase.from('orders').select('*').eq('order_status', 'PENDING_ADMIN_SCRUB');
+    if (error) {
+      console.error('Failed to fetch pending orders:', error);
+      return;
+    }
+    if (data && data.length > 0) {
+      // Fetch client names separately
+      const clientIds = [...new Set(data.map(o => o.client_id).filter(Boolean))];
+      const { data: profiles } = await supabase.from('profiles').select('id, company_name').in('id', clientIds);
+      const profileMap = {};
+      (profiles || []).forEach(p => { profileMap[p.id] = p.company_name; });
+      setOrders(data.map(o => ({ ...o, client_company_name: profileMap[o.client_id] || 'Unknown' })));
+    } else {
+      setOrders(data || []);
+    }
   };
 
   return (
@@ -41,7 +54,7 @@ export default function SanitisationGatePage() {
               {orders.map(order => (
                 <tr key={order.id} className="hover:bg-slate-800/50 transition-colors">
                   <td className="p-4 font-mono text-xs text-slate-500">{order.id.slice(0, 8)}</td>
-                  <td className="p-4">{order.client?.company_name || 'Unknown'}</td>
+                  <td className="p-4">{order.client_company_name || 'Unknown'}</td>
                   <td className="p-4 font-semibold">{order.part_name}</td>
                   <td className="p-4">{order.material}</td>
                   <td className="p-4">

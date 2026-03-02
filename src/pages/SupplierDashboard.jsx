@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 
 const SupplierDashboard = () => {
   const { currentUser, userCompanyName } = useAuth();
-  const [stats, setStats] = useState({ openTenders: 0, activeBids: 0, awarded: 0, completed: 0 });
+  const [stats, setStats] = useState({ awarded: 0, completed: 0 });
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,18 +20,15 @@ const SupplierDashboard = () => {
       if (!currentUser) return;
       
       try {
-        const [tendersRes, bidsRes, awardedRes, activityRes] = await Promise.all([
-          supabase.from('orders').select('id', {count: 'exact'}).eq('order_status', 'OPEN_FOR_BIDDING'),
-          supabase.from('bid_submissions').select('id', {count: 'exact'}).eq('supplier_id', currentUser.id),
-          supabase.from('orders').select('id', {count: 'exact'}).eq('supplier_id', currentUser.id).eq('order_status', 'IN_PRODUCTION'),
+        const [awardedRes, completedRes, activityRes] = await Promise.all([
+          supabase.from('orders').select('id', {count: 'exact'}).eq('supplier_id', currentUser.id).in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH']),
+          supabase.from('orders').select('id', {count: 'exact'}).eq('supplier_id', currentUser.id).eq('order_status', 'DELIVERED'),
           supabase.from('orders').select('id, ghost_public_name, order_status, updated_at').eq('supplier_id', currentUser.id).order('updated_at', { ascending: false }).limit(5)
         ]);
 
         setStats({
-          openTenders: tendersRes.count || 0,
-          activeBids: bidsRes.count || 0,
           awarded: awardedRes.count || 0,
-          completed: 0 // Mock for now
+          completed: completedRes.count || 0
         });
         
         if (activityRes.data) setActivities(activityRes.data);
@@ -92,11 +89,9 @@ const SupplierDashboard = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard icon={Briefcase} title="Open Tenders" value={stats.openTenders} color="text-cyan-400" path="/supplier-hub/jobs" />
-            <StatCard icon={FileText} title="Active Bids" value={stats.activeBids} color="text-amber-400" path="/supplier-hub/bids" />
-            <StatCard icon={Package} title="In Production" value={stats.awarded} color="text-emerald-400" path="/supplier-hub/awarded" />
-            <StatCard icon={CheckCircle} title="Completed Jobs" value={stats.completed} color="text-slate-400" path="/supplier-hub/awarded" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            <StatCard icon={Package} title="Active Orders" value={stats.awarded} color="text-emerald-400" path="/supplier-hub/orders" />
+            <StatCard icon={CheckCircle} title="Completed Jobs" value={stats.completed} color="text-cyan-400" path="/supplier-hub/orders" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -128,14 +123,8 @@ const SupplierDashboard = () => {
             <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-6 shadow-xl">
                <h2 className="text-lg font-bold text-slate-100 mb-6">Quick Actions</h2>
                <div className="space-y-3">
-                 <Button onClick={() => navigate('/supplier-hub/jobs')} className="w-full justify-between bg-[#1e293b] hover:bg-cyan-900/30 text-slate-300 hover:text-cyan-400 border border-slate-800 hover:border-cyan-800">
-                   View Available Tenders <ArrowRight size={16} />
-                 </Button>
-                 <Button onClick={() => navigate('/supplier-hub/bids')} className="w-full justify-between bg-[#1e293b] hover:bg-cyan-900/30 text-slate-300 hover:text-cyan-400 border border-slate-800 hover:border-cyan-800">
-                   Manage My Bids <ArrowRight size={16} />
-                 </Button>
-                 <Button onClick={() => navigate('/supplier-hub/awarded')} className="w-full justify-between bg-[#1e293b] hover:bg-cyan-900/30 text-slate-300 hover:text-cyan-400 border border-slate-800 hover:border-cyan-800">
-                   Production Jobs <ArrowRight size={16} />
+                 <Button onClick={() => navigate('/supplier-hub/orders')} className="w-full justify-between bg-[#1e293b] hover:bg-cyan-900/30 text-slate-300 hover:text-cyan-400 border border-slate-800 hover:border-cyan-800">
+                   View My Orders <ArrowRight size={16} />
                  </Button>
                  <Button onClick={() => navigate('/supplier-hub/documents')} className="w-full justify-between bg-[#1e293b] hover:bg-cyan-900/30 text-slate-300 hover:text-cyan-400 border border-slate-800 hover:border-cyan-800">
                    Document Portal <ArrowRight size={16} />

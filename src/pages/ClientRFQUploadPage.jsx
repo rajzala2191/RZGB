@@ -10,28 +10,28 @@ import { useDropzone } from 'react-dropzone';
 import { logInfo, logError } from '@/lib/logger';
 
 const ClientRFQUploadPage = () => {
-  const { projectId } = useParams();
+  const { orderId } = useParams();
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [projects, setProjects] = useState([]);
-  const [selectedProject, setSelectedProject] = useState(projectId || '');
+  const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(orderId || '');
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchOrders = async () => {
        if(!currentUser) return;
-       logInfo('RFQUpload', 'Fetching client projects for dropdown');
+       logInfo('RFQUpload', 'Fetching client orders for dropdown');
        try {
-          const { data, error } = await supabase.from('projects').select('id, project_name').eq('client_id', currentUser.id);
+          const { data, error } = await supabase.from('orders').select('id, part_name, ghost_public_name').eq('client_id', currentUser.id);
           if (error) throw error;
-          setProjects(data || []);
+          setOrders(data || []);
        } catch (error) {
-          logError('RFQUpload', 'Failed to fetch projects', error);
+          logError('RFQUpload', 'Failed to fetch orders', error);
        }
     };
-    fetchProjects();
+    fetchOrders();
   }, [currentUser]);
 
   const onDrop = (acceptedFiles) => {
@@ -41,22 +41,20 @@ const ClientRFQUploadPage = () => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, maxFiles: 1 });
 
   const handleUpload = async () => {
-    if (!file || !selectedProject) {
-       toast({ title: "Validation Error", description: "Please select a project and a file.", variant: "destructive" });
+    if (!file || !selectedOrder) {
+       toast({ title: "Validation Error", description: "Please select an order and a file.", variant: "destructive" });
        return;
     }
 
     setUploading(true);
     const workflow = 'RFQUpload';
-    logInfo(workflow, 'Starting file upload process', { fileName: file.name, fileSize: file.size, project: selectedProject });
+    logInfo(workflow, 'Starting file upload process', { fileName: file.name, fileSize: file.size, order: selectedOrder });
 
     try {
-       // Mock storage upload for demo environment compatibility 
-       // In real app: supabase.storage.from('documents').upload(...)
        const filePath = `rfqs/${currentUser.id}/${Date.now()}_${file.name}`;
        
        const payload = {
-          project_id: selectedProject,
+          order_id: selectedOrder,
           client_id: currentUser.id,
           uploaded_by: currentUser.id,
           file_name: file.name,
@@ -75,12 +73,12 @@ const ClientRFQUploadPage = () => {
        await supabase.from('audit_logs').insert({
           admin_id: currentUser.id,
           action: 'RFQ_UPLOADED',
-          details: `Uploaded RFQ for project ${selectedProject}`,
+          details: `Uploaded RFQ for order ${selectedOrder}`,
           status: 'success'
        });
 
        toast({ title: "RFQ Uploaded", description: "Your document is now in the intake queue." });
-       navigate('/client-dashboard/projects');
+       navigate('/client-dashboard/orders');
 
     } catch (err) {
        logError(workflow, 'Upload failed', err);
@@ -99,14 +97,14 @@ const ClientRFQUploadPage = () => {
           </div>
           <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-8">
              <div className="mb-6">
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Select Project</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Select Order</label>
                 <select 
-                   value={selectedProject}
-                   onChange={e => setSelectedProject(e.target.value)}
+                   value={selectedOrder}
+                   onChange={e => setSelectedOrder(e.target.value)}
                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-slate-100"
                 >
-                   <option value="">-- Select Project --</option>
-                   {projects.map(p => <option key={p.id} value={p.id}>{p.project_name}</option>)}
+                   <option value="">-- Select Order --</option>
+                   {orders.map(o => <option key={o.id} value={o.id}>{o.ghost_public_name || o.part_name || o.id.slice(0, 8)}</option>)}
                 </select>
              </div>
              <div 
@@ -131,7 +129,7 @@ const ClientRFQUploadPage = () => {
              </div>
              <button 
                 onClick={handleUpload}
-                disabled={uploading || !file || !selectedProject}
+                disabled={uploading || !file || !selectedOrder}
                 className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
              >
                 {uploading ? <Loader2 className="animate-spin" /> : <UploadCloud size={20} />}

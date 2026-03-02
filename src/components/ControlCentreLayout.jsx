@@ -10,7 +10,7 @@ import {
   ShieldCheck, 
   Network,
   FolderOpen,
-  TrendingUp
+  Radio
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -31,9 +31,9 @@ const ControlCentreLayout = ({ children }) => {
   const navItems = [
     { path: '/control-centre', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/control-centre/sanitisation-gate', label: 'Sanitisation Gate', icon: ShieldCheck },
-    { path: '/control-centre/bid-management', label: 'Bid Management', icon: TrendingUp },
+    { path: '/control-centre/live-tracking', label: 'Live Tracking', icon: Radio },
+    { path: '/control-centre/supplier-pool', label: 'Assign to Supplier', icon: Network },
     { path: '/control-centre/document-review', label: 'Document Review', icon: FolderOpen },
-    { path: '/control-centre/supplier-pool', label: 'Supplier Pool', icon: Network },
   ];
 
   return (
