@@ -31,7 +31,8 @@ import SanitisationReviewPage from '@/pages/SanitisationReviewPage';
 import SupplierPoolPage from '@/pages/SupplierPoolPage';
 import AdminDocumentReview from '@/pages/AdminDocumentReview';
 import AdminLiveTracking from '@/pages/AdminLiveTracking';
-
+import AdminLiveChatPage from '@/pages/AdminLiveChatPage';
+import LiveChatWidget from '@/components/LiveChatWidget';
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
@@ -79,6 +80,7 @@ function App() {
                 <Route path="/control-centre/sanitisation-gate/review/:orderId" element={<ProtectedRoute requiredRole="admin"><SanitisationReviewPage /></ProtectedRoute>} />
                 <Route path="/control-centre/document-review" element={<ProtectedRoute requiredRole="admin"><AdminDocumentReview /></ProtectedRoute>} />
                 <Route path="/control-centre/live-tracking" element={<ProtectedRoute requiredRole="admin"><AdminLiveTracking /></ProtectedRoute>} />
+                <Route path="/control-centre/live-chat" element={<ProtectedRoute requiredRole="admin"><AdminLiveChatPage /></ProtectedRoute>} />
 
                 <Route path="/control-centre/supplier-pool" element={<ProtectedRoute requiredRole="admin"><SupplierPoolPage /></ProtectedRoute>} />
                 <Route path="/control-centre/linkage" element={<ProtectedRoute requiredRole="admin"><LinkageDashboard /></ProtectedRoute>} />
@@ -123,6 +125,7 @@ function App() {
                 <Route path="/supplier-hub/dispatch/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><Navigate to="/supplier-hub/orders" replace /></ProtectedRoute>} />
               </Routes>
                 <Toaster />
+                <LiveChatWidget />
               </ClientProvider>
             </SupplierProvider>
           </AdminProvider>
