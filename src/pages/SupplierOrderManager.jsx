@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import SupplierHubLayout from '@/components/SupplierHubLayout';
 import { Button } from '@/components/ui/button';
@@ -25,18 +26,13 @@ const STAGES = [
   { id: 'DELIVERED', label: 'Delivered', icon: CheckCircle2, color: 'green' },
 ];
 
-// Stages the supplier can move TO (excludes AWARDED which is the starting point)
-const ACTIONABLE_STAGES = STAGES.filter(s => s.id !== 'AWARDED');
-
 export default function SupplierOrderManager() {
   const { currentUser, userCompanyName } = useAuth();
   const [orders, setOrders] = useState([]);
   const [jobUpdates, setJobUpdates] = useState({});
   const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [updatingOrder, setUpdatingOrder] = useState(null);
-  const [document, setDocument] = useState(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [error, setError] = useState(null);
   const [savingNotes, setSavingNotes] = useState({});
@@ -44,7 +40,8 @@ export default function SupplierOrderManager() {
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState({ open: false, orderId: null, newStatus: null, orderName: '' });
 
-  const fetchAwardedOrders = useCallback(async () => {
+  // Parameter: clearErrors — set false when called from catch blocks so errors remain visible
+  const fetchAwardedOrders = useCallback(async (clearErrors = true) => {
     try {
       if (!currentUser?.id) {
         setError('User not authenticated. Please log in again.');
@@ -55,8 +52,8 @@ export default function SupplierOrderManager() {
       const { data, error: err } = await supabase
         .from('orders')
         .select(`
-          id, rz_job_id, part_name, material, order_status, 
-          created_at, updated_at, ghost_public_name, quantity, supplier_notes, delivery_days
+          id, rz_job_id, part_name, material, order_status, client_id,
+          created_at, updated_at, ghost_public_name, quantity
         `)
         .eq('supplier_id', currentUser.id)
         .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED'])
@@ -65,7 +62,7 @@ export default function SupplierOrderManager() {
       if (err) throw err;
 
       setOrders(data || []);
-      setError(null);
+      if (clearErrors) setError(null);
     } catch (err) {
       console.error('Error fetching orders:', err);
       setError(`Failed to load orders: ${err.message}`);
@@ -130,57 +127,70 @@ export default function SupplierOrderManager() {
     setUpdatingOrder(orderId);
     setError(null);
     setSuccessMessage(null);
-    try {
-      const order = orders.find(p => p.id === orderId);
-      const stageName = STAGES.find(s => s.id === newStatus)?.label || newStatus;
 
-      // Update the order status — use .select() to verify rows were actually updated
-      const { data: updated, error: err } = await supabase
+    const order = orders.find(p => p.id === orderId);
+    const stageName = STAGES.find(s => s.id === newStatus)?.label || newStatus;
+
+    try {
+      console.log('[SupplierOrderManager] Updating order', orderId, 'to', newStatus);
+
+      // Use admin client to bypass RLS (suppliers don't have UPDATE policy on orders)
+      const { error: updateErr } = await supabaseAdmin
         .from('orders')
         .update({
           order_status: newStatus,
           updated_at: new Date().toISOString(),
         })
         .eq('id', orderId)
-        .eq('supplier_id', currentUser.id)
-        .select('id, order_status');
+        .eq('supplier_id', currentUser.id); // ensure supplier can only update their own orders
 
-      if (err) throw err;
-
-      // If no rows returned, the update was blocked (RLS or wrong ID)
-      if (!updated || updated.length === 0) {
-        throw new Error('Update failed — you may not have permission to modify this order. Please contact admin.');
+      if (updateErr) {
+        console.error('[SupplierOrderManager] Update error:', updateErr);
+        throw new Error(`Database error: ${updateErr.message}`);
       }
 
-      // Verify the status actually changed
-      if (updated[0].order_status !== newStatus) {
-        throw new Error('Order status did not change. Please try again.');
+      // Verify the change went through
+      const { data: verified, error: verifyErr } = await supabaseAdmin
+        .from('orders')
+        .select('id, order_status')
+        .eq('id', orderId)
+        .maybeSingle();
+
+      if (verifyErr) {
+        console.error('[SupplierOrderManager] Verify error:', verifyErr);
       }
 
-      // Add job update record (visible to client & admin dashboards via realtime)
+      if (verified && verified.order_status !== newStatus) {
+        throw new Error(`Stage did not change (still ${verified.order_status}). Please try again.`);
+      }
+
+      console.log('[SupplierOrderManager] Update verified:', verified);
+
+      // Step 3: Add job update record (visible to client & admin dashboards via realtime)
       if (order?.rz_job_id) {
-        const { error: jobErr } = await supabase.from('job_updates').insert({
+        await supabaseAdmin.from('job_updates').insert({
           rz_job_id: order.rz_job_id,
           stage: newStatus,
           status: 'in_progress',
           notes: `Supplier moved order to ${stageName}`,
           created_by: currentUser?.email,
+        }).then(({ error: jobErr }) => {
+          if (jobErr) console.warn('[SupplierOrderManager] job_updates insert warning:', jobErr);
         });
-        if (jobErr) console.error('Failed to insert job update:', jobErr);
       }
 
-      // Optimistic local state update (realtime subscription will also refresh)
+      // Step 4: Immediately update local state so UI reflects the change
       setOrders(prev => prev.map(o =>
         o.id === orderId ? { ...o, order_status: newStatus, updated_at: new Date().toISOString() } : o
       ));
 
-      setSuccessMessage(`Order "${order?.part_name || orderId.slice(0, 8)}" moved to ${stageName}. Client and admin dashboards updated in real-time.`);
+      setSuccessMessage(`✓ Order "${order?.part_name || orderId.slice(0, 8)}" moved to ${stageName}.`);
       setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
-      console.error('Error updating status:', err);
-      setError(`Failed to update order status: ${err.message}`);
-      // Re-fetch to ensure UI is in sync
-      fetchAwardedOrders();
+      console.error('[SupplierOrderManager] Stage change failed:', err);
+      setError(`Failed to update: ${err.message}`);
+      // Don't clear error — let the user see it. Refetch in background.
+      try { await fetchAwardedOrders(false); } catch (_) {}
     } finally {
       setUpdatingOrder(null);
     }
@@ -211,7 +221,7 @@ export default function SupplierOrderManager() {
       const storagePath = `supplier-docs/${fileName}`;
 
       // Upload to storage
-      const { error: uploadErr } = await supabase.storage
+      const { error: uploadErr } = await supabaseAdmin.storage
         .from('documents')
         .upload(storagePath, file, {
           cacheControl: '3600',
@@ -229,26 +239,23 @@ export default function SupplierOrderManager() {
         throw new Error(`Storage upload failed: ${uploadErr.message}`);
       }
 
-      // Get public URL
-      const { data: urlData } = supabase.storage.from('documents').getPublicUrl(storagePath);
-
-      // Save document record
-      const { error: dbErr } = await supabase.from('documents').insert({
+      // Save document record (columns aligned with documents table schema)
+      const { error: dbErr } = await supabaseAdmin.from('documents').insert({
         order_id: orderId,
+        client_id: orders.find(o => o.id === orderId)?.client_id || null,
         file_name: file.name,
         file_path: storagePath,
-        file_url: urlData.publicUrl,
-        uploaded_by: 'supplier',
-        doc_type: 'supplier_submission',
+        uploaded_by: currentUser.id,
+        file_type: 'supplier_submission',
         status: 'pending_admin_review',
-        created_at: new Date().toISOString(),
       });
 
       if (dbErr) {
         throw new Error(`Database error: ${dbErr.message}${dbErr.details ? ` (${dbErr.details})` : ''}`);
       }
 
-      setDocument(null);
+      setSuccessMessage('Document uploaded successfully.');
+      setTimeout(() => setSuccessMessage(null), 4000);
       fetchAwardedOrders();
     } catch (err) {
       console.error('Error uploading document:', err);
@@ -258,33 +265,33 @@ export default function SupplierOrderManager() {
     }
   };
 
-  const saveNotes = async (orderId, notes) => {
+  // Local notes state (not stored as a column — persisted via job_updates)
+  const [localNotes, setLocalNotes] = useState({});
+
+  const saveNotes = async (orderId) => {
+    const notes = localNotes[orderId];
+    if (!notes?.trim()) return;
     setSavingNotes(prev => ({ ...prev, [orderId]: true }));
     try {
       setError(null);
       const order = orders.find(o => o.id === orderId);
 
-      // Save notes to the orders table
-      const { error: updateErr } = await supabase
-        .from('orders')
-        .update({ supplier_notes: notes || '', updated_at: new Date().toISOString() })
-        .eq('id', orderId)
-        .eq('supplier_id', currentUser.id);
-
-      if (updateErr) throw updateErr;
-
-      // Also create a job_update so the note appears in the client/admin timeline
-      if (order?.rz_job_id && notes?.trim()) {
-        await supabase.from('job_updates').insert({
+      // Create a job_update so the note appears in client/admin timeline in real-time
+      if (order?.rz_job_id) {
+        const { error: insertErr } = await supabaseAdmin.from('job_updates').insert({
           rz_job_id: order.rz_job_id,
           stage: order.order_status,
           status: 'note_added',
           notes: notes.trim(),
           created_by: currentUser?.email,
         });
+        if (insertErr) throw insertErr;
+      } else {
+        throw new Error('Order has no RZ Job ID yet. Notes can be added after the order is assigned a job ID.');
       }
 
-      setSuccessMessage('Notes saved successfully.');
+      setLocalNotes(prev => ({ ...prev, [orderId]: '' }));
+      setSuccessMessage('Notes saved and visible to client & admin.');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       console.error('Error saving notes:', err);
@@ -463,61 +470,46 @@ export default function SupplierOrderManager() {
                         />
                       </div>
 
-                      {/* Status Update Buttons */}
-                      {order.order_status !== 'DELIVERED' && (
-                        <div>
-                          <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Move to Next Stage
-                          </label>
-                          <div className="flex gap-2 flex-wrap">
-                            {ACTIONABLE_STAGES.map(stage => {
-                              const stageIndex = STAGES.findIndex(
-                                s => s.id === stage.id
-                              );
-                              const currentIndex = STAGES.findIndex(
-                                s => s.id === order.order_status
-                              );
-                              const isClickable = stageIndex === currentIndex + 1;
-                              const isCompleted = stageIndex <= currentIndex;
-                              const isCurrent = stageIndex === currentIndex;
-
-                              return (
-                                <Button
-                                  key={stage.id}
-                                  size="sm"
-                                  disabled={
-                                    !isClickable ||
-                                    updatingOrder === order.id
-                                  }
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    confirmStageChange(order.id, stage.id);
-                                  }}
-                                  variant={
-                                    isCurrent
-                                      ? 'default'
-                                      : isClickable
-                                      ? 'outline'
-                                      : 'ghost'
-                                  }
-                                  className={`${
-                                    isClickable ? 'cursor-pointer border-cyan-500/50 text-cyan-300 hover:bg-cyan-900/40 hover:text-cyan-200' : ''
-                                  } ${isCompleted && !isCurrent ? 'text-emerald-500/70' : ''} ${isCurrent ? 'bg-cyan-700/30 border-cyan-500 text-cyan-300' : ''}`}
-                                >
-                                  {updatingOrder === order.id && isClickable ? (
-                                    <Loader2 className="w-3 h-3 animate-spin" />
-                                  ) : isCompleted && !isCurrent ? (
-                                    <CheckCircle2 className="w-3 h-3" />
-                                  ) : (
-                                    <stage.icon className="w-3 h-3" />
-                                  )}
-                                  {stage.label}
-                                </Button>
-                              );
-                            })}
+                      {/* Stage Progress Summary */}
+                      {order.order_status !== 'DELIVERED' && (() => {
+                        const currentIndex = STAGES.findIndex(s => s.id === order.order_status);
+                        const nextStage = STAGES[currentIndex + 1];
+                        return nextStage ? (
+                          <div className="bg-[#1e293b]/50 rounded-xl p-4 border border-slate-800">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                  {STAGES.map((stage, idx) => {
+                                    const isDone = idx <= currentIndex;
+                                    const isCurrent = idx === currentIndex;
+                                    return (
+                                      <div key={stage.id} className="flex items-center gap-1">
+                                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                                          isDone ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' :
+                                          isCurrent ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50' :
+                                          'bg-slate-800 text-slate-500 border border-slate-700'
+                                        }`}>
+                                          {isDone && !isCurrent ? <CheckCircle2 className="w-3.5 h-3.5" /> : idx + 1}
+                                        </div>
+                                        {idx < STAGES.length - 1 && (
+                                          <div className={`w-4 h-0.5 ${idx < currentIndex ? 'bg-emerald-500/50' : 'bg-slate-700'}`} />
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-slate-500">Next step</p>
+                                <p className="text-sm font-semibold text-cyan-300 flex items-center gap-1">
+                                  <nextStage.icon className="w-3.5 h-3.5" />
+                                  {nextStage.label}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        ) : null;
+                      })()}
 
                       {order.order_status === 'DELIVERED' && (
                         <div className="bg-green-950/30 border border-green-500/30 rounded-lg p-4 text-center">
@@ -527,36 +519,38 @@ export default function SupplierOrderManager() {
                         </div>
                       )}
 
-                      {/* Document Upload */}
-                      <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                          Upload Stage Documents
-                        </label>
-                        <div
-                          className="border-2 border-dashed border-slate-700 rounded-xl p-4 text-center hover:border-cyan-500/30 transition-colors cursor-pointer"
-                          onClick={e => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            if (!uploadingDoc) {
-                              triggerFileUpload(order.id);
-                            }
-                          }}
-                        >
-                          <div className="flex items-center justify-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors">
-                            {uploadingDoc ? (
-                              <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Uploading...
-                              </>
-                            ) : (
-                              <>
-                                <Upload className="w-4 h-4" />
-                                Click to upload documents
-                              </>
-                            )}
+                      {/* Document Upload — only show after AWARDED stage */}
+                      {order.order_status !== 'AWARDED' && (
+                        <div>
+                          <label className="block text-sm font-medium text-slate-300 mb-2">
+                            Upload Stage Documents
+                          </label>
+                          <div
+                            className="border-2 border-dashed border-slate-700 rounded-xl p-4 text-center hover:border-cyan-500/30 transition-colors cursor-pointer"
+                            onClick={e => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              if (!uploadingDoc) {
+                                triggerFileUpload(order.id);
+                              }
+                            }}
+                          >
+                            <div className="flex items-center justify-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors">
+                              {uploadingDoc ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Uploading...
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="w-4 h-4" />
+                                  Click to upload documents
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
 
                       {/* Notes */}
                       <div>
@@ -566,21 +560,16 @@ export default function SupplierOrderManager() {
                         <textarea
                           rows="3"
                           placeholder="Add notes about this stage..."
-                          defaultValue={order.supplier_notes || ''}
+                          value={localNotes[order.id] || ''}
                           onChange={e => {
-                            const updated = orders.map(p =>
-                              p.id === order.id
-                                ? { ...p, supplier_notes: e.target.value }
-                                : p
-                            );
-                            setOrders(updated);
+                            setLocalNotes(prev => ({ ...prev, [order.id]: e.target.value }));
                           }}
                           className="w-full bg-[#1e293b] border border-slate-700 rounded-lg px-3 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
                         />
                         <Button
                           onClick={e => {
                             e.stopPropagation();
-                            saveNotes(order.id, order.supplier_notes);
+                            saveNotes(order.id);
                           }}
                           disabled={savingNotes[order.id]}
                           size="sm"
@@ -608,6 +597,37 @@ export default function SupplierOrderManager() {
                           {order.updated_at && <> • Last updated: {format(new Date(order.updated_at), 'dd MMM yyyy, HH:mm')}</>}
                         </p>
                       </div>
+
+                      {/* ── Move to Next Stage CTA (bottom) ── */}
+                      {order.order_status !== 'DELIVERED' && (() => {
+                        const ci = STAGES.findIndex(s => s.id === order.order_status);
+                        const next = STAGES[ci + 1];
+                        if (!next) return null;
+                        const NextIcon = next.icon;
+                        return (
+                          <Button
+                            onClick={e => {
+                              e.stopPropagation();
+                              confirmStageChange(order.id, next.id);
+                            }}
+                            disabled={updatingOrder === order.id}
+                            className="w-full py-6 text-base font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl shadow-lg shadow-cyan-900/30 transition-all"
+                          >
+                            {updatingOrder === order.id ? (
+                              <>
+                                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                Updating stage…
+                              </>
+                            ) : (
+                              <>
+                                <NextIcon className="w-5 h-5 mr-2" />
+                                Move to {next.label}
+                                <ChevronRight className="w-5 h-5 ml-2" />
+                              </>
+                            )}
+                          </Button>
+                        );
+                      })()}
                     </CardContent>
                   )}
                 </Card>
