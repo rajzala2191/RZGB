@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import { supabase } from '@/lib/customSupabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { Search, Filter, Download, FileText, Eye, Loader2, Library } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import SecurePDFViewer from '@/components/SecurePDFViewer';
+import { DocumentPreviewModal } from '@/components/DocumentPreview';
 
 const ClientDocumentLibraryPage = () => {
   const { currentUser } = useAuth();
@@ -15,20 +15,46 @@ const ClientDocumentLibraryPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [previewDoc, setPreviewDoc] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchDocs = async () => {
       if (!currentUser) return;
       try {
-        const { data, error } = await supabase
+        // Fetch documents by client_id
+        const { data: byClient, error: err1 } = await supabase
           .from('documents')
           .select('*')
-          .eq('client_id', currentUser.id) // Filter by client
+          .eq('client_id', currentUser.id)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        setDocuments(data || []);
+        if (err1) throw err1;
+        let allDocs = byClient || [];
+
+        // Also fetch the client's orders and find documents by order_id
+        const { data: clientOrders } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('client_id', currentUser.id);
+
+        const orderIds = (clientOrders || []).map(o => o.id).filter(Boolean);
+        if (orderIds.length > 0) {
+          const { data: byOrder } = await supabaseAdmin
+            .from('documents')
+            .select('*')
+            .in('order_id', orderIds)
+            .order('created_at', { ascending: false });
+
+          if (byOrder) {
+            const existingIds = new Set(allDocs.map(d => d.id));
+            byOrder.forEach(doc => {
+              if (!existingIds.has(doc.id)) allDocs.push(doc);
+            });
+          }
+        }
+
+        setDocuments(allDocs);
       } catch (e) {
         console.error(e);
         toast({ title: "Error", description: "Failed to load document library", variant: "destructive" });
@@ -126,14 +152,12 @@ const ClientDocumentLibraryPage = () => {
                            </span>
                         </td>
                         <td className="p-4 text-right flex justify-end gap-2">
-                           <Dialog>
-                              <DialogTrigger asChild>
-                                 <button className="p-2 hover:bg-cyan-900/30 text-cyan-400 rounded transition-colors"><Eye size={16} /></button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-5xl bg-transparent border-none p-0">
-                                 <SecurePDFViewer document={doc} />
-                              </DialogContent>
-                           </Dialog>
+                           <button 
+                              onClick={() => setPreviewDoc(doc)}
+                              className="p-2 hover:bg-cyan-900/30 text-cyan-400 rounded transition-colors"
+                           >
+                              <Eye size={16} />
+                           </button>
                            <button className="p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded transition-colors"><Download size={16} /></button>
                         </td>
                      </tr>
@@ -142,6 +166,15 @@ const ClientDocumentLibraryPage = () => {
             </table>
          </div>
       )}
+
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal
+        open={!!previewDoc}
+        onOpenChange={(open) => { if (!open) setPreviewDoc(null); }}
+        filePath={previewDoc?.file_path}
+        fileName={previewDoc?.file_name}
+        fileUrl={previewDoc?.file_url}
+      />
     </ClientDashboardLayout>
   );
 };

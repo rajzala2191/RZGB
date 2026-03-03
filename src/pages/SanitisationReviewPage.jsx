@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { CheckSquare } from 'lucide-react';
+import { CheckSquare, FileText } from 'lucide-react';
+
 import ControlCentreLayout from '@/components/ControlCentreLayout';
+import DocumentPreview from '@/components/DocumentPreview';
+import { scrubDrawingWithAI } from '@/lib/aiScrubber';
 
 export default function SanitisationReviewPage() {
   const { orderId } = useParams();
@@ -15,6 +19,7 @@ export default function SanitisationReviewPage() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const [order, setOrder] = useState(null);
+  const [documents, setDocuments] = useState([]);
   const [formData, setFormData] = useState({
     ghost_public_name: '', ghost_description: '', target_sell_price: ''
   });
@@ -22,7 +27,21 @@ export default function SanitisationReviewPage() {
 
   useEffect(() => {
     fetchOrder();
+    fetchDocuments();
   }, [orderId]);
+
+  const fetchDocuments = async () => {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('documents')
+        .select('id, order_id, file_name, file_path, file_type, status, uploaded_by, created_at')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: false });
+      if (!error && data) setDocuments(data);
+    } catch (err) {
+      console.error('Error fetching order documents:', err);
+    }
+  };
 
   const fetchOrder = async () => {
     const { data } = await supabase.from('orders').select('*').eq('id', orderId).single();
@@ -108,6 +127,82 @@ export default function SanitisationReviewPage() {
             </div>
           </div>
         </div>
+
+        {/* Client Uploaded Documents */}
+
+        {documents.length > 0 && (
+          <div className="bg-[#0f172a] p-6 rounded-lg shadow-xl border border-slate-800 space-y-4">
+            <h2 className="text-xl font-semibold border-b border-slate-800 pb-2 text-slate-200 flex items-center gap-2">
+              <FileText size={20} className="text-cyan-400" />
+              Client Uploaded Documents ({documents.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {documents.map(doc => (
+                <div key={doc.id} className="relative group">
+                  <DocumentPreview filePath={doc.file_path} fileName={doc.file_name} compact />
+                  {/* Remove Button */}
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="absolute top-2 left-2 z-10 opacity-80 group-hover:opacity-100"
+                    title="Remove document"
+                    onClick={async () => {
+                      if (!window.confirm('Are you sure you want to delete this document?')) return;
+                      try {
+                        // Remove from storage (original and scrubbed if exists)
+                        await supabaseAdmin.storage.from('documents').remove([doc.file_path]);
+                        if (doc.scrubbed_file_path) {
+                          await supabaseAdmin.storage.from('documents').remove([doc.scrubbed_file_path]);
+                        }
+                        // Remove from DB
+                        await supabaseAdmin.from('documents').delete().eq('id', doc.id);
+                        toast({ title: 'Document Removed', description: 'The document was deleted.' });
+                        fetchDocuments();
+                      } catch (err) {
+                        toast({ title: 'Remove Failed', description: err.message, variant: 'destructive' });
+                      }
+                    }}
+                  >
+                    Remove
+                  </Button>
+                  {/* AI Scrub Button */}
+                  {doc.file_type === 'client_drawing' && doc.status !== 'SCRUBBED' && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="absolute top-2 right-2 z-10"
+                      onClick={async () => {
+                        try {
+                          toast({ title: 'AI Scrubbing', description: 'Scrubbing drawing with AI...', duration: 2000 });
+                          // Download file from Supabase
+                          const { data, error } = await supabaseAdmin.storage.from('documents').download(doc.file_path);
+                          if (error) throw error;
+                          // Call AI scrubber
+                          const scrubbedBlob = await scrubDrawingWithAI(data);
+                          // Upload scrubbed file
+                          const scrubbedPath = doc.file_path.replace(/(\.[^.]+)$/, '_scrubbed$1');
+                          const { error: uploadError } = await supabaseAdmin.storage.from('documents').upload(scrubbedPath, scrubbedBlob, { upsert: true });
+                          if (uploadError) throw uploadError;
+                          // Update document record
+                          await supabaseAdmin.from('documents').update({ status: 'SCRUBBED', scrubbed_file_path: scrubbedPath }).eq('id', doc.id);
+                          toast({ title: 'AI Scrubbing Complete', description: 'Drawing scrubbed and updated.' });
+                          fetchDocuments();
+                        } catch (err) {
+                          toast({ title: 'AI Scrubbing Failed', description: err.message, variant: 'destructive' });
+                        }
+                      }}
+                    >
+                      Scrub with AI
+                    </Button>
+                  )}
+                  {doc.status === 'SCRUBBED' && (
+                    <span className="absolute top-2 right-2 z-10 bg-green-900/80 text-green-300 px-2 py-0.5 rounded text-xs font-bold">AI SCRUBBED</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Button onClick={handleAuthorise} size="lg" className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold flex items-center justify-center gap-2">
           <CheckSquare size={20} />

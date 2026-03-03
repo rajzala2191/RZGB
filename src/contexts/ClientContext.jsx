@@ -19,25 +19,48 @@ export const ClientProvider = ({ children }) => {
     try {
       if (orders.length === 0) setLoading(true);
 
-      const [ordersRes, docsRes] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('*')
-          .eq('client_id', currentUser.id)
-          .neq('order_status', 'CLEARED')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('documents')
-          .select('*')
-          .eq('client_id', currentUser.id)
-          .order('created_at', { ascending: false })
-      ]);
+      // First fetch orders
+      const ordersRes = await supabase
+        .from('orders')
+        .select('*')
+        .eq('client_id', currentUser.id)
+        .neq('order_status', 'CLEARED')
+        .order('created_at', { ascending: false });
 
       if (ordersRes.error) throw ordersRes.error;
-      if (docsRes.error) throw docsRes.error;
+      const clientOrders = ordersRes.data || [];
 
-      setOrders(ordersRes.data || []);
-      setDocuments(docsRes.data || []);
+      // Fetch docs by client_id
+      const docsRes = await supabase
+        .from('documents')
+        .select('*')
+        .eq('client_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+      let allDocs = docsRes.data || [];
+
+      // Also fetch docs by order_id for the client's orders (some docs may not have client_id set)
+      const orderIds = clientOrders.map(o => o.id).filter(Boolean);
+      if (orderIds.length > 0) {
+        const docsForOrders = await supabase
+          .from('documents')
+          .select('*')
+          .in('order_id', orderIds)
+          .order('created_at', { ascending: false });
+
+        if (docsForOrders.data) {
+          // Merge, deduplicate by id
+          const existingIds = new Set(allDocs.map(d => d.id));
+          docsForOrders.data.forEach(doc => {
+            if (!existingIds.has(doc.id)) {
+              allDocs.push(doc);
+            }
+          });
+        }
+      }
+
+      setOrders(clientOrders);
+      setDocuments(allDocs);
       setError(null);
     } catch (err) {
       console.error("ClientContext Fetch Error:", err);

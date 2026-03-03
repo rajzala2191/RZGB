@@ -9,10 +9,12 @@ import {
   ChevronUp, X, Calendar, DollarSign, MapPin, FileText
 } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrders } from '@/contexts/AdminContext';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import OrderTimeline from '@/components/OrderTimeline';
+import DocumentPreview from '@/components/DocumentPreview';
 import { format, formatDistanceToNow } from 'date-fns';
 
 // Pipeline stage definitions
@@ -50,6 +52,7 @@ const AdminLiveTracking = () => {
   const { orders: allOrders, loading: ordersLoading, refreshData } = useOrders();
 
   const [jobUpdates, setJobUpdates] = useState({});
+  const [orderDocuments, setOrderDocuments] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [stageFilter, setStageFilter] = useState('ALL');
   const [expandedOrder, setExpandedOrder] = useState(null);
@@ -75,13 +78,35 @@ const AdminLiveTracking = () => {
       }
     };
 
+    const fetchDocuments = async () => {
+      try {
+        const { data, error } = await supabaseAdmin
+          .from('documents')
+          .select('id, order_id, file_name, file_path, file_type, status, created_at')
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          const grouped = {};
+          data.forEach(doc => {
+            if (!grouped[doc.order_id]) grouped[doc.order_id] = [];
+            grouped[doc.order_id].push(doc);
+          });
+          setOrderDocuments(grouped);
+        }
+      } catch (err) {
+        console.error('Error fetching documents for admin tracking:', err);
+      }
+    };
+
     fetchUpdates();
+    fetchDocuments();
 
     // Realtime subscription for updates
     const channel = supabase
       .channel('admin-live-tracking')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_updates' }, () => fetchUpdates())
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, () => refreshData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'documents' }, () => fetchDocuments())
       .subscribe();
 
     return () => supabase.removeChannel(channel);
@@ -416,6 +441,26 @@ const AdminLiveTracking = () => {
                                       )}
                                     </div>
                                   </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Order Documents */}
+                          {(orderDocuments[order.id] || []).length > 0 && (
+                            <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+                              <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                                <Eye size={16} className="text-emerald-400" />
+                                Documents ({orderDocuments[order.id].length})
+                              </h4>
+                              <div className="space-y-3">
+                                {orderDocuments[order.id].map(doc => (
+                                  <DocumentPreview
+                                    key={doc.id}
+                                    filePath={doc.file_path}
+                                    fileName={doc.file_name}
+                                    compact={true}
+                                  />
                                 ))}
                               </div>
                             </div>

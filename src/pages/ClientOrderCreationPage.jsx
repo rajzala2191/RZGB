@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,18 +69,29 @@ export default function ClientOrderCreationPage() {
 
       if (error) throw error;
 
-      // Handle file uploads to storage bucket 'documents' if needed here
+      // Handle file uploads to storage bucket 'documents' (use admin client to bypass RLS)
       if (files.length > 0) {
          for (const file of files) {
            const filePath = `${currentUser.id}/${data.id}/${file.name}`;
-           await supabase.storage.from('documents').upload(filePath, file);
-           await supabase.from('documents').insert([{
+           const { error: uploadError } = await supabaseAdmin.storage.from('documents').upload(filePath, file);
+           if (uploadError) {
+             console.error('File upload error:', uploadError);
+             toast({ title: 'Upload Warning', description: `Failed to upload ${file.name}: ${uploadError.message}`, variant: 'destructive' });
+             continue;
+           }
+           const { error: docError } = await supabaseAdmin.from('documents').insert([{
               order_id: data.id,
               client_id: currentUser.id,
               file_name: file.name,
               file_path: filePath,
+              file_type: 'client_drawing',
+              uploaded_by: currentUser.id,
               status: 'PENDING_SCRUB'
            }]);
+           if (docError) {
+             console.error('Document record insert error:', docError);
+             toast({ title: 'Upload Warning', description: `Failed to save record for ${file.name}: ${docError.message}`, variant: 'destructive' });
+           }
          }
       }
 

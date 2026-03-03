@@ -8,6 +8,7 @@ import {
   Eye, X, Clock, Send
 } from 'lucide-react';
 import { format } from 'date-fns';
+import DocumentPreview from '@/components/DocumentPreview';
 
 export default function AdminDocumentReview() {
   const [documents, setDocuments] = useState([]);
@@ -29,7 +30,6 @@ export default function AdminDocumentReview() {
           event: '*',
           schema: 'public',
           table: 'documents',
-          filter: `doc_type=eq.supplier_submission`,
         },
         () => fetchDocuments()
       )
@@ -43,11 +43,11 @@ export default function AdminDocumentReview() {
       const { data, error: err } = await supabase
         .from('documents')
         .select(`
-          id, order_id, file_name, file_url, status, notes,
+          id, order_id, file_name, file_path, file_url, file_type, status, notes,
           created_at, updated_at, uploaded_by,
           order:order_id(id, part_name, rz_job_id, supplier:supplier_id(company_name))
         `)
-        .eq('doc_type', 'supplier_submission')
+        .in('file_type', ['supplier_submission', 'client_drawing'])
         .order('created_at', { ascending: false });
 
       if (err) throw err;
@@ -195,9 +195,9 @@ export default function AdminDocumentReview() {
     <ControlCentreLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Supplier Document Review</h1>
+          <h1 className="text-3xl font-bold">Document Review</h1>
           <p className="text-slate-400 mt-1">
-            Review, sanitize, and approve documents from suppliers
+            Review, sanitize, and approve documents from clients and suppliers
           </p>
         </div>
 
@@ -212,6 +212,7 @@ export default function AdminDocumentReview() {
         <div className="flex gap-2 border-b border-slate-700">
           {[
             { value: 'pending_admin_review', label: 'Pending Review' },
+            { value: 'PENDING_SCRUB', label: 'Client Drawings' },
             { value: 'approved', label: 'Approved' },
             { value: 'rejected', label: 'Rejected' },
             { value: 'sent_to_client', label: 'Sent to Client' },
@@ -267,6 +268,16 @@ export default function AdminDocumentReview() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
+                      {doc.file_type === 'client_drawing' && (
+                        <div className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-900/40 text-purple-300 border border-purple-700/50">
+                          CLIENT
+                        </div>
+                      )}
+                      {doc.file_type === 'supplier_submission' && (
+                        <div className="px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-900/40 text-cyan-300 border border-cyan-700/50">
+                          SUPPLIER
+                        </div>
+                      )}
                       <div
                         className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${
                           doc.status === 'pending_admin_review'
@@ -310,17 +321,22 @@ export default function AdminDocumentReview() {
                       <label className="block text-sm font-medium text-slate-300 mb-2">
                         Document Preview
                       </label>
-                      <div className="bg-slate-800/50 rounded p-4 text-center">
-                        <a
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300"
-                        >
-                          <Download className="w-4 h-4" />
-                          Download & View Document
-                        </a>
-                      </div>
+                      {doc.file_path ? (
+                        <DocumentPreview
+                          filePath={doc.file_path}
+                          fileName={doc.file_name}
+                          fileUrl={doc.file_url}
+                        />
+                      ) : doc.file_url ? (
+                        <DocumentPreview
+                          fileUrl={doc.file_url}
+                          fileName={doc.file_name}
+                        />
+                      ) : (
+                        <div className="bg-slate-800/50 rounded p-4 text-center">
+                          <p className="text-slate-500 text-sm">No file available for preview</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Notes */}

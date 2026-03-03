@@ -2,19 +2,25 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import OrderTimeline from '@/components/OrderTimeline';
-import { FileText, Download, ArrowRight, Loader2, ListTree, Trash2, XCircle, ArrowLeft } from 'lucide-react';
+import DocumentPreview, { DocumentPreviewModal } from '@/components/DocumentPreview';
+import { FileText, Download, ArrowRight, Loader2, ListTree, Trash2, XCircle, ArrowLeft, Eye, FileImage } from 'lucide-react';
 
 const WITHDRAWABLE = ['PENDING_ADMIN_SCRUB', 'SANITIZED', 'OPEN_FOR_BIDDING', 'BID_RECEIVED', 'AWARDED'];
 
 export default function ClientOrderDetailsPage() {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [order, setOrder] = useState(null);
   const [updates, setUpdates] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [previewDoc, setPreviewDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [withdrawing, setWithdrawing] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
@@ -22,7 +28,7 @@ export default function ClientOrderDetailsPage() {
 
   useEffect(() => {
     fetchOrder();
-  }, [orderId, currentUser]);
+  }, [orderId]);
 
   const fetchOrder = async () => {
     try {
@@ -44,6 +50,13 @@ export default function ClientOrderDetailsPage() {
           .order('created_at', { ascending: true });
         if (upd) setUpdates(upd);
       }
+
+      // Fetch documents for this order (use admin client to bypass RLS if needed)
+      const { data: docs } = await supabaseAdmin.from('documents')
+        .select('*')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: false });
+      if (docs) setDocuments(docs);
     } catch (err) {
       console.error('ClientOrderDetailsPage fetch error:', err);
       toast({ title: 'Error', description: err.message || 'Failed to load order details.', variant: 'destructive' });
@@ -158,19 +171,27 @@ export default function ClientOrderDetailsPage() {
             </div>
 
             <div className="bg-[#0f172a] p-6 rounded-xl shadow-xl border border-slate-800">
-              <h2 className="text-xl font-bold border-b border-slate-800 pb-3 mb-6 text-slate-100">Documents & Files</h2>
+              <h2 className="text-xl font-bold border-b border-slate-800 pb-3 mb-6 text-slate-100 flex items-center gap-2">
+                <Eye className="w-5 h-5 text-cyan-400" />
+                Documents & Files
+              </h2>
               <div className="space-y-3">
-                 {/* Placeholder for actual files fetch. In real app, query documents table */}
-                 <div className="flex items-center justify-between p-4 border border-slate-700 bg-[#1e293b] rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <FileText className="w-6 h-6 text-cyan-500" />
-                      <div>
-                        <p className="text-slate-200 font-medium">Initial_Design_Specs.pdf</p>
-                        <p className="text-xs text-slate-500">Uploaded {new Date(order.created_at).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="text-slate-400 hover:text-cyan-400 hover:bg-slate-800"><Download className="w-5 h-5" /></Button>
-                 </div>
+                 {documents.length === 0 ? (
+                   <div className="text-center py-8 text-slate-500">
+                     <FileText className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                     <p>No documents uploaded yet.</p>
+                   </div>
+                 ) : (
+                   documents.map(doc => (
+                     <DocumentPreview
+                       key={doc.id}
+                       filePath={doc.file_path}
+                       fileName={doc.file_name}
+                       fileUrl={doc.file_url}
+                       compact={true}
+                     />
+                   ))
+                 )}
               </div>
             </div>
           </div>

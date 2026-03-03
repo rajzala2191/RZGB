@@ -3,12 +3,14 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Download, FileText, FileImage, FolderOpen } from 'lucide-react';
+import { Search, Download, FileText, FileImage, FolderOpen, Eye } from 'lucide-react';
 import SupplierHubLayout from '@/components/SupplierHubLayout';
+import { DocumentPreviewModal } from '@/components/DocumentPreview';
 
 export default function SupplierDocumentsPortal() {
   const [documents, setDocuments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [previewDoc, setPreviewDoc] = useState(null);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export default function SupplierDocumentsPortal() {
 
   const fetchDocuments = async () => {
     if (!currentUser) return;
-    const { data } = await supabase.from('documents').select('*').eq('supplier_id', currentUser.id).order('created_at', { ascending: false });
+    const { data } = await supabase.from('documents').select('*').eq('uploaded_by', currentUser.id).order('created_at', { ascending: false });
     if (data) setDocuments(data);
   };
 
@@ -72,9 +74,19 @@ export default function SupplierDocumentsPortal() {
                   <td className="p-4 font-mono text-xs text-slate-500">{doc.order_id?.slice(0,8) || 'N/A'}</td>
                   <td className="p-4 text-slate-400">{new Date(doc.created_at).toLocaleDateString()}</td>
                   <td className="p-4 text-right">
-                    <Button size="sm" variant="ghost" className="text-cyan-500 hover:text-cyan-400 hover:bg-cyan-900/20">
-                      <Download size={16} />
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="text-cyan-500 hover:text-cyan-400 hover:bg-cyan-900/20"
+                        onClick={() => setPreviewDoc(doc)}
+                      >
+                        <Eye size={16} />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="text-slate-400 hover:text-slate-300 hover:bg-slate-800">
+                        <Download size={16} />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -89,6 +101,15 @@ export default function SupplierDocumentsPortal() {
             </tbody>
           </table>
         </div>
+
+        {/* Document Preview Modal */}
+        <DocumentPreviewModal
+          open={!!previewDoc}
+          onOpenChange={(open) => { if (!open) setPreviewDoc(null); }}
+          filePath={previewDoc?.file_path}
+          fileName={previewDoc?.file_name}
+          fileUrl={previewDoc?.file_url}
+        />
       </div>
     </SupplierHubLayout>
   );

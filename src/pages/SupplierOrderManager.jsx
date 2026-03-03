@@ -10,10 +10,11 @@ import {
 } from '@/components/ui/dialog';
 import {
   Loader2, AlertCircle, CheckCircle2, Clock, Upload, FileText,
-  ChevronRight, Package, Zap, Hourglass, ShieldCheck, Truck, AlertTriangle
+  ChevronRight, Package, Zap, Hourglass, ShieldCheck, Truck, AlertTriangle, Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
 import OrderTimeline from '@/components/OrderTimeline';
+import DocumentPreview from '@/components/DocumentPreview';
 
 // Full pipeline including AWARDED so index math works correctly
 const STAGES = [
@@ -37,6 +38,7 @@ export default function SupplierOrderManager() {
   const [error, setError] = useState(null);
   const [savingNotes, setSavingNotes] = useState({});
   const [successMessage, setSuccessMessage] = useState(null);
+  const [orderDocuments, setOrderDocuments] = useState({});
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState({ open: false, orderId: null, newStatus: null, orderName: '' });
 
@@ -87,11 +89,34 @@ export default function SupplierOrderManager() {
     }
   }, [currentUser]);
 
+  // Fetch documents uploaded for each order
+  const fetchOrderDocuments = useCallback(async () => {
+    if (!currentUser?.id) return;
+    try {
+      const { data, error: err } = await supabaseAdmin
+        .from('documents')
+        .select('id, order_id, file_name, file_path, file_type, status, created_at')
+        .eq('uploaded_by', currentUser.id)
+        .order('created_at', { ascending: false });
+
+      if (err) throw err;
+      const grouped = {};
+      (data || []).forEach(doc => {
+        if (!grouped[doc.order_id]) grouped[doc.order_id] = [];
+        grouped[doc.order_id].push(doc);
+      });
+      setOrderDocuments(grouped);
+    } catch (err) {
+      console.error('Error fetching order documents:', err);
+    }
+  }, [currentUser]);
+
   useEffect(() => {
     if (!currentUser?.id) return;
 
     fetchAwardedOrders();
     fetchJobUpdates();
+    fetchOrderDocuments();
 
     // Realtime subscription — syncs across all portals (client, admin, supplier)
     const channel = supabase
@@ -102,10 +127,13 @@ export default function SupplierOrderManager() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_updates' }, () => {
         fetchJobUpdates();
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'documents' }, () => {
+        fetchOrderDocuments();
+      })
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, [currentUser, fetchAwardedOrders, fetchJobUpdates]);
+  }, [currentUser, fetchAwardedOrders, fetchJobUpdates, fetchOrderDocuments]);
 
   const confirmStageChange = (orderId, newStatus) => {
     const order = orders.find(p => p.id === orderId);
@@ -257,6 +285,7 @@ export default function SupplierOrderManager() {
       setSuccessMessage('Document uploaded successfully.');
       setTimeout(() => setSuccessMessage(null), 4000);
       fetchAwardedOrders();
+      fetchOrderDocuments();
     } catch (err) {
       console.error('Error uploading document:', err);
       setError(err.message || 'Failed to upload document');
@@ -548,6 +577,26 @@ export default function SupplierOrderManager() {
                                 </>
                               )}
                             </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Uploaded Documents with Preview */}
+                      {(orderDocuments[order.id] || []).length > 0 && (
+                        <div>
+                          <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
+                            <Eye className="w-4 h-4 text-cyan-400" />
+                            Uploaded Documents ({orderDocuments[order.id].length})
+                          </label>
+                          <div className="space-y-3">
+                            {orderDocuments[order.id].map(doc => (
+                              <DocumentPreview
+                                key={doc.id}
+                                filePath={doc.file_path}
+                                fileName={doc.file_name}
+                                compact={true}
+                              />
+                            ))}
                           </div>
                         </div>
                       )}
