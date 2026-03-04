@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import ClientDashboardLayout from '@/components/ClientDashboardLayout';
+import SupplierHubLayout from '@/components/SupplierHubLayout';
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,7 +11,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 import { TICKET_CATEGORIES, getStatusColor, getPriorityColor } from '@/lib/ticketHelpers';
 
-const ClientSupportPage = () => {
+const SupplierSupportPage = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -37,7 +37,6 @@ const ClientSupportPage = () => {
     e.preventDefault();
     if (!formData.subject || !formData.message) return;
     setSubmitting(true);
-
     try {
       const { data: newTicket, error } = await supabase
         .from('support_tickets')
@@ -47,7 +46,7 @@ const ClientSupportPage = () => {
           category: formData.category,
           message: formData.message,
           status: 'open',
-          user_role: 'client',
+          user_role: 'supplier',
         })
         .select()
         .single();
@@ -65,7 +64,7 @@ const ClientSupportPage = () => {
           recipientId: admins.map(a => a.id),
           senderId: currentUser.id,
           type: 'support_ticket',
-          title: 'New Client Support Ticket',
+          title: 'New Supplier Support Ticket',
           message: `New ticket: "${formData.subject}"`,
           link: `/control-centre/support/${newTicket.id}`,
         });
@@ -77,17 +76,9 @@ const ClientSupportPage = () => {
           subject: formData.subject,
           category: formData.category,
           ticketId: newTicket.id,
-          senderRole: 'client',
+          senderRole: 'supplier',
         },
       }).catch(() => {});
-
-      // Audit log
-      await supabase.from('audit_logs').insert({
-        user_id: currentUser.id,
-        action: 'SUPPORT_TICKET_CREATED',
-        details: `Ticket subject: ${formData.subject}`,
-        status: 'success',
-      });
 
       toast({ title: 'Ticket Submitted', description: 'Our support team has been notified.' });
       setFormData({ subject: '', category: TICKET_CATEGORIES[0], message: '' });
@@ -100,14 +91,14 @@ const ClientSupportPage = () => {
   };
 
   return (
-    <ClientDashboardLayout>
-      <Helmet><title>Support - Client Portal</title></Helmet>
+    <SupplierHubLayout>
+      <Helmet><title>Support - Supplier Hub</title></Helmet>
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
           <LifeBuoy className="text-cyan-500" size={32} /> Support Center
         </h1>
-        <p className="text-slate-400 mt-1">We're here to help with your orders and platform questions.</p>
+        <p className="text-slate-400 mt-1">Raise a support request and our team will get back to you.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -192,7 +183,7 @@ const ClientSupportPage = () => {
                 {tickets.map(t => (
                   <div
                     key={t.id}
-                    onClick={() => navigate(`/client-dashboard/support/${t.id}`)}
+                    onClick={() => navigate(`/supplier-hub/support/${t.id}`)}
                     className="p-4 hover:bg-slate-900/50 transition-colors cursor-pointer flex items-center justify-between"
                   >
                     <div className="flex-1 min-w-0">
@@ -215,8 +206,8 @@ const ClientSupportPage = () => {
           </div>
         </div>
       </div>
-    </ClientDashboardLayout>
+    </SupplierHubLayout>
   );
 };
 
-export default ClientSupportPage;
+export default SupplierSupportPage;

@@ -4,7 +4,7 @@ import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, Filter, Download, FileText, Eye, Loader2, Library } from 'lucide-react';
+import { Search, Download, FileText, Eye, Loader2, Library } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { DocumentPreviewModal } from '@/components/DocumentPreview';
@@ -14,7 +14,7 @@ const ClientDocumentLibraryPage = () => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [typeFilter] = useState('all');
   const [previewDoc, setPreviewDoc] = useState(null);
   const { toast } = useToast();
 
@@ -54,7 +54,14 @@ const ClientDocumentLibraryPage = () => {
           }
         }
 
-        setDocuments(allDocs);
+        // Clients should not see supplier submissions that haven't been approved yet
+        const visibleDocs = allDocs.filter(doc => {
+          if (doc.file_type === 'supplier_submission') {
+            return doc.status === 'approved' || doc.status === 'sent_to_client';
+          }
+          return true;
+        });
+        setDocuments(visibleDocs);
       } catch (e) {
         console.error(e);
         toast({ title: "Error", description: "Failed to load document library", variant: "destructive" });
@@ -127,7 +134,7 @@ const ClientDocumentLibraryPage = () => {
       ) : filteredDocs.length === 0 ? (
          <div className="text-center py-12 text-slate-500">No documents found.</div>
       ) : (
-         <div className="bg-[#0f172a] border border-slate-800 rounded-xl overflow-hidden">
+         <div className="bg-[#0f172a] border border-slate-800 rounded-xl overflow-x-auto">
             <table className="w-full text-left">
                <thead className="bg-slate-950 text-slate-400 text-xs uppercase">
                   <tr>

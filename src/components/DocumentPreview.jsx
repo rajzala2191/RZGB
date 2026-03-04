@@ -46,7 +46,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
     try {
       const { data, error: urlError } = await supabaseAdmin.storage
         .from(bucket)
-        .createSignedUrl(filePath, 3600); // 1 hour expiry
+        .createSignedUrl(filePath, 86400); // 24 hour expiry
 
       if (urlError) throw urlError;
       if (!data?.signedUrl) throw new Error('No signed URL returned');

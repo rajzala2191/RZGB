@@ -251,7 +251,7 @@ const AdminLiveTracking = () => {
                 <p className={`text-xl font-bold ${isActive ? colors.text : 'text-slate-200'}`}>
                   {stageCounts[status]}
                 </p>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-medium truncate">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-medium leading-tight">
                   {stage?.label || status}
                 </p>
               </button>
@@ -357,7 +357,7 @@ const AdminLiveTracking = () => {
                     </div>
 
                     {/* Compact pipeline bar */}
-                    <div className="hidden lg:block flex-shrink-0 w-48">
+                    <div className="hidden md:block flex-shrink-0 w-40 md:w-48">
                       <OrderTimeline
                         currentStatus={order.order_status}
                         compact={true}
@@ -365,7 +365,7 @@ const AdminLiveTracking = () => {
                     </div>
 
                     {/* Timeline indicator */}
-                    <div className={`flex-shrink-0 text-right hidden sm:block`}>
+                    <div className="flex-shrink-0 text-right">
                       <p className={`text-xs font-bold ${isOnTrack ? 'text-emerald-400' : 'text-red-400'}`}>
                         {isOnTrack ? `${daysRemaining}d left` : `${Math.abs(daysRemaining)}d overdue`}
                       </p>
@@ -392,7 +392,7 @@ const AdminLiveTracking = () => {
                       >
                         <div className="p-6 space-y-6">
                           {/* Detail cards row */}
-                          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                             <DetailCard label="Quantity" value={order.quantity ? order.quantity.toLocaleString() : '—'} icon={Package} color="text-blue-400" />
                             <DetailCard label="Material" value={order.material || '—'} icon={Zap} color="text-orange-400" />
                             <DetailCard label="Unit Price" value={order.unit_price ? `£${order.unit_price}` : '—'} icon={DollarSign} color="text-emerald-400" />

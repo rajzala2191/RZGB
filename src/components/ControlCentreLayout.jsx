@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   LogOut, 
@@ -10,7 +10,8 @@ import {
   ShieldCheck, 
   Network,
   FolderOpen,
-  Radio
+  Radio,
+  LifeBuoy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -34,6 +35,7 @@ const ControlCentreLayout = ({ children }) => {
     { path: '/control-centre/live-tracking', label: 'Live Tracking', icon: Radio },
     { path: '/control-centre/supplier-pool', label: 'Assign to Supplier', icon: Network },
     { path: '/control-centre/document-review', label: 'Document Review', icon: FolderOpen },
+    { path: '/control-centre/support', label: 'Support', icon: LifeBuoy },
   ];
 
   return (
@@ -48,18 +50,13 @@ const ControlCentreLayout = ({ children }) => {
           </button>
         </div>
 
-        <AnimatePresence mode="wait">
-          {(isSidebarOpen || window.innerWidth >= 1024) && (
-            <motion.aside
-              initial={{ x: -300 }}
-              animate={{ x: 0 }}
-              exit={{ x: -300 }}
-              transition={{ type: 'spring', damping: 20 }}
+        <aside
               className={`
-                fixed lg:static top-0 left-0 z-40 h-screen w-72 
-                bg-[#0f172a] border-r border-slate-800 
+                fixed lg:static top-0 left-0 z-40 h-screen w-72
+                bg-[#0f172a] border-r border-slate-800
                 flex flex-col shadow-xl
-                ${isSidebarOpen ? 'block' : 'hidden lg:flex'}
+                transition-transform duration-300 ease-in-out
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
               `}
             >
               <div className="p-6 border-b border-slate-800 bg-[#0f172a]">
@@ -132,9 +129,7 @@ const ControlCentreLayout = ({ children }) => {
                   <span className="text-xs font-semibold uppercase tracking-wide">Sign Out</span>
                 </button>
               </div>
-            </motion.aside>
-          )}
-        </AnimatePresence>
+            </aside>
 
         <main className="flex-1 h-screen overflow-y-auto bg-[#020617] relative scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
           <div className="p-4 lg:p-8 pt-16 lg:pt-8 max-w-[1600px] mx-auto min-h-[calc(100vh-80px)]">

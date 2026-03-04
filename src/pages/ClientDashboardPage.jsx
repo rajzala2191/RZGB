@@ -44,8 +44,8 @@ const ClientDashboardPage = () => {
     );
   }
 
-  const activeOrders = orders.filter(o => o.status !== 'completed' && o.order_status !== 'COMPLETED').length;
-  const completedOrders = orders.filter(o => o.status === 'completed' || o.order_status === 'COMPLETED').length;
+  const activeOrders = orders.filter(o => o.order_status !== 'DELIVERED').length;
+  const completedOrders = orders.filter(o => o.order_status === 'DELIVERED').length;
   const pendingReview = orders.filter(o => o.order_status === 'PENDING_ADMIN_SCRUB').length;
   const totalOrders = orders.length;
 
@@ -95,7 +95,7 @@ const ClientDashboardPage = () => {
           <div className="space-y-4">
             {recentOrders.length > 0 ? (
               recentOrders.map(order => (
-                <div key={order.id} className="flex items-center justify-between p-4 bg-[#1e293b] rounded-xl border border-slate-700 hover:border-cyan-500/50 transition-colors group">
+                <div key={order.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 bg-[#1e293b] rounded-xl border border-slate-700 hover:border-cyan-500/50 transition-colors group">
                    <div className="flex items-center gap-4">
                      <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-cyan-500">
                         <FileText size={20} />

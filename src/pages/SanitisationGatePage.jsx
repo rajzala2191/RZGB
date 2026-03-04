@@ -38,7 +38,7 @@ export default function SanitisationGatePage() {
           <p className="text-slate-400 mt-1">Review and scrub pending orders before releasing to suppliers.</p>
         </div>
 
-        <div className="bg-[#0f172a] rounded-lg shadow-xl border border-slate-800 overflow-hidden">
+        <div className="bg-[#0f172a] rounded-lg shadow-xl border border-slate-800 overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-300">
               <tr>

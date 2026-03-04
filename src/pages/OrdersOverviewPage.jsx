@@ -122,7 +122,7 @@ const OrdersOverviewPage = () => {
     <ClientDashboardLayout>
       <Helmet><title>My Orders - Client Portal</title></Helmet>
       
-      <div className="mb-8 flex justify-between items-end">
+      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-100 mb-2 flex items-center gap-3">
             <Folder className="text-cyan-500" size={32} />
@@ -150,7 +150,7 @@ const OrdersOverviewPage = () => {
         </div>
       </div>
 
-      <div className="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden">
+      <div className="bg-[#0f172a] rounded-xl border border-slate-800 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-300">
             <tr>

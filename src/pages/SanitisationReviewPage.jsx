@@ -48,7 +48,7 @@ export default function SanitisationReviewPage() {
     if (data) {
       setOrder(data);
       setFormData({
-        ghost_public_name: `RZ-PRJ-${Math.floor(Math.random() * 10000)}`,
+        ghost_public_name: `RZ-PRJ-${Date.now().toString(36).toUpperCase().slice(-4)}${Math.floor(Math.random() * 100).toString().padStart(2, '0')}`,
         ghost_description: `Machined ${data.material || 'parts'}`,
         target_sell_price: data.buy_price ? (parseFloat(data.buy_price) * 1.2).toFixed(2) : ''
       });

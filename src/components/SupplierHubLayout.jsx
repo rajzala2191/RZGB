@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -14,7 +14,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  Bell
+  Bell,
+  LifeBuoy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -34,6 +35,7 @@ const SupplierHubLayout = ({ children }) => {
     { path: '/supplier-hub', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/supplier-hub/orders', label: 'My Orders', icon: Briefcase },
     { path: '/supplier-hub/documents', label: 'Documents Portal', icon: FolderOpen },
+    { path: '/supplier-hub/support', label: 'Support', icon: LifeBuoy },
   ];
 
   return (
@@ -48,18 +50,13 @@ const SupplierHubLayout = ({ children }) => {
           </button>
         </div>
 
-        <AnimatePresence mode="wait">
-          {(isSidebarOpen || window.innerWidth >= 1024) && (
-            <motion.aside
-              initial={{ x: -300 }}
-              animate={{ x: 0 }}
-              exit={{ x: -300 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+        <aside
               className={`
-                fixed lg:static top-0 left-0 z-40 h-screen w-72 
-                bg-[#020617] border-r border-slate-800 
+                fixed lg:static top-0 left-0 z-40 h-screen w-72
+                bg-[#020617] border-r border-slate-800
                 flex flex-col shadow-2xl shadow-black
-                ${isSidebarOpen ? 'block' : 'hidden lg:flex'}
+                transition-transform duration-300 ease-in-out
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
               `}
             >
               <div className="p-6 border-b border-slate-800 bg-[#020617] relative overflow-hidden">
@@ -137,9 +134,7 @@ const SupplierHubLayout = ({ children }) => {
                   </button>
                 </div>
               </div>
-            </motion.aside>
-          )}
-        </AnimatePresence>
+            </aside>
 
         <main className="flex-1 h-screen overflow-y-auto bg-[#020617] relative scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
           {/* Header - Clean and Minimal */}

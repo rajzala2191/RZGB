@@ -39,8 +39,6 @@ import QualityVaultPage from '@/pages/QualityVaultPage';
 import NCRVisibilityPage from '@/pages/NCRVisibilityPage';
 import ShippingTrackingPage from '@/pages/ShippingTrackingPage';
 import OrdersOverviewPage from '@/pages/OrdersOverviewPage';
-import ClientOrderHistoryPage from '@/pages/ClientOrderHistoryPage';
-import EnhancedOrderDetailsPage from '@/pages/EnhancedOrderDetailsPage';
 import ClientDocumentLibraryPage from '@/pages/ClientDocumentLibraryPage';
 import ClientSupportPage from '@/pages/ClientSupportPage';
 import ClientOrderCreationPage from '@/pages/ClientOrderCreationPage';
@@ -54,6 +52,10 @@ import NCRReportingPage from '@/pages/NCRReportingPage';
 
 import SupplierDocumentsPortal from '@/pages/SupplierDocumentsPortal';
 import SupplierOrderManager from '@/pages/SupplierOrderManager';
+import SupplierSupportPage from '@/pages/SupplierSupportPage';
+import TicketDetailPage from '@/pages/TicketDetailPage';
+import AdminSupportPage from '@/pages/AdminSupportPage';
+import AdminTicketDetailPage from '@/pages/AdminTicketDetailPage';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -99,12 +101,12 @@ function App() {
                 <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><OrdersOverviewPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/orders/:orderId" element={<ProtectedRoute requiredRole="client"><ClientOrderDetailsPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/orders/:orderId/tracking" element={<ProtectedRoute requiredRole="client"><LiveOrderTracking /></ProtectedRoute>} />
-                <Route path="/client-dashboard/orders-legacy/:orderId" element={<ProtectedRoute requiredRole="client"><EnhancedOrderDetailsPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/quality-vault" element={<ProtectedRoute requiredRole="client"><QualityVaultPage /></ProtectedRoute>} />
+<Route path="/client-dashboard/quality-vault" element={<ProtectedRoute requiredRole="client"><QualityVaultPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/documents" element={<ProtectedRoute requiredRole="client"><ClientDocumentLibraryPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/shipping" element={<ProtectedRoute requiredRole="client"><ShippingTrackingPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/ncr-visibility" element={<ProtectedRoute requiredRole="client"><NCRVisibilityPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/support" element={<ProtectedRoute requiredRole="client"><ClientSupportPage /></ProtectedRoute>} />
+                <Route path="/client-dashboard/support/:ticketId" element={<ProtectedRoute requiredRole="client"><TicketDetailPage /></ProtectedRoute>} />
 
                 {/* --- SUPPLIER ROUTES --- */}
                 <Route path="/supplier-hub" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
@@ -115,12 +117,10 @@ function App() {
                 <Route path="/supplier-hub/job-tracking/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><JobDetailsPage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
                 <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
-                {/* Legacy routes - redirect to unified order manager */}
-                <Route path="/supplier-hub/material-update/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><Navigate to="/supplier-hub/orders" replace /></ProtectedRoute>} />
-                <Route path="/supplier-hub/casting/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><Navigate to="/supplier-hub/orders" replace /></ProtectedRoute>} />
-                <Route path="/supplier-hub/machining/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><Navigate to="/supplier-hub/orders" replace /></ProtectedRoute>} />
-                <Route path="/supplier-hub/qc/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><Navigate to="/supplier-hub/orders" replace /></ProtectedRoute>} />
-                <Route path="/supplier-hub/dispatch/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><Navigate to="/supplier-hub/orders" replace /></ProtectedRoute>} />
+                <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
+                <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
+                <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
               </Routes>
                 <Toaster />
               </ClientProvider>

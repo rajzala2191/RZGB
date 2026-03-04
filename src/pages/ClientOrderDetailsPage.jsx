@@ -136,10 +136,10 @@ export default function ClientOrderDetailsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Main Info */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="md:col-span-2 space-y-8">
             <div className="bg-[#0f172a] p-6 rounded-xl shadow-xl border border-slate-800">
               <h2 className="text-xl font-bold border-b border-slate-800 pb-3 mb-6 text-slate-100">Order Specifications</h2>
               <div className="grid grid-cols-2 gap-y-6 gap-x-8">

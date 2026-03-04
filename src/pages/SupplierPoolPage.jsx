@@ -30,13 +30,13 @@ export default function SupplierPoolPage() {
 
   return (
     <ControlCentreLayout>
-      <div className="p-8 space-y-6">
-        <div className="flex justify-between items-end border-b border-slate-800 pb-6">
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-slate-800 pb-6">
           <div>
             <h1 className="text-3xl font-bold text-slate-100">Assign to Supplier</h1>
             <p className="text-slate-400">Assign sanitized orders directly to suppliers.</p>
           </div>
-          <div className="relative w-64">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
             <Input 
               placeholder="Search orders..." 
@@ -47,7 +47,7 @@ export default function SupplierPoolPage() {
           </div>
         </div>
 
-        <div className="bg-[#0f172a] rounded-lg shadow-xl border border-slate-800 overflow-hidden">
+        <div className="bg-[#0f172a] rounded-lg shadow-xl border border-slate-800 overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-300">
               <tr>
