@@ -43,6 +43,15 @@ body {
     color: #f1f5f9;
     font-family: 'DM Sans', sans-serif;
     transition: background-color 300ms ease, color 300ms ease, background-image 300ms ease;
+    /* Prevent horizontal scroll on iOS */
+    overflow-x: hidden;
+}
+
+/* Fix iOS Safari 100vh bug — min-h-screen uses dvh where supported */
+@supports (min-height: 100dvh) {
+    .min-h-screen {
+        min-height: 100dvh;
+    }
 }
 
 html.light body {
