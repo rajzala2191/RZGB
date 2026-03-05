@@ -5,6 +5,7 @@ import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import AssetViewer from '@/components/AssetViewer';
 import OrderTimeline from '@/components/OrderTimeline';
 import { supabase } from '@/lib/customSupabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -92,21 +93,26 @@ const LiveOrderTracking = () => {
         setUpdates([]);
       }
 
-      // Fetch drawings/documents for this order
-      const { data: docsData } = await supabase
+      // Fetch drawings/documents — use admin client to bypass RLS
+      const { data: docsData } = await supabaseAdmin
         .from('documents')
-        .select('id, file_name, file_url, file_path')
+        .select('id, file_name, file_path')
         .eq('order_id', orderData.id)
         .order('created_at', { ascending: false });
 
-      setDrawings((docsData || []).map(doc => ({
-        id: doc.id,
-        asset_name: doc.file_name,
-        asset_type: doc.file_name?.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image',
-        file_size: null,
-        download_enabled: false,
-        file_url: doc.file_url,
-      })));
+      setDrawings((docsData || []).map(doc => {
+        const { data: urlData } = supabase.storage
+          .from('documents')
+          .getPublicUrl(doc.file_path);
+        return {
+          id: doc.id,
+          asset_name: doc.file_name,
+          asset_type: doc.file_name?.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image',
+          file_size: null,
+          download_enabled: false,
+          file_url: urlData?.publicUrl || null,
+        };
+      }));
       setError(null);
     } catch (err) {
       console.error('LiveOrderTracking fetch error:', err);
