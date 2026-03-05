@@ -2,16 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
+import AssetViewer from '@/components/AssetViewer';
+import OrderTimeline from '@/components/OrderTimeline';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import {
-  Loader2, ArrowLeft, CheckCircle2, Clock, AlertCircle, Package,
-  Truck, FileText, TrendingUp, Calendar, DollarSign, MapPin,
-  FileCheck, Zap, BarChart3, Hourglass, ShieldCheck, XCircle
+  Loader2, ArrowLeft, CheckCircle2, AlertCircle, Package,
+  Truck, Calendar, DollarSign, MapPin,
+  FileCheck, Zap, Hourglass, ShieldCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
-import OrderTimeline from '@/components/OrderTimeline';
 
 const LiveOrderTracking = () => {
   const { orderId } = useParams();
@@ -20,6 +21,7 @@ const LiveOrderTracking = () => {
   const { toast } = useToast();
   const [order, setOrder] = useState(null);
   const [updates, setUpdates] = useState([]);
+  const [drawings, setDrawings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -89,6 +91,22 @@ const LiveOrderTracking = () => {
       } else {
         setUpdates([]);
       }
+
+      // Fetch drawings/documents for this order
+      const { data: docsData } = await supabase
+        .from('documents')
+        .select('id, file_name, file_url, file_path')
+        .eq('order_id', orderData.id)
+        .order('created_at', { ascending: false });
+
+      setDrawings((docsData || []).map(doc => ({
+        id: doc.id,
+        asset_name: doc.file_name,
+        asset_type: doc.file_name?.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image',
+        file_size: null,
+        download_enabled: false,
+        file_url: doc.file_url,
+      })));
       setError(null);
     } catch (err) {
       console.error('LiveOrderTracking fetch error:', err);
@@ -136,15 +154,6 @@ const LiveOrderTracking = () => {
   };
   const currentStageId = STATUS_TO_STAGE_ID[order.order_status] || order.order_status;
   const currentStageIndex = STAGES.findIndex(s => s.id === currentStageId);
-
-  // Group updates by stage
-  const updatesByStage = {};
-  updates.forEach(update => {
-    if (!updatesByStage[update.stage]) {
-      updatesByStage[update.stage] = [];
-    }
-    updatesByStage[update.stage].push(update);
-  });
 
   // Calculate days remaining
   const daysRequested = order.delivery_days || 60;
@@ -242,87 +251,8 @@ const LiveOrderTracking = () => {
           />
         </div>
 
-        {/* Real-time Updates Feed */}
-        <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-8">
-          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-            <FileText size={24} className="text-blue-400" />
-            Live Updates & Reports
-          </h2>
-
-          {updates.length === 0 ? (
-            <div className="text-center py-12">
-              <Clock className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-400">Waiting for first supplier update...</p>
-            </div>
-          ) : (
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {updates.map((update, idx) => (
-                <div key={idx} className="bg-slate-900/50 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-all">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="text-sm font-bold text-white">{update.stage?.replace(/_/g, ' ')}</p>
-                      <p className="text-xs text-slate-400 capitalize">{update.status?.replace(/_/g, ' ')}</p>
-                    </div>
-                    <p className="text-xs text-slate-500">{format(new Date(update.created_at), 'MMM dd, HH:mm')}</p>
-                  </div>
-
-                  {update.notes && (
-                    <p className="text-sm text-slate-300 bg-slate-800/50 rounded p-3 mt-2">{update.notes}</p>
-                  )}
-                  {update.created_by && (
-                    <p className="text-xs text-slate-500 mt-2">Updated by: {update.created_by}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Quality & Compliance Reports */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-emerald-950/30 to-slate-900 border border-emerald-500/30 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-white flex items-center gap-2">
-                <BarChart3 size={20} className="text-emerald-400" />
-                QC Status
-              </h3>
-            </div>
-            <div className={`text-center p-4 rounded-lg ${
-              order.is_qc_approved 
-                ? 'bg-emerald-950/50 border border-emerald-500/50' 
-                : 'bg-amber-950/50 border border-amber-500/50'
-            }`}>
-              <p className={`text-2xl font-black ${
-                order.is_qc_approved ? 'text-emerald-400' : 'text-amber-400'
-              }`}>
-                {order.is_qc_approved ? '✓ APPROVED' : '⟳ PENDING'}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-950/30 to-slate-900 border border-blue-500/30 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-white flex items-center gap-2">
-                <FileCheck size={20} className="text-blue-400" />
-                Documentation
-              </h3>
-            </div>
-            <div className="space-y-2 text-sm">
-              <p className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 size={16} className="text-cyan-400" />
-                Order Specifications
-              </p>
-              <p className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 size={16} className="text-cyan-400" />
-                Quality Reports
-              </p>
-              <p className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 size={16} className="text-cyan-400" />
-                Shipping Documents
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Drawings Viewer */}
+        <AssetViewer orderId={order.id} assets={drawings} />
       </div>
     </ClientDashboardLayout>
   );
