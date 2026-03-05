@@ -80,8 +80,8 @@ const SecurePDFViewer = ({ document, order }) => {
                     <span className="font-bold">{userCompanyName}</span>
                  </div>
                  <div>
-                    <span className="text-slate-500 block text-xs uppercase">Project</span>
-                    <span className="font-bold">{order?.project_id || 'N/A'}</span>
+                    <span className="text-slate-500 block text-xs uppercase">Order</span>
+                    <span className="font-bold">{order?.rz_job_id || order?.id?.slice(0, 8) || 'N/A'}</span>
                  </div>
                  <div>
                     <span className="text-slate-500 block text-xs uppercase">RZ Job ID</span>

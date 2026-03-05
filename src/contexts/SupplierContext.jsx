@@ -28,7 +28,7 @@ export const SupplierProvider = ({ children }) => {
         supabase
           .from('documents')
           .select('*')
-          .eq('supplier_id', currentUser.id)
+          .eq('uploaded_by', currentUser.id)
           .order('created_at', { ascending: false })
       ]);
 
@@ -56,7 +56,7 @@ export const SupplierProvider = ({ children }) => {
 
     const channel = supabase.channel('supplier-dashboard')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `supplier_id=eq.${currentUser.id}` }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'documents', filter: `supplier_id=eq.${currentUser.id}` }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'documents', filter: `uploaded_by=eq.${currentUser.id}` }, () => fetchData())
       .subscribe();
 
     return () => {

@@ -53,7 +53,7 @@ const JobDetailsPage = () => {
 
   return (
     <SupplierHubLayout>
-      <Helmet><title>Job {job.rz_job_id} - Supplier Hub</title></Helmet>
+      <Helmet><title>{`Job ${job.rz_job_id || ''} - Supplier Hub`}</title></Helmet>
       
       <div className="mb-6">
         <button onClick={() => navigate('/supplier-hub')} className="text-slate-400 hover:text-white flex items-center gap-2 mb-4 text-sm font-bold">

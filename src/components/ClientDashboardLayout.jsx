@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -12,10 +12,10 @@ import {
   X,
   Search,
   PlusCircle,
-  FolderPlus
+  FolderPlus,
+  LifeBuoy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import ThemeToggle from '@/components/ThemeToggle';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 const ClientDashboardLayout = ({ children }) => {
@@ -33,9 +33,10 @@ const ClientDashboardLayout = ({ children }) => {
 
   const navItems = [
     { path: '/client-dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-    { path: '/client-dashboard/create-order', label: 'Create New Project', icon: FolderPlus, highlight: true },
-    { path: '/client-dashboard/projects', label: 'My Projects', icon: Briefcase },
-    { path: '/client-dashboard/documents', label: 'Documents', icon: Library }
+    { path: '/client-dashboard/create-order', label: 'Create New Order', icon: FolderPlus, highlight: true },
+    { path: '/client-dashboard/orders', label: 'My Orders', icon: Briefcase },
+    { path: '/client-dashboard/documents', label: 'Documents', icon: Library },
+    { path: '/client-dashboard/support', label: 'Support', icon: LifeBuoy }
   ];
 
   return (
@@ -50,18 +51,13 @@ const ClientDashboardLayout = ({ children }) => {
           </button>
         </div>
 
-        <AnimatePresence mode="wait">
-          {(isSidebarOpen || window.innerWidth >= 1024) && (
-            <motion.aside
-              initial={{ x: -300 }}
-              animate={{ x: 0 }}
-              exit={{ x: -300 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+        <aside
               className={`
-                fixed lg:static top-0 left-0 z-40 h-screen w-72 
-                bg-[#020617] border-r border-slate-800 
+                fixed lg:static top-0 left-0 z-40 h-screen w-72
+                bg-[#020617] border-r border-slate-800
                 flex flex-col shadow-2xl shadow-black
-                ${isSidebarOpen ? 'block' : 'hidden lg:flex'}
+                transition-transform duration-300 ease-in-out
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
               `}
             >
               <div className="p-6 border-b border-slate-800 bg-[#020617] relative overflow-hidden">
@@ -74,7 +70,7 @@ const ClientDashboardLayout = ({ children }) => {
                   />
                   <h2 className="text-lg font-bold text-slate-100 tracking-wider">CLIENT PORTAL</h2>
                   <div className="mt-2 px-3 py-1 rounded-full bg-cyan-950/30 border border-cyan-500/30 text-[10px] text-cyan-400 font-bold uppercase tracking-widest">
-                    Projects
+                    Orders
                   </div>
                 </div>
               </div>
@@ -127,7 +123,6 @@ const ClientDashboardLayout = ({ children }) => {
                   </div>
                 </div>
                 <div className="flex gap-2 mb-3">
-                  <ThemeToggle />
                   <div className="flex-1" />
                 </div>
                 <div className="flex gap-2">
@@ -143,9 +138,7 @@ const ClientDashboardLayout = ({ children }) => {
                   </button>
                 </div>
               </div>
-            </motion.aside>
-          )}
-        </AnimatePresence>
+            </aside>
 
         <main className="flex-1 h-screen overflow-y-auto bg-[#020617] relative scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
           {/* Header - Clean and Minimal */}

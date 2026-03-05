@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { X, Building2, AlertCircle } from 'lucide-react';
+import { X, Building2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefresh }) {
   const [suppliers, setSuppliers] = useState([]);
@@ -18,19 +18,16 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
   }, [isOpen]);
 
   const fetchSuppliers = async () => {
-    // Fetch users with role 'supplier'
     const { data } = await supabase.from('profiles').select('*').eq('role', 'supplier');
     if (data) {
-      // Mocking specialization and rating if not present
       setSuppliers(data.map(s => ({
         ...s,
-        specialization: 'General Manufacturing',
-        rating: 4.8
+        specialization: s.specialization || 'General Manufacturing',
       })));
     }
   };
 
-  const handleRelease = async () => {
+  const handleAssign = async () => {
     if (!selectedSupplierId) {
       toast({ title: 'Validation', description: 'Please select a supplier.', variant: 'destructive' });
       return;
@@ -38,24 +35,33 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
 
     setLoading(true);
     try {
-      // Create tender request
-      await supabase.from('tender_requests').insert([{
-        project_id: order.project_id || order.id,
-        status: 'OPEN',
-        deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      }]);
+      // Generate RZ Job ID
+      const year = new Date().getFullYear();
+      const rzJobId = `RZ-${year}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-      // Update order status
-      await supabase.from('orders').update({ 
-        order_status: 'OPEN_FOR_BIDDING',
-        supplier_id: selectedSupplierId // Assigning directly for simplified flow
+      // Directly assign supplier and set order to AWARDED
+      const { error: orderErr } = await supabase.from('orders').update({
+        supplier_id: selectedSupplierId,
+        order_status: 'AWARDED',
+        rz_job_id: rzJobId,
+        updated_at: new Date().toISOString()
       }).eq('id', order.id);
+      if (orderErr) throw orderErr;
 
-      toast({ title: 'Success', description: 'Order released to supplier successfully.' });
+      // Create initial job update record
+      await supabase.from('job_updates').insert({
+        rz_job_id: rzJobId,
+        stage: 'AWARDED',
+        note: 'Order assigned to supplier. Production can begin.',
+        updated_by: 'ADMIN'
+      });
+
+      toast({ title: 'Supplier Assigned', description: `Order awarded to supplier. Job ID: ${rzJobId}` });
       onRefresh();
       onClose();
     } catch (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      console.error('Assign supplier error:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to assign supplier.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -69,7 +75,7 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
       <div className="bg-[#0f172a] border border-slate-800 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
         <div className="flex justify-between items-center p-6 border-b border-slate-800">
-          <h2 className="text-xl font-bold text-slate-100">Release to Supplier</h2>
+          <h2 className="text-xl font-bold text-slate-100">Assign to Supplier</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white">
             <X size={20} />
           </button>
@@ -86,7 +92,7 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
 
           {/* Supplier Selection */}
           <div className="space-y-3">
-            <label className="text-sm font-semibold text-slate-300">Select Supplier</label>
+            <label className="text-sm font-semibold text-slate-300">Select Supplier to Assign</label>
             <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
               {suppliers.map(s => (
                 <div 
@@ -99,7 +105,7 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
                   <Building2 size={20} className={selectedSupplierId === s.id ? 'text-cyan-400' : 'text-slate-500'} />
                   <div>
                     <p className="font-semibold text-slate-200">{s.company_name || s.email}</p>
-                    <p className="text-xs text-slate-400">Spec: {s.specialization} • Rating: {s.rating}★</p>
+                    <p className="text-xs text-slate-400">{s.specialization}</p>
                   </div>
                 </div>
               ))}
@@ -108,11 +114,11 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
 
           {/* Confirmation Info */}
           {selectedSupplier && (
-            <div className="bg-amber-950/30 border border-amber-900/50 p-4 rounded-lg flex gap-3 text-amber-200/90 text-sm">
-              <AlertCircle size={18} className="shrink-0 mt-0.5" />
+            <div className="bg-emerald-950/30 border border-emerald-900/50 p-4 rounded-lg flex gap-3 text-emerald-200/90 text-sm">
+              <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
               <div>
-                <p>This order will be sent to <strong>{selectedSupplier.company_name || selectedSupplier.email}</strong>.</p>
-                <p className="mt-1 opacity-80">Supplier will see: RZ_GLOBAL_INTERNAL (not client name).</p>
+                <p>Order will be directly awarded to <strong>{selectedSupplier.company_name || selectedSupplier.email}</strong>.</p>
+                <p className="mt-1 opacity-80">Supplier will see the ghost identity only (not client name). Production can start immediately.</p>
               </div>
             </div>
           )}
@@ -122,8 +128,8 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
           <Button variant="outline" onClick={onClose} className="border-slate-700 text-slate-300 hover:bg-slate-800">
             Cancel
           </Button>
-          <Button onClick={handleRelease} disabled={!selectedSupplierId || loading} className="bg-cyan-600 hover:bg-cyan-500 text-white">
-            {loading ? 'Processing...' : 'Release Tender'}
+          <Button onClick={handleAssign} disabled={!selectedSupplierId || loading} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+            {loading ? 'Assigning...' : 'Assign & Award'}
           </Button>
         </div>
       </div>

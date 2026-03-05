@@ -4,13 +4,13 @@ import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import { useClientDocuments } from '@/contexts/ClientContext';
 import { Search, Filter, FileText, Download, Eye, ShieldCheck, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
-import SecurePDFViewer from '@/components/SecurePDFViewer';
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { DocumentPreviewModal } from '@/components/DocumentPreview';
 
 const QualityVaultPage = () => {
   const { documents, loading, error } = useClientDocuments();
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   const filteredDocs = documents.filter(doc => {
     const matchesSearch = (doc.file_name || '').toLowerCase().includes(searchTerm.toLowerCase());
@@ -74,16 +74,12 @@ const QualityVaultPage = () => {
                 </p>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <button className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-300 py-2 rounded-lg text-xs font-bold border border-slate-700 transition-colors">
-                        <Eye size={14} /> View
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-5xl bg-transparent border-none p-0">
-                      <SecurePDFViewer document={doc} />
-                    </DialogContent>
-                  </Dialog>
+                  <button 
+                    onClick={() => setPreviewDoc(doc)}
+                    className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-300 py-2 rounded-lg text-xs font-bold border border-slate-700 transition-colors"
+                  >
+                    <Eye size={14} /> View
+                  </button>
                   
                   <button 
                     onClick={() => alert("Downloading secure file...")}
@@ -97,6 +93,15 @@ const QualityVaultPage = () => {
           </div>
         )}
       </div>
+
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal
+        open={!!previewDoc}
+        onOpenChange={(open) => { if (!open) setPreviewDoc(null); }}
+        filePath={previewDoc?.file_path}
+        fileName={previewDoc?.file_name}
+        fileUrl={previewDoc?.file_url}
+      />
     </ClientDashboardLayout>
   );
 };

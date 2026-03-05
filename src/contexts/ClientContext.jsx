@@ -8,7 +8,6 @@ export const ClientProvider = ({ children }) => {
   const { currentUser, userRole } = useAuth();
   const [orders, setOrders] = useState([]);
   const [documents, setDocuments] = useState([]);
-  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,33 +17,50 @@ export const ClientProvider = ({ children }) => {
     if (!isClient || !currentUser) return;
 
     try {
-      if (orders.length === 0 && projects.length === 0) setLoading(true);
+      if (orders.length === 0) setLoading(true);
 
-      const [ordersRes, docsRes, projectsRes] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('*')
-          .eq('client_id', currentUser.id)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('documents')
-          .select('*')
-          .eq('client_id', currentUser.id)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('projects')
-          .select('*')
-          .eq('client_id', currentUser.id)
-          .order('created_at', { ascending: false })
-      ]);
+      // First fetch orders
+      const ordersRes = await supabase
+        .from('orders')
+        .select('*')
+        .eq('client_id', currentUser.id)
+        .neq('order_status', 'CLEARED')
+        .order('created_at', { ascending: false });
 
       if (ordersRes.error) throw ordersRes.error;
-      if (docsRes.error) throw docsRes.error;
-      if (projectsRes.error) throw projectsRes.error;
+      const clientOrders = ordersRes.data || [];
 
-      setOrders(ordersRes.data || []);
-      setDocuments(docsRes.data || []);
-      setProjects(projectsRes.data || []);
+      // Fetch docs by client_id
+      const docsRes = await supabase
+        .from('documents')
+        .select('*')
+        .eq('client_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+      let allDocs = docsRes.data || [];
+
+      // Also fetch docs by order_id for the client's orders (some docs may not have client_id set)
+      const orderIds = clientOrders.map(o => o.id).filter(Boolean);
+      if (orderIds.length > 0) {
+        const docsForOrders = await supabase
+          .from('documents')
+          .select('*')
+          .in('order_id', orderIds)
+          .order('created_at', { ascending: false });
+
+        if (docsForOrders.data) {
+          // Merge, deduplicate by id
+          const existingIds = new Set(allDocs.map(d => d.id));
+          docsForOrders.data.forEach(doc => {
+            if (!existingIds.has(doc.id)) {
+              allDocs.push(doc);
+            }
+          });
+        }
+      }
+
+      setOrders(clientOrders);
+      setDocuments(allDocs);
       setError(null);
     } catch (err) {
       console.error("ClientContext Fetch Error:", err);
@@ -65,7 +81,6 @@ export const ClientProvider = ({ children }) => {
     const channel = supabase.channel('client-dashboard')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `client_id=eq.${currentUser.id}` }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'documents', filter: `client_id=eq.${currentUser.id}` }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects', filter: `client_id=eq.${currentUser.id}` }, () => fetchData())
       .subscribe();
 
     return () => {
@@ -74,7 +89,7 @@ export const ClientProvider = ({ children }) => {
   }, [isClient, currentUser, fetchData]);
 
   return (
-    <ClientContext.Provider value={{ orders, documents, projects, loading, error, refreshData: fetchData }}>
+    <ClientContext.Provider value={{ orders, documents, loading, error, refreshData: fetchData }}>
       {children}
     </ClientContext.Provider>
   );
@@ -92,8 +107,3 @@ export const useClientDocuments = () => {
   return { documents: context.documents, loading: context.loading, error: context.error, refreshDocuments: context.refreshData };
 };
 
-export const useClientProjects = () => {
-  const context = useContext(ClientContext);
-  if (!context) throw new Error("useClientProjects must be used within ClientProvider");
-  return { projects: context.projects, loading: context.loading, error: context.error, refreshProjects: context.refreshData };
-};

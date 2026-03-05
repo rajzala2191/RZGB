@@ -16,11 +16,24 @@ const JourneyStepper = ({ currentStage }) => {
   // Adjust mapping based on your actual status values
   const getStageNumber = (status) => {
     switch (status) {
-      case 'active': return 2;
-      case 'processing': return 3;
-      case 'sanitised': return 4;
-      case 'completed': return 5;
-      default: return 1;
+      case 'PENDING_ADMIN_SCRUB':
+      case 'SANITIZED':
+        return 1;
+      case 'OPEN_FOR_BIDDING':
+      case 'BID_RECEIVED':
+      case 'AWARDED':
+      case 'MATERIAL':
+        return 2;
+      case 'CASTING':
+      case 'MACHINING':
+        return 3;
+      case 'QC':
+        return 4;
+      case 'DISPATCH':
+      case 'DELIVERED':
+        return 5;
+      default:
+        return 1;
     }
   };
 

@@ -19,7 +19,7 @@ const NCRVisibilityPage = () => {
       // This requires a join or a specific RLS policy that allows clients to see these rows
       const { data, error } = await supabase
         .from('ncr_reports')
-        .select('*, order:order_id(rz_job_id, project_id)')
+        .select('*, order:order_id(rz_job_id)')
         .eq('client_notified', true)
         .order('created_at', { ascending: false });
 

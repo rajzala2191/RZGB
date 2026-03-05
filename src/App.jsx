@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
+import { Route, Routes, BrowserRouter as Router, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AdminProvider } from '@/contexts/AdminContext';
 import { SupplierProvider } from '@/contexts/SupplierContext';
@@ -30,38 +30,32 @@ import SanitisationGatePage from '@/pages/SanitisationGatePage';
 import SanitisationReviewPage from '@/pages/SanitisationReviewPage';
 import SupplierPoolPage from '@/pages/SupplierPoolPage';
 import AdminDocumentReview from '@/pages/AdminDocumentReview';
+import AdminLiveTracking from '@/pages/AdminLiveTracking';
+
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
 import QualityVaultPage from '@/pages/QualityVaultPage';
 import NCRVisibilityPage from '@/pages/NCRVisibilityPage';
 import ShippingTrackingPage from '@/pages/ShippingTrackingPage';
-import ProjectsOverviewPage from '@/pages/ProjectsOverviewPage';
-import ClientOrderHistoryPage from '@/pages/ClientOrderHistoryPage';
-import EnhancedOrderDetailsPage from '@/pages/EnhancedOrderDetailsPage';
+import OrdersOverviewPage from '@/pages/OrdersOverviewPage';
 import ClientDocumentLibraryPage from '@/pages/ClientDocumentLibraryPage';
 import ClientSupportPage from '@/pages/ClientSupportPage';
-import ClientProjectCreationPage from '@/pages/ClientProjectCreationPage';
-import ClientRFQUploadPage from '@/pages/ClientRFQUploadPage';
 import ClientOrderCreationPage from '@/pages/ClientOrderCreationPage';
 import ClientOrderDetailsPage from '@/pages/ClientOrderDetailsPage';
-import ProjectTrackingPage from '@/pages/ProjectTrackingPage';
-import LiveProjectTracking from '@/pages/LiveProjectTracking';
+import LiveOrderTracking from '@/pages/LiveOrderTracking';
 
 // Supplier Pages
 import SupplierDashboard from '@/pages/SupplierDashboard';
 import JobDetailsPage from '@/pages/JobDetailsPage';
 import NCRReportingPage from '@/pages/NCRReportingPage';
-import SupplierJobsPage from '@/pages/SupplierJobsPage';
-import TenderDetailsPage from '@/pages/TenderDetailsPage';
+
 import SupplierDocumentsPortal from '@/pages/SupplierDocumentsPortal';
-import SupplierProjectManager from '@/pages/SupplierProjectManager';
-// Keeping old pages as fallback (deprecated - use SupplierProjectManager instead)
-import MaterialUpdatePage from '@/pages/MaterialUpdatePage';
-import CastingPage from '@/pages/CastingPage';
-import MachiningPage from '@/pages/MachiningPage';
-import QCPage from '@/pages/QCPage';
-import DispatchPage from '@/pages/DispatchPage';
+import SupplierOrderManager from '@/pages/SupplierOrderManager';
+import SupplierSupportPage from '@/pages/SupplierSupportPage';
+import TicketDetailPage from '@/pages/TicketDetailPage';
+import AdminSupportPage from '@/pages/AdminSupportPage';
+import AdminTicketDetailPage from '@/pages/AdminTicketDetailPage';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -86,6 +80,8 @@ function App() {
                 <Route path="/control-centre/sanitisation-gate" element={<ProtectedRoute requiredRole="admin"><SanitisationGatePage /></ProtectedRoute>} />
                 <Route path="/control-centre/sanitisation-gate/review/:orderId" element={<ProtectedRoute requiredRole="admin"><SanitisationReviewPage /></ProtectedRoute>} />
                 <Route path="/control-centre/document-review" element={<ProtectedRoute requiredRole="admin"><AdminDocumentReview /></ProtectedRoute>} />
+                <Route path="/control-centre/live-tracking" element={<ProtectedRoute requiredRole="admin"><AdminLiveTracking /></ProtectedRoute>} />
+
                 <Route path="/control-centre/supplier-pool" element={<ProtectedRoute requiredRole="admin"><SupplierPoolPage /></ProtectedRoute>} />
                 <Route path="/control-centre/linkage" element={<ProtectedRoute requiredRole="admin"><LinkageDashboard /></ProtectedRoute>} />
                 <Route path="/control-centre/sanitisation" element={<ProtectedRoute requiredRole="admin"><SanitisationEngine /></ProtectedRoute>} />
@@ -102,35 +98,29 @@ function App() {
                 {/* --- CLIENT ROUTES --- */}
                 <Route path="/client-dashboard" element={<ProtectedRoute requiredRole="client"><ClientDashboardPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/create-order" element={<ProtectedRoute requiredRole="client"><ClientOrderCreationPage /></ProtectedRoute>} />
+                <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><OrdersOverviewPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/orders/:orderId" element={<ProtectedRoute requiredRole="client"><ClientOrderDetailsPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/projects" element={<ProtectedRoute requiredRole="client"><ProjectsOverviewPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/projects/:projectId/tracking" element={<ProtectedRoute requiredRole="client"><LiveProjectTracking /></ProtectedRoute>} />
-                <Route path="/client-dashboard/projects/:projectId/tracking-legacy" element={<ProtectedRoute requiredRole="client"><ProjectTrackingPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/create-project" element={<ProtectedRoute requiredRole="client"><ClientProjectCreationPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/projects/:projectId/upload-rfq" element={<ProtectedRoute requiredRole="client"><ClientRFQUploadPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><ClientOrderHistoryPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/orders-legacy/:orderId" element={<ProtectedRoute requiredRole="client"><EnhancedOrderDetailsPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/quality-vault" element={<ProtectedRoute requiredRole="client"><QualityVaultPage /></ProtectedRoute>} />
+                <Route path="/client-dashboard/orders/:orderId/tracking" element={<ProtectedRoute requiredRole="client"><LiveOrderTracking /></ProtectedRoute>} />
+<Route path="/client-dashboard/quality-vault" element={<ProtectedRoute requiredRole="client"><QualityVaultPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/documents" element={<ProtectedRoute requiredRole="client"><ClientDocumentLibraryPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/shipping" element={<ProtectedRoute requiredRole="client"><ShippingTrackingPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/ncr-visibility" element={<ProtectedRoute requiredRole="client"><NCRVisibilityPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/support" element={<ProtectedRoute requiredRole="client"><ClientSupportPage /></ProtectedRoute>} />
+                <Route path="/client-dashboard/support/:ticketId" element={<ProtectedRoute requiredRole="client"><TicketDetailPage /></ProtectedRoute>} />
 
                 {/* --- SUPPLIER ROUTES --- */}
                 <Route path="/supplier-hub" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
                 <Route path="/supplier-hub/dashboard" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
-                <Route path="/supplier-hub/projects" element={<ProtectedRoute requiredRole="supplier"><SupplierProjectManager /></ProtectedRoute>} />
-                <Route path="/supplier-hub/jobs" element={<ProtectedRoute requiredRole="supplier"><SupplierJobsPage /></ProtectedRoute>} />
-                <Route path="/supplier-hub/jobs/:tenderId" element={<ProtectedRoute requiredRole="supplier"><TenderDetailsPage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/orders" element={<ProtectedRoute requiredRole="supplier"><SupplierOrderManager /></ProtectedRoute>} />
+                <Route path="/supplier-hub/awarded" element={<ProtectedRoute requiredRole="supplier"><SupplierOrderManager /></ProtectedRoute>} />
+
                 <Route path="/supplier-hub/job-tracking/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><JobDetailsPage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
                 <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
-                {/* Legacy routes - deprecated, use SupplierProjectManager instead */}
-                <Route path="/supplier-hub/material-update/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><MaterialUpdatePage /></ProtectedRoute>} />
-                <Route path="/supplier-hub/casting/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><CastingPage /></ProtectedRoute>} />
-                <Route path="/supplier-hub/machining/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><MachiningPage /></ProtectedRoute>} />
-                <Route path="/supplier-hub/qc/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><QCPage /></ProtectedRoute>} />
-                <Route path="/supplier-hub/dispatch/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><DispatchPage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
+                <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
+                <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
               </Routes>
                 <Toaster />
               </ClientProvider>

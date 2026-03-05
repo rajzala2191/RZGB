@@ -59,29 +59,24 @@ const IntakeGatePage = () => {
     logInfo('IntakeGate', `Processing RFQ ${rfqId}`, rfq);
     try {
       const year = new Date().getFullYear();
-      const rzProjectId = `RZ-${year}-${Math.floor(100 + Math.random() * 900)}`;
+      const rzJobId = `RZ-${year}-${Math.floor(100 + Math.random() * 900)}`;
 
       logInfo('IntakeGate', 'Updating document status to processing');
       const { error: updateError } = await supabase
         .from('documents')
-        .update({ status: 'processing', redaction_notes: `Assigned Project ID: ${rzProjectId}` })
+        .update({ status: 'processing', redaction_notes: `Assigned Job ID: ${rzJobId}` })
         .eq('id', rfqId);
 
       if (updateError) throw updateError;
 
-      if(rfq.project_id) {
-         logInfo('IntakeGate', `Updating project ${rfq.project_id} to intake_complete`);
-         await supabase.from('projects').update({ status: 'intake_complete' }).eq('id', rfq.project_id);
-      }
-
       await createAuditLog({
         userId: currentUser?.id,
         action: 'PROCESS_RFQ',
-        details: `Started processing RFQ. Assigned ID: ${rzProjectId}`,
+        details: `Started processing RFQ. Assigned ID: ${rzJobId}`,
         status: 'success'
       });
 
-      toast({ title: "Processing Started", description: `RFQ assigned ID: ${rzProjectId}` });
+      toast({ title: "Processing Started", description: `RFQ assigned ID: ${rzJobId}` });
       fetchPendingRfqs();
       
     } catch (err) {
