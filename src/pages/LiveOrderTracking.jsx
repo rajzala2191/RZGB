@@ -100,19 +100,23 @@ const LiveOrderTracking = () => {
         .eq('order_id', orderData.id)
         .order('created_at', { ascending: false });
 
-      setDrawings((docsData || []).map(doc => {
-        const { data: urlData } = supabase.storage
-          .from('documents')
-          .getPublicUrl(doc.file_path);
-        return {
-          id: doc.id,
-          asset_name: doc.file_name,
-          asset_type: doc.file_name?.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image',
-          file_size: null,
-          download_enabled: false,
-          file_url: urlData?.publicUrl || null,
-        };
-      }));
+      // Generate 24-hour signed URLs (bucket is private, getPublicUrl won't work)
+      const drawingsWithUrls = await Promise.all(
+        (docsData || []).map(async (doc) => {
+          const { data: urlData } = await supabaseAdmin.storage
+            .from('documents')
+            .createSignedUrl(doc.file_path, 86400);
+          return {
+            id: doc.id,
+            asset_name: doc.file_name,
+            asset_type: doc.file_name?.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image',
+            file_size: null,
+            download_enabled: true,
+            file_url: urlData?.signedUrl || null,
+          };
+        })
+      );
+      setDrawings(drawingsWithUrls);
       setError(null);
     } catch (err) {
       console.error('LiveOrderTracking fetch error:', err);

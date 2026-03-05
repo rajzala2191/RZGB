@@ -9,7 +9,8 @@ import { useToast } from '@/components/ui/use-toast';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import OrderTimeline from '@/components/OrderTimeline';
 import DocumentPreview, { DocumentPreviewModal } from '@/components/DocumentPreview';
-import { FileText, Download, ArrowRight, Loader2, ListTree, Trash2, XCircle, ArrowLeft, Eye, FileImage } from 'lucide-react';
+import { FileText, Download, ArrowRight, Loader2, ListTree, Trash2, XCircle, ArrowLeft, Eye, FileImage, ClipboardList, PoundSterling, MapPin } from 'lucide-react';
+import { FormSection, DisplayField } from '@/components/ui/FormSection';
 
 const WITHDRAWABLE = ['PENDING_ADMIN_SCRUB', 'SANITIZED', 'OPEN_FOR_BIDDING', 'BID_RECEIVED', 'AWARDED'];
 
@@ -140,41 +141,42 @@ export default function ClientOrderDetailsPage() {
           
           {/* Main Info */}
           <div className="md:col-span-2 space-y-8">
-            <div className="bg-[#0f172a] p-6 rounded-xl shadow-xl border border-slate-800">
-              <h2 className="text-xl font-bold border-b border-slate-800 pb-3 mb-6 text-slate-100">Order Specifications</h2>
+            <FormSection title="Order Specifications" icon={ClipboardList}>
               <div className="grid grid-cols-2 gap-y-6 gap-x-8">
-                <div>
-                  <p className="text-xs text-slate-500 font-bold uppercase mb-1">Material</p>
-                  <p className="text-slate-200 font-medium">{order.material || 'Not specified'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-bold uppercase mb-1">Quantity</p>
-                  <p className="text-slate-200 font-medium">{order.quantity || 'Not specified'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-bold uppercase mb-1">Tolerance</p>
-                  <p className="text-slate-200 font-medium">{order.tolerance || 'Standard'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-bold uppercase mb-1">Surface Finish</p>
-                  <p className="text-slate-200 font-medium">{order.surface_finish || 'As Machined'}</p>
+                <DisplayField label="Material"       value={order.material       || 'Not specified'} />
+                <DisplayField label="Quantity"       value={order.quantity       || 'Not specified'} />
+                <DisplayField label="Tolerance"      value={order.tolerance      || 'Standard'} />
+                <DisplayField label="Surface Finish" value={order.surface_finish || 'As Machined'} />
+                {order.budget && (
+                  <DisplayField label="Target Budget">
+                    <p className="text-emerald-400 font-bold text-sm flex items-center gap-1">
+                      <PoundSterling size={13} />
+                      {parseFloat(order.budget).toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                    </p>
+                  </DisplayField>
+                )}
+                {order.delivery_location && (
+                  <DisplayField label="Delivery Location">
+                    <p className="text-slate-200 text-sm flex items-center gap-1.5">
+                      <MapPin size={13} className="text-slate-500" />
+                      {order.delivery_location}
+                    </p>
+                  </DisplayField>
+                )}
+                <div className="col-span-2">
+                  <DisplayField label="Description">
+                    <p className="text-slate-300 bg-[#1e293b] p-3 rounded-lg border border-slate-700 mt-1 min-h-[60px] text-sm">{order.description || 'No description provided.'}</p>
+                  </DisplayField>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-xs text-slate-500 font-bold uppercase mb-1">Description</p>
-                  <p className="text-slate-300 bg-[#1e293b] p-3 rounded-lg border border-slate-700 mt-1 min-h-[60px]">{order.description || 'No description provided.'}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-xs text-slate-500 font-bold uppercase mb-1">Special Requirements</p>
-                  <p className="text-slate-300 bg-[#1e293b] p-3 rounded-lg border border-slate-700 mt-1 min-h-[60px]">{order.special_requirements || 'None specified.'}</p>
+                  <DisplayField label="Special Requirements">
+                    <p className="text-slate-300 bg-[#1e293b] p-3 rounded-lg border border-slate-700 mt-1 min-h-[60px] text-sm">{order.special_requirements || 'None specified.'}</p>
+                  </DisplayField>
                 </div>
               </div>
-            </div>
+            </FormSection>
 
-            <div className="bg-[#0f172a] p-6 rounded-xl shadow-xl border border-slate-800">
-              <h2 className="text-xl font-bold border-b border-slate-800 pb-3 mb-6 text-slate-100 flex items-center gap-2">
-                <Eye className="w-5 h-5 text-cyan-400" />
-                Documents & Files
-              </h2>
+            <FormSection title="Documents & Files" icon={Eye}>
               <div className="space-y-3">
                  {documents.length === 0 ? (
                    <div className="text-center py-8 text-slate-500">
@@ -193,36 +195,34 @@ export default function ClientOrderDetailsPage() {
                    ))
                  )}
               </div>
-            </div>
+            </FormSection>
           </div>
 
           {/* Sidebar Actions / Progress */}
-          <div className="space-y-8">
-            <div className="bg-[#0f172a] p-6 rounded-xl shadow-xl border border-slate-800">
-              <h2 className="text-lg font-bold border-b border-slate-800 pb-3 mb-6 text-slate-100">Action Required</h2>
+          <div className="space-y-6">
+            <FormSection title="Status">
               {currentStatus === 'DRAFT' ? (
                 <div className="space-y-4">
-                  <p className="text-sm text-slate-400">Your order is in draft state. Submit it for engineering review when ready.</p>
+                  <p className="text-sm text-slate-400">Your order is in draft. Submit it for engineering review when ready.</p>
                   <Button className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold">Submit for Review</Button>
                 </div>
               ) : (
-                <div className="space-y-4 text-center py-4">
-                  <Loader2 className="w-12 h-12 text-cyan-500 mx-auto animate-spin mb-4" />
-                  <p className="text-sm text-slate-300 font-medium">Order is currently locked for processing.</p>
-                  <p className="text-xs text-slate-500">Awaiting status change from our engineering team.</p>
+                <div className="text-center py-4 space-y-3">
+                  <Loader2 className="w-10 h-10 text-cyan-500 mx-auto animate-spin" />
+                  <p className="text-sm text-slate-300 font-medium">Order is locked for processing.</p>
+                  <p className="text-xs text-slate-500">Awaiting update from our engineering team.</p>
                 </div>
               )}
-            </div>
+            </FormSection>
 
-            <div className="bg-[#0f172a] p-6 rounded-xl shadow-xl border border-slate-800">
-               <h2 className="text-lg font-bold border-b border-slate-800 pb-3 mb-6 text-slate-100">Order Timeline</h2>
-               <OrderTimeline 
-                 currentStatus={currentStatus} 
-                 createdAt={order.created_at} 
-                 updatedAt={order.updated_at} 
-                 updates={updates}
-               />
-            </div>
+            <FormSection title="Order Timeline">
+              <OrderTimeline
+                currentStatus={currentStatus}
+                createdAt={order.created_at}
+                updatedAt={order.updated_at}
+                updates={updates}
+              />
+            </FormSection>
           </div>
 
         </div>

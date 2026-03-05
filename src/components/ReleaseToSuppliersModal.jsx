@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { X, Building2, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -47,6 +48,11 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
         updated_at: new Date().toISOString()
       }).eq('id', order.id);
       if (orderErr) throw orderErr;
+
+      // Stamp supplier_id on all existing documents for this order so supplier can access them
+      await supabaseAdmin.from('documents')
+        .update({ supplier_id: selectedSupplierId })
+        .eq('order_id', order.id);
 
       // Create initial job update record
       await supabase.from('job_updates').insert({

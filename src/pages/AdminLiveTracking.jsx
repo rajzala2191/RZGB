@@ -6,7 +6,7 @@ import {
   Loader2, Search, Filter, ArrowUpRight, Eye, Clock, AlertCircle,
   Package, FileCheck, CheckCircle2, Hourglass, ShieldCheck, Truck,
   Zap, XCircle, RefreshCw, TrendingUp, BarChart3, ChevronDown,
-  ChevronUp, X, Calendar, DollarSign, MapPin, FileText
+  ChevronUp, X, Calendar, DollarSign, MapPin, FileText, Upload
 } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
@@ -58,6 +58,7 @@ const AdminLiveTracking = () => {
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState('updated'); // 'updated' | 'created' | 'risk'
+  const [uploadingDoc, setUploadingDoc] = useState(null); // orderId being uploaded to
 
   // Fetch job_updates for all ongoing orders
   useEffect(() => {
@@ -168,6 +169,33 @@ const AdminLiveTracking = () => {
     const orderDate = new Date(order.created_at);
     const dueDate = new Date(orderDate.getTime() + daysRequested * 24 * 60 * 60 * 1000);
     return Math.ceil((dueDate - new Date()) / (1000 * 60 * 60 * 24));
+  };
+
+  const handleAdminDocUpload = async (e, order) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingDoc(order.id);
+    try {
+      const ext = file.name.split('.').pop();
+      const storagePath = `admin-docs/${order.id}-${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabaseAdmin.storage.from('documents').upload(storagePath, file, { upsert: false });
+      if (uploadErr) throw uploadErr;
+      await supabaseAdmin.from('documents').insert({
+        order_id: order.id,
+        client_id: order.client_id || null,
+        supplier_id: order.supplier_id || null,
+        file_name: file.name,
+        file_path: storagePath,
+        uploaded_by: currentUser.id,
+        file_type: 'admin_document',
+        status: 'approved',
+      });
+    } catch (err) {
+      console.error('Admin doc upload error:', err);
+    } finally {
+      setUploadingDoc(null);
+      e.target.value = '';
+    }
   };
 
   const handleRefresh = async () => {
@@ -447,12 +475,19 @@ const AdminLiveTracking = () => {
                           )}
 
                           {/* Order Documents */}
-                          {(orderDocuments[order.id] || []).length > 0 && (
-                            <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-                              <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+                            <div className="flex items-center justify-between mb-4">
+                              <h4 className="text-sm font-bold text-white flex items-center gap-2">
                                 <Eye size={16} className="text-emerald-400" />
-                                Documents ({orderDocuments[order.id].length})
+                                Documents {(orderDocuments[order.id] || []).length > 0 && `(${orderDocuments[order.id].length})`}
                               </h4>
+                              <label className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${uploadingDoc === order.id ? 'bg-slate-700 text-slate-400' : 'bg-cyan-900/40 text-cyan-400 hover:bg-cyan-900/70 border border-cyan-800/50'}`}>
+                                {uploadingDoc === order.id ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+                                {uploadingDoc === order.id ? 'Uploading…' : 'Send to Supplier'}
+                                <input type="file" className="hidden" disabled={!!uploadingDoc} onChange={e => handleAdminDocUpload(e, order)} />
+                              </label>
+                            </div>
+                            {(orderDocuments[order.id] || []).length > 0 ? (
                               <div className="space-y-3">
                                 {orderDocuments[order.id].map(doc => (
                                   <DocumentPreview
@@ -463,8 +498,10 @@ const AdminLiveTracking = () => {
                                   />
                                 ))}
                               </div>
-                            </div>
-                          )}
+                            ) : (
+                              <p className="text-xs text-slate-500">No documents yet. Upload files to share with the assigned supplier.</p>
+                            )}
+                          </div>
 
                           {/* Action button */}
                           <div className="flex justify-end">

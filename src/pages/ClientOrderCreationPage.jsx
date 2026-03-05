@@ -1,240 +1,501 @@
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
-import { UploadCloud, CheckCircle2, AlertCircle, X, Loader2 } from 'lucide-react';
+import {
+  FormSection, FormField,
+  SelectField, TextareaField,
+} from '@/components/ui/FormSection';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
+import ThreeDModelViewer from '@/components/ThreeDModelViewer';
+import {
+  ClipboardList, Wrench, UploadCloud, Eye,
+  CheckCircle2, AlertCircle, X, Loader2,
+  Box, MapPin, ChevronRight, ChevronLeft,
+  FileText, ArrowRight,
+} from 'lucide-react';
 
-const FORBIDDEN_STRINGS = ['confidential', 'internal', 'secret', 'proprietary'];
+// ─── Constants ────────────────────────────────────────────────────────────────
+const FORBIDDEN = ['confidential', 'internal', 'secret', 'proprietary'];
+const MODEL_EXT = ['.stl', '.obj', '.gltf', '.glb', '.x_t'];
 
+const STEPS = [
+  { n: 1, label: 'Order Details',  icon: ClipboardList },
+  { n: 2, label: 'Specifications', icon: Wrench },
+  { n: 3, label: 'Files & Models', icon: UploadCloud },
+  { n: 4, label: 'Review',         icon: Eye },
+];
+
+const MATERIALS = [
+  'Aluminum 6061', 'Stainless Steel 304', 'Titanium',
+  'Brass', 'Copper', 'ABS Plastic', 'Nylon (PA12)', 'PEEK', 'Other',
+];
+const FINISHES = [
+  'As Machined', 'Bead Blast', 'Anodized (Clear)',
+  'Anodized (Color)', 'Powder Coat', 'Electropolished', 'Passivated',
+];
+
+// ─── Step indicator ───────────────────────────────────────────────────────────
+function StepIndicator({ current }) {
+  return (
+    <div className="flex items-center justify-between mb-8">
+      {STEPS.map((s, i) => {
+        const done   = s.n < current;
+        const active = s.n === current;
+        const Icon   = s.icon;
+        return (
+          <div key={s.n} className="flex-1 flex items-center">
+            <div className="flex flex-col items-center gap-1.5 relative z-10">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all
+                ${done   ? 'bg-cyan-600 border-cyan-600 text-white'
+                : active ? 'bg-[#0f172a] border-cyan-500 text-cyan-400'
+                :          'bg-[#0f172a] border-slate-700 text-slate-600'}`}>
+                {done ? <CheckCircle2 size={18} /> : <Icon size={16} />}
+              </div>
+              <span className={`text-xs font-bold hidden sm:block whitespace-nowrap
+                ${active ? 'text-cyan-400' : done ? 'text-slate-400' : 'text-slate-600'}`}>
+                {s.label}
+              </span>
+            </div>
+            {i < STEPS.length - 1 && (
+              <div className={`flex-1 h-px mx-2 mt-[-14px] ${done ? 'bg-cyan-600' : 'bg-slate-800'}`} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Navigation row ───────────────────────────────────────────────────────────
+function StepNav({ step, onBack, onNext, onSubmit, loading, canSubmit }) {
+  const last = step === STEPS.length;
+  return (
+    <div className="flex gap-3 pt-6 border-t border-slate-800 mt-6">
+      {step > 1 && (
+        <Button type="button" variant="outline"
+          className="border-slate-700 text-slate-300 hover:bg-slate-800"
+          onClick={onBack}>
+          <ChevronLeft size={16} className="mr-1" /> Back
+        </Button>
+      )}
+      <div className="flex-1" />
+      {last ? (
+        <Button type="button" onClick={onSubmit} disabled={loading || !canSubmit}
+          className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-8">
+          {loading
+            ? <><Loader2 size={16} className="animate-spin mr-2" /> Submitting…</>
+            : <><CheckCircle2 size={16} className="mr-2" /> Submit Order</>}
+        </Button>
+      ) : (
+        <Button type="button" onClick={onNext}
+          className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-8">
+          Continue <ChevronRight size={16} className="ml-1" />
+        </Button>
+      )}
+    </div>
+  );
+}
+
+// ─── File row ─────────────────────────────────────────────────────────────────
+function FileRow({ name, size, onRemove, active, onClick, icon: Icon, iconClass }) {
+  return (
+    <div onClick={onClick}
+      className={`flex items-center justify-between p-3 rounded-lg border transition-colors
+        ${onClick ? 'cursor-pointer' : ''}
+        ${active ? 'bg-cyan-900/20 border-cyan-600' : 'bg-[#1e293b] border-slate-700 hover:border-slate-600'}`}>
+      <div className="flex items-center gap-3 text-sm text-slate-200 min-w-0">
+        <Icon size={18} className={iconClass || 'text-slate-400'} />
+        <span className="truncate">{name}</span>
+        <span className="text-slate-500 shrink-0">{(size / 1024 / 1024).toFixed(2)} MB</span>
+      </div>
+      <button type="button" onClick={e => { e.stopPropagation(); onRemove(); }}
+        className="ml-3 text-slate-500 hover:text-red-400 transition-colors shrink-0">
+        <X size={16} />
+      </button>
+    </div>
+  );
+}
+
+// ─── Drop zone ────────────────────────────────────────────────────────────────
+function DropZone({ onDrop, inputId, accept, icon: Icon, title, subtitle }) {
+  return (
+    <div onDragOver={e => e.preventDefault()} onDrop={onDrop}
+      onClick={() => document.getElementById(inputId).click()}
+      className="border-2 border-dashed border-slate-700 rounded-xl py-10 text-center
+        hover:bg-[#1e293b] hover:border-cyan-500 transition-colors cursor-pointer">
+      <Icon className="mx-auto h-10 w-10 text-cyan-500 mb-3" />
+      <p className="text-slate-200 font-bold text-sm mb-1">{title}</p>
+      <p className="text-slate-500 text-xs">{subtitle}</p>
+      <input id={inputId} type="file" multiple {...(accept && accept !== '*' ? { accept } : {})} className="hidden" onChange={onDrop} />
+    </div>
+  );
+}
+
+// ─── Review summary row ───────────────────────────────────────────────────────
+function SummaryRow({ label, value }) {
+  if (!value) return null;
+  return (
+    <div className="flex justify-between gap-4 py-2 border-b border-slate-800/60 last:border-0">
+      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 shrink-0">{label}</span>
+      <span className="text-sm text-slate-200 text-right">{value}</span>
+    </div>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 export default function ClientOrderCreationPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    part_name: '', 
-    description: '',
-    material: '', 
-    quantity: '', 
-    tolerance: '',
-    surface_finish: '',
-    special_requirements: ''
-  });
-  const [files, setFiles] = useState([]);
 
-  const handleFileDrop = (e) => {
+  // Form state — every key maps to an orders table column
+  const [form, setForm] = useState({
+    part_name:            '',   // orders.part_name            TEXT NOT NULL
+    description:          '',   // orders.description           TEXT
+    material:             '',   // orders.material              TEXT
+    quantity:             '',   // orders.quantity              INTEGER
+    tolerance:            '',   // orders.tolerance             TEXT
+    surface_finish:       '',   // orders.surface_finish        TEXT
+    special_requirements: '',   // orders.special_requirements  TEXT
+    budget:               '',   // orders.budget                NUMERIC (GBP)
+    delivery_location:    '',   // orders.delivery_location     TEXT
+  });
+
+  const set = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
+
+  // File state — each file becomes a documents table row
+  const [drawingFiles, setDrawingFiles] = useState([]); // file_type = 'client_drawing'
+  const [modelFiles,   setModelFiles]   = useState([]); // file_type = '3d_model'
+  const [previewModel, setPreviewModel] = useState(null);
+
+  // ── Step validation ─────────────────────────────────────────────────────────
+  const validateStep1 = () => {
+    if (!form.part_name.trim()) {
+      toast({ title: 'Required', description: 'Part name is required.', variant: 'destructive' });
+      return false;
+    }
+    if (!form.material) {
+      toast({ title: 'Required', description: 'Please select a material.', variant: 'destructive' });
+      return false;
+    }
+    if (!form.quantity || parseInt(form.quantity) < 1) {
+      toast({ title: 'Required', description: 'Quantity must be at least 1.', variant: 'destructive' });
+      return false;
+    }
+    return true;
+  };
+
+  const nextStep = () => {
+    if (step === 1 && !validateStep1()) return;
+    setStep(s => Math.min(s + 1, STEPS.length));
+  };
+  const prevStep = () => setStep(s => Math.max(s - 1, 1));
+
+  // ── File handlers ───────────────────────────────────────────────────────────
+  const handleFileDrop = e => {
     e.preventDefault();
-    const droppedFiles = Array.from(e.dataTransfer?.files || e.target.files);
-    
-    const validFiles = [];
-    droppedFiles.forEach(f => {
-      const isForbidden = FORBIDDEN_STRINGS.some(str => f.name.toLowerCase().includes(str));
-      if (isForbidden) {
-        toast({ title: 'Validation Error', description: `File "${f.name}" contains forbidden keywords.`, variant: 'destructive' });
+    const dropped = Array.from(e.dataTransfer?.files || e.target.files);
+    const drawings = [];
+    const models = [];
+    dropped.forEach(f => {
+      const nameLow = f.name.toLowerCase();
+      if (FORBIDDEN.some(w => nameLow.includes(w))) {
+        toast({ title: 'Rejected', description: `"${f.name}" contains a forbidden keyword.`, variant: 'destructive' });
+        return;
+      }
+      if (MODEL_EXT.some(ext => nameLow.endsWith(ext))) {
+        models.push(f);
       } else {
-        validFiles.push(f);
+        drawings.push(f);
       }
     });
-    
-    setFiles(prev => [...prev, ...validFiles]);
+    if (drawings.length) setDrawingFiles(prev => [...prev, ...drawings]);
+    if (models.length) {
+      setModelFiles(prev => [...prev, ...models]);
+      setPreviewModel(models[models.length - 1]);
+    }
   };
 
-  const removeFile = (index) => {
-    setFiles(files.filter((_, i) => i !== index));
+  const removeDrawing = i => setDrawingFiles(prev => prev.filter((_, j) => j !== i));
+  const removeModel = i => {
+    const upd = modelFiles.filter((_, j) => j !== i);
+    setModelFiles(upd);
+    if (previewModel === modelFiles[i]) setPreviewModel(upd[upd.length - 1] || null);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // ── Submit ──────────────────────────────────────────────────────────────────
+  const handleSubmit = async () => {
+    if (!validateStep1()) { setStep(1); return; }
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('orders').insert([{
-        client_id: currentUser.id,
-        user_id: currentUser.id,
-        part_name: formData.part_name,
-        description: formData.description,
-        material: formData.material,
-        quantity: parseInt(formData.quantity, 10),
-        tolerance: formData.tolerance,
-        surface_finish: formData.surface_finish,
-        special_requirements: formData.special_requirements,
-        order_status: 'PENDING_ADMIN_SCRUB'
+      // 1. Insert order row
+      const { data: order, error } = await supabase.from('orders').insert([{
+        client_id:            currentUser.id,
+        user_id:              currentUser.id,              // legacy alias
+        part_name:            form.part_name.trim(),
+        description:          form.description || null,
+        material:             form.material,
+        quantity:             parseInt(form.quantity, 10),
+        tolerance:            form.tolerance || null,
+        surface_finish:       form.surface_finish || null,
+        special_requirements: form.special_requirements || null,
+        budget:               form.budget ? parseFloat(form.budget) : null,
+        delivery_location:    form.delivery_location || null,
+        order_status:         'PENDING_ADMIN_SCRUB',
       }]).select().single();
 
       if (error) throw error;
 
-      // Handle file uploads to storage bucket 'documents' (use admin client to bypass RLS)
-      if (files.length > 0) {
-         for (const file of files) {
-           const filePath = `${currentUser.id}/${data.id}/${file.name}`;
-           const { error: uploadError } = await supabaseAdmin.storage.from('documents').upload(filePath, file);
-           if (uploadError) {
-             console.error('File upload error:', uploadError);
-             toast({ title: 'Upload Warning', description: `Failed to upload ${file.name}: ${uploadError.message}`, variant: 'destructive' });
-             continue;
-           }
-           const { error: docError } = await supabaseAdmin.from('documents').insert([{
-              order_id: data.id,
-              client_id: currentUser.id,
-              file_name: file.name,
-              file_path: filePath,
-              file_type: 'client_drawing',
-              uploaded_by: currentUser.id,
-              status: 'PENDING_SCRUB'
-           }]);
-           if (docError) {
-             console.error('Document record insert error:', docError);
-             toast({ title: 'Upload Warning', description: `Failed to save record for ${file.name}: ${docError.message}`, variant: 'destructive' });
-           }
-         }
+      // 2. Upload technical drawings → documents.file_type = 'client_drawing'
+      for (const file of drawingFiles) {
+        const path = `${currentUser.id}/${order.id}/${file.name}`;
+        const { error: upErr } = await supabaseAdmin.storage.from('documents').upload(path, file);
+        if (upErr) { toast({ title: 'Upload Warning', description: `${file.name}: ${upErr.message}`, variant: 'destructive' }); continue; }
+        await supabaseAdmin.from('documents').insert([{
+          order_id:    order.id,
+          client_id:   currentUser.id,
+          uploaded_by: currentUser.id,
+          file_name:   file.name,
+          file_path:   path,
+          file_type:   'client_drawing',
+          status:      'PENDING_SCRUB',
+        }]);
       }
 
-      toast({ title: 'Success', description: 'Order successfully created and submitted.' });
-      navigate(`/client-dashboard/orders/${data.id}/tracking`);
-    } catch (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      // 3. Upload 3D models → documents.file_type = '3d_model'
+      for (const file of modelFiles) {
+        const path = `${currentUser.id}/${order.id}/models/${file.name}`;
+        const { error: upErr } = await supabaseAdmin.storage.from('documents').upload(path, file);
+        if (upErr) { toast({ title: 'Upload Warning', description: `${file.name}: ${upErr.message}`, variant: 'destructive' }); continue; }
+        await supabaseAdmin.from('documents').insert([{
+          order_id:    order.id,
+          client_id:   currentUser.id,
+          uploaded_by: currentUser.id,
+          file_name:   file.name,
+          file_path:   path,
+          file_type:   '3d_model',
+          status:      'ACTIVE',
+        }]);
+      }
+
+      toast({ title: 'Order Submitted', description: 'Your order is now pending admin review.' });
+      navigate(`/client-dashboard/orders/${order.id}/tracking`);
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientDashboardLayout>
-      <div className="max-w-4xl mx-auto py-8">
-        <h1 className="text-3xl font-black mb-2 text-slate-100">Create New Order</h1>
-        <p className="text-slate-400 mb-8">Fill in the details below to initiate a new manufacturing order.</p>
+      <div className="max-w-3xl mx-auto py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-black text-slate-100 mb-1">Create New Order</h1>
+          <p className="text-slate-400 text-sm">Complete each step to submit your manufacturing request.</p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 bg-[#0f172a] p-8 rounded-2xl shadow-2xl border border-slate-800">
-          
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold border-b border-slate-800 pb-2 text-cyan-400">Order Details</h2>
-            <div className="grid grid-cols-1 gap-6">
-              <div className="space-y-2">
-                <Label className="text-slate-300 font-bold">Part Name *</Label>
-                <Input required value={formData.part_name} onChange={e => setFormData({...formData, part_name: e.target.value})} className="text-slate-100 bg-[#1e293b] border-slate-700 placeholder-slate-500 focus:border-cyan-500" placeholder="e.g. Aluminum Enclosure V2" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-300 font-bold">Description</Label>
-                <textarea 
-                  rows="3" 
-                  value={formData.description} 
-                  onChange={e => setFormData({...formData, description: e.target.value})} 
-                  className="w-full rounded-md text-slate-100 bg-[#1e293b] border border-slate-700 p-3 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500" 
-                  placeholder="Provide a brief description of the order"
-                />
+        <StepIndicator current={step} />
+
+        {/* ── STEP 1: Order Details ──────────────────────────────────────────── */}
+        {step === 1 && (
+          <FormSection title="Order Details" icon={ClipboardList}>
+            <div className="space-y-6">
+              <FormField label="Part Name" required hint="A clear name for the part or assembly.">
+                <Input required value={form.part_name} onChange={set('part_name')}
+                  className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500"
+                  placeholder="e.g. Aluminium Enclosure V2" />
+              </FormField>
+
+              <FormField label="Description" hint="Describe the part, its function, and critical features.">
+                <TextareaField value={form.description} onChange={set('description')} rows={4}
+                  placeholder="Brief description of the part and its intended application" />
+              </FormField>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField label="Material" required>
+                  <SelectField required value={form.material} onChange={set('material')} placeholder="Select material">
+                    {MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                  </SelectField>
+                </FormField>
+
+                <FormField label="Quantity" required hint="Total units required.">
+                  <Input type="number" min="1" required value={form.quantity} onChange={set('quantity')}
+                    className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500"
+                    placeholder="e.g. 500" />
+                </FormField>
               </div>
             </div>
-          </div>
+            <StepNav step={step} onNext={nextStep} />
+          </FormSection>
+        )}
 
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold border-b border-slate-800 pb-2 text-cyan-400">Manufacturing Specifications</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label className="text-slate-300 font-bold">Material *</Label>
-                <select 
-                  required
-                  value={formData.material} 
-                  onChange={e => setFormData({...formData, material: e.target.value})} 
-                  className="w-full rounded-md text-slate-100 bg-[#1e293b] border border-slate-700 p-2.5 focus:outline-none focus:border-cyan-500"
-                >
-                  <option value="" disabled>Select Material</option>
-                  <option value="Aluminum 6061">Aluminum 6061</option>
-                  <option value="Stainless Steel 304">Stainless Steel 304</option>
-                  <option value="Titanium">Titanium</option>
-                  <option value="Brass">Brass</option>
-                  <option value="ABS Plastic">ABS Plastic</option>
-                  <option value="Other">Other (Specify in requirements)</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-300 font-bold">Quantity *</Label>
-                <Input type="number" min="1" required value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} className="text-slate-100 bg-[#1e293b] border-slate-700 focus:border-cyan-500" placeholder="e.g. 100" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-300 font-bold">Tolerance</Label>
-                <Input value={formData.tolerance} onChange={e => setFormData({...formData, tolerance: e.target.value})} className="text-slate-100 bg-[#1e293b] border-slate-700 focus:border-cyan-500" placeholder="e.g. +/- 0.05mm" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-300 font-bold">Surface Finish</Label>
-                <select 
-                  value={formData.surface_finish} 
-                  onChange={e => setFormData({...formData, surface_finish: e.target.value})} 
-                  className="w-full rounded-md text-slate-100 bg-[#1e293b] border border-slate-700 p-2.5 focus:outline-none focus:border-cyan-500"
-                >
-                  <option value="">Select Finish (Optional)</option>
-                  <option value="As Machined">As Machined</option>
-                  <option value="Bead Blast">Bead Blast</option>
-                  <option value="Anodized (Clear)">Anodized (Clear)</option>
-                  <option value="Anodized (Color)">Anodized (Color)</option>
-                  <option value="Powder Coat">Powder Coat</option>
-                </select>
-              </div>
-            </div>
-          </div>
+        {/* ── STEP 2: Specifications ─────────────────────────────────────────── */}
+        {step === 2 && (
+          <FormSection title="Specifications" icon={Wrench}>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField label="Tolerance" hint="e.g. ±0.05 mm · ISO 2768-m">
+                  <Input value={form.tolerance} onChange={set('tolerance')}
+                    className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500"
+                    placeholder="e.g. ±0.05 mm" />
+                </FormField>
 
-          <div className="space-y-2">
-             <Label className="text-slate-300 font-bold">Special Requirements</Label>
-             <textarea 
-               rows="3" 
-               value={formData.special_requirements} 
-               onChange={e => setFormData({...formData, special_requirements: e.target.value})} 
-               className="w-full rounded-md text-slate-100 bg-[#1e293b] border border-slate-700 p-3 placeholder-slate-500 focus:outline-none focus:border-cyan-500" 
-               placeholder="Any additional notes, packaging requests, or certifications required"
-             />
-          </div>
+                <FormField label="Surface Finish">
+                  <SelectField value={form.surface_finish} onChange={set('surface_finish')} placeholder="Select finish (optional)">
+                    {FINISHES.map(f => <option key={f} value={f}>{f}</option>)}
+                  </SelectField>
+                </FormField>
 
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold border-b border-slate-800 pb-2 text-cyan-400">File Upload</h2>
-            <div className="bg-[#1e293b] p-4 rounded-lg flex items-start gap-3 border border-amber-900/50 text-amber-500/80 mb-4">
-              <AlertCircle size={20} className="shrink-0 mt-0.5" />
-              <p className="text-sm">For your security, filenames containing words like <span className="font-bold">confidential, internal, secret, or proprietary</span> are automatically rejected. Files will be sanitized upon submission.</p>
-            </div>
-            
-            <div 
-              onDragOver={e => e.preventDefault()} 
-              onDrop={handleFileDrop}
-              className="border-2 border-dashed border-slate-700 rounded-xl p-12 text-center hover:bg-[#1e293b] hover:border-cyan-500 transition-colors bg-[#0f172a] cursor-pointer"
-              onClick={() => document.getElementById('file-upload').click()}
-            >
-              <UploadCloud className="mx-auto h-12 w-12 text-cyan-500 mb-4" />
-              <h3 className="text-slate-200 font-bold mb-1">Drag and drop files here</h3>
-              <p className="text-slate-400 text-sm">or click to browse from your computer</p>
-              <Input type="file" multiple className="hidden" id="file-upload" onChange={handleFileDrop} />
-            </div>
-
-            {files.length > 0 && (
-              <div className="mt-6 space-y-2">
-                <h4 className="text-sm font-bold text-slate-300 mb-3">Attached Files ({files.length})</h4>
-                {files.map((f, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-[#1e293b] rounded-lg border border-slate-700">
-                    <div className="flex items-center text-sm text-slate-200">
-                      <CheckCircle2 className="w-5 h-5 mr-3 text-emerald-500"/> 
-                      {f.name} <span className="text-slate-500 ml-2">({(f.size / 1024 / 1024).toFixed(2)} MB)</span>
-                    </div>
-                    <button type="button" onClick={() => removeFile(i)} className="text-slate-500 hover:text-red-400 transition-colors">
-                      <X size={18} />
-                    </button>
+                <FormField label="Target Budget (£)" hint="Optional — helps suppliers tailor bids.">
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-bold pointer-events-none">£</span>
+                    <Input type="number" min="0" step="0.01" value={form.budget} onChange={set('budget')}
+                      className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500 pl-7"
+                      placeholder="0.00" />
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </FormField>
 
-          <div className="flex gap-4 pt-4 border-t border-slate-800">
-            <Button type="button" variant="outline" onClick={() => navigate(-1)} className="w-1/3 border-slate-600 text-slate-300 hover:bg-slate-800">
-              Cancel
-            </Button>
-            <Button type="submit" className="w-2/3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold" disabled={loading}>
-              {loading ? <><Loader2 className="animate-spin mr-2" size={18} /> Processing...</> : 'Submit Order'}
-            </Button>
+                <FormField label="Delivery Location" hint="City, postcode, or full address.">
+                  <div className="relative">
+                    <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                    <Input value={form.delivery_location} onChange={set('delivery_location')}
+                      className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500 pl-8"
+                      placeholder="e.g. Manchester, M1 1AE" />
+                  </div>
+                </FormField>
+              </div>
+
+              <FormField label="Special Requirements" hint="Certifications, packaging, marking, inspection level, etc.">
+                <TextareaField value={form.special_requirements} onChange={set('special_requirements')} rows={4}
+                  placeholder="Any additional notes, packaging requests, or certifications required" />
+              </FormField>
+            </div>
+            <StepNav step={step} onBack={prevStep} onNext={nextStep} />
+          </FormSection>
+        )}
+
+        {/* ── STEP 3: Files & Models ─────────────────────────────────────────── */}
+        {step === 3 && (
+          <div className="space-y-6">
+            <FormSection title="Files & Attachments" icon={UploadCloud}>
+              <div className="flex gap-3 bg-[#1e293b] border border-amber-900/40 rounded-lg p-4 mb-5">
+                <AlertCircle size={18} className="text-amber-500/80 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-500/80 leading-relaxed">
+                  Files named with <strong>confidential, internal, secret</strong> or <strong>proprietary</strong> are rejected.
+                  All drawings are AI-sanitised before reaching suppliers. 3D models (.stl .obj .gltf .glb .x_t) are auto-detected.
+                </p>
+              </div>
+
+              <DropZone onDrop={handleFileDrop} inputId="file-upload"
+                icon={UploadCloud} title="Drag and drop files here"
+                subtitle="PDF · DXF · DWG · STEP · IGES · STL · OBJ · GLTF · GLB · X_T · or any engineering file" />
+
+              {drawingFiles.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Drawings & Documents ({drawingFiles.length})</p>
+                  {drawingFiles.map((f, i) => (
+                    <FileRow key={i} name={f.name} size={f.size}
+                      onRemove={() => removeDrawing(i)}
+                      icon={FileText} iconClass="text-slate-400" />
+                  ))}
+                </div>
+              )}
+
+              {modelFiles.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">3D Models ({modelFiles.length}) — click to preview</p>
+                  {modelFiles.map((f, i) => (
+                    <FileRow key={i} name={f.name} size={f.size}
+                      active={previewModel === f}
+                      onClick={() => setPreviewModel(f)}
+                      onRemove={() => removeModel(i)}
+                      icon={Box} iconClass="text-cyan-500" />
+                  ))}
+                  {previewModel && (
+                    <div className="mt-3">
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Preview — {previewModel.name}</p>
+                      <ThreeDModelViewer file={previewModel} />
+                    </div>
+                  )}
+                </div>
+              )}
+            </FormSection>
+
+            <StepNav step={step} onBack={prevStep} onNext={nextStep} />
           </div>
-        </form>
+        )}
+
+        {/* ── STEP 4: Review & Submit ────────────────────────────────────────── */}
+        {step === 4 && (
+          <div className="space-y-5">
+            <FormSection title="Order Summary" icon={Eye}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Order Details</p>
+                  <SummaryRow label="Part Name"   value={form.part_name} />
+                  <SummaryRow label="Description" value={form.description} />
+                  <SummaryRow label="Material"    value={form.material} />
+                  <SummaryRow label="Quantity"    value={form.quantity} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Specifications</p>
+                  <SummaryRow label="Tolerance"      value={form.tolerance} />
+                  <SummaryRow label="Surface Finish" value={form.surface_finish} />
+                  <SummaryRow label="Budget"
+                    value={form.budget ? `£${parseFloat(form.budget).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : null} />
+                  <SummaryRow label="Delivery"       value={form.delivery_location} />
+                </div>
+                {form.special_requirements && (
+                  <div className="col-span-2 pt-3 mt-3 border-t border-slate-800">
+                    <SummaryRow label="Special Requirements" value={form.special_requirements} />
+                  </div>
+                )}
+              </div>
+            </FormSection>
+
+            {(drawingFiles.length > 0 || modelFiles.length > 0) && (
+              <FormSection title="Attached Files" icon={UploadCloud}>
+                <div className="space-y-1.5">
+                  {drawingFiles.map((f, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm text-slate-300 py-1">
+                      <FileText size={14} className="text-slate-500 shrink-0" />
+                      <span className="truncate">{f.name}</span>
+                      <span className="text-slate-600 text-xs ml-auto shrink-0">{(f.size / 1024 / 1024).toFixed(2)} MB</span>
+                    </div>
+                  ))}
+                  {modelFiles.map((f, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm text-slate-300 py-1">
+                      <Box size={14} className="text-cyan-600 shrink-0" />
+                      <span className="truncate">{f.name}</span>
+                      <span className="text-slate-600 text-xs ml-auto shrink-0">{(f.size / 1024 / 1024).toFixed(2)} MB</span>
+                    </div>
+                  ))}
+                </div>
+              </FormSection>
+            )}
+
+            <div className="bg-[#0f172a] border border-cyan-900/40 rounded-xl p-4 flex gap-3">
+              <ArrowRight size={18} className="text-cyan-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Once submitted, your order enters <span className="text-cyan-400 font-bold">Admin Review</span>.
+                Drawings are AI-sanitised before sharing with suppliers.
+                You can track progress in real time from your dashboard.
+              </p>
+            </div>
+
+            <StepNav step={step} onBack={prevStep} onSubmit={handleSubmit} loading={loading}
+              canSubmit={!!form.part_name && !!form.material && !!form.quantity} />
+          </div>
+        )}
       </div>
     </ClientDashboardLayout>
   );

@@ -10,8 +10,9 @@ import {
 } from '@/components/ui/dialog';
 import {
   Loader2, AlertCircle, CheckCircle2, Clock, Upload, FileText,
-  ChevronRight, Package, Zap, Hourglass, ShieldCheck, Truck, AlertTriangle, Eye
+  ChevronRight, Package, Zap, Hourglass, ShieldCheck, Truck, AlertTriangle, Eye, Box
 } from 'lucide-react';
+import ThreeDModelViewer from '@/components/ThreeDModelViewer';
 import { format } from 'date-fns';
 import OrderTimeline from '@/components/OrderTimeline';
 import DocumentPreview from '@/components/DocumentPreview';
@@ -96,7 +97,7 @@ export default function SupplierOrderManager() {
       const { data, error: err } = await supabaseAdmin
         .from('documents')
         .select('id, order_id, file_name, file_path, file_type, status, created_at')
-        .eq('uploaded_by', currentUser.id)
+        .or(`uploaded_by.eq.${currentUser.id},supplier_id.eq.${currentUser.id}`)
         .order('created_at', { ascending: false });
 
       if (err) throw err;
@@ -581,21 +582,61 @@ export default function SupplierOrderManager() {
                         </div>
                       )}
 
-                      {/* Uploaded Documents with Preview */}
-                      {(orderDocuments[order.id] || []).length > 0 && (
+                      {/* Client Drawings & 3D Models */}
+                      {(() => {
+                        const clientDocs = (orderDocuments[order.id] || []).filter(d =>
+                          d.file_type === 'client_drawing' || d.file_type === '3d_model'
+                        );
+                        const models = clientDocs.filter(d => d.file_type === '3d_model');
+                        const drawings = clientDocs.filter(d => d.file_type === 'client_drawing');
+                        if (!clientDocs.length) return null;
+                        return (
+                          <div className="space-y-3">
+                            <label className="block text-sm font-medium text-slate-300 flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-cyan-400" />
+                              Technical Drawings & Files ({clientDocs.length})
+                            </label>
+                            {drawings.map(doc => (
+                              <DocumentPreview key={doc.id} filePath={doc.file_path} fileName={doc.file_name} compact={true} />
+                            ))}
+                            {models.map(doc => (
+                              <div key={doc.id} className="space-y-1">
+                                <div className="flex items-center gap-2 text-xs text-slate-400">
+                                  <Box className="w-3.5 h-3.5 text-cyan-500" />
+                                  {doc.file_name}
+                                </div>
+                                <ThreeDModelViewer url={doc.file_url} fileName={doc.file_name} />
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Admin Documents */}
+                      {(orderDocuments[order.id] || []).filter(d => d.file_type === 'admin_document').length > 0 && (
+                        <div>
+                          <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-amber-400" />
+                            From RZ Engineering ({(orderDocuments[order.id] || []).filter(d => d.file_type === 'admin_document').length})
+                          </label>
+                          <div className="space-y-3">
+                            {(orderDocuments[order.id] || []).filter(d => d.file_type === 'admin_document').map(doc => (
+                              <DocumentPreview key={doc.id} filePath={doc.file_path} fileName={doc.file_name} compact={true} />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Supplier Submissions */}
+                      {(orderDocuments[order.id] || []).filter(d => d.file_type === 'supplier_submission').length > 0 && (
                         <div>
                           <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
                             <Eye className="w-4 h-4 text-cyan-400" />
-                            Uploaded Documents ({orderDocuments[order.id].length})
+                            Your Submissions ({(orderDocuments[order.id] || []).filter(d => d.file_type === 'supplier_submission').length})
                           </label>
                           <div className="space-y-3">
-                            {orderDocuments[order.id].map(doc => (
-                              <DocumentPreview
-                                key={doc.id}
-                                filePath={doc.file_path}
-                                fileName={doc.file_name}
-                                compact={true}
-                              />
+                            {(orderDocuments[order.id] || []).filter(d => d.file_type === 'supplier_submission').map(doc => (
+                              <DocumentPreview key={doc.id} filePath={doc.file_path} fileName={doc.file_name} compact={true} />
                             ))}
                           </div>
                         </div>

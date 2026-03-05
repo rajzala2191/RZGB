@@ -1,15 +1,59 @@
-import React, { useState } from 'react';
-import { FileText, Download, Lock, Eye, Image as ImageIcon, Box } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { FileText, Download, Lock, Eye, Image as ImageIcon, Box, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { logAssetView } from '@/lib/auditLogger';
+import ThreeDModelViewer from '@/components/ThreeDModelViewer';
+
+const MODEL_EXTENSIONS = ['.stl', '.obj', '.gltf', '.glb', '.x_t'];
+const isModel = (name = '') => MODEL_EXTENSIONS.some(ext => name.toLowerCase().endsWith(ext));
 
 const AssetViewer = ({ assets, orderId }) => {
   const { currentUser } = useAuth();
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [loadingBlob, setLoadingBlob] = useState(false);
+  const prevBlobUrl = useRef(null);
+
+  // For PDFs: fetch as blob to bypass Supabase X-Frame-Options header
+  useEffect(() => {
+    if (prevBlobUrl.current) {
+      URL.revokeObjectURL(prevBlobUrl.current);
+      prevBlobUrl.current = null;
+    }
+    setBlobUrl(null);
+    if (!selectedAsset?.file_url || selectedAsset.asset_type !== 'pdf') return;
+
+    let cancelled = false;
+    setLoadingBlob(true);
+    fetch(selectedAsset.file_url)
+      .then(r => r.blob())
+      .then(blob => {
+        if (cancelled) return;
+        const url = URL.createObjectURL(blob);
+        prevBlobUrl.current = url;
+        setBlobUrl(url);
+      })
+      .catch(() => { if (!cancelled) setBlobUrl(null); })
+      .finally(() => { if (!cancelled) setLoadingBlob(false); });
+
+    return () => { cancelled = true; };
+  }, [selectedAsset]);
 
   const handleView = async (asset) => {
     setSelectedAsset(asset);
     await logAssetView(currentUser.id, orderId, asset.asset_name);
+  };
+
+  const handleDownload = () => {
+    if (!selectedAsset?.file_url) return;
+    const a = document.createElement('a');
+    a.href = selectedAsset.file_url;
+    a.download = selectedAsset.asset_name;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   return (
@@ -39,7 +83,7 @@ const AssetViewer = ({ assets, orderId }) => {
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-slate-900 rounded-lg text-slate-400">
-                      {asset.asset_type === 'pdf' ? <FileText size={20} /> : <ImageIcon size={20} />}
+                      {asset.asset_type === 'pdf' ? <FileText size={20} /> : isModel(asset.asset_name) ? <Box size={20} className="text-cyan-500" /> : <ImageIcon size={20} />}
                     </div>
                     <div className="overflow-hidden">
                       <p className="text-sm font-medium text-slate-200 truncate">{asset.asset_name}</p>
@@ -53,50 +97,80 @@ const AssetViewer = ({ assets, orderId }) => {
         </div>
 
         {/* Viewer Area */}
-        <div className="lg:col-span-2 relative bg-slate-950 flex items-center justify-center overflow-hidden select-none">
+        <div className="lg:col-span-2 relative bg-slate-950 flex items-center justify-center overflow-hidden">
           {selectedAsset ? (
-            <div 
-              className="relative w-full h-full flex items-center justify-center p-8"
-              onContextMenu={(e) => e.preventDefault()}
-            >
-              {/* Mock Content */}
-              <div className="bg-white/90 p-12 rounded shadow-2xl max-w-lg text-slate-900 text-center relative z-10">
-                 <FileText size={64} className="mx-auto mb-4 text-slate-400" />
-                 <h4 className="text-xl font-bold mb-2">{selectedAsset.asset_name}</h4>
-                 <p className="text-sm text-slate-500">Preview Mode</p>
-                 <div className="mt-6 p-4 bg-slate-100 rounded text-xs font-mono text-left">
-                    <p>SPECIFICATION: RZ-STD-884</p>
-                    <p>TOLERANCE: +/- 0.05mm</p>
-                    <p>MATERIAL: AL-6061-T6</p>
-                    <p className="blur-[2px] select-none mt-2">Confidential technical data...</p>
-                 </div>
-              </div>
-
-              {/* Watermark Overlay */}
-              <div 
-                className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center overflow-hidden"
-                style={{ backgroundImage: 'linear-gradient(45deg, transparent 48%, rgba(255,255,255,0.05) 50%, transparent 52%)', backgroundSize: '20px 20px' }}
-              >
-                <div className="transform -rotate-45 text-slate-500/10 text-4xl font-black whitespace-nowrap select-none">
-                  RZ PROPRIETARY • {currentUser?.id?.slice(0,8).toUpperCase()} • DO NOT DISTRIBUTE
+            <div className="relative w-full h-full flex flex-col" style={{ minHeight: '400px' }}>
+              {/* File Render */}
+              {selectedAsset.file_url ? (
+                selectedAsset.asset_type === 'pdf' ? (
+                  loadingBlob ? (
+                    <div className="flex-1 flex items-center justify-center text-slate-400">
+                      <Loader2 size={32} className="animate-spin" />
+                    </div>
+                  ) : blobUrl ? (
+                    <iframe
+                      src={blobUrl}
+                      title={selectedAsset.asset_name}
+                      className="w-full flex-1"
+                      style={{ minHeight: '400px', border: 'none' }}
+                    />
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
+                      <FileText size={48} className="mb-3 opacity-30" />
+                      <p className="text-sm">Failed to load PDF</p>
+                    </div>
+                  )
+                ) : isModel(selectedAsset.asset_name) ? (
+                  <div className="flex-1 p-4">
+                    <ThreeDModelViewer url={selectedAsset.file_url} fileName={selectedAsset.asset_name} />
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+                    <img
+                      src={selectedAsset.file_url}
+                      alt={selectedAsset.asset_name}
+                      className="max-w-full max-h-[500px] object-contain rounded shadow-lg"
+                      onContextMenu={(e) => e.preventDefault()}
+                    />
+                  </div>
+                )
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
+                  <FileText size={48} className="mb-3 opacity-30" />
+                  <p className="text-sm">Preview unavailable</p>
                 </div>
+              )}
+
+              {/* Watermark */}
+              <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center overflow-hidden">
+                <p className="transform -rotate-45 text-white/5 text-4xl font-black whitespace-nowrap select-none">
+                  RZ GLOBAL • {currentUser?.id?.slice(0, 8).toUpperCase()} • CONFIDENTIAL
+                </p>
               </div>
 
-              {/* Secure Actions */}
-              <div className="absolute bottom-4 right-4 z-30 flex gap-2">
-                 <button 
-                   disabled={!selectedAsset.download_enabled}
-                   className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-400 rounded-lg text-sm font-bold border border-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white transition-colors"
-                 >
-                   {selectedAsset.download_enabled ? <Download size={16} /> : <Lock size={16} />}
-                   {selectedAsset.download_enabled ? 'Download' : 'Download Locked'}
-                 </button>
+              {/* Download */}
+              <div className="absolute bottom-4 right-4 z-20">
+                {selectedAsset.download_enabled && selectedAsset.file_url ? (
+                  <a
+                    href={selectedAsset.file_url}
+                    download={selectedAsset.asset_name}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg"
+                  >
+                    <Download size={16} /> Download
+                  </a>
+                ) : (
+                  <span className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-500 rounded-lg text-sm font-bold border border-slate-700">
+                    <Lock size={16} /> Download Locked
+                  </span>
+                )}
               </div>
             </div>
           ) : (
             <div className="text-center text-slate-600">
               <Eye size={48} className="mx-auto mb-4 opacity-20" />
-              <p>Select an asset to view securely</p>
+              <p>Select an asset to view</p>
             </div>
           )}
         </div>
