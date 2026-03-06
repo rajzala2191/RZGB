@@ -316,13 +316,16 @@ const LoginPage = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   useEffect(() => {
+    // Don't redirect while the forgot-password modal is open — OTP verification
+    // establishes a session mid-flow and we need to stay on the password step.
+    if (showForgotPassword) return;
     if (currentUser && userRole) {
       if (userRole === 'admin') navigate('/control-centre', { replace: true });
       else if (userRole === 'client') navigate('/client-dashboard', { replace: true });
       else if (userRole === 'supplier') navigate('/supplier-hub', { replace: true });
       else navigate('/', { replace: true });
     }
-  }, [currentUser, userRole, navigate]);
+  }, [currentUser, userRole, navigate, showForgotPassword]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
