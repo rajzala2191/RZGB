@@ -12,7 +12,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 const ForgotPasswordModal = ({ onClose }) => {
   const [step, setStep] = useState('email'); // 'email' | 'otp' | 'password' | 'done'
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '', '', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +51,7 @@ const ForgotPasswordModal = ({ onClose }) => {
     const next = [...otp];
     next[index] = value.slice(-1);
     setOtp(next);
-    if (value && index < 5) otpRefs.current[index + 1]?.focus();
+    if (value && index < 7) otpRefs.current[index + 1]?.focus();
   };
 
   const handleOtpKeyDown = (index, e) => {
@@ -61,10 +61,10 @@ const ForgotPasswordModal = ({ onClose }) => {
   };
 
   const handleOtpPaste = (e) => {
-    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (text.length === 6) {
+    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8);
+    if (text.length === 8) {
       setOtp(text.split(''));
-      otpRefs.current[5]?.focus();
+      otpRefs.current[7]?.focus();
     }
     e.preventDefault();
   };
@@ -72,7 +72,7 @@ const ForgotPasswordModal = ({ onClose }) => {
   const handleVerifyOtp = async (e) => {
     e?.preventDefault();
     const token = otp.join('');
-    if (token.length < 6) { setError('Please enter the complete 6-digit code.'); return; }
+    if (token.length < 8) { setError('Please enter the complete 8-digit code.'); return; }
     setError('');
     setLoading(true);
     try {
@@ -138,7 +138,7 @@ const ForgotPasswordModal = ({ onClose }) => {
           <form onSubmit={handleSendOtp} className="space-y-5">
             <div>
               <h2 className="text-xl font-bold text-white mb-1">Forgot your password?</h2>
-              <p className="text-sm text-gray-400">Enter your registered email and we'll send you a 6-digit code.</p>
+              <p className="text-sm text-gray-400">Enter your registered email and we'll send you an 8-digit code.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
@@ -170,12 +170,12 @@ const ForgotPasswordModal = ({ onClose }) => {
         {step === 'otp' && (
           <form onSubmit={handleVerifyOtp} className="space-y-5">
             <div>
-              <button type="button" onClick={() => { setStep('email'); setError(''); setOtp(['','','','','','']); }} className="flex items-center gap-1 text-sm text-gray-400 hover:text-orange-400 transition-colors mb-3">
+              <button type="button" onClick={() => { setStep('email'); setError(''); setOtp(['','','','','','','','']); }} className="flex items-center gap-1 text-sm text-gray-400 hover:text-orange-400 transition-colors mb-3">
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
               <h2 className="text-xl font-bold text-white mb-1">Enter verification code</h2>
               <p className="text-sm text-gray-400">
-                We sent a 6-digit code to <span className="text-orange-400 font-medium">{email}</span>. It expires in 1 hour.
+                We sent an 8-digit code to <span className="text-orange-400 font-medium">{email}</span>. It expires in 1 hour.
               </p>
             </div>
             <div className="flex justify-between gap-2" onPaste={handleOtpPaste}>
