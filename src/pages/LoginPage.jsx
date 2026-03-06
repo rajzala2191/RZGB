@@ -10,7 +10,6 @@ import { supabase } from '@/lib/customSupabaseClient';
 // ─── Forgot Password Modal ───────────────────────────────────────────────────
 
 const ForgotPasswordModal = ({ onClose }) => {
-  const { toast } = useToast();
   const [step, setStep] = useState('email'); // 'email' | 'otp' | 'password' | 'done'
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -22,7 +21,6 @@ const ForgotPasswordModal = ({ onClose }) => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const otpRefs = useRef([]);
 
-  // Countdown timer for resend
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const t = setInterval(() => setResendCooldown(c => c - 1), 1000);
@@ -34,16 +32,15 @@ const ForgotPasswordModal = ({ onClose }) => {
     setError('');
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
-        options: { shouldCreateUser: false },
-      });
+      const { error: err } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase(),
+        { redirectTo: `${window.location.origin}/reset-password` }
+      );
       if (err) throw err;
       setStep('otp');
       setResendCooldown(60);
-      toast({ title: 'OTP Sent', description: 'Check your email for the 6-digit code.' });
     } catch (err) {
-      setError(err.message || 'Failed to send OTP. Please check the email address.');
+      setError(err.message || 'Failed to send code. Please check the email address.');
     } finally {
       setLoading(false);
     }
@@ -79,10 +76,11 @@ const ForgotPasswordModal = ({ onClose }) => {
     setError('');
     setLoading(true);
     try {
+      // type: 'recovery' is required for OTPs sent via resetPasswordForEmail
       const { error: err } = await supabase.auth.verifyOtp({
         email: email.trim().toLowerCase(),
         token,
-        type: 'email',
+        type: 'recovery',
       });
       if (err) throw err;
       setStep('password');
@@ -102,7 +100,6 @@ const ForgotPasswordModal = ({ onClose }) => {
     try {
       const { error: err } = await supabase.auth.updateUser({ password: newPassword });
       if (err) throw err;
-      // Sign out so user logs in fresh with new password
       await supabase.auth.signOut();
       setStep('done');
     } catch (err) {
@@ -128,15 +125,10 @@ const ForgotPasswordModal = ({ onClose }) => {
         transition={{ duration: 0.25 }}
         className="w-full max-w-md bg-[#111111] rounded-xl shadow-2xl border border-gray-800 p-8 relative"
       >
-        {/* Close */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
           <X className="w-5 h-5" />
         </button>
 
-        {/* Logo */}
         <div className="flex justify-center mb-6">
           <img src="/light-logo.png" alt="RZ Global Solutions" className="h-12 object-contain" />
         </div>
@@ -146,7 +138,7 @@ const ForgotPasswordModal = ({ onClose }) => {
           <form onSubmit={handleSendOtp} className="space-y-5">
             <div>
               <h2 className="text-xl font-bold text-white mb-1">Forgot your password?</h2>
-              <p className="text-sm text-gray-400">Enter your registered email and we'll send you a one-time code.</p>
+              <p className="text-sm text-gray-400">Enter your registered email and we'll send you a 6-digit code.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
@@ -169,7 +161,7 @@ const ForgotPasswordModal = ({ onClose }) => {
               disabled={loading}
               className="w-full bg-gradient-to-r from-[#FF6B35] to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:from-orange-500 hover:to-orange-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? <Spinner /> : <><Mail className="w-4 h-4" /> Send One-Time Code</>}
+              {loading ? <Spinner /> : <><Mail className="w-4 h-4" /> Send Code</>}
             </button>
           </form>
         )}
@@ -178,12 +170,12 @@ const ForgotPasswordModal = ({ onClose }) => {
         {step === 'otp' && (
           <form onSubmit={handleVerifyOtp} className="space-y-5">
             <div>
-              <button type="button" onClick={() => { setStep('email'); setError(''); }} className="flex items-center gap-1 text-sm text-gray-400 hover:text-orange-400 transition-colors mb-3">
+              <button type="button" onClick={() => { setStep('email'); setError(''); setOtp(['','','','','','']); }} className="flex items-center gap-1 text-sm text-gray-400 hover:text-orange-400 transition-colors mb-3">
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
               <h2 className="text-xl font-bold text-white mb-1">Enter verification code</h2>
               <p className="text-sm text-gray-400">
-                We sent a 6-digit code to <span className="text-orange-400 font-medium">{email}</span>. It expires in 10 minutes.
+                We sent a 6-digit code to <span className="text-orange-400 font-medium">{email}</span>. It expires in 1 hour.
               </p>
             </div>
             <div className="flex justify-between gap-2" onPaste={handleOtpPaste}>
@@ -211,7 +203,7 @@ const ForgotPasswordModal = ({ onClose }) => {
             </button>
             <div className="text-center">
               {resendCooldown > 0 ? (
-                <span className="text-xs text-gray-500">Resend code in {resendCooldown}s</span>
+                <span className="text-xs text-gray-500">Resend available in {resendCooldown}s</span>
               ) : (
                 <button type="button" onClick={handleSendOtp} className="text-xs text-orange-400 hover:text-orange-300 transition-colors">
                   Didn't receive it? Resend code
@@ -280,7 +272,7 @@ const ForgotPasswordModal = ({ onClose }) => {
               </div>
             </div>
             <h2 className="text-xl font-bold text-white">Password updated!</h2>
-            <p className="text-sm text-gray-400">Your password has been successfully reset. You can now sign in with your new password.</p>
+            <p className="text-sm text-gray-400">Your password has been changed. You can now sign in with your new password.</p>
             <button
               onClick={onClose}
               className="w-full bg-gradient-to-r from-[#FF6B35] to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:from-orange-500 hover:to-orange-800 transition-all mt-2"
@@ -415,11 +407,9 @@ const LoginPage = () => {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                    Password
-                  </label>
-                </div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+                  Password
+                </label>
                 <div className="relative group">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
                   <input
@@ -483,7 +473,6 @@ const LoginPage = () => {
         </motion.div>
       </div>
 
-      {/* Forgot Password Modal */}
       <AnimatePresence>
         {showForgotPassword && (
           <ForgotPasswordModal onClose={() => setShowForgotPassword(false)} />
