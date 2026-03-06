@@ -29,7 +29,7 @@ export default function SupplierDocumentsPortal() {
 
   const getFileIcon = (type) => {
     if (type?.includes('pdf')) return <FileText className="text-red-400" />;
-    if (type?.includes('image')) return <FileImage className="text-cyan-400" />;
+    if (type?.includes('image')) return <FileImage className="text-orange-400" />;
     return <FileText className="text-slate-400" />;
   };
 
@@ -72,7 +72,7 @@ export default function SupplierDocumentsPortal() {
                     <div className="p-2 bg-slate-900 rounded-lg border border-slate-700">
                       {getFileIcon(doc.file_type)}
                     </div>
-                    <span className="font-medium text-slate-200 group-hover:text-cyan-400 transition-colors">{doc.file_name}</span>
+                    <span className="font-medium text-slate-200 group-hover:text-orange-400 transition-colors">{doc.file_name}</span>
                   </td>
                   <td className="p-4 text-slate-400 uppercase text-xs font-semibold">{(doc.file_type || 'General').replace(/_/g, ' ')}</td>
                   <td className="p-4 font-mono text-xs text-slate-500">{doc.order_id?.slice(0,8) || 'N/A'}</td>
@@ -82,7 +82,7 @@ export default function SupplierDocumentsPortal() {
                       <Button 
                         size="sm" 
                         variant="ghost" 
-                        className="text-cyan-500 hover:text-cyan-400 hover:bg-cyan-900/20"
+                        className="text-orange-500 hover:text-orange-400 hover:bg-orange-900/20"
                         onClick={() => setPreviewDoc(doc)}
                       >
                         <Eye size={16} />

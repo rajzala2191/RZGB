@@ -91,7 +91,7 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
           {/* Order Details */}
           <div className="bg-[#1e293b] p-4 rounded-lg border border-slate-700 space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-slate-400">Order ID:</span> <span className="font-mono text-slate-200">{order?.id?.slice(0, 8)}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">Ghost Name:</span> <span className="font-semibold text-cyan-400">{order?.ghost_public_name}</span></div>
+            <div className="flex justify-between"><span className="text-slate-400">Sanitised Name:</span> <span className="font-semibold text-orange-400">{order?.ghost_public_name}</span></div>
             <div className="flex justify-between"><span className="text-slate-400">Material:</span> <span className="text-slate-200">{order?.material}</span></div>
             <div className="flex justify-between"><span className="text-slate-400">Quantity:</span> <span className="text-slate-200">{order?.quantity}</span></div>
           </div>
@@ -105,10 +105,10 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
                   key={s.id}
                   onClick={() => setSelectedSupplierId(s.id)}
                   className={`p-3 rounded-lg border cursor-pointer transition-colors flex items-center gap-3 ${
-                    selectedSupplierId === s.id ? 'bg-cyan-900/20 border-cyan-500' : 'bg-[#1e293b] border-slate-700 hover:border-slate-500'
+                    selectedSupplierId === s.id ? 'bg-orange-900/20 border-orange-500' : 'bg-[#1e293b] border-slate-700 hover:border-slate-500'
                   }`}
                 >
-                  <Building2 size={20} className={selectedSupplierId === s.id ? 'text-cyan-400' : 'text-slate-500'} />
+                  <Building2 size={20} className={selectedSupplierId === s.id ? 'text-orange-400' : 'text-slate-500'} />
                   <div>
                     <p className="font-semibold text-slate-200">{s.company_name || s.email}</p>
                     <p className="text-xs text-slate-400">{s.specialization}</p>
@@ -124,7 +124,7 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
               <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
               <div>
                 <p>Order will be directly awarded to <strong>{selectedSupplier.company_name || selectedSupplier.email}</strong>.</p>
-                <p className="mt-1 opacity-80">Supplier will see the ghost identity only (not client name). Production can start immediately.</p>
+                <p className="mt-1 opacity-80">Supplier will see the sanitised identity only (not client name). Production can start immediately.</p>
               </div>
             </div>
           )}

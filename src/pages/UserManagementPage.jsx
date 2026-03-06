@@ -1,101 +1,247 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/customSupabaseClient';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
-import UserInvitationForm from '@/components/UserInvitationForm';
-import UsersTable from '@/components/UsersTable';
-import { Users } from 'lucide-react';
+import UserCard from '@/components/UserCard';
+import UserDetailDrawer from '@/components/UserDetailDrawer';
+import InviteUserModal from '@/components/InviteUserModal';
+import {
+  Users, Shield, User, Truck, Plus, Search,
+  Loader2, UserCheck, Clock, AlertCircle
+} from 'lucide-react';
+
+const FILTER_TABS = [
+  { key: 'all',      label: 'All',       icon: Users  },
+  { key: 'client',   label: 'Clients',   icon: User   },
+  { key: 'supplier', label: 'Suppliers', icon: Truck  },
+  { key: 'admin',    label: 'Admins',    icon: Shield },
+];
+
+const StatCard = ({ icon: Icon, label, value, color }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="bg-[#0f172a] border border-slate-800 rounded-xl p-4 flex items-center gap-4"
+  >
+    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
+      <Icon size={18} />
+    </div>
+    <div>
+      <p className="text-2xl font-bold text-slate-100">{value}</p>
+      <p className="text-xs text-slate-500">{label}</p>
+    </div>
+  </motion.div>
+);
 
 const UserManagementPage = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers]               = useState([]);
+  const [orderCounts, setOrderCounts]   = useState({});
+  const [loading, setLoading]           = useState(true);
+  const [search, setSearch]             = useState('');
+  const [roleFilter, setRoleFilter]     = useState('all');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showInvite, setShowInvite]     = useState(false);
 
   const fetchUsers = async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, email, company_name, role, status, created_at, logo_url')
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       setUsers(data || []);
-    } catch (error) {
-      console.error('Error fetching users:', error);
+    } catch (err) {
+      console.error('Error fetching users:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchOrderCounts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('client_id');
+      if (error) throw error;
+      const counts = {};
+      (data || []).forEach(({ client_id }) => {
+        if (client_id) counts[client_id] = (counts[client_id] || 0) + 1;
+      });
+      setOrderCounts(counts);
+    } catch (err) {
+      console.error('Error fetching order counts:', err);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchOrderCounts();
   }, []);
 
-  const handleUserDeleted = (deletedId) => {
-    // Optimistic update
-    setUsers(users.filter(u => u.id !== deletedId));
-    // Re-fetch to ensure sync (optional)
+  // Re-select updated user from fresh list after update
+  const handleUpdated = () => {
     fetchUsers();
+    if (selectedUser) {
+      // Defer so users state refreshes first
+      setTimeout(() => {
+        setUsers(prev => {
+          const refreshed = prev.find(u => u.id === selectedUser.id);
+          if (refreshed) setSelectedUser(refreshed);
+          return prev;
+        });
+      }, 300);
+    }
   };
 
-  const handleUserAdded = () => {
-    fetchUsers(); // Refresh the list to show new user
+  const handleDeleted = (id) => {
+    setUsers(prev => prev.filter(u => u.id !== id));
+    setSelectedUser(null);
   };
-  
-  const handleUserUpdated = () => {
-    fetchUsers();
-  };
+
+  const stats = useMemo(() => ({
+    total:      users.length,
+    active:     users.filter(u => u.status === 'active').length,
+    pending:    users.filter(u => !u.status || u.status === 'pending').length,
+    admins:     users.filter(u => u.role === 'admin').length,
+    clients:    users.filter(u => u.role === 'client').length,
+    suppliers:  users.filter(u => u.role === 'supplier').length,
+  }), [users]);
+
+  const filteredUsers = useMemo(() => {
+    return users.filter(u => {
+      const matchRole = roleFilter === 'all' || u.role === roleFilter;
+      const q = search.toLowerCase();
+      const matchSearch = !q ||
+        u.email?.toLowerCase().includes(q) ||
+        u.company_name?.toLowerCase().includes(q);
+      return matchRole && matchSearch;
+    });
+  }, [users, roleFilter, search]);
 
   return (
     <ControlCentreLayout>
       <Helmet>
-        <title>User Management - Ghost Portal</title>
-        <meta name="description" content="Manage users and permissions for RZ Global Solutions Ghost Portal" />
+        <title>User Management - RZ Global Solutions</title>
       </Helmet>
 
       <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-6">
+
+        {/* Page header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Users className="w-8 h-8 text-[#FF6B35]" />
+            <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2.5">
+              <Users size={24} className="text-orange-400" />
               User Management
             </h1>
-            <p className="text-gray-400 mt-1">Invite new users and manage existing access permissions.</p>
+            <p className="text-slate-500 text-sm mt-1">Manage access, roles, and permissions across the portal.</p>
           </div>
+          <button
+            onClick={() => setShowInvite(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-orange-900/20 shrink-0"
+          >
+            <Plus size={16} />
+            Invite User
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Left Column - Invite Form */}
-          <div className="xl:col-span-1">
-            <UserInvitationForm onSuccess={handleUserAdded} />
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mt-6 bg-gradient-to-br from-gray-900 to-gray-900/50 border border-gray-800 rounded-xl p-6"
-            >
-              <h4 className="text-white font-semibold mb-2">Access Control Notes</h4>
-              <ul className="text-sm text-gray-400 space-y-2 list-disc pl-4">
-                <li>Admins have full system access.</li>
-                <li>Clients can only see their own orders.</li>
-                <li>Suppliers are restricted to assigned jobs.</li>
-                <li>Invited users receive an email to set their password.</li>
-              </ul>
-            </motion.div>
-          </div>
+        {/* Stats row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard icon={Users}     label="Total Users"  value={stats.total}   color="bg-slate-700/60 text-slate-300" />
+          <StatCard icon={UserCheck} label="Active"       value={stats.active}  color="bg-emerald-500/10 text-emerald-400" />
+          <StatCard icon={Clock}     label="Pending"      value={stats.pending} color="bg-yellow-500/10 text-yellow-400" />
+          <StatCard icon={Shield}    label="Admins"       value={stats.admins}  color="bg-orange-500/10 text-orange-400" />
+        </div>
 
-          {/* Right Column - Users Table */}
-          <div className="xl:col-span-2">
-            <UsersTable 
-              users={users} 
-              loading={loading} 
-              onUserDeleted={handleUserDeleted} 
-              onUserUpdated={handleUserUpdated}
+        {/* Search + filter bar */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search by email or company..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full bg-[#0f172a] border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all"
             />
           </div>
+
+          {/* Role filter pills */}
+          <div className="flex items-center gap-1.5 bg-[#0f172a] border border-slate-800 rounded-xl p-1">
+            {FILTER_TABS.map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setRoleFilter(key)}
+                className={`
+                  flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
+                  ${roleFilter === key
+                    ? 'bg-orange-600 text-white shadow'
+                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/60'}
+                `}
+              >
+                <Icon size={12} />
+                {label}
+                {key !== 'all' && (
+                  <span className={`text-[10px] ${roleFilter === key ? 'opacity-70' : 'opacity-50'}`}>
+                    {key === 'client' ? stats.clients : key === 'supplier' ? stats.suppliers : stats.admins}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* User card grid */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 text-slate-500">
+            <Loader2 size={32} className="animate-spin mb-3 text-orange-500" />
+            <p className="text-sm">Loading users...</p>
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 text-slate-600">
+            <AlertCircle size={32} className="mb-3 opacity-40" />
+            <p className="text-sm">No users found{search ? ` for "${search}"` : ''}.</p>
+          </div>
+        ) : (
+          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <AnimatePresence mode="popLayout">
+              {filteredUsers.map((user, index) => (
+                <UserCard
+                  key={user.id}
+                  user={user}
+                  orderCount={orderCounts[user.id] || 0}
+                  index={index}
+                  onClick={() => setSelectedUser(user)}
+                />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </div>
+
+      {/* Detail Drawer */}
+      <AnimatePresence>
+        {selectedUser && (
+          <UserDetailDrawer
+            user={selectedUser}
+            orderCount={orderCounts[selectedUser.id] || 0}
+            onClose={() => setSelectedUser(null)}
+            onUpdated={handleUpdated}
+            onDeleted={handleDeleted}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Invite Modal */}
+      <AnimatePresence>
+        {showInvite && (
+          <InviteUserModal
+            onClose={() => setShowInvite(false)}
+            onSuccess={fetchUsers}
+          />
+        )}
+      </AnimatePresence>
     </ControlCentreLayout>
   );
 };

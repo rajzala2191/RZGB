@@ -102,7 +102,7 @@ const ClientDocumentLibraryPage = () => {
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
            <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
-              <Library className="text-cyan-500" size={32} />
+              <Library className="text-orange-500" size={32} />
               Document Library
            </h1>
            <p className="text-slate-400 mt-1">Central repository for all order files.</p>
@@ -111,7 +111,7 @@ const ClientDocumentLibraryPage = () => {
            <button onClick={handleExportCSV} className="px-4 py-2 bg-slate-800 rounded-lg text-slate-300 border border-slate-700 hover:text-white transition-colors">
               Export List
            </button>
-           <button onClick={handleBulkDownload} className="px-4 py-2 bg-cyan-600 rounded-lg text-white font-bold hover:bg-cyan-500 transition-colors flex items-center gap-2">
+           <button onClick={handleBulkDownload} className="px-4 py-2 bg-orange-600 rounded-lg text-white font-bold hover:bg-orange-500 transition-colors flex items-center gap-2">
               <Download size={16} /> Download All (ZIP)
            </button>
         </div>
@@ -124,13 +124,13 @@ const ClientDocumentLibraryPage = () => {
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="Search files..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-10 pr-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-10 pr-4 py-2 text-slate-100 focus:outline-none focus:border-orange-500"
             />
          </div>
       </div>
 
       {loading ? (
-         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-cyan-500" size={40} /></div>
+         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-orange-500" size={40} /></div>
       ) : filteredDocs.length === 0 ? (
          <div className="text-center py-12 text-slate-500">No documents found.</div>
       ) : (
@@ -161,7 +161,7 @@ const ClientDocumentLibraryPage = () => {
                         <td className="p-4 text-right flex justify-end gap-2">
                            <button 
                               onClick={() => setPreviewDoc(doc)}
-                              className="p-2 hover:bg-cyan-900/30 text-cyan-400 rounded transition-colors"
+                              className="p-2 hover:bg-orange-900/30 text-orange-400 rounded transition-colors"
                            >
                               <Eye size={16} />
                            </button>

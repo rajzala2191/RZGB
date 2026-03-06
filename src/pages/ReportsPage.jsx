@@ -83,7 +83,7 @@ const ReportsPage = () => {
   return (
     <ControlCentreLayout>
       <Helmet>
-        <title>Reports - Ghost Portal</title>
+        <title>Reports - RZ Global Solutions</title>
       </Helmet>
 
       {error && (

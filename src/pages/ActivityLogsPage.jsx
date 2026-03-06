@@ -77,7 +77,7 @@ const ActivityLogsPage = () => {
   return (
     <ControlCentreLayout>
       <Helmet>
-        <title>Activity Logs - Ghost Portal</title>
+        <title>Activity Logs - RZ Global Solutions</title>
       </Helmet>
 
       <div className="space-y-6">

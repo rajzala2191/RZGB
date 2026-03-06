@@ -90,7 +90,7 @@ export default function AdminSupportPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
-              <LifeBuoy className="text-cyan-500" size={30} /> Support Tickets
+              <LifeBuoy className="text-orange-500" size={30} /> Support Tickets
             </h1>
             <p className="text-slate-400 mt-1">Manage client and supplier support requests.</p>
           </div>
@@ -108,7 +108,7 @@ export default function AdminSupportPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: 'Open', key: 'open', color: 'text-emerald-400', bg: 'bg-emerald-900/20 border-emerald-800/50' },
-            { label: 'In Progress', key: 'in-progress', color: 'text-cyan-400', bg: 'bg-cyan-900/20 border-cyan-800/50' },
+            { label: 'In Progress', key: 'in-progress', color: 'text-orange-400', bg: 'bg-orange-900/20 border-orange-800/50' },
             { label: 'Resolved', key: 'resolved', color: 'text-purple-400', bg: 'bg-purple-900/20 border-purple-800/50' },
             { label: 'Closed', key: 'closed', color: 'text-slate-400', bg: 'bg-slate-800 border-slate-700' },
           ].map(s => (
@@ -129,7 +129,7 @@ export default function AdminSupportPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase transition-colors ${
                   activeTab === tab
-                    ? 'bg-cyan-600 text-white'
+                    ? 'bg-orange-600 text-white'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -142,7 +142,7 @@ export default function AdminSupportPage() {
           <select
             value={priorityFilter}
             onChange={e => setPriorityFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-cyan-500"
+            className="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-orange-500"
           >
             <option value="all">All Priorities</option>
             <option value="urgent">Urgent</option>
@@ -158,7 +158,7 @@ export default function AdminSupportPage() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search by company, subject..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
+              className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-orange-500"
             />
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function AdminSupportPage() {
         {/* Ticket List */}
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 className="animate-spin text-cyan-500 w-10 h-10" />
+            <Loader2 className="animate-spin text-orange-500 w-10 h-10" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 bg-slate-900/30 border border-slate-800 rounded-xl">

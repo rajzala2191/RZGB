@@ -1,59 +1,110 @@
-import React from 'react';
+import { useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   Package, FileCheck, Zap, CheckCircle2, Hourglass,
-  ShieldCheck, Truck, Clock, XCircle
+  ShieldCheck, Truck, Clock, XCircle, Check,
 } from 'lucide-react';
 
 const ALL_STAGES = [
-  { id: 'PENDING_ADMIN_SCRUB', label: 'Order Submitted', icon: Package, color: 'blue' },
-  { id: 'SANITIZED', label: 'Under Review', icon: FileCheck, color: 'purple' },
-  { id: 'AWARDED', label: 'Supplier Assigned', icon: CheckCircle2, color: 'amber' },
-  { id: 'MATERIAL', label: 'Material Sourcing', icon: Package, color: 'sky' },
-  { id: 'CASTING', label: 'Casting', icon: Zap, color: 'orange' },
-  { id: 'MACHINING', label: 'Machining', icon: Hourglass, color: 'violet' },
-  { id: 'QC', label: 'Quality Control', icon: ShieldCheck, color: 'emerald' },
-  { id: 'DISPATCH', label: 'Dispatched', icon: Truck, color: 'blue' },
-  { id: 'DELIVERED', label: 'Delivered', icon: CheckCircle2, color: 'green' },
+  { id: 'PENDING_ADMIN_SCRUB', label: 'Order Received',    short: 'Received',    icon: Package     },
+  { id: 'SANITIZED',           label: 'Under Review',       short: 'Review',      icon: FileCheck   },
+  { id: 'AWARDED',             label: 'Supplier Assigned',  short: 'Assigned',    icon: CheckCircle2},
+  { id: 'MATERIAL',            label: 'Material Sourcing',  short: 'Material',    icon: Package     },
+  { id: 'CASTING',             label: 'Casting',            short: 'Casting',     icon: Zap         },
+  { id: 'MACHINING',           label: 'Machining',          short: 'Machining',   icon: Hourglass   },
+  { id: 'QC',                  label: 'Quality Control',    short: 'QC',          icon: ShieldCheck },
+  { id: 'DISPATCH',            label: 'Dispatched',         short: 'Dispatch',    icon: Truck       },
+  { id: 'DELIVERED',           label: 'Delivered',          short: 'Delivered',   icon: CheckCircle2},
 ];
 
-const COLOR_MAP = {
-  blue:    { bg: 'bg-blue-500',    ring: 'ring-blue-500/30',    text: 'text-blue-400',    line: 'bg-blue-500' },
-  purple:  { bg: 'bg-purple-500',  ring: 'ring-purple-500/30',  text: 'text-purple-400',  line: 'bg-purple-500' },
-  indigo:  { bg: 'bg-indigo-500',  ring: 'ring-indigo-500/30',  text: 'text-indigo-400',  line: 'bg-indigo-500' },
-  cyan:    { bg: 'bg-cyan-500',    ring: 'ring-cyan-500/30',    text: 'text-cyan-400',    line: 'bg-cyan-500' },
-  amber:   { bg: 'bg-amber-500',   ring: 'ring-amber-500/30',   text: 'text-amber-400',   line: 'bg-amber-500' },
-  sky:     { bg: 'bg-sky-500',     ring: 'ring-sky-500/30',     text: 'text-sky-400',     line: 'bg-sky-500' },
-  orange:  { bg: 'bg-orange-500',  ring: 'ring-orange-500/30',  text: 'text-orange-400',  line: 'bg-orange-500' },
-  violet:  { bg: 'bg-violet-500',  ring: 'ring-violet-500/30',  text: 'text-violet-400',  line: 'bg-violet-500' },
-  emerald: { bg: 'bg-emerald-500', ring: 'ring-emerald-500/30', text: 'text-emerald-400', line: 'bg-emerald-500' },
-  green:   { bg: 'bg-green-500',   ring: 'ring-green-500/30',   text: 'text-green-400',   line: 'bg-green-500' },
-};
+const ACCENT = '#FF6B35';
 
-/**
- * OrderTimeline — universal timeline for all roles.
- * 
- * @param {string} currentStatus  - The order_status from the DB
- * @param {string} createdAt      - ISO date of when order was created
- * @param {string} updatedAt      - ISO date of last update
- * @param {Array}  updates        - Array of job_updates objects (optional)
- * @param {boolean} compact       - If true, renders a single-line mini version
- * @param {boolean} isWithdrawn   - If true, shows withdrawn state
- */
-export default function OrderTimeline({ 
-  currentStatus = 'PENDING_ADMIN_SCRUB', 
-  createdAt, 
-  updatedAt, 
-  updates = [], 
+/* ── Compact: segmented bar used in tables ──────────────────── */
+function CompactTimeline({ currentIndex }) {
+  return (
+    <div className="flex items-center gap-0.5 w-full">
+      {ALL_STAGES.map((_, i) => {
+        const done    = i < currentIndex;
+        const current = i === currentIndex;
+        return (
+          <div
+            key={i}
+            className="flex-1 h-1.5 rounded-full transition-all duration-500"
+            style={{
+              background: done ? ACCENT : current ? `${ACCENT}80` : 'rgba(128,128,128,0.18)',
+              transform: current ? 'scaleY(1.4)' : 'scaleY(1)',
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── Full pipeline ──────────────────────────────────────────── */
+export default function OrderTimeline({
+  currentStatus = 'PENDING_ADMIN_SCRUB',
+  createdAt,
+  updatedAt,
+  updates = [],
   compact = false,
-  isWithdrawn = false
+  isWithdrawn = false,
 }) {
+  const { isDark } = useTheme();
+  const scrollRef = useRef(null);
+
+  const t = isDark ? {
+    card:        'rgba(255,255,255,0.04)',
+    cardBorder:  'rgba(255,255,255,0.08)',
+    activeBg:    'rgba(255,107,53,0.1)',
+    activeBorder:'rgba(255,107,53,0.25)',
+    doneBg:      'rgba(255,255,255,0.03)',
+    futureBg:    'transparent',
+    text:        '#ffffff',
+    textMuted:   'rgba(255,255,255,0.5)',
+    textFaint:   'rgba(255,255,255,0.25)',
+    dot:         'rgba(255,255,255,0.1)',
+    dotBorder:   'rgba(255,255,255,0.12)',
+    connectorDone:  ACCENT,
+    connectorFuture:'rgba(255,255,255,0.1)',
+    noteBg:      'rgba(255,255,255,0.04)',
+    noteBorder:  'rgba(255,255,255,0.07)',
+  } : {
+    card:        '#ffffff',
+    cardBorder:  'rgba(0,0,0,0.08)',
+    activeBg:    'rgba(255,107,53,0.07)',
+    activeBorder:'rgba(255,107,53,0.2)',
+    doneBg:      'rgba(0,0,0,0.02)',
+    futureBg:    'transparent',
+    text:        '#0f0f0f',
+    textMuted:   'rgba(0,0,0,0.5)',
+    textFaint:   'rgba(0,0,0,0.28)',
+    dot:         'rgba(0,0,0,0.07)',
+    dotBorder:   'rgba(0,0,0,0.1)',
+    connectorDone:  ACCENT,
+    connectorFuture:'rgba(0,0,0,0.1)',
+    noteBg:      'rgba(0,0,0,0.03)',
+    noteBorder:  'rgba(0,0,0,0.07)',
+  };
+
+  /* withdrawn state */
   if (isWithdrawn || currentStatus === 'WITHDRAWN') {
     return (
-      <div className="flex items-center gap-3 py-3 px-4 bg-red-950/30 border border-red-800/50 rounded-lg">
-        <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+      <div
+        className="flex items-center gap-3 p-4 rounded-2xl"
+        style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)' }}
+      >
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(239,68,68,0.15)' }}>
+          <XCircle size={18} style={{ color: '#ef4444' }} />
+        </div>
         <div>
-          <p className="text-red-400 font-semibold text-sm">Order Withdrawn</p>
-          {updatedAt && <p className="text-red-400/60 text-xs">on {new Date(updatedAt).toLocaleDateString()}</p>}
+          <p className="font-semibold text-sm" style={{ color: '#ef4444' }}>Order Withdrawn</p>
+          {updatedAt && (
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(239,68,68,0.6)' }}>
+              {new Date(updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -61,127 +112,221 @@ export default function OrderTimeline({
 
   const currentIndex = ALL_STAGES.findIndex(s => s.id === currentStatus);
 
-  // Compact single-line version for tables/cards
-  if (compact) {
-    return (
-      <div className="flex items-center gap-1 w-full">
-        {ALL_STAGES.map((stage, i) => {
-          const isPast = i < currentIndex;
-          const isCurrent = i === currentIndex;
-          const colors = COLOR_MAP[stage.color];
-          return (
-            <div key={stage.id} className="flex items-center flex-1 min-w-0">
-              <div 
-                className={`h-2 flex-1 rounded-full transition-all ${
-                  isPast ? colors.bg : isCurrent ? `${colors.bg} animate-pulse` : 'bg-slate-700'
-                }`}
-                title={stage.label}
-              />
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
+  if (compact) return <CompactTimeline currentIndex={currentIndex} />;
 
-  // Build update timestamps keyed by stage
+  /* build update map */
   const updatesByStage = {};
   updates.forEach(u => {
     if (!updatesByStage[u.stage]) updatesByStage[u.stage] = [];
     updatesByStage[u.stage].push(u);
   });
 
+  const pct = currentIndex < 0 ? 0 : Math.round(((currentIndex + 1) / ALL_STAGES.length) * 100);
+
+  /* scroll active node into view */
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const active = scrollRef.current.querySelector('[data-active="true"]');
+    if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [currentStatus]);
+
   return (
-    <div className="relative">
-      {ALL_STAGES.map((stage, i) => {
-        const isPast = i < currentIndex;
-        const isCurrent = i === currentIndex;
-        const isFuture = i > currentIndex;
-        const colors = COLOR_MAP[stage.color];
-        const Icon = stage.icon;
-        const stageUpdates = updatesByStage[stage.id] || [];
+    <div className="space-y-6">
 
-        // Determine timestamp
-        let timestamp = null;
-        if (isCurrent && updatedAt) timestamp = updatedAt;
-        else if (isPast && stageUpdates.length > 0) timestamp = stageUpdates[stageUpdates.length - 1].created_at;
-        else if (i === 0 && createdAt) timestamp = createdAt;
+      {/* ── Progress header ────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2.5">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-50" style={{ background: ACCENT }} />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ background: ACCENT }} />
+          </span>
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: t.textMuted }}>
+            {currentIndex >= 0 ? ALL_STAGES[currentIndex].label : 'Processing'}
+          </span>
+        </div>
+        <span className="text-xs font-bold tabular-nums" style={{ color: ACCENT }}>{pct}%</span>
+      </div>
 
-        return (
-          <div key={stage.id} className="relative flex gap-4">
-            {/* Vertical line connector */}
-            {i < ALL_STAGES.length - 1 && (
-              <div className="absolute left-[19px] top-10 w-0.5 h-[calc(100%-16px)]">
-                <div className={`h-full rounded-full transition-all ${isPast ? colors.line : 'bg-slate-700/50'}`} />
-              </div>
-            )}
+      {/* ── Master progress bar ────────────────────────────── */}
+      <div className="relative h-1 rounded-full overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }}>
+        <motion.div
+          className="absolute inset-y-0 left-0 rounded-full"
+          style={{ background: `linear-gradient(90deg, ${ACCENT}, #f97316)` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+        />
+      </div>
 
-            {/* Circle icon */}
-            <div className="flex-shrink-0 z-10">
-              <div 
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                  isPast 
-                    ? `${colors.bg} text-white shadow-lg`
-                    : isCurrent 
-                      ? `${colors.bg} text-white ring-4 ${colors.ring} shadow-lg animate-pulse`
-                      : 'bg-slate-800 text-slate-500 border border-slate-700'
-                }`}
-              >
-                {isPast ? (
-                  <CheckCircle2 className="w-5 h-5" />
-                ) : isCurrent ? (
-                  <Icon className="w-5 h-5" />
-                ) : (
-                  <Icon className="w-4 h-4" />
-                )}
-              </div>
-            </div>
+      {/* ── Horizontal stage nodes (scrollable) ────────────── */}
+      <div ref={scrollRef} className="overflow-x-auto pb-1 -mx-1 px-1">
+        <div className="flex items-start gap-0 min-w-max">
+          {ALL_STAGES.map((stage, i) => {
+            const done    = i < currentIndex;
+            const current = i === currentIndex;
+            const future  = i > currentIndex;
+            const Icon    = stage.icon;
 
-            {/* Content */}
-            <div className={`flex-1 pb-8 ${i === ALL_STAGES.length - 1 ? 'pb-0' : ''}`}>
-              <div className={`rounded-lg p-3 transition-all ${
-                isCurrent 
-                  ? 'bg-slate-800/80 border border-slate-700' 
-                  : isPast 
-                    ? 'bg-transparent' 
-                    : 'bg-transparent opacity-50'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <h4 className={`font-semibold text-sm ${
-                    isCurrent ? colors.text : isPast ? 'text-slate-300' : 'text-slate-500'
-                  }`}>
-                    {stage.label}
-                    {isCurrent && (
-                      <span className={`ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${colors.bg} text-white`}>
-                        <Clock className="w-3 h-3" /> Current
-                      </span>
+            return (
+              <div key={stage.id} className="flex items-center" data-active={current}>
+                {/* Node */}
+                <div className="flex flex-col items-center gap-2 w-16">
+                  <motion.div
+                    initial={false}
+                    animate={current ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+                    transition={current ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
+                    className="relative w-9 h-9 rounded-xl flex items-center justify-center"
+                    style={{
+                      background: done ? `${ACCENT}20` : current ? ACCENT : t.dot,
+                      border: `1.5px solid ${done ? `${ACCENT}50` : current ? ACCENT : t.dotBorder}`,
+                      boxShadow: current ? `0 0 16px ${ACCENT}40` : 'none',
+                    }}
+                  >
+                    {done ? (
+                      <Check size={14} style={{ color: ACCENT }} strokeWidth={2.5} />
+                    ) : (
+                      <Icon size={14} style={{ color: current ? '#fff' : t.textFaint }} />
                     )}
-                  </h4>
-                  {timestamp && (
-                    <span className="text-[11px] text-slate-500 font-mono">
-                      {new Date(timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </span>
-                  )}
+                    {current && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 animate-pulse"
+                        style={{ background: ACCENT, borderColor: isDark ? '#09090b' : '#f0f0f2' }} />
+                    )}
+                  </motion.div>
+                  <p
+                    className="text-[10px] font-semibold text-center leading-tight"
+                    style={{ color: done ? t.textMuted : current ? t.text : t.textFaint }}
+                  >
+                    {stage.short}
+                  </p>
                 </div>
 
-                {/* Stage updates / notes */}
-                {stageUpdates.length > 0 && (isPast || isCurrent) && (
-                  <div className="mt-2 space-y-1">
-                    {stageUpdates.slice(-2).map((u, j) => (
-                      <div key={j} className="text-xs text-slate-400 flex items-start gap-2">
-                        <span className="text-slate-600 font-mono whitespace-nowrap">
-                          {new Date(u.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        <span>{u.notes}</span>
-                      </div>
-                    ))}
+                {/* Connector */}
+                {i < ALL_STAGES.length - 1 && (
+                  <div className="w-6 shrink-0 mb-5">
+                    <div className="h-px" style={{ background: done ? `${ACCENT}60` : t.connectorFuture }} />
                   </div>
                 )}
               </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Stage detail rows ──────────────────────────────── */}
+      <div className="space-y-2">
+        {ALL_STAGES.map((stage, i) => {
+          const done    = i < currentIndex;
+          const current = i === currentIndex;
+          const future  = i > currentIndex;
+          const Icon    = stage.icon;
+          const stageUpdates = updatesByStage[stage.id] || [];
+
+          let timestamp = null;
+          if (i === 0 && createdAt)                                     timestamp = createdAt;
+          else if (current && updatedAt)                                 timestamp = updatedAt;
+          else if (done && stageUpdates.length > 0)                     timestamp = stageUpdates[stageUpdates.length - 1].created_at;
+
+          if (future) return (
+            <div
+              key={stage.id}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl"
+              style={{ opacity: 0.4 }}
+            >
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: t.dot, border: `1px solid ${t.dotBorder}` }}>
+                <Icon size={11} style={{ color: t.textFaint }} />
+              </div>
+              <span className="text-xs font-medium" style={{ color: t.textFaint }}>{stage.label}</span>
             </div>
-          </div>
-        );
-      })}
+          );
+
+          return (
+            <motion.div
+              key={stage.id}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.04 }}
+              className="rounded-xl overflow-hidden"
+              style={{
+                background:  current ? t.activeBg  : t.doneBg,
+                border:      `1px solid ${current ? t.activeBorder : 'transparent'}`,
+              }}
+            >
+              <div className="flex items-start gap-3 px-4 py-3">
+                {/* Icon */}
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                  style={{
+                    background: current ? `${ACCENT}20` : 'rgba(34,197,94,0.12)',
+                    border: `1px solid ${current ? `${ACCENT}30` : 'rgba(34,197,94,0.2)'}`,
+                  }}
+                >
+                  {done
+                    ? <Check size={13} style={{ color: '#22c55e' }} strokeWidth={2.5} />
+                    : <Icon size={13} style={{ color: ACCENT }} />
+                  }
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold" style={{ color: current ? t.text : t.textMuted }}>
+                        {stage.label}
+                      </span>
+                      {current && (
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: `${ACCENT}20`, color: ACCENT }}
+                        >
+                          In Progress
+                        </span>
+                      )}
+                      {done && (
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e' }}
+                        >
+                          Complete
+                        </span>
+                      )}
+                    </div>
+                    {timestamp && (
+                      <span className="text-[11px] font-mono shrink-0" style={{ color: t.textFaint }}>
+                        {new Date(timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Update notes */}
+                  <AnimatePresence>
+                    {stageUpdates.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="mt-2 space-y-1.5"
+                      >
+                        {stageUpdates.slice(-3).map((u, j) => (
+                          <div
+                            key={j}
+                            className="flex items-start gap-2 px-3 py-2 rounded-lg text-xs"
+                            style={{ background: t.noteBg, border: `1px solid ${t.noteBorder}` }}
+                          >
+                            <Clock size={11} style={{ color: t.textFaint, marginTop: 1, flexShrink: 0 }} />
+                            <span className="font-mono shrink-0" style={{ color: t.textFaint }}>
+                              {new Date(u.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            <span style={{ color: t.textMuted }}>{u.notes}</span>
+                          </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
   );
 }

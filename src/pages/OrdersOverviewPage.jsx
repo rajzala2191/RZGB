@@ -1,29 +1,84 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import { useClientOrders } from '@/contexts/ClientContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowRight, Loader2, AlertCircle, Folder, Plus, Trash2, XCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import OrderTimeline from '@/components/OrderTimeline';
+import {
+  Briefcase, ArrowRight, Loader2, AlertCircle, Plus,
+  Trash2, XCircle, ChevronRight, Activity, CheckCircle2,
+  Clock, PackageX, Zap,
+} from 'lucide-react';
 
 const WITHDRAWABLE = ['PENDING_ADMIN_SCRUB', 'SANITIZED', 'OPEN_FOR_BIDDING', 'BID_RECEIVED', 'AWARDED'];
 
-const OrdersOverviewPage = () => {
+const STATUS = {
+  PENDING_ADMIN_SCRUB: { label: 'Pending Review', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)'  },
+  SANITIZED:           { label: 'Sanitised',      color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)'  },
+  OPEN_FOR_BIDDING:    { label: 'Open to Bid',    color: '#3b82f6', bg: 'rgba(59,130,246,0.1)'  },
+  BID_RECEIVED:        { label: 'Bid Received',   color: '#06b6d4', bg: 'rgba(6,182,212,0.1)'   },
+  AWARDED:             { label: 'Awarded',         color: '#FF6B35', bg: 'rgba(255,107,53,0.1)'  },
+  MATERIAL:            { label: 'Material',        color: '#FF6B35', bg: 'rgba(255,107,53,0.1)'  },
+  CASTING:             { label: 'Casting',         color: '#FF6B35', bg: 'rgba(255,107,53,0.1)'  },
+  MACHINING:           { label: 'Machining',       color: '#FF6B35', bg: 'rgba(255,107,53,0.1)'  },
+  QC:                  { label: 'QC',              color: '#a855f7', bg: 'rgba(168,85,247,0.1)'  },
+  DISPATCH:            { label: 'Dispatch',        color: '#10b981', bg: 'rgba(16,185,129,0.1)'  },
+  DELIVERED:           { label: 'Delivered',       color: '#22c55e', bg: 'rgba(34,197,94,0.1)'   },
+  WITHDRAWN:           { label: 'Withdrawn',       color: '#ef4444', bg: 'rgba(239,68,68,0.1)'   },
+};
+const getStatus = (s) => STATUS[s] || { label: s?.replace(/_/g, ' ') || '—', color: '#71717a', bg: 'rgba(113,113,122,0.1)' };
+
+const ACCENT = '#FF6B35';
+
+export default function OrdersOverviewPage() {
   const { orders, loading, error, refreshOrders } = useClientOrders();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [withdrawingId, setWithdrawingId] = useState(null);
-  const [confirmId, setConfirmId] = useState(null);
+  const [withdrawingId, setWithdrawingId]   = useState(null);
+  const [confirmId, setConfirmId]           = useState(null);
   const [clearingWithdrawn, setClearingWithdrawn] = useState(false);
+  const [hoveredRow, setHoveredRow]         = useState(null);
 
+  /* ── theme tokens ──────────────────────────────────────── */
+  const t = isDark ? {
+    page:       '#09090b',
+    card:       'rgba(255,255,255,0.04)',
+    cardBorder: 'rgba(255,255,255,0.08)',
+    thead:      'rgba(255,255,255,0.04)',
+    divider:    'rgba(255,255,255,0.06)',
+    rowHover:   'rgba(255,255,255,0.03)',
+    text:       '#ffffff',
+    textMuted:  'rgba(255,255,255,0.5)',
+    textFaint:  'rgba(255,255,255,0.3)',
+    mono:       'rgba(255,255,255,0.35)',
+    badge:      'rgba(255,255,255,0.07)',
+    badgeBorder:'rgba(255,255,255,0.1)',
+  } : {
+    page:       '#f0f0f2',
+    card:       '#ffffff',
+    cardBorder: 'rgba(0,0,0,0.08)',
+    thead:      'rgba(0,0,0,0.03)',
+    divider:    'rgba(0,0,0,0.06)',
+    rowHover:   'rgba(0,0,0,0.025)',
+    text:       '#0f0f0f',
+    textMuted:  'rgba(0,0,0,0.5)',
+    textFaint:  'rgba(0,0,0,0.35)',
+    mono:       'rgba(0,0,0,0.35)',
+    badge:      'rgba(0,0,0,0.05)',
+    badgeBorder:'rgba(0,0,0,0.09)',
+  };
+
+  /* ── handlers ──────────────────────────────────────────── */
   const handleWithdraw = async (orderId) => {
     setWithdrawingId(orderId);
     try {
       const { error: err } = await supabase.from('orders').update({
-        order_status: 'WITHDRAWN',
-        updated_at: new Date().toISOString()
+        order_status: 'WITHDRAWN', updated_at: new Date().toISOString(),
       }).eq('id', orderId);
       if (err) throw err;
       toast({ title: 'Order Withdrawn', description: 'Your order has been successfully withdrawn.' });
@@ -40,194 +95,275 @@ const OrdersOverviewPage = () => {
     setClearingWithdrawn(true);
     try {
       const withdrawnOrders = orders.filter(o => o.order_status === 'WITHDRAWN');
-      if (withdrawnOrders.length === 0) {
-        toast({ title: 'No Withdrawn Orders', description: 'There are no withdrawn orders to clear.' });
-        setClearingWithdrawn(false);
+      if (!withdrawnOrders.length) {
+        toast({ title: 'No Withdrawn Orders' });
         return;
       }
-
-      // Update each withdrawn order individually to avoid RLS/batch issues
       let cleared = 0;
       for (const wo of withdrawnOrders) {
         const { error: err } = await supabase
-          .from('orders')
-          .update({ order_status: 'CLEARED', updated_at: new Date().toISOString() })
-          .eq('id', wo.id);
-        if (err) {
-          console.error(`Failed to clear order ${wo.id}:`, err);
-        } else {
-          cleared++;
-        }
+          .from('orders').update({ order_status: 'CLEARED', updated_at: new Date().toISOString() }).eq('id', wo.id);
+        if (!err) cleared++;
       }
-
-      if (cleared > 0) {
-        toast({ title: 'Cleared', description: `${cleared} withdrawn order(s) cleared.` });
-        if (refreshOrders) refreshOrders();
-      } else {
-        toast({ title: 'Error', description: 'Could not clear withdrawn orders. Check console for details.', variant: 'destructive' });
-      }
+      if (cleared > 0) { toast({ title: 'Cleared', description: `${cleared} order(s) cleared.` }); refreshOrders?.(); }
+      else toast({ title: 'Error', description: 'Could not clear orders.', variant: 'destructive' });
     } catch (err) {
-      console.error('Clear withdrawn error:', err);
-      toast({ title: 'Error', description: err.message || 'Failed to clear withdrawn orders.', variant: 'destructive' });
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
       setClearingWithdrawn(false);
     }
   };
 
-  if (loading) {
-    return (
-      <ClientDashboardLayout>
-        <div className="flex flex-col items-center justify-center p-24 h-full">
-          <img src="https://horizons-cdn.hostinger.com/23dd5419-ae91-4a08-9a43-379efd2912c4/572f4264785907121da08b9cd8e3daf2.png" alt="RZ Global Solutions" className="w-20 h-20 mb-6 animate-pulse" />
-          <Loader2 className="animate-spin text-cyan-500 w-10 h-10 mb-4" />
-          <p className="text-slate-400 font-medium text-lg">RZ Global Solutions is loading your orders...</p>
-        </div>
-      </ClientDashboardLayout>
-    );
-  }
+  /* ── stats ─────────────────────────────────────────────── */
+  const stats = [
+    { label: 'Total Orders',  value: orders.length,
+      icon: Briefcase, color: ACCENT },
+    { label: 'In Production', value: orders.filter(o => ['MATERIAL','CASTING','MACHINING','QC','DISPATCH'].includes(o.order_status)).length,
+      icon: Activity, color: '#3b82f6' },
+    { label: 'Delivered',     value: orders.filter(o => o.order_status === 'DELIVERED').length,
+      icon: CheckCircle2, color: '#22c55e' },
+    { label: 'Pending',       value: orders.filter(o => ['PENDING_ADMIN_SCRUB','SANITIZED','OPEN_FOR_BIDDING','BID_RECEIVED'].includes(o.order_status)).length,
+      icon: Clock, color: '#f59e0b' },
+  ];
 
-  if (error) {
-    return (
-      <ClientDashboardLayout>
-        <div className="p-16 flex flex-col items-center text-red-400 gap-4 bg-[#0f172a] rounded-xl border border-slate-800 mt-8">
-          <img src="https://horizons-cdn.hostinger.com/23dd5419-ae91-4a08-9a43-379efd2912c4/572f4264785907121da08b9cd8e3daf2.png" alt="RZ Global Solutions" className="w-16 h-16 opacity-50 grayscale" />
-          <div className="flex items-center gap-2 text-lg font-bold">
-            <AlertCircle size={24} /> RZ Global Solutions Error
-          </div>
-          <p>Failed to load orders: {error}</p>
+  /* ── loading ────────────────────────────────────────────── */
+  if (loading) return (
+    <ClientDashboardLayout>
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={32} className="animate-spin" style={{ color: ACCENT }} />
+          <p style={{ color: t.textMuted }} className="text-sm">Loading your orders…</p>
         </div>
-      </ClientDashboardLayout>
-    );
-  }
+      </div>
+    </ClientDashboardLayout>
+  );
 
-  const getStatusColor = (status) => {
-    switch (status?.toUpperCase()) {
-      case 'PENDING_ADMIN_SCRUB': return 'bg-yellow-950 text-yellow-400 border-yellow-900';
-      case 'SANITIZED': return 'bg-indigo-950 text-indigo-400 border-indigo-900';
-      case 'OPEN_FOR_BIDDING':
-      case 'BID_RECEIVED': return 'bg-cyan-950 text-cyan-400 border-cyan-900';
-      case 'AWARDED': return 'bg-amber-950 text-amber-400 border-amber-900';
-      case 'MATERIAL':
-      case 'CASTING':
-      case 'MACHINING':
-      case 'QC':
-      case 'DISPATCH': return 'bg-blue-950 text-blue-400 border-blue-900';
-      case 'DELIVERED': return 'bg-emerald-950 text-emerald-400 border-emerald-900';
-      case 'WITHDRAWN': return 'bg-red-950 text-red-400 border-red-900';
-      default: return 'bg-slate-800 text-slate-400 border-slate-700';
-    }
-  };
+  if (error) return (
+    <ClientDashboardLayout>
+      <div className="flex items-center gap-3 p-6 rounded-2xl mt-4" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+        <AlertCircle size={20} style={{ color: '#ef4444' }} />
+        <p style={{ color: '#ef4444' }} className="text-sm font-medium">Failed to load orders: {error}</p>
+      </div>
+    </ClientDashboardLayout>
+  );
 
   return (
     <ClientDashboardLayout>
-      <Helmet><title>My Orders - Client Portal</title></Helmet>
-      
-      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+      <Helmet><title>My Orders — Client Portal</title></Helmet>
+
+      {/* ── Header ─────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
+      >
         <div>
-          <h1 className="text-3xl font-bold text-slate-100 mb-2 flex items-center gap-3">
-            <Folder className="text-cyan-500" size={32} />
-            Orders Overview
-          </h1>
-          <p className="text-slate-400">Track all your manufacturing orders and their progress.</p>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold" style={{ color: t.text }}>My Orders</h1>
+            <span
+              className="text-xs font-bold px-2 py-0.5 rounded-full"
+              style={{ background: t.badge, color: t.textMuted, border: `1px solid ${t.badgeBorder}` }}
+            >
+              {orders.length}
+            </span>
+          </div>
+          <p className="text-sm" style={{ color: t.textMuted }}>Track all your manufacturing orders and their progress.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {orders.some(o => o.order_status === 'WITHDRAWN') && (
             <button
               onClick={handleClearWithdrawn}
               disabled={clearingWithdrawn}
-              className="flex items-center gap-2 bg-red-950/50 hover:bg-red-900/50 text-red-400 hover:text-red-300 px-4 py-2 rounded-lg font-medium transition-colors border border-red-800/50 text-sm"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 disabled:opacity-50"
+              style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.18)' }}
             >
-              {clearingWithdrawn ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+              {clearingWithdrawn ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
               Clear Withdrawn
             </button>
           )}
-          <button 
-             onClick={() => navigate('/client-dashboard/create-order')}
-             className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          <button
+            onClick={() => navigate('/client-dashboard/create-order')}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-150 hover:opacity-90 active:scale-95"
+            style={{ background: `linear-gradient(135deg, ${ACCENT}, #f97316)`, boxShadow: '0 2px 12px rgba(255,107,53,0.25)' }}
           >
-             <Plus size={18} /> New Order
+            <Zap size={14} /> New Order
           </button>
         </div>
+      </motion.div>
+
+      {/* ── Stats row ──────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: i * 0.06 }}
+            className="rounded-2xl p-4"
+            style={{ background: t.card, border: `1px solid ${t.cardBorder}` }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: t.textFaint }}>{s.label}</p>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${s.color}18` }}>
+                <s.icon size={14} style={{ color: s.color }} />
+              </div>
+            </div>
+            <p className="text-2xl font-bold" style={{ color: t.text }}>{s.value}</p>
+          </motion.div>
+        ))}
       </div>
 
-      <div className="bg-[#0f172a] rounded-xl border border-slate-800 overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-300">
-            <tr>
-              <th className="p-4">Order ID</th>
-              <th className="p-4">Part Name</th>
-              <th className="p-4">Material</th>
-              <th className="p-4">Qty</th>
-              <th className="p-4">Status</th>
-              <th className="p-4">Progress</th>
-              <th className="p-4">Created</th>
-              <th className="p-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800 text-slate-200">
-            {orders.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="p-16 text-center text-slate-500">
-                  <Folder size={48} className="text-slate-700 mx-auto mb-4" />
-                  <p>No orders yet. Create one to get started.</p>
-                </td>
-              </tr>
-            ) : orders.map(order => (
-              <tr key={order.id} className="hover:bg-slate-800/50 transition-colors">
-                <td className="p-4 font-mono text-xs text-slate-500">{order.id.slice(0, 8)}</td>
-                <td className="p-4 font-semibold text-slate-100">{order.part_name}</td>
-                <td className="p-4 text-slate-300">{order.material}</td>
-                <td className="p-4 text-slate-300">{order.quantity}</td>
-                <td className="p-4">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${getStatusColor(order.order_status)}`}>
-                    {order.order_status?.replace(/_/g, ' ')}
-                  </span>
-                </td>
-                <td className="p-4 w-40">
-                  <OrderTimeline currentStatus={order.order_status} compact />
-                </td>
-                <td className="p-4 text-slate-400 whitespace-nowrap">{new Date(order.created_at).toLocaleDateString()}</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => navigate(`/client-dashboard/orders/${order.id}/tracking`)}
-                      className="text-cyan-400 hover:text-cyan-300 font-medium text-sm flex items-center gap-1"
-                    >
-                      Track <ArrowRight size={14} />
-                    </button>
-                    {WITHDRAWABLE.includes(order.order_status) && (
-                      confirmId === order.id ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleWithdraw(order.id)}
-                            disabled={withdrawingId === order.id}
-                            className="text-red-400 hover:text-red-300 text-xs font-bold px-2 py-1 bg-red-950/50 border border-red-800/50 rounded"
+      {/* ── Table card ─────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.25 }}
+        className="rounded-2xl overflow-hidden"
+        style={{ background: t.card, border: `1px solid ${t.cardBorder}` }}
+      >
+        {orders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: t.badge }}>
+              <PackageX size={24} style={{ color: t.textFaint }} />
+            </div>
+            <div className="text-center">
+              <p className="font-semibold mb-1" style={{ color: t.text }}>No orders yet</p>
+              <p className="text-sm" style={{ color: t.textMuted }}>Create your first order to get started.</p>
+            </div>
+            <button
+              onClick={() => navigate('/client-dashboard/create-order')}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white mt-2"
+              style={{ background: `linear-gradient(135deg, ${ACCENT}, #f97316)` }}
+            >
+              <Plus size={15} /> New Order
+            </button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr style={{ background: t.thead, borderBottom: `1px solid ${t.divider}` }}>
+                  {['Job ID', 'Part Name', 'Material', 'Qty', 'Status', 'Progress', 'Created', ''].map(h => (
+                    <th key={h} className="px-5 py-3 text-xs font-bold uppercase tracking-widest" style={{ color: t.textFaint }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {orders.map((order, i) => {
+                    const st = getStatus(order.order_status);
+                    const isHovered = hoveredRow === order.id;
+                    return (
+                      <motion.tr
+                        key={order.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2, delay: i * 0.03 }}
+                        onMouseEnter={() => setHoveredRow(order.id)}
+                        onMouseLeave={() => setHoveredRow(null)}
+                        style={{
+                          borderBottom: `1px solid ${t.divider}`,
+                          background: isHovered ? t.rowHover : 'transparent',
+                          transition: 'background 0.15s',
+                        }}
+                      >
+                        {/* Job ID */}
+                        <td className="px-5 py-4">
+                          <span className="font-mono text-xs font-bold" style={{ color: t.mono }}>
+                            {order.rz_job_id || order.id.slice(0, 8).toUpperCase()}
+                          </span>
+                        </td>
+
+                        {/* Part name */}
+                        <td className="px-5 py-4">
+                          <span className="font-semibold" style={{ color: t.text }}>{order.part_name}</span>
+                        </td>
+
+                        {/* Material */}
+                        <td className="px-5 py-4">
+                          <span style={{ color: t.textMuted }}>{order.material || '—'}</span>
+                        </td>
+
+                        {/* Qty */}
+                        <td className="px-5 py-4">
+                          <span className="font-semibold" style={{ color: t.text }}>{order.quantity}</span>
+                        </td>
+
+                        {/* Status pill */}
+                        <td className="px-5 py-4">
+                          <span
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
+                            style={{ background: st.bg, color: st.color }}
                           >
-                            {withdrawingId === order.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Confirm'}
-                          </button>
-                          <button onClick={() => setConfirmId(null)} className="text-slate-400 hover:text-slate-300 text-xs px-1">
-                            <XCircle size={14} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setConfirmId(order.id); }}
-                          className="text-red-500/60 hover:text-red-400 transition-colors"
-                          title="Withdraw Order"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      )
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: st.color }} />
+                            {st.label}
+                          </span>
+                        </td>
+
+                        {/* Progress timeline */}
+                        <td className="px-5 py-4 w-36">
+                          <OrderTimeline currentStatus={order.order_status} compact />
+                        </td>
+
+                        {/* Created */}
+                        <td className="px-5 py-4 whitespace-nowrap">
+                          <span className="text-xs" style={{ color: t.textFaint }}>
+                            {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => navigate(`/client-dashboard/orders/${order.id}/tracking`)}
+                              className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all duration-150"
+                              style={{ color: ACCENT, background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.18)' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,53,0.15)'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,107,53,0.08)'; }}
+                            >
+                              Track <ArrowRight size={12} />
+                            </button>
+
+                            {WITHDRAWABLE.includes(order.order_status) && (
+                              confirmId === order.id ? (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => handleWithdraw(order.id)}
+                                    disabled={withdrawingId === order.id}
+                                    className="text-xs font-bold px-2 py-1 rounded-lg disabled:opacity-50"
+                                    style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+                                  >
+                                    {withdrawingId === order.id ? <Loader2 size={12} className="animate-spin" /> : 'Confirm'}
+                                  </button>
+                                  <button onClick={() => setConfirmId(null)} style={{ color: t.textFaint }}>
+                                    <XCircle size={14} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setConfirmId(order.id); }}
+                                  className="p-1.5 rounded-lg transition-all duration-150"
+                                  style={{ color: t.textFaint }}
+                                  title="Withdraw Order"
+                                  onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; }}
+                                  onMouseLeave={e => { e.currentTarget.style.color = t.textFaint; e.currentTarget.style.background = 'transparent'; }}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )
+                            )}
+                          </div>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
+        )}
+      </motion.div>
     </ClientDashboardLayout>
   );
-};
-
-export default OrdersOverviewPage;
+}

@@ -64,7 +64,7 @@ const EnhancedJourneyStepper = ({ orderId, currentStatus }) => {
         
         {/* Active Progress Bar */}
         <motion.div 
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-cyan-500 -z-10 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-orange-500 -z-10 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]"
           initial={{ width: '0%' }}
           animate={{ width: `${((currentStep - 1) / (stages.length - 1)) * 100}%` }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
@@ -84,7 +84,7 @@ const EnhancedJourneyStepper = ({ orderId, currentStatus }) => {
                 className={cn(
                   "w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-500 bg-[#020617] z-10",
                   isCompleted ? "border-emerald-500 text-emerald-500 bg-emerald-950/20" :
-                  isCurrent ? "border-cyan-500 text-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.6)] bg-cyan-950/20 scale-110" :
+                  isCurrent ? "border-orange-500 text-orange-500 shadow-[0_0_20px_rgba(6,182,212,0.6)] bg-orange-950/20 scale-110" :
                   "border-slate-800 text-slate-700 bg-slate-950"
                 )}
               >
@@ -97,7 +97,7 @@ const EnhancedJourneyStepper = ({ orderId, currentStatus }) => {
                 <p className={cn(
                   "text-xs font-bold uppercase tracking-wider mb-1 transition-colors duration-300",
                   isCompleted ? "text-emerald-400" :
-                  isCurrent ? "text-cyan-400" :
+                  isCurrent ? "text-orange-400" :
                   "text-slate-600"
                 )}>
                   {stage.label}
@@ -112,7 +112,7 @@ const EnhancedJourneyStepper = ({ orderId, currentStatus }) => {
                   <motion.div 
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-[9px] font-mono text-cyan-600"
+                    className="mt-1 text-[9px] font-mono text-orange-600"
                   >
                     IN PROGRESS
                   </motion.div>

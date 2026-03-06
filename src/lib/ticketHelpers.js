@@ -11,7 +11,7 @@ export const getPriorityColor = (p) => ({
 
 export const getStatusColor = (s) => ({
   open: 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50',
-  'in-progress': 'bg-cyan-900/30 text-cyan-400 border-cyan-800/50',
+  'in-progress': 'bg-orange-900/30 text-orange-400 border-orange-800/50',
   resolved: 'bg-purple-900/30 text-purple-400 border-purple-800/50',
   closed: 'bg-slate-800 text-slate-500 border-slate-700',
 }[s] || 'bg-slate-800 text-slate-400 border-slate-700');

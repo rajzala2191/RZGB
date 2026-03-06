@@ -51,18 +51,18 @@ function StepIndicator({ current }) {
           <div key={s.n} className="flex-1 flex items-center">
             <div className="flex flex-col items-center gap-1.5 relative z-10">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all
-                ${done   ? 'bg-cyan-600 border-cyan-600 text-white'
-                : active ? 'bg-[#0f172a] border-cyan-500 text-cyan-400'
+                ${done   ? 'bg-orange-600 border-orange-600 text-white'
+                : active ? 'bg-[#0f172a] border-orange-500 text-orange-400'
                 :          'bg-[#0f172a] border-slate-700 text-slate-600'}`}>
                 {done ? <CheckCircle2 size={18} /> : <Icon size={16} />}
               </div>
               <span className={`text-xs font-bold hidden sm:block whitespace-nowrap
-                ${active ? 'text-cyan-400' : done ? 'text-slate-400' : 'text-slate-600'}`}>
+                ${active ? 'text-orange-400' : done ? 'text-slate-400' : 'text-slate-600'}`}>
                 {s.label}
               </span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className={`flex-1 h-px mx-2 mt-[-14px] ${done ? 'bg-cyan-600' : 'bg-slate-800'}`} />
+              <div className={`flex-1 h-px mx-2 mt-[-14px] ${done ? 'bg-orange-600' : 'bg-slate-800'}`} />
             )}
           </div>
         );
@@ -86,14 +86,14 @@ function StepNav({ step, onBack, onNext, onSubmit, loading, canSubmit }) {
       <div className="flex-1" />
       {last ? (
         <Button type="button" onClick={onSubmit} disabled={loading || !canSubmit}
-          className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-8">
+          className="bg-orange-600 hover:bg-orange-500 text-white font-bold px-8">
           {loading
             ? <><Loader2 size={16} className="animate-spin mr-2" /> Submitting…</>
             : <><CheckCircle2 size={16} className="mr-2" /> Submit Order</>}
         </Button>
       ) : (
         <Button type="button" onClick={onNext}
-          className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-8">
+          className="bg-orange-600 hover:bg-orange-500 text-white font-bold px-8">
           Continue <ChevronRight size={16} className="ml-1" />
         </Button>
       )}
@@ -107,7 +107,7 @@ function FileRow({ name, size, onRemove, active, onClick, icon: Icon, iconClass 
     <div onClick={onClick}
       className={`flex items-center justify-between p-3 rounded-lg border transition-colors
         ${onClick ? 'cursor-pointer' : ''}
-        ${active ? 'bg-cyan-900/20 border-cyan-600' : 'bg-[#1e293b] border-slate-700 hover:border-slate-600'}`}>
+        ${active ? 'bg-orange-900/20 border-orange-600' : 'bg-[#1e293b] border-slate-700 hover:border-slate-600'}`}>
       <div className="flex items-center gap-3 text-sm text-slate-200 min-w-0">
         <Icon size={18} className={iconClass || 'text-slate-400'} />
         <span className="truncate">{name}</span>
@@ -127,8 +127,8 @@ function DropZone({ onDrop, inputId, accept, icon: Icon, title, subtitle }) {
     <div onDragOver={e => e.preventDefault()} onDrop={onDrop}
       onClick={() => document.getElementById(inputId).click()}
       className="border-2 border-dashed border-slate-700 rounded-xl py-10 text-center
-        hover:bg-[#1e293b] hover:border-cyan-500 transition-colors cursor-pointer">
-      <Icon className="mx-auto h-10 w-10 text-cyan-500 mb-3" />
+        hover:bg-[#1e293b] hover:border-orange-500 transition-colors cursor-pointer">
+      <Icon className="mx-auto h-10 w-10 text-orange-500 mb-3" />
       <p className="text-slate-200 font-bold text-sm mb-1">{title}</p>
       <p className="text-slate-500 text-xs">{subtitle}</p>
       <input id={inputId} type="file" multiple {...(accept && accept !== '*' ? { accept } : {})} className="hidden" onChange={onDrop} />
@@ -164,7 +164,7 @@ export default function ClientOrderCreationPage() {
     tolerance:            '',   // orders.tolerance             TEXT
     surface_finish:       '',   // orders.surface_finish        TEXT
     special_requirements: '',   // orders.special_requirements  TEXT
-    budget:               '',   // orders.budget                NUMERIC (GBP)
+    buy_price:            '',   // orders.buy_price              NUMERIC (GBP per part)
     delivery_location:    '',   // orders.delivery_location     TEXT
   });
 
@@ -246,7 +246,7 @@ export default function ClientOrderCreationPage() {
         tolerance:            form.tolerance || null,
         surface_finish:       form.surface_finish || null,
         special_requirements: form.special_requirements || null,
-        budget:               form.budget ? parseFloat(form.budget) : null,
+        buy_price:            form.buy_price ? parseFloat(form.buy_price) : null,
         delivery_location:    form.delivery_location || null,
         order_status:         'PENDING_ADMIN_SCRUB',
       }]).select().single();
@@ -311,7 +311,7 @@ export default function ClientOrderCreationPage() {
             <div className="space-y-6">
               <FormField label="Part Name" required hint="A clear name for the part or assembly.">
                 <Input required value={form.part_name} onChange={set('part_name')}
-                  className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500"
+                  className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-orange-500"
                   placeholder="e.g. Aluminium Enclosure V2" />
               </FormField>
 
@@ -329,7 +329,7 @@ export default function ClientOrderCreationPage() {
 
                 <FormField label="Quantity" required hint="Total units required.">
                   <Input type="number" min="1" required value={form.quantity} onChange={set('quantity')}
-                    className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500"
+                    className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-orange-500"
                     placeholder="e.g. 500" />
                 </FormField>
               </div>
@@ -345,7 +345,7 @@ export default function ClientOrderCreationPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField label="Tolerance" hint="e.g. ±0.05 mm · ISO 2768-m">
                   <Input value={form.tolerance} onChange={set('tolerance')}
-                    className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500"
+                    className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-orange-500"
                     placeholder="e.g. ±0.05 mm" />
                 </FormField>
 
@@ -355,11 +355,11 @@ export default function ClientOrderCreationPage() {
                   </SelectField>
                 </FormField>
 
-                <FormField label="Target Budget (£)" hint="Optional — helps suppliers tailor bids.">
+                <FormField label="Target Price per Part (£)" hint="Optional — your target unit price per piece.">
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-bold pointer-events-none">£</span>
-                    <Input type="number" min="0" step="0.01" value={form.budget} onChange={set('budget')}
-                      className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500 pl-7"
+                    <Input type="number" min="0" step="0.01" value={form.buy_price} onChange={set('buy_price')}
+                      className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-orange-500 pl-7"
                       placeholder="0.00" />
                   </div>
                 </FormField>
@@ -368,7 +368,7 @@ export default function ClientOrderCreationPage() {
                   <div className="relative">
                     <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                     <Input value={form.delivery_location} onChange={set('delivery_location')}
-                      className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-cyan-500 pl-8"
+                      className="bg-[#1e293b] border-slate-700 text-slate-100 placeholder-slate-500 focus:border-orange-500 pl-8"
                       placeholder="e.g. Manchester, M1 1AE" />
                   </div>
                 </FormField>
@@ -418,7 +418,7 @@ export default function ClientOrderCreationPage() {
                       active={previewModel === f}
                       onClick={() => setPreviewModel(f)}
                       onRemove={() => removeModel(i)}
-                      icon={Box} iconClass="text-cyan-500" />
+                      icon={Box} iconClass="text-orange-500" />
                   ))}
                   {previewModel && (
                     <div className="mt-3">
@@ -450,8 +450,8 @@ export default function ClientOrderCreationPage() {
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Specifications</p>
                   <SummaryRow label="Tolerance"      value={form.tolerance} />
                   <SummaryRow label="Surface Finish" value={form.surface_finish} />
-                  <SummaryRow label="Budget"
-                    value={form.budget ? `£${parseFloat(form.budget).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : null} />
+                  <SummaryRow label="Price per Part"
+                    value={form.buy_price ? `£${parseFloat(form.buy_price).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : null} />
                   <SummaryRow label="Delivery"       value={form.delivery_location} />
                 </div>
                 {form.special_requirements && (
@@ -474,7 +474,7 @@ export default function ClientOrderCreationPage() {
                   ))}
                   {modelFiles.map((f, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm text-slate-300 py-1">
-                      <Box size={14} className="text-cyan-600 shrink-0" />
+                      <Box size={14} className="text-orange-600 shrink-0" />
                       <span className="truncate">{f.name}</span>
                       <span className="text-slate-600 text-xs ml-auto shrink-0">{(f.size / 1024 / 1024).toFixed(2)} MB</span>
                     </div>
@@ -483,10 +483,10 @@ export default function ClientOrderCreationPage() {
               </FormSection>
             )}
 
-            <div className="bg-[#0f172a] border border-cyan-900/40 rounded-xl p-4 flex gap-3">
-              <ArrowRight size={18} className="text-cyan-500 shrink-0 mt-0.5" />
+            <div className="bg-[#0f172a] border border-orange-900/40 rounded-xl p-4 flex gap-3">
+              <ArrowRight size={18} className="text-orange-500 shrink-0 mt-0.5" />
               <p className="text-sm text-slate-400 leading-relaxed">
-                Once submitted, your order enters <span className="text-cyan-400 font-bold">Admin Review</span>.
+                Once submitted, your order enters <span className="text-orange-400 font-bold">Admin Review</span>.
                 Drawings are AI-sanitised before sharing with suppliers.
                 You can track progress in real time from your dashboard.
               </p>

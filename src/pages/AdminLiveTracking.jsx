@@ -218,7 +218,7 @@ const AdminLiveTracking = () => {
     return (
       <ControlCentreLayout>
         <div className="flex justify-center items-center py-20">
-          <Loader2 className="animate-spin text-cyan-500 w-12 h-12" />
+          <Loader2 className="animate-spin text-orange-500 w-12 h-12" />
         </div>
       </ControlCentreLayout>
     );
@@ -241,7 +241,7 @@ const AdminLiveTracking = () => {
           <div>
             <h1 className="text-3xl font-bold text-white mb-1">Live Order Tracking</h1>
             <p className="text-slate-400 text-sm">
-              Real-time overview of <span className="text-cyan-400 font-semibold">{ongoingOrders.length}</span> ongoing orders across the manufacturing pipeline.
+              Real-time overview of <span className="text-orange-400 font-semibold">{ongoingOrders.length}</span> ongoing orders across the manufacturing pipeline.
             </p>
           </div>
           <button
@@ -296,7 +296,7 @@ const AdminLiveTracking = () => {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search by part name, job ID, material..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
             />
             {searchQuery && (
               <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
@@ -309,7 +309,7 @@ const AdminLiveTracking = () => {
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-cyan-500"
+              className="px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-orange-500"
             >
               <option value="updated">Sort: Last Updated</option>
               <option value="created">Sort: Newest First</option>
@@ -319,7 +319,7 @@ const AdminLiveTracking = () => {
             {stageFilter !== 'ALL' && (
               <button
                 onClick={() => setStageFilter('ALL')}
-                className="flex items-center gap-1 px-3 py-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-sm text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                className="flex items-center gap-1 px-3 py-2.5 bg-orange-500/10 border border-orange-500/30 rounded-lg text-sm text-orange-400 hover:bg-orange-500/20 transition-colors"
               >
                 <X size={14} />
                 Clear Filter
@@ -354,7 +354,7 @@ const AdminLiveTracking = () => {
                   key={order.id}
                   layout
                   className={`bg-[#0f172a] border rounded-xl overflow-hidden transition-all ${
-                    isExpanded ? 'border-cyan-500/40' : 'border-slate-800 hover:border-slate-700'
+                    isExpanded ? 'border-orange-500/40' : 'border-slate-800 hover:border-slate-700'
                   }`}
                 >
                   {/* Row Header */}
@@ -425,13 +425,13 @@ const AdminLiveTracking = () => {
                             <DetailCard label="Material" value={order.material || '—'} icon={Zap} color="text-orange-400" />
                             <DetailCard label="Unit Price" value={order.unit_price ? `£${order.unit_price}` : '—'} icon={DollarSign} color="text-emerald-400" />
                             <DetailCard label="Delivery" value={`${order.delivery_days || 60} days`} icon={Calendar} color="text-amber-400" />
-                            <DetailCard label="Location" value={order.delivery_to || 'TBD'} icon={MapPin} color="text-cyan-400" />
+                            <DetailCard label="Location" value={order.delivery_to || 'TBD'} icon={MapPin} color="text-orange-400" />
                           </div>
 
                           {/* Full Timeline */}
                           <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
                             <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                              <TrendingUp size={16} className="text-cyan-400" />
+                              <TrendingUp size={16} className="text-orange-400" />
                               Manufacturing Pipeline
                             </h4>
                             <OrderTimeline
@@ -453,7 +453,7 @@ const AdminLiveTracking = () => {
                               <div className="space-y-2 max-h-48 overflow-y-auto">
                                 {orderUpdates.slice(-5).reverse().map((update, idx) => (
                                   <div key={idx} className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-2 flex-shrink-0" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center justify-between gap-2">
                                         <p className="text-xs font-semibold text-slate-300">
@@ -481,7 +481,7 @@ const AdminLiveTracking = () => {
                                 <Eye size={16} className="text-emerald-400" />
                                 Documents {(orderDocuments[order.id] || []).length > 0 && `(${orderDocuments[order.id].length})`}
                               </h4>
-                              <label className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${uploadingDoc === order.id ? 'bg-slate-700 text-slate-400' : 'bg-cyan-900/40 text-cyan-400 hover:bg-cyan-900/70 border border-cyan-800/50'}`}>
+                              <label className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${uploadingDoc === order.id ? 'bg-slate-700 text-slate-400' : 'bg-orange-900/40 text-orange-400 hover:bg-orange-900/70 border border-orange-800/50'}`}>
                                 {uploadingDoc === order.id ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
                                 {uploadingDoc === order.id ? 'Uploading…' : 'Send to Supplier'}
                                 <input type="file" className="hidden" disabled={!!uploadingDoc} onChange={e => handleAdminDocUpload(e, order)} />
@@ -510,7 +510,7 @@ const AdminLiveTracking = () => {
                                 e.stopPropagation();
                                 navigate(`/control-centre/sanitisation-gate/review/${order.id}`);
                               }}
-                              className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm font-medium transition-colors"
+                              className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-medium transition-colors"
                             >
                               <Eye size={16} />
                               Open Full Review

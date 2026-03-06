@@ -94,7 +94,7 @@ const JobDetailsPage = () => {
             </button>
             <button
               onClick={() => navigate(`/supplier-hub/material-update/${rz_job_id}`)}
-              className="p-3 rounded-lg bg-slate-800 hover:bg-cyan-900/30 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-400 transition-all font-bold text-sm text-center"
+              className="p-3 rounded-lg bg-slate-800 hover:bg-orange-900/30 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-orange-400 transition-all font-bold text-sm text-center"
             >
               📦 Material Update
             </button>

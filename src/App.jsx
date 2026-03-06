@@ -35,7 +35,6 @@ import AdminLiveTracking from '@/pages/AdminLiveTracking';
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
-import QualityVaultPage from '@/pages/QualityVaultPage';
 import NCRVisibilityPage from '@/pages/NCRVisibilityPage';
 import ShippingTrackingPage from '@/pages/ShippingTrackingPage';
 import OrdersOverviewPage from '@/pages/OrdersOverviewPage';
@@ -53,6 +52,8 @@ import NCRReportingPage from '@/pages/NCRReportingPage';
 import SupplierDocumentsPortal from '@/pages/SupplierDocumentsPortal';
 import SupplierOrderManager from '@/pages/SupplierOrderManager';
 import SupplierSupportPage from '@/pages/SupplierSupportPage';
+import SupplierProfilePage from '@/pages/SupplierProfilePage';
+import ClientProfilePage from '@/pages/ClientProfilePage';
 import TicketDetailPage from '@/pages/TicketDetailPage';
 import AdminSupportPage from '@/pages/AdminSupportPage';
 import AdminTicketDetailPage from '@/pages/AdminTicketDetailPage';
@@ -101,10 +102,10 @@ function App() {
                 <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><OrdersOverviewPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/orders/:orderId" element={<ProtectedRoute requiredRole="client"><ClientOrderDetailsPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/orders/:orderId/tracking" element={<ProtectedRoute requiredRole="client"><LiveOrderTracking /></ProtectedRoute>} />
-<Route path="/client-dashboard/quality-vault" element={<ProtectedRoute requiredRole="client"><QualityVaultPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/documents" element={<ProtectedRoute requiredRole="client"><ClientDocumentLibraryPage /></ProtectedRoute>} />
+<Route path="/client-dashboard/documents" element={<ProtectedRoute requiredRole="client"><ClientDocumentLibraryPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/shipping" element={<ProtectedRoute requiredRole="client"><ShippingTrackingPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/ncr-visibility" element={<ProtectedRoute requiredRole="client"><NCRVisibilityPage /></ProtectedRoute>} />
+                <Route path="/client-dashboard/profile" element={<ProtectedRoute requiredRole="client"><ClientProfilePage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/support" element={<ProtectedRoute requiredRole="client"><ClientSupportPage /></ProtectedRoute>} />
                 <Route path="/client-dashboard/support/:ticketId" element={<ProtectedRoute requiredRole="client"><TicketDetailPage /></ProtectedRoute>} />
 
@@ -117,6 +118,7 @@ function App() {
                 <Route path="/supplier-hub/job-tracking/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><JobDetailsPage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
                 <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
+                <Route path="/supplier-hub/profile" element={<ProtectedRoute requiredRole="supplier"><SupplierProfilePage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
                 <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
                 <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />

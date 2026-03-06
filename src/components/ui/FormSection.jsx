@@ -22,7 +22,7 @@ export function FormSection({ title, icon: Icon, children, className, action }) 
       {title && (
         <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-800">
           <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-            {Icon && <Icon size={18} className="text-cyan-400" />}
+            {Icon && <Icon size={18} className="text-orange-400" />}
             {title}
           </h2>
           {action}
@@ -62,7 +62,7 @@ export function DisplayField({ label, value, className, children }) {
 // ─── Shared input class (apply to <input>, <select>, <textarea>) ─────────────
 export const inputCls =
   'w-full bg-[#1e293b] border border-slate-700 rounded-md text-slate-100 text-sm px-3 py-2.5 ' +
-  'placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/40 ' +
+  'placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/40 ' +
   'transition-colors';
 
 // ─── Styled select wrapper ────────────────────────────────────────────────────

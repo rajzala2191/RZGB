@@ -98,7 +98,7 @@ const ShippingLabelGenerator = ({ orderId, isQcApproved, rzJobId }) => {
           className={`
             flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all
             ${isQcApproved 
-              ? 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]' 
+              ? 'bg-orange-600 hover:bg-orange-500 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]' 
               : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
             }
           `}

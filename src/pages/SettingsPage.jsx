@@ -109,7 +109,7 @@ const SettingsPage = () => {
   return (
     <ControlCentreLayout>
       <Helmet>
-        <title>Settings - Ghost Portal</title>
+        <title>Settings - RZ Global Solutions</title>
       </Helmet>
 
       <div className="max-w-4xl mx-auto space-y-6 pb-20">

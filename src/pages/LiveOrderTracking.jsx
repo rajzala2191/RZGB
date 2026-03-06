@@ -1,111 +1,101 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import { motion } from 'framer-motion';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import AssetViewer from '@/components/AssetViewer';
 import OrderTimeline from '@/components/OrderTimeline';
+import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
-import {
-  Loader2, ArrowLeft, CheckCircle2, AlertCircle, Package,
-  Truck, Calendar, DollarSign, MapPin,
-  FileCheck, Zap, Hourglass, ShieldCheck
-} from 'lucide-react';
 import { format } from 'date-fns';
+import {
+  Loader2, ArrowLeft, AlertCircle, Package,
+  Truck, Calendar, PoundSterling, MapPin, Activity,
+} from 'lucide-react';
 
-const LiveOrderTracking = () => {
+const ACCENT = '#FF6B35';
+
+
+const STATUS_LABEL = {
+  PENDING_ADMIN_SCRUB: { label: 'Pending Review', color: '#f59e0b' },
+  SANITIZED:           { label: 'Sanitised',      color: '#8b5cf6' },
+  OPEN_FOR_BIDDING:    { label: 'Open to Bid',    color: '#3b82f6' },
+  BID_RECEIVED:        { label: 'Bid Received',   color: '#06b6d4' },
+  AWARDED:             { label: 'Awarded',         color: ACCENT    },
+  MATERIAL:            { label: 'Material',        color: ACCENT    },
+  CASTING:             { label: 'Casting',         color: ACCENT    },
+  MACHINING:           { label: 'Machining',       color: ACCENT    },
+  QC:                  { label: 'QC',              color: '#a855f7' },
+  DISPATCH:            { label: 'Dispatch',        color: '#10b981' },
+  DELIVERED:           { label: 'Delivered',       color: '#22c55e' },
+  WITHDRAWN:           { label: 'Withdrawn',       color: '#ef4444' },
+};
+const getStatusInfo = (s) => STATUS_LABEL[s] || { label: s?.replace(/_/g, ' ') || '—', color: '#71717a' };
+
+export default function LiveOrderTracking() {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { toast } = useToast();
-  const [order, setOrder] = useState(null);
-  const [updates, setUpdates] = useState([]);
+  const { isDark } = useTheme();
+  const [order, setOrder]       = useState(null);
+  const [updates, setUpdates]   = useState([]);
   const [drawings, setDrawings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
 
-  // Pipeline stages in order
-  const STAGES = [
-    { id: 'PENDING_ADMIN_SCRUB', label: 'Order Received', color: 'blue', icon: Package },
-    { id: 'SANITIZED', label: 'Sanitizing', color: 'purple', icon: FileCheck },
-    { id: 'AWARDED', label: 'Supplier Assigned', color: 'amber', icon: CheckCircle2 },
-    { id: 'MATERIAL', label: 'Material Sourcing', color: 'sky', icon: Package },
-    { id: 'CASTING', label: 'Casting', color: 'orange', icon: Zap },
-    { id: 'MACHINING', label: 'Machining', color: 'violet', icon: Hourglass },
-    { id: 'QC', label: 'Quality Control', color: 'emerald', icon: ShieldCheck },
-    { id: 'DISPATCH', label: 'Dispatch', color: 'blue', icon: Truck },
-    { id: 'DELIVERED', label: 'Delivered', color: 'green', icon: CheckCircle2 },
-  ];
+  /* ── theme tokens ──────────────────────────────────────── */
+  const t = isDark ? {
+    card:       'rgba(255,255,255,0.04)',
+    cardBorder: 'rgba(255,255,255,0.08)',
+    text:       '#ffffff',
+    textMuted:  'rgba(255,255,255,0.5)',
+    textFaint:  'rgba(255,255,255,0.3)',
+    iconBg:     'rgba(255,255,255,0.06)',
+    divider:    'rgba(255,255,255,0.07)',
+    backColor:  'rgba(255,255,255,0.4)',
+    backHover:  '#ffffff',
+    mono:       'rgba(255,255,255,0.45)',
+  } : {
+    card:       '#ffffff',
+    cardBorder: 'rgba(0,0,0,0.08)',
+    text:       '#0f0f0f',
+    textMuted:  'rgba(0,0,0,0.5)',
+    textFaint:  'rgba(0,0,0,0.35)',
+    iconBg:     'rgba(0,0,0,0.05)',
+    divider:    'rgba(0,0,0,0.07)',
+    backColor:  'rgba(0,0,0,0.4)',
+    backHover:  '#0f0f0f',
+    mono:       'rgba(0,0,0,0.45)',
+  };
 
-  useEffect(() => {
-    if (!currentUser) return;
-    fetchOrderData();
-
-    // Set up realtime subscription for job_updates
-    const channel = supabase
-      .channel(`live-tracking-${orderId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'job_updates' },
-        () => fetchOrderData()
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` },
-        () => fetchOrderData()
-      )
-      .subscribe();
-
-    return () => supabase.removeChannel(channel);
-  }, [orderId, currentUser]);
-
+  /* ── data fetch ─────────────────────────────────────────── */
   const fetchOrderData = async () => {
     if (!currentUser?.id) return;
     try {
-      // Use maybeSingle to avoid PGRST116 error when RLS filters out the row
       const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('id', orderId)
-        .maybeSingle();
-
+        .from('orders').select('*').eq('id', orderId).maybeSingle();
       if (orderError) throw orderError;
-      if (!orderData) {
-        setError('Order not found or you do not have permission to view it.');
-        setLoading(false);
-        return;
-      }
+      if (!orderData) { setError('Order not found or access denied.'); setLoading(false); return; }
       setOrder(orderData);
 
-      // Fetch job updates only if the order has an rz_job_id
       if (orderData.rz_job_id) {
-        const { data: updatesData, error: updatesError } = await supabase
-          .from('job_updates')
-          .select('*')
+        const { data: updatesData } = await supabase
+          .from('job_updates').select('*')
           .eq('rz_job_id', orderData.rz_job_id)
           .order('created_at', { ascending: true });
-
-        if (updatesError) console.error('Failed to load updates:', updatesError);
         setUpdates(updatesData || []);
-      } else {
-        setUpdates([]);
-      }
+      } else { setUpdates([]); }
 
-      // Fetch drawings/documents — use admin client to bypass RLS
       const { data: docsData } = await supabaseAdmin
-        .from('documents')
-        .select('id, file_name, file_path')
-        .eq('order_id', orderData.id)
-        .order('created_at', { ascending: false });
+        .from('documents').select('id, file_name, file_path')
+        .eq('order_id', orderData.id).order('created_at', { ascending: false });
 
-      // Generate 24-hour signed URLs (bucket is private, getPublicUrl won't work)
       const drawingsWithUrls = await Promise.all(
         (docsData || []).map(async (doc) => {
           const { data: urlData } = await supabaseAdmin.storage
-            .from('documents')
-            .createSignedUrl(doc.file_path, 86400);
+            .from('documents').createSignedUrl(doc.file_path, 86400);
           return {
             id: doc.id,
             asset_name: doc.file_name,
@@ -119,153 +109,188 @@ const LiveOrderTracking = () => {
       setDrawings(drawingsWithUrls);
       setError(null);
     } catch (err) {
-      console.error('LiveOrderTracking fetch error:', err);
       setError(err.message || 'Unable to load order data');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (!currentUser) return;
+    fetchOrderData();
+    const channel = supabase.channel(`live-tracking-${orderId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'job_updates' }, fetchOrderData)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` }, fetchOrderData)
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [orderId, currentUser]);
+
+  /* ── loading ────────────────────────────────────────────── */
   if (loading) return (
     <ClientDashboardLayout>
-      <div className="flex justify-center items-center py-20">
-        <Loader2 className="animate-spin text-cyan-500 w-12 h-12" />
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={28} className="animate-spin" style={{ color: ACCENT }} />
+          <p style={{ color: t.textMuted }} className="text-sm">Loading order…</p>
+        </div>
       </div>
     </ClientDashboardLayout>
   );
 
   if (error || !order) return (
     <ClientDashboardLayout>
-      <div className="bg-red-950/30 border border-red-500/50 rounded-xl p-8 text-center">
-        <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-        <p className="text-red-300 font-semibold mb-2">{error || 'Order not found'}</p>
-        <div className="flex justify-center gap-3 mt-4">
+      <div className="rounded-2xl p-8 text-center mt-4" style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)' }}>
+        <AlertCircle size={28} style={{ color: '#ef4444' }} className="mx-auto mb-3" />
+        <p className="font-semibold mb-4" style={{ color: '#ef4444' }}>{error || 'Order not found'}</p>
+        <div className="flex justify-center gap-3">
           <button
             onClick={() => { setLoading(true); setError(null); fetchOrderData(); }}
-            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-medium transition-colors text-sm"
-          >
-            Retry
-          </button>
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-white"
+            style={{ background: `linear-gradient(135deg, ${ACCENT}, #f97316)` }}
+          >Retry</button>
           <button
             onClick={() => navigate('/client-dashboard/orders')}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition-colors text-sm border border-slate-700"
-          >
-            Back to Orders
-          </button>
+            className="px-4 py-2 rounded-xl text-sm font-medium"
+            style={{ background: t.card, border: `1px solid ${t.cardBorder}`, color: t.textMuted }}
+          >Back to Orders</button>
         </div>
       </div>
     </ClientDashboardLayout>
   );
 
-  // Map DB order_status values to pipeline stage IDs
-  const STATUS_TO_STAGE_ID = {
-    'PENDING_ADMIN_SCRUB': 'PENDING_ADMIN_SCRUB',
-    'SANITIZED': 'SANITIZED',
-  };
-  const currentStageId = STATUS_TO_STAGE_ID[order.order_status] || order.order_status;
-  const currentStageIndex = STAGES.findIndex(s => s.id === currentStageId);
+  /* ── derived values ─────────────────────────────────────── */
+  const statusInfo     = getStatusInfo(order.order_status);
+  const daysRequested  = order.delivery_days || 60;
+  const dueDate        = new Date(new Date(order.created_at).getTime() + daysRequested * 86400000);
+  const daysRemaining  = Math.ceil((dueDate - new Date()) / 86400000);
+  const isWithdrawn    = order.order_status === 'WITHDRAWN';
+  const isOnTrack      = !isWithdrawn && daysRemaining > 0;
 
-  // Calculate days remaining
-  const daysRequested = order.delivery_days || 60;
-  const orderDate = new Date(order.created_at);
-  const dueDate = new Date(orderDate.getTime() + daysRequested * 24 * 60 * 60 * 1000);
-  const daysRemaining = Math.ceil((dueDate - new Date()) / (1000 * 60 * 60 * 24));
-  const isOnTrack = daysRemaining > 0;
+  const infoCards = [
+    { label: 'Quantity',    value: order.quantity?.toLocaleString() || '—',    sub: order.material || '',      icon: Package,        color: '#3b82f6' },
+    { label: 'Price per Part', value: order.unit_price ? `£${order.unit_price}` : '—',
+      sub: order.unit_price ? 'Per part · ex VAT' : 'Pending bid award',
+      icon: PoundSterling, color: '#22c55e' },
+    { label: 'Target Delivery', value: `${daysRequested}d`, sub: format(dueDate, 'MMM d, yyyy'), icon: Calendar, color: '#f59e0b' },
+    { label: 'Deliver To',  value: order.delivery_to || 'To your door',         sub: 'Delivery address',        icon: MapPin,         color: '#a855f7' },
+  ];
 
   return (
     <ClientDashboardLayout>
-      <Helmet><title>{`${order.ghost_public_name || 'Order'} - Order Tracking`}</title></Helmet>
+      <Helmet><title>{`${order.part_name || 'Order'} — Tracking`}</title></Helmet>
 
       <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <button onClick={() => navigate(-1)} className="text-slate-400 hover:text-white flex items-center gap-2 mb-4 text-sm font-bold">
-            <ArrowLeft size={16} /> Back
+
+        {/* ── Back + Header ─────────────────────────────────── */}
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-sm font-medium mb-5 transition-colors"
+            style={{ color: t.backColor }}
+            onMouseEnter={e => e.currentTarget.style.color = t.backHover}
+            onMouseLeave={e => e.currentTarget.style.color = t.backColor}
+          >
+            <ArrowLeft size={15} /> Back to Orders
           </button>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-black text-white font-mono tracking-tight mb-2">{order.ghost_public_name || order.part_name || 'Order'}</h1>
-              <p className="text-slate-400 text-sm">RZ Job ID: <span className="text-cyan-400 font-mono">{order.rz_job_id || 'Pending'}</span></p>
+              {/* Live indicator */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: ACCENT }} />
+                  <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: ACCENT }} />
+                </span>
+                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: t.textFaint }}>Live Tracking</span>
+              </div>
+
+              <h1 className="text-2xl font-bold mb-1" style={{ color: t.text }}>
+                {order.part_name || 'Order'}
+              </h1>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-mono px-2 py-0.5 rounded-lg" style={{ background: t.iconBg, color: t.mono }}>
+                  {order.rz_job_id || 'Job ID pending'}
+                </span>
+                <span
+                  className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full"
+                  style={{ background: `${statusInfo.color}15`, color: statusInfo.color }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusInfo.color }} />
+                  {statusInfo.label}
+                </span>
+              </div>
             </div>
-            <div className={`px-4 py-2 rounded-lg font-bold text-sm border ${
-              order.order_status === 'WITHDRAWN'
-                ? 'bg-red-950/50 border-red-500 text-red-400'
-                : isOnTrack 
-                  ? 'bg-emerald-950/50 border-emerald-500 text-emerald-400' 
-                  : 'bg-red-950/50 border-red-500 text-red-400'
-            }`}>
-              {order.order_status === 'WITHDRAWN' 
-                ? '✕ Withdrawn'
-                : isOnTrack ? '✓ On Track' : '⚠ At Risk'
-              }{order.order_status !== 'WITHDRAWN' && ` • ${Math.abs(daysRemaining)} days ${isOnTrack ? 'remaining' : 'overdue'}`}
+
+            {/* On-track badge */}
+            <div
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold shrink-0"
+              style={{
+                background: isWithdrawn ? 'rgba(239,68,68,0.1)' : isOnTrack ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+                border:     `1px solid ${isWithdrawn ? 'rgba(239,68,68,0.2)' : isOnTrack ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                color:      isWithdrawn ? '#ef4444' : isOnTrack ? '#22c55e' : '#ef4444',
+              }}
+            >
+              <Activity size={15} />
+              {isWithdrawn
+                ? 'Withdrawn'
+                : `${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) !== 1 ? 's' : ''} ${isOnTrack ? 'remaining' : 'overdue'}`
+              }
             </div>
           </div>
+        </motion.div>
+
+        {/* ── Info cards ────────────────────────────────────── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {infoCards.map((card, i) => (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, delay: 0.05 + i * 0.06 }}
+              className="rounded-2xl p-5"
+              style={{ background: t.card, border: `1px solid ${t.cardBorder}` }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: t.textFaint }}>{card.label}</p>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${card.color}18` }}>
+                  <card.icon size={14} style={{ color: card.color }} />
+                </div>
+              </div>
+              <p className="text-xl font-bold leading-none mb-1.5" style={{ color: t.text }}>{card.value}</p>
+              <p className="text-xs truncate" style={{ color: t.textFaint }}>{card.sub}</p>
+            </motion.div>
+          ))}
         </div>
 
-        {/* Order Details Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Quantity */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Quantity</p>
-              <Package className="text-blue-400" size={18} />
-            </div>
-            <p className="text-2xl font-black text-slate-100">{order.quantity ? order.quantity.toLocaleString() : '—'}</p>
-            <p className="text-xs text-slate-400 mt-2">{order.material}</p>
-          </div>
-
-          {/* Unit Price */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Unit Price</p>
-              <DollarSign className="text-emerald-400" size={18} />
-            </div>
-            <p className="text-2xl font-black text-slate-100">{order.unit_price ? `£${order.unit_price}` : '—'}</p>
-            <p className="text-xs text-slate-400 mt-2">{order.quantity && order.unit_price ? `Total: £${(order.quantity * order.unit_price).toLocaleString()}` : 'Pending bid award'}</p>
-          </div>
-
-          {/* Delivery */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Delivery</p>
-              <Calendar className="text-amber-400" size={18} />
-            </div>
-            <p className="text-2xl font-black text-slate-100">{daysRequested} days</p>
-            <p className="text-xs text-slate-400 mt-2">{format(dueDate, 'MMM dd, yyyy')}</p>
-          </div>
-
-          {/* Delivery Location */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Location</p>
-              <MapPin className="text-cyan-400" size={18} />
-            </div>
-            <p className="text-lg font-black text-slate-100">{order.delivery_to || 'To your door'}</p>
-            <p className="text-xs text-slate-400 mt-2">Delivery method</p>
-          </div>
-        </div>
-
-        {/* Pipeline Visualization */}
-        <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-8">
-          <h2 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
-            <Zap size={24} className="text-cyan-400" />
+        {/* ── Pipeline ──────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.28 }}
+          className="rounded-2xl p-6"
+          style={{ background: t.card, border: `1px solid ${t.cardBorder}` }}
+        >
+          <h2 className="text-sm font-bold uppercase tracking-widest mb-6" style={{ color: t.textFaint }}>
             Manufacturing Pipeline
           </h2>
 
-          <OrderTimeline 
+          <OrderTimeline
             currentStatus={order.order_status}
             createdAt={order.created_at}
             updatedAt={order.updated_at}
             updates={updates}
-            isWithdrawn={order.order_status === 'WITHDRAWN'}
+            isWithdrawn={isWithdrawn}
           />
-        </div>
+        </motion.div>
 
-        {/* Drawings Viewer */}
-        <AssetViewer orderId={order.id} assets={drawings} />
+        {/* ── Drawings / Documents ─────────────────────────── */}
+        {drawings.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.35 }}
+          >
+            <AssetViewer orderId={order.id} assets={drawings} />
+          </motion.div>
+        )}
       </div>
     </ClientDashboardLayout>
   );
-};
-
-export default LiveOrderTracking;
+}

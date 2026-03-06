@@ -72,7 +72,7 @@ const LinkageDashboard = () => {
   return (
     <ControlCentreLayout>
       <Helmet>
-        <title>Linkage Dashboard - Ghost Portal</title>
+        <title>Linkage Dashboard - RZ Global Solutions</title>
       </Helmet>
 
       <div className="space-y-6">
@@ -97,7 +97,7 @@ const LinkageDashboard = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input 
               type="text" 
-              placeholder="Search by RZ-Job-ID, Client, or Ghost ID..."
+              placeholder="Search by RZ-Job-ID, Client, or Anon ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-10 pr-4 py-2 text-slate-100 focus:outline-none focus:border-sky-500 placeholder-slate-600"
@@ -142,7 +142,7 @@ const LinkageDashboard = () => {
                       <div className="flex items-center gap-1">RZ-Job-ID <ArrowUpDown size={12} /></div>
                     </th>
                     <th className="p-4">Client Name</th>
-                    <th className="p-4">Ghost ID (Supplier)</th>
+                    <th className="p-4">Anon ID (Supplier)</th>
                     <th className="p-4 text-right cursor-pointer hover:text-sky-400" onClick={() => requestSort('buy_price')}>
                       <div className="flex items-center justify-end gap-1">Buy Price <ArrowUpDown size={12} /></div>
                     </th>
@@ -161,7 +161,7 @@ const LinkageDashboard = () => {
                         <tr key={order.id} className="hover:bg-slate-900/50 transition-colors group">
                           <td className="p-4 font-mono text-sky-400 font-medium">{order.rz_job_id || 'PENDING'}</td>
                           <td className="p-4 text-slate-300">{order.client?.company_name || order.client?.email || 'N/A'}</td>
-                          <td className="p-4 text-slate-400 italic">{order.supplier?.email ? `GHOST-${order.supplier.email.substring(0,4).toUpperCase()}` : 'Unassigned'}</td>
+                          <td className="p-4 text-slate-400 italic">{order.supplier?.email ? `ANON-${order.supplier.email.substring(0,4).toUpperCase()}` : 'Unassigned'}</td>
                           <td className="p-4 text-right text-slate-400">£{order.buy_price || 0}</td>
                           <td className="p-4 text-right text-slate-200 font-medium">£{order.sell_price || 0}</td>
                           <td className="p-4 text-right">

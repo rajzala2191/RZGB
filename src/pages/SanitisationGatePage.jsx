@@ -61,7 +61,7 @@ export default function SanitisationGatePage() {
                     <span className="px-3 py-1 bg-yellow-900/30 text-yellow-400 rounded-full text-xs font-semibold border border-yellow-700/50">PENDING</span>
                   </td>
                   <td className="p-4">
-                    <Button size="sm" onClick={() => navigate(`/control-centre/sanitisation-gate/review/${order.id}`)} className="bg-cyan-600 hover:bg-cyan-500 text-white">Review</Button>
+                    <Button size="sm" onClick={() => navigate(`/control-centre/sanitisation-gate/review/${order.id}`)} className="bg-orange-600 hover:bg-orange-500 text-white">Review</Button>
                   </td>
                 </tr>
               ))}

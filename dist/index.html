@@ -2,12 +2,15 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<link rel="icon" type="image/svg+xml" href="/assets/logo-5df272f5.svg" />
+		<link rel="icon" type="image/x-icon" href="/assets/flati-icon-6e09564d.ico" />
+		<!-- Apple Touch Icon for iOS -->
+		<link rel="apple-touch-icon" sizes="180x180" href="/assets/flat-icon-180-893b608b.png">
 		<meta name="generator" content="RZ Global Solutions UK" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Portal | RZ Global Solutions UK</title>
-		<script type="module" crossorigin src="/assets/index-0f572a0a.js"></script>
-		<link rel="stylesheet" href="/assets/index-f2dc077e.css">
+		<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlJaIEdsb2JhbCBQb3J0YWwiLAogICJzaG9ydF9uYW1lIjogIlJaIFBvcnRhbCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZmZmZmZmIiwKICAidGhlbWVfY29sb3IiOiAiIzBkMWEyNiIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImZsYXQtaWNvbi0xODAucG5nIiwKICAgICAgInNpemVzIjogIjE4MHgxODAiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9" />
+		<script type="module" crossorigin src="/assets/index-f1d32ef5.js"></script>
+		<link rel="stylesheet" href="/assets/index-6e87fce2.css">
 		<script type="module">
 window.onerror = (message, source, lineno, colno, errorObj) => {
 	const errorDetails = errorObj ? JSON.stringify({
@@ -163,5 +166,12 @@ if (window.navigation && window.self !== window.top) {
 	<body>
 		<div id="root"></div>
 		
+		<script>
+		  if ('serviceWorker' in navigator) {
+		    window.addEventListener('load', function() {
+		      navigator.serviceWorker.register('/service-worker.js');
+		    });
+		  }
+		</script>
 	</body>
 </html>

@@ -77,7 +77,7 @@ const AuditVault = () => {
   return (
     <ControlCentreLayout>
       <Helmet>
-        <title>Audit Vault - Ghost Portal</title>
+        <title>Audit Vault - RZ Global Solutions</title>
       </Helmet>
 
       <div className="space-y-6">

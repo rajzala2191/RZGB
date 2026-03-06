@@ -9,7 +9,7 @@ export const ErrorState = ({ title = 'Error', message, onRetry }) => (
       <p className="text-slate-400 mb-4">{message || 'An error occurred. Please try again.'}</p>
       <button 
         onClick={onRetry || (() => window.location.reload())}
-        className="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+        className="w-full bg-orange-600 hover:bg-orange-500 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
       >
         <RefreshCw size={16} />
         Retry

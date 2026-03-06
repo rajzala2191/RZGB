@@ -41,11 +41,25 @@ CREATE TABLE IF NOT EXISTS profiles (
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email          text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role           text NOT NULL DEFAULT 'client';
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS company_name   text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS contact_person text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone          text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS status         text NOT NULL DEFAULT 'active';
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS created_at     timestamptz NOT NULL DEFAULT now();
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS updated_at     timestamptz NOT NULL DEFAULT now();
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS contact_person    text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone             text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS status            text NOT NULL DEFAULT 'active';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS created_at        timestamptz NOT NULL DEFAULT now();
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS updated_at        timestamptz NOT NULL DEFAULT now();
+-- Extended profile fields
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS address           text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS website           text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS company_size      text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio               text;
+-- Supplier-specific
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS specialization    text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS capabilities      text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS certifications    text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS years_in_business integer;
+-- Client-specific
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS industry          text;
+-- Logo
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS logo_url          text;
 
 -- Auto-create profile row when a new auth user signs up
 CREATE OR REPLACE FUNCTION handle_new_user()
@@ -85,10 +99,11 @@ CREATE TABLE IF NOT EXISTS orders (
   surface_finish       text,
   special_requirements text,
   budget               numeric,
+  buy_price            numeric,
   delivery_location    text,
   order_status         text NOT NULL DEFAULT 'PENDING_ADMIN_SCRUB',
-  ghost_public_name    text,
-  ghost_description    text,
+  public_name    text,
+  description    text,
   target_sell_price    numeric,
   rz_job_id            text UNIQUE,
   unit_price           numeric
@@ -105,10 +120,11 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS tolerance            text;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS surface_finish       text;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS special_requirements text;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS budget               numeric;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS buy_price            numeric;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_location    text;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_status         text NOT NULL DEFAULT 'PENDING_ADMIN_SCRUB';
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS ghost_public_name    text;
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS ghost_description    text;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS public_name    text;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS description    text;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS target_sell_price    numeric;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS unit_price           numeric;
 
@@ -172,12 +188,12 @@ CREATE TABLE IF NOT EXISTS sanitization_records (
   created_at timestamptz NOT NULL DEFAULT now(),
   order_id   uuid REFERENCES orders(id) ON DELETE CASCADE,
   admin_id   uuid REFERENCES profiles(id) ON DELETE SET NULL,
-  ghost_name text,
+  name text,
   status     text NOT NULL DEFAULT 'COMPLETED'
 );
 ALTER TABLE sanitization_records ADD COLUMN IF NOT EXISTS order_id   uuid REFERENCES orders(id) ON DELETE CASCADE;
 ALTER TABLE sanitization_records ADD COLUMN IF NOT EXISTS admin_id   uuid REFERENCES profiles(id) ON DELETE SET NULL;
-ALTER TABLE sanitization_records ADD COLUMN IF NOT EXISTS ghost_name text;
+ALTER TABLE sanitization_records ADD COLUMN IF NOT EXISTS name text;
 ALTER TABLE sanitization_records ADD COLUMN IF NOT EXISTS status     text NOT NULL DEFAULT 'COMPLETED';
 
 -- ════════════════════════════════════════════════════════════
@@ -338,6 +354,36 @@ CREATE TABLE IF NOT EXISTS system_settings (
 );
 ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS setting_value text;
 ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS updated_at    timestamptz NOT NULL DEFAULT now();
+
+-- ════════════════════════════════════════════════════════════
+-- NOTIFICATIONS
+-- ════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS notifications (
+  id            uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  recipient_id  uuid REFERENCES profiles(id) ON DELETE CASCADE,
+  sender_id     uuid REFERENCES profiles(id) ON DELETE SET NULL,
+  type          text,
+  title         text,
+  message       text,
+  link          text,
+  order_id      uuid REFERENCES orders(id) ON DELETE SET NULL,
+  read          boolean NOT NULL DEFAULT false,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS recipient_id  uuid REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS sender_id     uuid REFERENCES profiles(id) ON DELETE SET NULL;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS type          text;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS title         text;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS message       text;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS link          text;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS order_id      uuid REFERENCES orders(id) ON DELETE SET NULL;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS read          boolean NOT NULL DEFAULT false;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS created_at    timestamptz NOT NULL DEFAULT now();
+
+CREATE INDEX IF NOT EXISTS idx_notifications_recipient_id ON notifications(recipient_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_order_id     ON notifications(order_id);
+
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
 -- ════════════════════════════════════════════════════════════
 -- INDEXES

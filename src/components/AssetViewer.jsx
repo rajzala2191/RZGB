@@ -83,7 +83,7 @@ const AssetViewer = ({ assets, orderId }) => {
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-slate-900 rounded-lg text-slate-400">
-                      {asset.asset_type === 'pdf' ? <FileText size={20} /> : isModel(asset.asset_name) ? <Box size={20} className="text-cyan-500" /> : <ImageIcon size={20} />}
+                      {asset.asset_type === 'pdf' ? <FileText size={20} /> : isModel(asset.asset_name) ? <Box size={20} className="text-orange-500" /> : <ImageIcon size={20} />}
                     </div>
                     <div className="overflow-hidden">
                       <p className="text-sm font-medium text-slate-200 truncate">{asset.asset_name}</p>

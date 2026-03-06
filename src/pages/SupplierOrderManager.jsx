@@ -2,34 +2,37 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import SupplierHubLayout from '@/components/SupplierHubLayout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from '@/components/ui/dialog';
 import {
   Loader2, AlertCircle, CheckCircle2, Clock, Upload, FileText,
-  ChevronRight, Package, Zap, Hourglass, ShieldCheck, Truck, AlertTriangle, Eye, Box
+  ChevronRight, ChevronDown, Package, Zap, Hourglass, ShieldCheck, Truck,
+  AlertTriangle, Eye, Box,
 } from 'lucide-react';
 import ThreeDModelViewer from '@/components/ThreeDModelViewer';
 import { format } from 'date-fns';
 import OrderTimeline from '@/components/OrderTimeline';
 import DocumentPreview from '@/components/DocumentPreview';
 
+const ACCENT = '#FF6B35';
+
 // Full pipeline including AWARDED so index math works correctly
 const STAGES = [
-  { id: 'AWARDED', label: 'Supplier Assigned', icon: CheckCircle2, color: 'amber' },
-  { id: 'MATERIAL', label: 'Material Sourcing', icon: Package, color: 'sky' },
-  { id: 'CASTING', label: 'Casting', icon: Zap, color: 'orange' },
-  { id: 'MACHINING', label: 'Machining', icon: Hourglass, color: 'violet' },
-  { id: 'QC', label: 'Quality Control', icon: ShieldCheck, color: 'emerald' },
-  { id: 'DISPATCH', label: 'Dispatch', icon: Truck, color: 'blue' },
-  { id: 'DELIVERED', label: 'Delivered', icon: CheckCircle2, color: 'green' },
+  { id: 'AWARDED',   label: 'Supplier Assigned', icon: CheckCircle2, hex: '#f59e0b' },
+  { id: 'MATERIAL',  label: 'Material Sourcing',  icon: Package,      hex: '#0ea5e9' },
+  { id: 'CASTING',   label: 'Casting',             icon: Zap,          hex: '#f97316' },
+  { id: 'MACHINING', label: 'Machining',            icon: Hourglass,    hex: '#8b5cf6' },
+  { id: 'QC',        label: 'Quality Control',      icon: ShieldCheck,  hex: '#22c55e' },
+  { id: 'DISPATCH',  label: 'Dispatch',             icon: Truck,        hex: '#06b6d4' },
+  { id: 'DELIVERED', label: 'Delivered',            icon: CheckCircle2, hex: '#22c55e' },
 ];
 
 export default function SupplierOrderManager() {
   const { currentUser, userCompanyName } = useAuth();
+  const { isDark } = useTheme();
   const [orders, setOrders] = useState([]);
   const [jobUpdates, setJobUpdates] = useState({});
   const [loading, setLoading] = useState(true);
@@ -41,7 +44,7 @@ export default function SupplierOrderManager() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [orderDocuments, setOrderDocuments] = useState({});
   // Confirmation dialog state
-  const [confirmDialog, setConfirmDialog] = useState({ open: false, orderId: null, newStatus: null, orderName: '' });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, orderId: null, newStatus: null, orderName: '', note: '' });
 
   // Parameter: clearErrors — set false when called from catch blocks so errors remain visible
   const fetchAwardedOrders = useCallback(async (clearErrors = true) => {
@@ -148,11 +151,12 @@ export default function SupplierOrderManager() {
       fromStage: currentStage?.label || order?.order_status,
       toStage: nextStage?.label || newStatus,
       ToIcon: nextStage?.icon || Package,
+      note: localNotes[orderId] || '',
     });
   };
 
-  const updateOrderStatus = async (orderId, newStatus) => {
-    setConfirmDialog({ open: false, orderId: null, newStatus: null, orderName: '' });
+  const updateOrderStatus = async (orderId, newStatus, supplierNote = '') => {
+    setConfirmDialog({ open: false, orderId: null, newStatus: null, orderName: '', note: '' });
     setUpdatingOrder(orderId);
     setError(null);
     setSuccessMessage(null);
@@ -195,17 +199,22 @@ export default function SupplierOrderManager() {
 
       console.log('[SupplierOrderManager] Update verified:', verified);
 
-      // Step 3: Add job update record (visible to client & admin dashboards via realtime)
+      // Step 3: Add job update record with supplier note (visible to client & admin via realtime)
       if (order?.rz_job_id) {
+        const noteText = supplierNote?.trim()
+          ? supplierNote.trim()
+          : `Stage advanced to ${stageName}`;
         await supabaseAdmin.from('job_updates').insert({
           rz_job_id: order.rz_job_id,
           stage: newStatus,
           status: 'in_progress',
-          notes: `Supplier moved order to ${stageName}`,
+          notes: noteText,
           created_by: currentUser?.email,
         }).then(({ error: jobErr }) => {
           if (jobErr) console.warn('[SupplierOrderManager] job_updates insert warning:', jobErr);
         });
+        // Clear the local note textarea after it's been sent with the stage
+        setLocalNotes(prev => ({ ...prev, [orderId]: '' }));
       }
 
       // Step 4: Immediately update local state so UI reflects the change
@@ -331,11 +340,28 @@ export default function SupplierOrderManager() {
     }
   };
 
+  // ── Theme tokens ────────────────────────────────────────────────────────────
+  const cardBg      = isDark ? 'rgba(255,255,255,0.03)' : '#ffffff';
+  const cardBorder  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  const innerBg     = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.025)';
+  const innerBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)';
+  const textPri     = isDark ? '#ffffff' : '#0f0f0f';
+  const textSec     = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+  const textMid     = isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.55)';
+  const inputBg     = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+  const inputBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)';
+  const dialogBg    = isDark ? '#18181b' : '#ffffff';
+  const dialogBord  = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
   if (loading) {
     return (
       <SupplierHubLayout>
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="animate-spin w-12 h-12 text-cyan-500" />
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+            style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.25)' }}>
+            <Loader2 className="animate-spin w-6 h-6" style={{ color: ACCENT }} />
+          </div>
+          <p className="text-sm font-medium" style={{ color: textSec }}>Loading your awarded orders…</p>
         </div>
       </SupplierHubLayout>
     );
@@ -343,388 +369,417 @@ export default function SupplierOrderManager() {
 
   return (
     <SupplierHubLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Awarded Orders</h1>
-          <p className="text-slate-400 mt-1">
-            Manage your manufacturing workflow for awarded orders
-          </p>
+      <div className="space-y-5">
+
+        {/* ── Page Header ──────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: ACCENT }}>
+              Supplier Hub
+            </p>
+            <h1 className="text-2xl font-bold" style={{ color: textPri }}>Awarded Orders</h1>
+            <p className="text-sm mt-0.5" style={{ color: textSec }}>
+              Manage your manufacturing workflow
+            </p>
+          </div>
+          {orders.length > 0 && (
+            <div className="px-3 py-1.5 rounded-xl text-xs font-bold"
+              style={{ background: 'rgba(255,107,53,0.1)', color: ACCENT, border: '1px solid rgba(255,107,53,0.25)' }}>
+              {orders.length} {orders.length === 1 ? 'order' : 'orders'}
+            </div>
+          )}
         </div>
 
+        {/* ── Alerts ───────────────────────────────────────────────────── */}
         {error && (
-          <div className="bg-red-950/30 border border-red-500/50 rounded-lg p-4 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+          <div className="flex items-start gap-3 p-4 rounded-xl"
+            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: '#ef4444' }} />
             <div>
-              <p className="text-red-300 font-semibold">Error</p>
-              <p className="text-red-300 text-sm mt-1">{error}</p>
+              <p className="text-sm font-semibold" style={{ color: '#ef4444' }}>Error</p>
+              <p className="text-sm mt-0.5" style={{ color: '#ef4444', opacity: 0.8 }}>{error}</p>
             </div>
           </div>
         )}
 
         {successMessage && (
-          <div className="bg-emerald-950/30 border border-emerald-500/50 rounded-lg p-4 flex gap-3 animate-in fade-in duration-300">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-            <div>
-              <p className="text-emerald-300 font-semibold">Stage Updated</p>
-              <p className="text-emerald-300 text-sm mt-1">{successMessage}</p>
-            </div>
+          <div className="flex items-start gap-3 p-4 rounded-xl"
+            style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+            <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" style={{ color: '#22c55e' }} />
+            <p className="text-sm font-medium" style={{ color: '#22c55e' }}>{successMessage}</p>
           </div>
         )}
 
-        {/* Stage Change Confirmation Dialog */}
-        <Dialog open={confirmDialog.open} onOpenChange={(open) => { if (!open) setConfirmDialog({ open: false, orderId: null, newStatus: null, orderName: '' }); }}>
-          <DialogContent className="bg-[#0f172a] border-slate-700 text-slate-100 sm:max-w-md">
+        {/* ── Stage Change Confirmation Dialog ─────────────────────────── */}
+        <Dialog open={confirmDialog.open} onOpenChange={(open) => {
+          if (!open) setConfirmDialog({ open: false, orderId: null, newStatus: null, orderName: '' });
+        }}>
+          <DialogContent style={{ background: dialogBg, border: `1px solid ${dialogBord}`, color: textPri }}
+            className="sm:max-w-md rounded-2xl shadow-2xl">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-3 text-xl">
-                <AlertTriangle className="w-6 h-6 text-amber-400" />
+              <DialogTitle className="flex items-center gap-3 text-lg font-bold" style={{ color: textPri }}>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                  style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                  <AlertTriangle className="w-4 h-4" style={{ color: '#f59e0b' }} />
+                </div>
                 Confirm Stage Change
               </DialogTitle>
-              <DialogDescription className="text-slate-400 pt-2">
-                You are about to move this order to the next manufacturing stage. This action will be visible to the client and admin.
+              <DialogDescription className="text-sm mt-1" style={{ color: textSec }}>
+                This action will be visible to the client and admin in real-time.
               </DialogDescription>
             </DialogHeader>
+
             <div className="my-4 space-y-3">
-              <div className="bg-[#1e293b] rounded-lg p-4 border border-slate-700">
-                <p className="text-sm text-slate-400 mb-1">Order</p>
-                <p className="text-lg font-bold text-white">{confirmDialog.orderName}</p>
+              {/* Order name */}
+              <div className="p-3 rounded-xl" style={{ background: innerBg, border: `1px solid ${innerBorder}` }}>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: textSec }}>Order</p>
+                <p className="text-base font-bold" style={{ color: textPri }}>{confirmDialog.orderName}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-slate-800/80 rounded-lg p-3 text-center border border-slate-700">
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Current</p>
-                  <p className="text-sm font-semibold text-slate-300">{confirmDialog.fromStage}</p>
+
+              {/* Stage transition */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 p-3 rounded-xl text-center" style={{ background: innerBg, border: `1px solid ${innerBorder}` }}>
+                  <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: textSec }}>Current</p>
+                  <p className="text-sm font-semibold" style={{ color: textMid }}>{confirmDialog.fromStage}</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-cyan-400 flex-shrink-0" />
-                <div className="flex-1 bg-cyan-950/40 rounded-lg p-3 text-center border border-cyan-700/50">
-                  <p className="text-[10px] uppercase tracking-wider text-cyan-500 mb-1">Moving to</p>
-                  <p className="text-sm font-semibold text-cyan-300">{confirmDialog.toStage}</p>
+                <ChevronRight className="w-4 h-4 shrink-0" style={{ color: ACCENT }} />
+                <div className="flex-1 p-3 rounded-xl text-center"
+                  style={{ background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.25)' }}>
+                  <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: ACCENT }}>Moving to</p>
+                  <p className="text-sm font-semibold" style={{ color: ACCENT }}>{confirmDialog.toStage}</p>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 text-center">
-                This update will be reflected on the client tracking page and admin dashboard in real-time.
-              </p>
+
+              {/* Note textarea */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: textSec }}>
+                  Stage Note <span className="font-normal normal-case opacity-60">(sent to admin & client)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe what was completed, any issues, or next steps…"
+                  value={confirmDialog.note}
+                  onChange={e => setConfirmDialog(prev => ({ ...prev, note: e.target.value }))}
+                  className="w-full rounded-xl px-3 py-2.5 text-sm resize-none outline-none transition-all"
+                  style={{
+                    background: inputBg, border: `1px solid ${inputBorder}`,
+                    color: textPri,
+                  }}
+                />
+              </div>
             </div>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                variant="ghost"
+
+            <DialogFooter className="gap-2">
+              <button
                 onClick={() => setConfirmDialog({ open: false, orderId: null, newStatus: null, orderName: '' })}
-                className="text-slate-300 hover:text-white hover:bg-slate-800"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                style={{ background: innerBg, border: `1px solid ${innerBorder}`, color: textMid }}
               >
                 Cancel
-              </Button>
-              <Button
-                onClick={() => updateOrderStatus(confirmDialog.orderId, confirmDialog.newStatus)}
-                disabled={updatingOrder}
-                className="bg-cyan-600 hover:bg-cyan-500 text-white"
+              </button>
+              <button
+                onClick={() => updateOrderStatus(confirmDialog.orderId, confirmDialog.newStatus, confirmDialog.note)}
+                disabled={!!updatingOrder}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-60"
+                style={{ background: `linear-gradient(135deg, ${ACCENT}, #f97316)`, boxShadow: '0 4px 14px rgba(255,107,53,0.3)' }}
               >
                 {updatingOrder ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    Processing...
-                  </>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
                 ) : (
-                  <>
-                    <ChevronRight className="w-4 h-4 mr-1" />
-                    Confirm & Move Forward
-                  </>
+                  <><ChevronRight className="w-4 h-4" /> Confirm & Advance</>
                 )}
-              </Button>
+              </button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {orders.length === 0 && !error ? (
-          <Card className="bg-[#0f172a] border-slate-800 rounded-2xl shadow-xl">
-            <CardContent className="pt-12 text-center">
-              <Package className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-              <p className="text-slate-400">No awarded orders yet</p>
-              <p className="text-slate-500 text-sm mt-2">Check back after your bids are accepted</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {orders.map(order => {
-              const currentStage = STAGES.find(s => s.id === order.order_status);
-              const isExpanded = expandedOrder === order.id;
-
-              return (
-                <Card
-                  key={order.id}
-                  className="bg-[#0f172a] border-slate-800 rounded-2xl shadow-xl hover:border-cyan-500/50 transition-colors cursor-pointer"
-                  onClick={() =>
-                    setExpandedOrder(isExpanded ? null : order.id)
-                  }
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg flex items-center gap-3">
-                          <span className="font-mono text-sm bg-slate-800/80 text-cyan-400 px-2.5 py-1 rounded-lg border border-slate-700">
-                            {order.id.slice(0, 8).toUpperCase()}
-                          </span>
-                          {order.part_name}
-                        </CardTitle>
-                        <p className="text-sm text-slate-400 mt-1">
-                          {order.ghost_public_name || 'RZ Order'} • Material: {order.material}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <div
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 ${
-                            order.order_status === 'DELIVERED'
-                              ? 'bg-green-900/40 text-green-300 border border-green-700/50'
-                              : 'bg-cyan-900/40 text-cyan-300 border border-cyan-700/50'
-                          }`}
-                        >
-                          {currentStage?.icon && (
-                            <currentStage.icon className="w-3 h-3" />
-                          )}
-                          {currentStage?.label || order.order_status.replace(/_/g, ' ')}
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-
-                  {isExpanded && (
-                    <CardContent className="pt-6 border-t border-slate-800 space-y-4" onClick={e => e.stopPropagation()}>
-                      {/* Pipeline Progress */}
-                      <div className="bg-[#1e293b]/50 rounded-xl p-4 border border-slate-800">
-                        <label className="block text-sm font-medium text-slate-300 mb-3">
-                          Manufacturing Pipeline
-                        </label>
-                        <OrderTimeline
-                          currentStatus={order.order_status}
-                          createdAt={order.created_at}
-                          updatedAt={order.updated_at}
-                          updates={order.rz_job_id ? (jobUpdates[order.rz_job_id] || []) : []}
-                          compact={true}
-                        />
-                      </div>
-
-                      {/* Stage Progress Summary */}
-                      {order.order_status !== 'DELIVERED' && (() => {
-                        const currentIndex = STAGES.findIndex(s => s.id === order.order_status);
-                        const nextStage = STAGES[currentIndex + 1];
-                        return nextStage ? (
-                          <div className="bg-[#1e293b]/50 rounded-xl p-4 border border-slate-800">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-2">
-                                  {STAGES.map((stage, idx) => {
-                                    const isDone = idx <= currentIndex;
-                                    const isCurrent = idx === currentIndex;
-                                    return (
-                                      <div key={stage.id} className="flex items-center gap-1">
-                                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                                          isDone ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' :
-                                          isCurrent ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50' :
-                                          'bg-slate-800 text-slate-500 border border-slate-700'
-                                        }`}>
-                                          {isDone && !isCurrent ? <CheckCircle2 className="w-3.5 h-3.5" /> : idx + 1}
-                                        </div>
-                                        {idx < STAGES.length - 1 && (
-                                          <div className={`w-4 h-0.5 ${idx < currentIndex ? 'bg-emerald-500/50' : 'bg-slate-700'}`} />
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-xs text-slate-500">Next step</p>
-                                <p className="text-sm font-semibold text-cyan-300 flex items-center gap-1">
-                                  <nextStage.icon className="w-3.5 h-3.5" />
-                                  {nextStage.label}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ) : null;
-                      })()}
-
-                      {order.order_status === 'DELIVERED' && (
-                        <div className="bg-green-950/30 border border-green-500/30 rounded-lg p-4 text-center">
-                          <CheckCircle2 className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                          <p className="text-green-300 font-semibold">Order Delivered Successfully</p>
-                          <p className="text-green-400/60 text-sm mt-1">This order has completed all manufacturing stages.</p>
-                        </div>
-                      )}
-
-                      {/* Document Upload — only show after AWARDED stage */}
-                      {order.order_status !== 'AWARDED' && (
-                        <div>
-                          <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Upload Stage Documents
-                          </label>
-                          <div
-                            className="border-2 border-dashed border-slate-700 rounded-xl p-4 text-center hover:border-cyan-500/30 transition-colors cursor-pointer"
-                            onClick={e => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              if (!uploadingDoc) {
-                                triggerFileUpload(order.id);
-                              }
-                            }}
-                          >
-                            <div className="flex items-center justify-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors">
-                              {uploadingDoc ? (
-                                <>
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                  Uploading...
-                                </>
-                              ) : (
-                                <>
-                                  <Upload className="w-4 h-4" />
-                                  Click to upload documents
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Client Drawings & 3D Models */}
-                      {(() => {
-                        const clientDocs = (orderDocuments[order.id] || []).filter(d =>
-                          d.file_type === 'client_drawing' || d.file_type === '3d_model'
-                        );
-                        const models = clientDocs.filter(d => d.file_type === '3d_model');
-                        const drawings = clientDocs.filter(d => d.file_type === 'client_drawing');
-                        if (!clientDocs.length) return null;
-                        return (
-                          <div className="space-y-3">
-                            <label className="block text-sm font-medium text-slate-300 flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-cyan-400" />
-                              Technical Drawings & Files ({clientDocs.length})
-                            </label>
-                            {drawings.map(doc => (
-                              <DocumentPreview key={doc.id} filePath={doc.file_path} fileName={doc.file_name} compact={true} />
-                            ))}
-                            {models.map(doc => (
-                              <div key={doc.id} className="space-y-1">
-                                <div className="flex items-center gap-2 text-xs text-slate-400">
-                                  <Box className="w-3.5 h-3.5 text-cyan-500" />
-                                  {doc.file_name}
-                                </div>
-                                <ThreeDModelViewer url={doc.file_url} fileName={doc.file_name} />
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })()}
-
-                      {/* Admin Documents */}
-                      {(orderDocuments[order.id] || []).filter(d => d.file_type === 'admin_document').length > 0 && (
-                        <div>
-                          <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-amber-400" />
-                            From RZ Engineering ({(orderDocuments[order.id] || []).filter(d => d.file_type === 'admin_document').length})
-                          </label>
-                          <div className="space-y-3">
-                            {(orderDocuments[order.id] || []).filter(d => d.file_type === 'admin_document').map(doc => (
-                              <DocumentPreview key={doc.id} filePath={doc.file_path} fileName={doc.file_name} compact={true} />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Supplier Submissions */}
-                      {(orderDocuments[order.id] || []).filter(d => d.file_type === 'supplier_submission').length > 0 && (
-                        <div>
-                          <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-                            <Eye className="w-4 h-4 text-cyan-400" />
-                            Your Submissions ({(orderDocuments[order.id] || []).filter(d => d.file_type === 'supplier_submission').length})
-                          </label>
-                          <div className="space-y-3">
-                            {(orderDocuments[order.id] || []).filter(d => d.file_type === 'supplier_submission').map(doc => (
-                              <DocumentPreview key={doc.id} filePath={doc.file_path} fileName={doc.file_name} compact={true} />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Notes */}
-                      <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                          Update Notes
-                        </label>
-                        <textarea
-                          rows="3"
-                          placeholder="Add notes about this stage..."
-                          value={localNotes[order.id] || ''}
-                          onChange={e => {
-                            setLocalNotes(prev => ({ ...prev, [order.id]: e.target.value }));
-                          }}
-                          className="w-full bg-[#1e293b] border border-slate-700 rounded-lg px-3 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
-                        />
-                        <Button
-                          onClick={e => {
-                            e.stopPropagation();
-                            saveNotes(order.id);
-                          }}
-                          disabled={savingNotes[order.id]}
-                          size="sm"
-                          className="mt-2 bg-cyan-600 hover:bg-cyan-500 text-white"
-                        >
-                          {savingNotes[order.id] ? (
-                            <>
-                              <Loader2 className="w-3 h-3 animate-spin mr-2" />
-                              Saving...
-                            </>
-                          ) : (
-                            'Save Notes'
-                          )}
-                        </Button>
-                      </div>
-
-                      {/* Status Info */}
-                      <div className="bg-[#1e293b]/50 rounded-lg p-3 text-sm text-slate-300 border border-slate-800 space-y-1">
-                        <p>
-                          <strong>Current Stage:</strong>{' '}
-                          {STAGES.find(s => s.id === order.order_status)?.label || order.order_status}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          RZ Job ID: <span className="font-mono text-slate-400">{order.rz_job_id || 'Pending'}</span>
-                          {order.updated_at && <> • Last updated: {format(new Date(order.updated_at), 'dd MMM yyyy, HH:mm')}</>}
-                        </p>
-                      </div>
-
-                      {/* ── Move to Next Stage CTA (bottom) ── */}
-                      {order.order_status !== 'DELIVERED' && (() => {
-                        const ci = STAGES.findIndex(s => s.id === order.order_status);
-                        const next = STAGES[ci + 1];
-                        if (!next) return null;
-                        const NextIcon = next.icon;
-                        return (
-                          <Button
-                            onClick={e => {
-                              e.stopPropagation();
-                              confirmStageChange(order.id, next.id);
-                            }}
-                            disabled={updatingOrder === order.id}
-                            className="w-full py-6 text-base font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl shadow-lg shadow-cyan-900/30 transition-all"
-                          >
-                            {updatingOrder === order.id ? (
-                              <>
-                                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                                Updating stage…
-                              </>
-                            ) : (
-                              <>
-                                <NextIcon className="w-5 h-5 mr-2" />
-                                Move to {next.label}
-                                <ChevronRight className="w-5 h-5 ml-2" />
-                              </>
-                            )}
-                          </Button>
-                        );
-                      })()}
-                    </CardContent>
-                  )}
-                </Card>
-              );
-            })}
+        {/* ── Empty state ───────────────────────────────────────────────── */}
+        {orders.length === 0 && !error && (
+          <div className="flex flex-col items-center justify-center py-16 rounded-2xl"
+            style={{ background: cardBg, border: `1px solid ${cardBorder}` }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
+              style={{ background: innerBg, border: `1px solid ${innerBorder}` }}>
+              <Package className="w-7 h-7" style={{ color: textSec }} />
+            </div>
+            <p className="text-sm font-semibold" style={{ color: textMid }}>No awarded orders yet</p>
+            <p className="text-xs mt-1" style={{ color: textSec }}>Check back after your bids are accepted</p>
           </div>
         )}
+
+        {/* ── Order Cards ───────────────────────────────────────────────── */}
+        <div className="space-y-3">
+          {orders.map(order => {
+            const stage       = STAGES.find(s => s.id === order.order_status);
+            const stageColor  = stage?.hex || ACCENT;
+            const isExpanded  = expandedOrder === order.id;
+            const currentIdx  = STAGES.findIndex(s => s.id === order.order_status);
+            const nextStage   = STAGES[currentIdx + 1];
+            const isDelivered = order.order_status === 'DELIVERED';
+
+            return (
+              <div key={order.id} className="rounded-2xl overflow-hidden transition-all duration-200"
+                style={{ background: cardBg, border: `1px solid ${isExpanded ? stageColor + '44' : cardBorder}` }}>
+
+                {/* ── Card Header ── */}
+                <div
+                  className="flex items-center gap-4 px-5 py-4 cursor-pointer select-none"
+                  onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                >
+                  {/* Stage color indicator */}
+                  <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: stageColor }} />
+
+                  {/* Job ID chip */}
+                  <div className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold shrink-0"
+                    style={{ background: `${stageColor}15`, color: stageColor, border: `1px solid ${stageColor}30` }}>
+                    {order.rz_job_id || order.id.slice(0, 8).toUpperCase()}
+                  </div>
+
+                  {/* Title + meta */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm leading-tight truncate" style={{ color: textPri }}>
+                      {order.part_name || order.ghost_public_name || 'Unnamed Order'}
+                    </p>
+                    <p className="text-xs mt-0.5 truncate" style={{ color: textSec }}>
+                      {order.ghost_public_name && order.part_name ? `${order.ghost_public_name} · ` : ''}
+                      {order.material && `Material: ${order.material}`}
+                      {order.quantity && ` · Qty: ${order.quantity}`}
+                    </p>
+                  </div>
+
+                  {/* Stage badge */}
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0"
+                    style={{ background: `${stageColor}12`, color: stageColor, border: `1px solid ${stageColor}30` }}>
+                    {stage?.icon && <stage.icon className="w-3 h-3" />}
+                    {stage?.label || order.order_status.replace(/_/g, ' ')}
+                  </div>
+
+                  {/* Expand toggle */}
+                  <ChevronDown
+                    className="w-4 h-4 shrink-0 transition-transform duration-200"
+                    style={{ color: textSec, transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  />
+                </div>
+
+                {/* ── Expanded Content ── */}
+                {isExpanded && (
+                  <div className="px-5 pb-5 space-y-4 border-t" style={{ borderColor: innerBorder }}
+                    onClick={e => e.stopPropagation()}>
+
+                    {/* Pipeline stepper */}
+                    <div className="pt-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: textSec }}>
+                        Manufacturing Pipeline
+                      </p>
+                      <div className="flex items-center gap-0 overflow-x-auto">
+                        {STAGES.map((s, idx) => {
+                          const done    = idx < currentIdx;
+                          const current = idx === currentIdx;
+                          const pending = idx > currentIdx;
+                          const dotColor = done ? '#22c55e' : current ? s.hex : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)');
+                          return (
+                            <React.Fragment key={s.id}>
+                              <div className="flex flex-col items-center gap-1 min-w-[60px]">
+                                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                                  style={{
+                                    background: done ? 'rgba(34,197,94,0.15)' : current ? `${s.hex}20` : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'),
+                                    border: `1.5px solid ${dotColor}`,
+                                  }}>
+                                  {done
+                                    ? <CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#22c55e' }} />
+                                    : <s.icon className="w-3 h-3" style={{ color: current ? s.hex : textSec }} />
+                                  }
+                                </div>
+                                <p className="text-[9px] font-semibold text-center leading-tight"
+                                  style={{ color: current ? s.hex : done ? '#22c55e' : textSec }}>
+                                  {s.label}
+                                </p>
+                              </div>
+                              {idx < STAGES.length - 1 && (
+                                <div className="flex-1 h-px mx-1 mb-4"
+                                  style={{ background: idx < currentIdx ? '#22c55e50' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)') }} />
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Timeline */}
+                    <div className="rounded-xl p-4" style={{ background: innerBg, border: `1px solid ${innerBorder}` }}>
+                      <OrderTimeline
+                        currentStatus={order.order_status}
+                        createdAt={order.created_at}
+                        updatedAt={order.updated_at}
+                        updates={order.rz_job_id ? (jobUpdates[order.rz_job_id] || []) : []}
+                        compact={true}
+                      />
+                    </div>
+
+                    {/* Delivered banner */}
+                    {isDelivered && (
+                      <div className="flex items-center gap-3 p-4 rounded-xl"
+                        style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                        <CheckCircle2 className="w-5 h-5 shrink-0" style={{ color: '#22c55e' }} />
+                        <div>
+                          <p className="text-sm font-semibold" style={{ color: '#22c55e' }}>Order Delivered Successfully</p>
+                          <p className="text-xs mt-0.5" style={{ color: '#22c55e', opacity: 0.7 }}>All manufacturing stages complete.</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Document Upload */}
+                    {order.order_status !== 'AWARDED' && !isDelivered && (
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSec }}>
+                          Upload Stage Documents
+                        </p>
+                        <div
+                          className="flex items-center justify-center gap-2 p-4 rounded-xl cursor-pointer transition-all duration-150"
+                          style={{
+                            background: inputBg,
+                            border: `2px dashed ${inputBorder}`,
+                            color: textMid,
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.color = ACCENT; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = inputBorder; e.currentTarget.style.color = textMid; }}
+                          onClick={e => { e.stopPropagation(); e.preventDefault(); if (!uploadingDoc) triggerFileUpload(order.id); }}
+                        >
+                          {uploadingDoc
+                            ? <><Loader2 className="w-4 h-4 animate-spin" /><span className="text-sm">Uploading…</span></>
+                            : <><Upload className="w-4 h-4" /><span className="text-sm font-medium">Click to upload documents</span></>
+                          }
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Technical Drawings */}
+                    {(() => {
+                      const clientDocs = (orderDocuments[order.id] || []).filter(d =>
+                        d.file_type === 'client_drawing' || d.file_type === '3d_model'
+                      );
+                      if (!clientDocs.length) return null;
+                      const drawings = clientDocs.filter(d => d.file_type === 'client_drawing');
+                      const models   = clientDocs.filter(d => d.file_type === '3d_model');
+                      return (
+                        <div className="space-y-2">
+                          <p className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: textSec }}>
+                            <FileText className="w-3.5 h-3.5" style={{ color: ACCENT }} />
+                            Technical Drawings & Files ({clientDocs.length})
+                          </p>
+                          {drawings.map(doc => <DocumentPreview key={doc.id} filePath={doc.file_path} fileName={doc.file_name} compact={true} />)}
+                          {models.map(doc => (
+                            <div key={doc.id} className="space-y-1">
+                              <div className="flex items-center gap-2 text-xs" style={{ color: textSec }}>
+                                <Box className="w-3.5 h-3.5" style={{ color: ACCENT }} />
+                                {doc.file_name}
+                              </div>
+                              <ThreeDModelViewer url={doc.file_url} fileName={doc.file_name} />
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Admin Documents */}
+                    {(orderDocuments[order.id] || []).filter(d => d.file_type === 'admin_document').length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: textSec }}>
+                          <FileText className="w-3.5 h-3.5" style={{ color: '#f59e0b' }} />
+                          From RZ Engineering ({(orderDocuments[order.id] || []).filter(d => d.file_type === 'admin_document').length})
+                        </p>
+                        {(orderDocuments[order.id] || []).filter(d => d.file_type === 'admin_document').map(doc => (
+                          <DocumentPreview key={doc.id} filePath={doc.file_path} fileName={doc.file_name} compact={true} />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Supplier Submissions */}
+                    {(orderDocuments[order.id] || []).filter(d => d.file_type === 'supplier_submission').length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: textSec }}>
+                          <Eye className="w-3.5 h-3.5" style={{ color: '#06b6d4' }} />
+                          Your Submissions ({(orderDocuments[order.id] || []).filter(d => d.file_type === 'supplier_submission').length})
+                        </p>
+                        {(orderDocuments[order.id] || []).filter(d => d.file_type === 'supplier_submission').map(doc => (
+                          <DocumentPreview key={doc.id} filePath={doc.file_path} fileName={doc.file_name} compact={true} />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Notes */}
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: textSec }}>
+                        Stage Notes <span className="font-normal normal-case opacity-60">(visible to client & admin)</span>
+                      </p>
+                      <textarea
+                        rows={3}
+                        placeholder="Describe progress, issues, or next steps…"
+                        value={localNotes[order.id] || ''}
+                        onChange={e => setLocalNotes(prev => ({ ...prev, [order.id]: e.target.value }))}
+                        className="w-full rounded-xl px-3 py-2.5 text-sm resize-none outline-none transition-all"
+                        style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: textPri }}
+                        onFocus={e => { e.target.style.borderColor = ACCENT; }}
+                        onBlur={e => { e.target.style.borderColor = inputBorder; }}
+                      />
+                      <button
+                        onClick={e => { e.stopPropagation(); saveNotes(order.id); }}
+                        disabled={savingNotes[order.id] || !localNotes[order.id]?.trim()}
+                        className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-all disabled:opacity-40"
+                        style={{ background: `linear-gradient(135deg, ${ACCENT}, #f97316)` }}
+                      >
+                        {savingNotes[order.id]
+                          ? <><Loader2 className="w-3 h-3 animate-spin" /> Saving…</>
+                          : 'Save Note'
+                        }
+                      </button>
+                    </div>
+
+                    {/* Meta info strip */}
+                    <div className="flex items-center gap-4 px-3 py-2.5 rounded-xl flex-wrap"
+                      style={{ background: innerBg, border: `1px solid ${innerBorder}` }}>
+                      <span className="text-xs" style={{ color: textSec }}>
+                        Stage: <span className="font-semibold" style={{ color: stageColor }}>{stage?.label}</span>
+                      </span>
+                      <span className="text-xs" style={{ color: textSec }}>
+                        RZ ID: <span className="font-mono" style={{ color: textMid }}>{order.rz_job_id || 'Pending'}</span>
+                      </span>
+                      {order.updated_at && (
+                        <span className="text-xs" style={{ color: textSec }}>
+                          Updated: <span style={{ color: textMid }}>{format(new Date(order.updated_at), 'dd MMM yyyy, HH:mm')}</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Move to Next Stage CTA */}
+                    {!isDelivered && nextStage && (
+                      <button
+                        onClick={e => { e.stopPropagation(); confirmStageChange(order.id, nextStage.id); }}
+                        disabled={updatingOrder === order.id}
+                        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-60"
+                        style={{
+                          background: `linear-gradient(135deg, ${ACCENT}, #f97316)`,
+                          boxShadow: `0 4px 20px rgba(255,107,53,0.3)`,
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,107,53,0.45)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,107,53,0.3)'; }}
+                      >
+                        {updatingOrder === order.id ? (
+                          <><Loader2 className="w-4 h-4 animate-spin" /> Updating stage…</>
+                        ) : (
+                          <>
+                            <nextStage.icon className="w-4 h-4" />
+                            Move to {nextStage.label}
+                            <ChevronRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </SupplierHubLayout>
   );

@@ -73,7 +73,7 @@ const MilestoneTrackingDetails = ({ orderId }) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Manufacturing Milestones</h3>
-        <span className="text-xs text-cyan-500 font-mono animate-pulse">● Live Updates</span>
+        <span className="text-xs text-orange-500 font-mono animate-pulse">● Live Updates</span>
       </div>
 
       <div className="relative border-l-2 border-slate-800 ml-3 space-y-8 pb-2">
@@ -88,7 +88,7 @@ const MilestoneTrackingDetails = ({ orderId }) => {
               <div className={`
                 absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 transition-all duration-300 bg-[#0f172a]
                 ${isCompleted ? 'border-emerald-500 text-emerald-500' : 
-                  isNext ? 'border-cyan-500 text-cyan-500 animate-pulse' : 'border-slate-700 text-slate-700'}
+                  isNext ? 'border-orange-500 text-orange-500 animate-pulse' : 'border-slate-700 text-slate-700'}
               `}>
                 {isCompleted && <div className="w-2 h-2 bg-emerald-500 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />}
               </div>
@@ -110,7 +110,7 @@ const MilestoneTrackingDetails = ({ orderId }) => {
                   )}
                   {isNext && (
                     <div className="flex flex-col mt-1">
-                      <span className="text-xs text-cyan-400 font-bold uppercase tracking-wider animate-pulse flex items-center gap-1">
+                      <span className="text-xs text-orange-400 font-bold uppercase tracking-wider animate-pulse flex items-center gap-1">
                         <Clock size={12} /> Pending Supplier
                       </span>
                     </div>

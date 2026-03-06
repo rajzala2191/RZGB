@@ -1,2 +1,1 @@
-// File Removed - Email Verification feature disabled
-export const useEmailVerification = () => ({});
+// File removed: Email Verification feature disabled and not used anywhere.

@@ -88,7 +88,7 @@ const CommunicationsPage = () => {
   return (
     <ControlCentreLayout>
       <Helmet>
-        <title>Communications - Ghost Portal</title>
+        <title>Communications - RZ Global Solutions</title>
       </Helmet>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

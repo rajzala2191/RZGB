@@ -1,23 +1,328 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { motion } from 'framer-motion';
-import { Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, LogIn, AlertCircle, X, ArrowLeft, KeyRound, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/customSupabaseClient';
+
+// ─── Forgot Password Modal ───────────────────────────────────────────────────
+
+const ForgotPasswordModal = ({ onClose }) => {
+  const { toast } = useToast();
+  const [step, setStep] = useState('email'); // 'email' | 'otp' | 'password' | 'done'
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const otpRefs = useRef([]);
+
+  // Countdown timer for resend
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(() => setResendCooldown(c => c - 1), 1000);
+    return () => clearInterval(t);
+  }, [resendCooldown]);
+
+  const handleSendOtp = async (e) => {
+    e?.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const { error: err } = await supabase.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+        options: { shouldCreateUser: false },
+      });
+      if (err) throw err;
+      setStep('otp');
+      setResendCooldown(60);
+      toast({ title: 'OTP Sent', description: 'Check your email for the 6-digit code.' });
+    } catch (err) {
+      setError(err.message || 'Failed to send OTP. Please check the email address.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    const next = [...otp];
+    next[index] = value.slice(-1);
+    setOtp(next);
+    if (value && index < 5) otpRefs.current[index + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (text.length === 6) {
+      setOtp(text.split(''));
+      otpRefs.current[5]?.focus();
+    }
+    e.preventDefault();
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e?.preventDefault();
+    const token = otp.join('');
+    if (token.length < 6) { setError('Please enter the complete 6-digit code.'); return; }
+    setError('');
+    setLoading(true);
+    try {
+      const { error: err } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token,
+        type: 'email',
+      });
+      if (err) throw err;
+      setStep('password');
+    } catch (err) {
+      setError(err.message || 'Invalid or expired code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetPassword = async (e) => {
+    e?.preventDefault();
+    if (newPassword.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
+    setError('');
+    setLoading(true);
+    try {
+      const { error: err } = await supabase.auth.updateUser({ password: newPassword });
+      if (err) throw err;
+      // Sign out so user logs in fresh with new password
+      await supabase.auth.signOut();
+      setStep('done');
+    } catch (err) {
+      setError(err.message || 'Failed to update password. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <motion.div
+      key="backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/70 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ duration: 0.25 }}
+        className="w-full max-w-md bg-[#111111] rounded-xl shadow-2xl border border-gray-800 p-8 relative"
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <img src="/light-logo.png" alt="RZ Global Solutions" className="h-12 object-contain" />
+        </div>
+
+        {/* ── STEP: Email ── */}
+        {step === 'email' && (
+          <form onSubmit={handleSendOtp} className="space-y-5">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-1">Forgot your password?</h2>
+              <p className="text-sm text-gray-400">Enter your registered email and we'll send you a one-time code.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+              <div className="relative group">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoFocus
+                  className="w-full pl-11 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  placeholder="name@company.com"
+                />
+              </div>
+            </div>
+            {error && <ErrorBanner message={error} />}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-[#FF6B35] to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:from-orange-500 hover:to-orange-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? <Spinner /> : <><Mail className="w-4 h-4" /> Send One-Time Code</>}
+            </button>
+          </form>
+        )}
+
+        {/* ── STEP: OTP ── */}
+        {step === 'otp' && (
+          <form onSubmit={handleVerifyOtp} className="space-y-5">
+            <div>
+              <button type="button" onClick={() => { setStep('email'); setError(''); }} className="flex items-center gap-1 text-sm text-gray-400 hover:text-orange-400 transition-colors mb-3">
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <h2 className="text-xl font-bold text-white mb-1">Enter verification code</h2>
+              <p className="text-sm text-gray-400">
+                We sent a 6-digit code to <span className="text-orange-400 font-medium">{email}</span>. It expires in 10 minutes.
+              </p>
+            </div>
+            <div className="flex justify-between gap-2" onPaste={handleOtpPaste}>
+              {otp.map((digit, i) => (
+                <input
+                  key={i}
+                  ref={(el) => (otpRefs.current[i] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(i, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                  className="w-full aspect-square text-center text-xl font-bold bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                />
+              ))}
+            </div>
+            {error && <ErrorBanner message={error} />}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-[#FF6B35] to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:from-orange-500 hover:to-orange-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? <Spinner /> : <><KeyRound className="w-4 h-4" /> Verify Code</>}
+            </button>
+            <div className="text-center">
+              {resendCooldown > 0 ? (
+                <span className="text-xs text-gray-500">Resend code in {resendCooldown}s</span>
+              ) : (
+                <button type="button" onClick={handleSendOtp} className="text-xs text-orange-400 hover:text-orange-300 transition-colors">
+                  Didn't receive it? Resend code
+                </button>
+              )}
+            </div>
+          </form>
+        )}
+
+        {/* ── STEP: New Password ── */}
+        {step === 'password' && (
+          <form onSubmit={handleSetPassword} className="space-y-5">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-1">Set new password</h2>
+              <p className="text-sm text-gray-400">Choose a strong password for your account.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+              <div className="relative group">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  autoFocus
+                  className="w-full pl-11 pr-11 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  placeholder="Minimum 8 characters"
+                />
+                <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+              <div className="relative group">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full pl-11 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  placeholder="Re-enter password"
+                />
+              </div>
+            </div>
+            {error && <ErrorBanner message={error} />}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-[#FF6B35] to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:from-orange-500 hover:to-orange-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? <Spinner /> : <><CheckCircle2 className="w-4 h-4" /> Update Password</>}
+            </button>
+          </form>
+        )}
+
+        {/* ── STEP: Done ── */}
+        {step === 'done' && (
+          <div className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="w-16 h-16 rounded-full bg-green-900/30 border border-green-500/40 flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8 text-green-400" />
+              </div>
+            </div>
+            <h2 className="text-xl font-bold text-white">Password updated!</h2>
+            <p className="text-sm text-gray-400">Your password has been successfully reset. You can now sign in with your new password.</p>
+            <button
+              onClick={onClose}
+              className="w-full bg-gradient-to-r from-[#FF6B35] to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:from-orange-500 hover:to-orange-800 transition-all mt-2"
+            >
+              <LogIn className="w-4 h-4" /> Back to Sign In
+            </button>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const ErrorBanner = ({ message }) => (
+  <motion.div
+    initial={{ opacity: 0, height: 0 }}
+    animate={{ opacity: 1, height: 'auto' }}
+    className="bg-red-900/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm flex items-start gap-2"
+  >
+    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+    <span>{message}</span>
+  </motion.div>
+);
+
+const Spinner = () => (
+  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+);
+
+// ─── Login Page ──────────────────────────────────────────────────────────────
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, currentUser, userRole } = useAuth();
   const { toast } = useToast();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(location.state?.error || '');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-  // Redirect if already logged in
   useEffect(() => {
     if (currentUser && userRole) {
       if (userRole === 'admin') navigate('/control-centre', { replace: true });
@@ -45,9 +350,8 @@ const LoginPage = () => {
       } else {
         toast({
           title: "Welcome Back",
-          description: "Successfully logged in to Ghost Portal.",
+          description: "Successfully logged in to RZ Portal.",
         });
-        // Navigation is handled by the useEffect above once auth state updates
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
@@ -59,12 +363,11 @@ const LoginPage = () => {
   return (
     <>
       <Helmet>
-        <title>Login - RZ Global Solutions Ghost Portal</title>
-        <meta name="description" content="Access your RZ Global Solutions Ghost Portal account." />
+        <title>Login - RZ Global Solutions</title>
+        <meta name="description" content="Access your RZ Global Solutions account." />
       </Helmet>
 
       <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12 relative overflow-hidden">
-        {/* Abstract background elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-600/10 rounded-full blur-[100px]" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 rounded-full blur-[100px]" />
@@ -78,12 +381,12 @@ const LoginPage = () => {
         >
           <div className="text-center mb-8">
             <img
-              src="https://horizons-cdn.hostinger.com/23dd5419-ae91-4a08-9a43-379efd2912c4/572f4264785907121da08b9cd8e3daf2.png"
+              src="/light-logo.png"
               alt="RZ Global Solutions Logo"
               className="h-20 mx-auto mb-6 object-contain"
             />
-            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Ghost Portal</h1>
-            <p className="text-gray-400">Secure access for clients & suppliers</p>
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">RZ Global Solutions</h1>
+            <p className="text-gray-400">Secure access portal for clients & suppliers</p>
           </div>
 
           <motion.div
@@ -161,20 +464,31 @@ const LoginPage = () => {
                   </>
                 )}
               </motion.button>
-              
+
               <div className="text-center pt-2">
-                 <a href="#" className="text-xs text-gray-500 hover:text-[#FF6B35] transition-colors">
-                    Forgot your password?
-                 </a>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-xs text-gray-500 hover:text-[#FF6B35] transition-colors"
+                >
+                  Forgot your password?
+                </button>
               </div>
             </form>
           </motion.div>
-          
+
           <p className="text-center text-gray-600 text-xs mt-8">
             &copy; {new Date().getFullYear()} RZ Global Solutions. All rights reserved.
           </p>
         </motion.div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {showForgotPassword && (
+          <ForgotPasswordModal onClose={() => setShowForgotPassword(false)} />
+        )}
+      </AnimatePresence>
     </>
   );
 };

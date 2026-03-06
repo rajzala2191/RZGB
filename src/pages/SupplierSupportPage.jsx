@@ -96,7 +96,7 @@ const SupplierSupportPage = () => {
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
-          <LifeBuoy className="text-cyan-500" size={32} /> Support Center
+          <LifeBuoy className="text-orange-500" size={32} /> Support Center
         </h1>
         <p className="text-slate-400 mt-1">Raise a support request and our team will get back to you.</p>
       </div>
@@ -108,11 +108,11 @@ const SupplierSupportPage = () => {
             <h3 className="font-bold text-white mb-4">Contact Information</h3>
             <div className="space-y-4 text-slate-400 text-sm">
               <div className="flex items-center gap-3">
-                <Mail className="text-cyan-500" size={18} />
+                <Mail className="text-orange-500" size={18} />
                 <span>support@rzglobal.com</span>
               </div>
               <div className="flex items-center gap-3">
-                <Phone className="text-cyan-500" size={18} />
+                <Phone className="text-orange-500" size={18} />
                 <span>+44 20 1234 5678</span>
               </div>
               <div className="pt-4 border-t border-slate-800">
@@ -135,7 +135,7 @@ const SupplierSupportPage = () => {
                     required
                     value={formData.subject}
                     onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 focus:outline-none focus:border-orange-500"
                     placeholder="Brief summary of issue"
                   />
                 </div>
@@ -144,7 +144,7 @@ const SupplierSupportPage = () => {
                   <select
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 focus:outline-none focus:border-orange-500"
                   >
                     {TICKET_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                   </select>
@@ -156,14 +156,14 @@ const SupplierSupportPage = () => {
                   required
                   value={formData.message}
                   onChange={e => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 min-h-[120px] focus:outline-none focus:border-cyan-500 resize-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 min-h-[120px] focus:outline-none focus:border-orange-500 resize-none"
                   placeholder="Describe your issue in detail..."
                 />
               </div>
               <button
                 disabled={submitting}
                 type="submit"
-                className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2 disabled:opacity-50 transition-colors"
+                className="bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2 disabled:opacity-50 transition-colors"
               >
                 {submitting ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
                 Submit Ticket
@@ -175,7 +175,7 @@ const SupplierSupportPage = () => {
           <div className="bg-[#0f172a] border border-slate-800 rounded-xl overflow-hidden">
             <div className="p-4 border-b border-slate-800 font-bold text-slate-300">My Tickets</div>
             {loading ? (
-              <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-cyan-500" /></div>
+              <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-orange-500" /></div>
             ) : tickets.length === 0 ? (
               <div className="p-8 text-center text-slate-500">No support history.</div>
             ) : (

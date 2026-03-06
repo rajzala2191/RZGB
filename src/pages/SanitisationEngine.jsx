@@ -121,7 +121,7 @@ const SanitisationEngine = () => {
   return (
     <ControlCentreLayout>
       <Helmet>
-        <title>Sanitisation Engine - Ghost Portal</title>
+        <title>Sanitisation Engine - RZ Global Solutions</title>
       </Helmet>
 
       <div className="h-[calc(100vh-140px)] flex flex-col">

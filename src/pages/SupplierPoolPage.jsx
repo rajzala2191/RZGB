@@ -26,7 +26,7 @@ export default function SupplierPoolPage() {
     setIsModalOpen(true);
   };
 
-  const filteredOrders = orders.filter(o => o.id.includes(searchTerm) || o.ghost_public_name?.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredOrders = orders.filter(o => o.id.includes(searchTerm) || o.public_name?.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <ControlCentreLayout>
@@ -52,7 +52,7 @@ export default function SupplierPoolPage() {
             <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-300">
               <tr>
                 <th className="p-4">Order ID</th>
-                <th className="p-4">Ghost Name</th>
+                <th className="p-4">Name</th>
                 <th className="p-4">Material</th>
                 <th className="p-4">Quantity</th>
                 <th className="p-4">Sanitized Date</th>
@@ -64,7 +64,7 @@ export default function SupplierPoolPage() {
               {filteredOrders.map(order => (
                 <tr key={order.id} className="hover:bg-[#1e293b] transition-colors">
                   <td className="p-4 font-mono text-xs text-slate-400">{order.id.slice(0, 8)}</td>
-                  <td className="p-4 font-semibold text-cyan-400">{order.ghost_public_name}</td>
+                  <td className="p-4 font-semibold text-orange-400">{order.public_name}</td>
                   <td className="p-4">{order.material}</td>
                   <td className="p-4">{order.quantity}</td>
                   <td className="p-4 text-slate-400">{new Date(order.updated_at).toLocaleDateString()}</td>

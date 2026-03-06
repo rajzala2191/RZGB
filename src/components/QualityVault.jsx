@@ -61,7 +61,7 @@ const QualityVault = ({ documents }) => {
                   {/* Mock size if not available */ "2.4 MB"}
                 </td>
                 <td className="p-4 text-center">
-                  <button className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/30 p-2 rounded-lg transition-all flex items-center gap-2 mx-auto text-xs font-bold uppercase tracking-wider border border-transparent hover:border-cyan-500/30">
+                  <button className="text-orange-400 hover:text-orange-300 hover:bg-orange-950/30 p-2 rounded-lg transition-all flex items-center gap-2 mx-auto text-xs font-bold uppercase tracking-wider border border-transparent hover:border-orange-500/30">
                     <Download size={14} /> Download
                   </button>
                 </td>

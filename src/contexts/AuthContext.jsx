@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [userCompanyName, setUserCompanyName] = useState(null);
+  const [userLogoUrl, setUserLogoUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   
   const { toast } = useToast();
@@ -44,13 +45,27 @@ export const AuthProvider = ({ children }) => {
       if (data) {
         setUserRole(data.role);
         setUserCompanyName(data.company_name);
-        return data;
       } else {
         // Fallback if profile doesn't exist yet (though handle_new_user trigger should create it)
         setUserRole('client');
         setUserCompanyName(null);
+        setUserLogoUrl(null);
         return { role: 'client' };
       }
+
+      // Fetch logo_url separately so a missing column never blocks login
+      try {
+        const { data: logoData } = await supabase
+          .from('profiles')
+          .select('logo_url')
+          .eq('id', userId)
+          .maybeSingle();
+        setUserLogoUrl(logoData?.logo_url || null);
+      } catch (_) {
+        setUserLogoUrl(null);
+      }
+
+      return data;
     } catch (error) {
       console.error('AuthContext: Unexpected error fetching profile:', error);
       return null;
@@ -101,8 +116,9 @@ export const AuthProvider = ({ children }) => {
           setCurrentUser(null);
           setUserRole(null);
           setUserCompanyName(null);
+          setUserLogoUrl(null);
         }
-        
+
         setLoading(false);
       }
     );
@@ -138,6 +154,7 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(null);
       setUserRole(null);
       setUserCompanyName(null);
+      setUserLogoUrl(null);
     } catch (error) {
       console.error('AuthContext: Error logging out:', error.message);
     }
@@ -147,6 +164,7 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     userRole,
     userCompanyName,
+    userLogoUrl,
     loading,
     login,
     logout,

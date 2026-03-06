@@ -117,7 +117,7 @@ const SystemAnalyticsPage = () => {
   return (
     <ControlCentreLayout>
       <Helmet>
-        <title>System Analytics - Ghost Portal</title>
+        <title>System Analytics - RZ Global Solutions</title>
       </Helmet>
 
       <div className="space-y-6">

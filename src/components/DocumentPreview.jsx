@@ -81,7 +81,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
   if (loading) {
     return (
       <div className={`flex items-center justify-center p-6 bg-slate-800/50 rounded-lg border border-slate-700 ${className}`}>
-        <Loader2 className="w-5 h-5 animate-spin text-cyan-500 mr-2" />
+        <Loader2 className="w-5 h-5 animate-spin text-orange-500 mr-2" />
         <span className="text-slate-400 text-sm">Loading preview...</span>
       </div>
     );
@@ -98,7 +98,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
         <p className="text-xs text-slate-500 mb-3">{error}</p>
         <button
           onClick={generateSignedUrl}
-          className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 transition-colors"
         >
           <RefreshCw className="w-3 h-3" /> Retry
         </button>
@@ -120,7 +120,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
           </div>
           <button
             onClick={handleDownload}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold rounded-lg transition-colors"
           >
             <Download className="w-3.5 h-3.5" /> Download
           </button>
@@ -135,7 +135,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
       <div className={`bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden ${className}`}>
         <div className="flex items-center justify-between px-3 py-2 bg-slate-900/80 border-b border-slate-700">
           <div className="flex items-center gap-2 min-w-0">
-            {isImage ? <ImageIcon className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" /> : <FileText className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />}
+            {isImage ? <ImageIcon className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" /> : <FileText className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />}
             <span className="text-xs text-slate-300 font-medium truncate">{fileName}</span>
           </div>
           <div className="flex items-center gap-1">
@@ -148,7 +148,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
             </button>
             <button
               onClick={handleDownload}
-              className="p-1 text-slate-500 hover:text-cyan-400 transition-colors rounded"
+              className="p-1 text-slate-500 hover:text-orange-400 transition-colors rounded"
               title="Download"
             >
               <Download className="w-3.5 h-3.5" />
@@ -185,7 +185,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
           <DialogContent className="max-w-6xl max-h-[90vh] bg-[#0b1120] border-slate-700 p-0 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 bg-slate-950 border-b border-slate-700">
               <div className="flex items-center gap-2">
-                {isImage ? <ImageIcon className="w-4 h-4 text-cyan-400" /> : <FileText className="w-4 h-4 text-red-400" />}
+                {isImage ? <ImageIcon className="w-4 h-4 text-orange-400" /> : <FileText className="w-4 h-4 text-red-400" />}
                 <span className="text-sm text-slate-200 font-bold">{fileName}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -225,7 +225,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
     <div className={`bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden ${className}`}>
       <div className="flex items-center justify-between px-4 py-3 bg-slate-900/80 border-b border-slate-700">
         <div className="flex items-center gap-2 min-w-0">
-          {isImage ? <ImageIcon className="w-4 h-4 text-cyan-400 flex-shrink-0" /> : <FileText className="w-4 h-4 text-red-400 flex-shrink-0" />}
+          {isImage ? <ImageIcon className="w-4 h-4 text-orange-400 flex-shrink-0" /> : <FileText className="w-4 h-4 text-red-400 flex-shrink-0" />}
           <span className="text-sm text-slate-200 font-medium truncate">{fileName}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
           </button>
           <button
             onClick={handleDownload}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-white bg-cyan-600 hover:bg-cyan-500 rounded-lg text-xs font-bold transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1 text-white bg-orange-600 hover:bg-orange-500 rounded-lg text-xs font-bold transition-colors"
           >
             <Download className="w-3.5 h-3.5" /> Download
           </button>
@@ -269,7 +269,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
         <DialogContent className="max-w-6xl max-h-[90vh] bg-[#0b1120] border-slate-700 p-0 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 bg-slate-950 border-b border-slate-700">
             <div className="flex items-center gap-2">
-              {isImage ? <ImageIcon className="w-4 h-4 text-cyan-400" /> : <FileText className="w-4 h-4 text-red-400" />}
+              {isImage ? <ImageIcon className="w-4 h-4 text-orange-400" /> : <FileText className="w-4 h-4 text-red-400" />}
               <span className="text-sm text-slate-200 font-bold">{fileName}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -364,7 +364,7 @@ export const DocumentPreviewModal = ({ open, onOpenChange, filePath, fileName, f
       <DialogContent className="max-w-6xl max-h-[90vh] bg-[#0b1120] border-slate-700 p-0 overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 bg-slate-950 border-b border-slate-700">
           <div className="flex items-center gap-2 min-w-0">
-            {isImage ? <ImageIcon className="w-4 h-4 text-cyan-400" /> : <FileText className="w-4 h-4 text-red-400" />}
+            {isImage ? <ImageIcon className="w-4 h-4 text-orange-400" /> : <FileText className="w-4 h-4 text-red-400" />}
             <span className="text-sm text-slate-200 font-bold truncate">{fileName}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -379,7 +379,7 @@ export const DocumentPreviewModal = ({ open, onOpenChange, filePath, fileName, f
         <div className="flex-1 overflow-auto" style={{ height: 'calc(90vh - 60px)' }}>
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
             </div>
           ) : !signedUrl ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-500">
@@ -396,7 +396,7 @@ export const DocumentPreviewModal = ({ open, onOpenChange, filePath, fileName, f
             <div className="flex flex-col items-center justify-center h-full text-slate-400">
               <FileText className="w-12 h-12 mb-3" />
               <p className="mb-4">Preview not available for this file type.</p>
-              <button onClick={handleDownload} className="px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-bold hover:bg-cyan-500 transition-colors flex items-center gap-2">
+              <button onClick={handleDownload} className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-bold hover:bg-orange-500 transition-colors flex items-center gap-2">
                 <Download className="w-4 h-4" /> Download File
               </button>
             </div>

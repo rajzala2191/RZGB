@@ -140,7 +140,7 @@ export default function AdminTicketDetailPage() {
   if (loading) {
     return (
       <ControlCentreLayout>
-        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-cyan-500 w-10 h-10" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-orange-500 w-10 h-10" /></div>
       </ControlCentreLayout>
     );
   }
@@ -196,7 +196,7 @@ export default function AdminTicketDetailPage() {
             {/* Original message */}
             <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-5">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xs">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-orange-600 flex items-center justify-center text-white font-bold text-xs">
                   {submitter?.company_name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <div>
@@ -213,14 +213,14 @@ export default function AdminTicketDetailPage() {
                 key={reply.id}
                 className={`border rounded-xl p-5 ${
                   reply.is_admin_reply
-                    ? 'bg-cyan-950/20 border-cyan-800/40 ml-4'
+                    ? 'bg-orange-950/20 border-orange-800/40 ml-4'
                     : 'bg-[#0f172a] border-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs ${
                     reply.is_admin_reply
-                      ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
+                      ? 'bg-gradient-to-br from-orange-500 to-blue-600'
                       : 'bg-gradient-to-br from-slate-500 to-slate-700'
                   }`}>
                     {reply.is_admin_reply ? <ShieldCheck size={14} /> : <User size={14} />}
@@ -237,20 +237,20 @@ export default function AdminTicketDetailPage() {
             ))}
 
             {/* Reply Form */}
-            <form onSubmit={handleReply} className="bg-[#0f172a] border border-cyan-800/40 rounded-xl p-5">
+            <form onSubmit={handleReply} className="bg-[#0f172a] border border-orange-800/40 rounded-xl p-5">
               <p className="text-sm font-bold text-slate-300 mb-3">Reply as Admin</p>
               <textarea
                 value={replyText}
                 onChange={e => setReplyText(e.target.value)}
                 placeholder="Type your reply..."
                 rows={4}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 resize-none"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-100 text-sm focus:outline-none focus:border-orange-500 resize-none"
               />
               <div className="flex justify-end mt-3">
                 <button
                   type="submit"
                   disabled={sending || !replyText.trim()}
-                  className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-5 rounded-lg text-sm disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 px-5 rounded-lg text-sm disabled:opacity-50 transition-colors"
                 >
                   {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                   Send Reply
@@ -295,7 +295,7 @@ export default function AdminTicketDetailPage() {
                   <select
                     value={localStatus}
                     onChange={e => setLocalStatus(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500"
                   >
                     {TICKET_STATUSES.map(s => (
                       <option key={s} value={s}>{s}</option>
@@ -307,7 +307,7 @@ export default function AdminTicketDetailPage() {
                   <select
                     value={localPriority}
                     onChange={e => setLocalPriority(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500"
                   >
                     {TICKET_PRIORITIES.map(p => (
                       <option key={p} value={p}>{p}</option>

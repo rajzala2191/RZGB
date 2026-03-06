@@ -47,7 +47,7 @@ const JourneyStepper = ({ currentStage }) => {
         
         {/* Active Progress Bar */}
         <motion.div 
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-cyan-500 -z-10"
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-orange-500 -z-10"
           initial={{ width: '0%' }}
           animate={{ width: `${((currentStep - 1) / (stages.length - 1)) * 100}%` }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
@@ -67,7 +67,7 @@ const JourneyStepper = ({ currentStage }) => {
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center border-4 transition-colors duration-300 bg-[#020617]",
                   isCompleted ? "border-emerald-500 text-emerald-500" :
-                  isCurrent ? "border-cyan-500 text-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]" :
+                  isCurrent ? "border-orange-500 text-orange-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]" :
                   "border-slate-700 text-slate-700"
                 )}
               >
@@ -80,7 +80,7 @@ const JourneyStepper = ({ currentStage }) => {
                 <p className={cn(
                   "text-xs font-bold uppercase tracking-wider mb-1",
                   isCompleted ? "text-emerald-500" :
-                  isCurrent ? "text-cyan-400" :
+                  isCurrent ? "text-orange-400" :
                   "text-slate-500"
                 )}>
                   {stage.label}

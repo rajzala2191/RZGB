@@ -18,13 +18,14 @@
 }
 
 :root.light {
-    /* Light Theme */
-    --bg-primary: #f8fafc;
-    --bg-secondary: #f1f5f9;
-    --bg-tertiary: #e2e8f0;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --border-color: #cbd5e1;
+    /* Light Theme — orange, white & black */
+    --bg-primary: #ffffff;
+    --bg-secondary: #fff7f0;
+    --bg-tertiary: #ffe8d6;
+    --text-primary: #0f0f0f;
+    --text-secondary: #3d3d3d;
+    --border-color: #f0cdb0;
+    --accent: #f97316;
 }
 
 html {
@@ -35,7 +36,7 @@ html {
 
 html.light {
     color-scheme: light;
-    background-color: #f8fafc;
+    background-color: #ffffff;
 }
 
 body {
@@ -55,6 +56,178 @@ body {
 }
 
 html.light body {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
-    color: #0f172a;
+    background: #f0f0f2;
+    color: #0f0f0f;
 }
+
+/* ============================================================
+   LIGHT THEME — comprehensive Tailwind class overrides
+   Neutral professional palette matching the redesigned portal
+   ============================================================ */
+
+/* ── Arbitrary hex backgrounds ─────────────────────────────── */
+html.light .bg-\[\#020617\]          { background-color: #f0f0f2 !important; }
+html.light .bg-\[\#0f172a\]          { background-color: #ffffff !important; }
+html.light .bg-\[\#1a1a1a\]          { background-color: #f4f4f6 !important; }
+html.light .bg-\[\#1e293b\]          { background-color: #ebebed !important; }
+html.light .bg-\[\#111111\]          { background-color: #f0f0f2 !important; }
+html.light .bg-\[\#020617\]\/80      { background-color: rgba(240,240,242,0.9) !important; }
+html.light .bg-\[\#020617\]\/50      { background-color: rgba(240,240,242,0.6) !important; }
+html.light .bg-\[\#0f172a\]\/30      { background-color: rgba(255,255,255,0.3) !important; }
+html.light .bg-\[\#0f172a\]\/50      { background-color: rgba(255,255,255,0.5) !important; }
+
+/* ── Slate backgrounds → neutral whites / light grays ──────── */
+html.light .bg-slate-950             { background-color: #f4f4f6 !important; }
+html.light .bg-slate-900             { background-color: #f4f4f6 !important; }
+html.light .bg-slate-800             { background-color: #ebebed !important; }
+html.light .bg-slate-700             { background-color: #e2e2e5 !important; }
+html.light .bg-slate-800\/60         { background-color: rgba(235,235,237,0.6) !important; }
+html.light .bg-slate-800\/50         { background-color: rgba(235,235,237,0.5) !important; }
+html.light .bg-slate-800\/40         { background-color: rgba(235,235,237,0.4) !important; }
+html.light .bg-slate-800\/30         { background-color: rgba(235,235,237,0.3) !important; }
+html.light .bg-slate-900\/50         { background-color: rgba(244,244,246,0.5) !important; }
+html.light .bg-slate-900\/30         { background-color: rgba(244,244,246,0.3) !important; }
+html.light .bg-slate-950\/30         { background-color: rgba(244,244,246,0.3) !important; }
+
+/* ── Gray backgrounds ──────────────────────────────────────── */
+html.light .bg-gray-900              { background-color: #f4f4f6 !important; }
+html.light .bg-gray-800              { background-color: #ebebed !important; }
+html.light .bg-gray-900\/50          { background-color: rgba(244,244,246,0.5) !important; }
+html.light .bg-gray-900\/30          { background-color: rgba(244,244,246,0.3) !important; }
+
+/* ── Black backgrounds (overlays, login page) ──────────────── */
+html.light .bg-black                 { background-color: #f0f0f2 !important; }
+html.light .bg-black\/60             { background-color: rgba(15,15,15,0.45) !important; }
+html.light .bg-black\/70             { background-color: rgba(15,15,15,0.5)  !important; }
+html.light .bg-black\/80             { background-color: rgba(15,15,15,0.55) !important; }
+
+/* ── Hover backgrounds ─────────────────────────────────────── */
+html.light .hover\:bg-slate-900\/50:hover { background-color: rgba(0,0,0,0.04) !important; }
+html.light .hover\:bg-slate-800:hover     { background-color: #ebebed !important; }
+html.light .hover\:bg-slate-800\/60:hover { background-color: rgba(235,235,237,0.6) !important; }
+html.light .hover\:bg-slate-800\/30:hover { background-color: rgba(235,235,237,0.3) !important; }
+html.light .hover\:bg-gray-800:hover      { background-color: #ebebed !important; }
+html.light .hover\:bg-gray-900\/50:hover  { background-color: rgba(244,244,246,0.5) !important; }
+html.light .group:hover .group-hover\:bg-slate-900\/50 { background-color: rgba(0,0,0,0.04) !important; }
+
+/* ── Text colours — neutral dark palette ───────────────────── */
+html.light .text-white               { color: #0f0f0f !important; }
+html.light .text-slate-100           { color: #0f0f0f !important; }
+html.light .text-slate-200           { color: #1c1c1c !important; }
+html.light .text-slate-300           { color: #333333 !important; }
+html.light .text-slate-400           { color: #555555 !important; }
+html.light .text-slate-500           { color: #777777 !important; }
+html.light .text-slate-600           { color: #777777 !important; }
+html.light .text-gray-100            { color: #0f0f0f !important; }
+html.light .text-gray-200            { color: #1c1c1c !important; }
+html.light .text-gray-300            { color: #333333 !important; }
+html.light .text-gray-400            { color: #555555 !important; }
+html.light .text-gray-500            { color: #777777 !important; }
+html.light .text-gray-600            { color: #777777 !important; }
+
+/* Hover text */
+html.light .hover\:text-slate-100:hover  { color: #0f0f0f !important; }
+html.light .hover\:text-slate-200:hover  { color: #1c1c1c !important; }
+html.light .hover\:text-slate-300:hover  { color: #333333 !important; }
+html.light .hover\:text-white:hover      { color: #0f0f0f !important; }
+html.light .group:hover .group-hover\:text-slate-100 { color: #0f0f0f !important; }
+html.light .group:hover .group-hover\:text-slate-400 { color: #555555 !important; }
+
+/* ── Border colours — neutral ───────────────────────────────── */
+html.light .border-slate-800         { border-color: rgba(0,0,0,0.09) !important; }
+html.light .border-slate-700         { border-color: rgba(0,0,0,0.13) !important; }
+html.light .border-slate-700\/60     { border-color: rgba(0,0,0,0.08) !important; }
+html.light .border-slate-700\/50     { border-color: rgba(0,0,0,0.07) !important; }
+html.light .border-slate-700\/30     { border-color: rgba(0,0,0,0.04) !important; }
+html.light .border-gray-800          { border-color: rgba(0,0,0,0.09) !important; }
+html.light .border-gray-700          { border-color: rgba(0,0,0,0.13) !important; }
+
+/* Hover borders */
+html.light .hover\:border-slate-500:hover { border-color: rgba(0,0,0,0.2) !important; }
+html.light .hover\:border-slate-600:hover { border-color: rgba(0,0,0,0.2) !important; }
+
+/* ── Divide (table row separators) ────────────────────────── */
+html.light .divide-slate-800 > * + * { border-color: rgba(0,0,0,0.07) !important; }
+html.light .divide-gray-800  > * + * { border-color: rgba(0,0,0,0.07) !important; }
+
+/* ── Placeholders ──────────────────────────────────────────── */
+html.light .placeholder-slate-600::placeholder { color: rgba(0,0,0,0.3) !important; }
+html.light .placeholder-gray-600::placeholder  { color: rgba(0,0,0,0.3) !important; }
+html.light .placeholder-slate-500::placeholder { color: rgba(0,0,0,0.3) !important; }
+
+/* ── Inputs / selects / textareas ──────────────────────────── */
+html.light input:not([type="checkbox"]):not([type="radio"]),
+html.light select,
+html.light textarea {
+    background-color: #ffffff !important;
+    color: #0f0f0f !important;
+    border-color: rgba(0,0,0,0.12) !important;
+}
+html.light input:disabled,
+html.light select:disabled,
+html.light textarea:disabled {
+    background-color: #f4f4f6 !important;
+    color: rgba(0,0,0,0.3) !important;
+}
+
+/* ── Sidebar & layout shells ───────────────────────────────── */
+html.light aside {
+    background-color: #ffffff !important;
+    border-color: rgba(0,0,0,0.09) !important;
+}
+html.light aside .border-b,
+html.light aside .border-t {
+    border-color: rgba(0,0,0,0.09) !important;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+html.light .scrollbar-thumb-slate-800 { scrollbar-color: rgba(0,0,0,0.15) transparent; }
+html.light ::-webkit-scrollbar-thumb  { background-color: rgba(0,0,0,0.15); }
+
+/* ── Shadows ───────────────────────────────────────────────── */
+html.light .shadow-xl   { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.07), 0 8px 10px -6px rgba(0,0,0,0.04) !important; }
+html.light .shadow-2xl  { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1) !important; }
+html.light .shadow-lg   { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04) !important; }
+
+/* ── Login page ────────────────────────────────────────────── */
+html.light .min-h-screen.bg-black     { background-color: #f0f0f2 !important; }
+
+/* ── Gradient cards ────────────────────────────────────────── */
+html.light .bg-gradient-to-br.from-gray-900 { background: #ffffff !important; }
+
+/* ── Orange as primary accent (was cyan) ───────────────────── */
+html.light .text-orange-400   { color: #FF6B35 !important; }
+html.light .text-orange-500   { color: #FF6B35 !important; }
+html.light .text-sky-400    { color: #FF6B35 !important; }
+html.light .text-sky-500    { color: #FF6B35 !important; }
+
+/* Keep non-primary accents readable */
+html.light .text-orange-400 { color: #ea580c !important; }
+html.light .text-orange-500 { color: #ea580c !important; }
+html.light .text-emerald-400 { color: #059669 !important; }
+html.light .text-blue-400   { color: #2563eb !important; }
+
+/* Accent borders */
+html.light .border-orange-500\/20  { border-color: rgba(255,107,53,0.2) !important; }
+html.light .border-orange-500\/40  { border-color: rgba(255,107,53,0.4) !important; }
+html.light .border-orange-500\/20 { border-color: rgba(234,88,12,0.2) !important; }
+html.light .border-orange-500\/40 { border-color: rgba(234,88,12,0.4) !important; }
+html.light .border-blue-500\/20  { border-color: rgba(37,99,235,0.2) !important; }
+html.light .border-blue-500\/40  { border-color: rgba(37,99,235,0.4) !important; }
+
+/* ── Active nav items ──────────────────────────────────────── */
+html.light .bg-orange-500\/10   { background-color: rgba(255,107,53,0.08) !important; }
+html.light .bg-orange-500\/10 { background-color: rgba(255,107,53,0.08) !important; }
+html.light .bg-blue-500\/10   { background-color: rgba(37,99,235,0.06)  !important; }
+html.light .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.06) !important; }
+
+/* ── Dropdown menus ────────────────────────────────────────── */
+html.light [data-radix-popper-content-wrapper] .bg-\[\#1a1a1a\],
+html.light [role="menu"] { background-color: #ffffff !important; border-color: rgba(0,0,0,0.1) !important; }
+
+/* ── Dialog / modal content ────────────────────────────────── */
+html.light [role="dialog"] .bg-\[\#1a1a1a\] { background-color: #ffffff !important; }
+
+/* ── Table row hover ───────────────────────────────────────── */
+html.light .hover\:bg-slate-900\/50:hover { background-color: rgba(0,0,0,0.04) !important; }
+html.light .hover\:bg-gray-900\/50:hover  { background-color: rgba(0,0,0,0.04) !important; }

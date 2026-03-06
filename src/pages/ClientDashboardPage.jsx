@@ -1,197 +1,366 @@
-
-import React from 'react';
+import { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useClientOrders } from '@/contexts/ClientContext';
-import { Package, CheckCircle, Clock, ArrowRight, TrendingUp, AlertCircle, FileText, PlusCircle, LayoutDashboard } from 'lucide-react';
+import {
+  Package, CheckCircle, Clock, ArrowRight, TrendingUp,
+  AlertCircle, FileText, PlusCircle, Layers, Activity,
+  ChevronRight, Sparkles, BarChart3,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
-const ClientDashboardPage = () => {
+/* ── animated counter ─────────────────────────────────────── */
+function AnimatedNumber({ value }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const start = 0;
+    const end = value;
+    const dur = 900;
+    const startTime = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - startTime) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(start + (end - start) * ease);
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [value]);
+  return <span ref={ref}>{value}</span>;
+}
+
+/* ── status config ────────────────────────────────────────── */
+const STATUS = {
+  PENDING_ADMIN_SCRUB: { label: 'Pending Review', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', dot: '#f59e0b' },
+  SANITIZED:           { label: 'Sanitised',      color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)', dot: '#8b5cf6' },
+  OPEN_FOR_BIDDING:    { label: 'Open to Bid',    color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', dot: '#3b82f6' },
+  BID_RECEIVED:        { label: 'Bid Received',   color: '#06b6d4', bg: 'rgba(6,182,212,0.1)',  dot: '#06b6d4' },
+  AWARDED:             { label: 'Awarded',         color: '#FF6B35', bg: 'rgba(255,107,53,0.1)', dot: '#FF6B35' },
+  MATERIAL:            { label: 'Material',        color: '#FF6B35', bg: 'rgba(255,107,53,0.1)', dot: '#FF6B35' },
+  CASTING:             { label: 'Casting',         color: '#FF6B35', bg: 'rgba(255,107,53,0.1)', dot: '#FF6B35' },
+  MACHINING:           { label: 'Machining',       color: '#FF6B35', bg: 'rgba(255,107,53,0.1)', dot: '#FF6B35' },
+  QC:                  { label: 'QC',              color: '#a855f7', bg: 'rgba(168,85,247,0.1)', dot: '#a855f7' },
+  DISPATCH:            { label: 'Dispatch',        color: '#10b981', bg: 'rgba(16,185,129,0.1)', dot: '#10b981' },
+  DELIVERED:           { label: 'Delivered',       color: '#22c55e', bg: 'rgba(34,197,94,0.1)',  dot: '#22c55e' },
+};
+
+const getStatus = (s) => STATUS[s] || { label: s?.replace(/_/g, ' ') || 'Draft', color: '#71717a', bg: 'rgba(113,113,122,0.1)', dot: '#71717a' };
+
+/* ── stat card ────────────────────────────────────────────── */
+function StatCard({ label, value, icon: Icon, accent, delay, isDark, sub }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay, ease: 'easeOut' }}
+      whileHover={{ y: -3, transition: { duration: 0.15 } }}
+      className="rounded-2xl p-5 flex flex-col gap-4 cursor-default"
+      style={{
+        background:  isDark ? '#111111' : '#ffffff',
+        border:      `1px solid ${isDark ? '#1f1f1f' : '#e5e5e5'}`,
+        boxShadow:   isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
+      }}
+    >
+      <div className="flex items-start justify-between">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: `${accent}18` }}
+        >
+          <Icon size={19} style={{ color: accent }} />
+        </div>
+        <BarChart3 size={14} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} />
+      </div>
+      <div>
+        <p className="text-3xl font-black tracking-tight" style={{ color: isDark ? '#fafafa' : '#0a0a0a' }}>
+          <AnimatedNumber value={value} />
+        </p>
+        <p className="text-sm font-medium mt-0.5" style={{ color: isDark ? '#71717a' : '#737373' }}>{label}</p>
+        {sub && <p className="text-xs mt-1 font-medium" style={{ color: accent }}>{sub}</p>}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── order row ────────────────────────────────────────────── */
+function OrderRow({ order, onClick, isDark, index }) {
+  const st = getStatus(order.order_status);
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2, delay: index * 0.05 }}
+      onClick={onClick}
+      className="flex items-center justify-between px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-150 group"
+      style={{ background: 'transparent' }}
+      onMouseEnter={e => e.currentTarget.style.background = isDark ? '#161616' : '#fafafa'}
+      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: isDark ? '#1a1a1a' : '#f4f4f5' }}
+        >
+          <FileText size={16} style={{ color: '#FF6B35' }} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold truncate" style={{ color: isDark ? '#fafafa' : '#0a0a0a' }}>
+            {order.part_name || 'Unnamed Order'}
+          </p>
+          <p className="text-xs font-mono mt-0.5" style={{ color: isDark ? '#52525b' : '#a1a1aa' }}>
+            {order.rz_job_id || order.id?.slice(0, 8)} · {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 shrink-0">
+        <span
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+          style={{ background: st.bg, color: st.color }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
+          {st.label}
+        </span>
+        <ChevronRight size={15} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} className="group-hover:translate-x-0.5 transition-transform" />
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── main ─────────────────────────────────────────────────── */
+export default function ClientDashboardPage() {
   const { userCompanyName } = useAuth();
+  const { isDark } = useTheme();
   const { orders, loading, error } = useClientOrders();
   const navigate = useNavigate();
 
-  if (loading) {
-    return (
-      <ClientDashboardLayout>
-        <div className="flex flex-col items-center justify-center p-24 h-full">
-          <img src="https://horizons-cdn.hostinger.com/23dd5419-ae91-4a08-9a43-379efd2912c4/572f4264785907121da08b9cd8e3daf2.png" alt="RZ Global Solutions" className="w-20 h-20 mb-6 animate-pulse" />
-          <p className="text-slate-400 font-medium text-lg">RZ Global Solutions is loading your dashboard...</p>
-        </div>
-      </ClientDashboardLayout>
-    );
-  }
+  const card = { bg: isDark ? '#111111' : '#ffffff', border: isDark ? '#1f1f1f' : '#e5e5e5' };
+  const textPrimary  = isDark ? '#fafafa'  : '#0a0a0a';
+  const textMuted    = isDark ? '#71717a'  : '#737373';
+  const divider      = isDark ? '#1f1f1f'  : '#f0f0f0';
 
-  if (error) {
-    return (
-      <ClientDashboardLayout>
-        <div className="flex flex-col items-center justify-center p-24 h-full">
-          <div className="bg-[#0f172a] border border-red-500/30 rounded-xl p-8 max-w-md w-full text-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-100 mb-2">Unable to Load Dashboard</h2>
-            <p className="text-slate-400 mb-4">{error}</p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-2 px-4 rounded-lg transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      </ClientDashboardLayout>
-    );
-  }
-
-  const activeOrders = orders.filter(o => o.order_status !== 'DELIVERED').length;
-  const completedOrders = orders.filter(o => o.order_status === 'DELIVERED').length;
-  const pendingReview = orders.filter(o => o.order_status === 'PENDING_ADMIN_SCRUB').length;
-  const totalOrders = orders.length;
-
-  const recentOrders = orders.slice(0, 5);
-
-  return (
+  /* ── loading ── */
+  if (loading) return (
     <ClientDashboardLayout>
-      <Helmet><title>Dashboard - Client Portal</title></Helmet>
-
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-        <div>
-          <h1 className="text-4xl font-black text-slate-100 mb-2 tracking-tight">
-            Welcome back, <span className="text-cyan-400">{userCompanyName || 'Partner'}</span>
-          </h1>
-          <p className="text-slate-400 text-lg">Manage and track your manufacturing orders.</p>
-        </div>
-        <button 
-           onClick={() => navigate('/client-dashboard/create-order')}
-           className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-cyan-900/40 hover:scale-105"
-        >
-           <PlusCircle size={20} /> Create New Order
-        </button>
+      <div className="flex flex-col items-center justify-center py-32 gap-4">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          className="w-10 h-10 rounded-full border-2 border-transparent"
+          style={{ borderTopColor: '#FF6B35', borderRightColor: 'rgba(255,107,53,0.3)' }}
+        />
+        <p className="text-sm font-medium" style={{ color: textMuted }}>Loading your dashboard…</p>
       </div>
+    </ClientDashboardLayout>
+  );
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <MetricCard title="Total Orders" value={totalOrders} icon={LayoutDashboard} color="blue" />
-        <MetricCard title="In Progress" value={activeOrders} icon={TrendingUp} color="cyan" />
-        <MetricCard title="Completed" value={completedOrders} icon={CheckCircle} color="emerald" />
-        <MetricCard title="Pending Review" value={pendingReview} icon={Clock} color="amber" />
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
-        {/* Recent Orders List */}
-        <div className="xl:col-span-2 bg-[#0f172a] border border-slate-800 rounded-2xl p-6 shadow-xl">
-          <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-            <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-              <Package className="text-cyan-500" size={24} /> Recent Orders
-            </h2>
-            <button 
-              onClick={() => navigate('/client-dashboard/orders')}
-              className="text-sm font-bold text-cyan-500 hover:text-cyan-400 flex items-center gap-1 transition-colors"
-            >
-              View All <ArrowRight size={16} />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {recentOrders.length > 0 ? (
-              recentOrders.map(order => (
-                <div key={order.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 bg-[#1e293b] rounded-xl border border-slate-700 hover:border-cyan-500/50 transition-colors group">
-                   <div className="flex items-center gap-4">
-                     <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-cyan-500">
-                        <FileText size={20} />
-                     </div>
-                     <div>
-                       <h4 className="text-slate-200 font-bold group-hover:text-cyan-400 transition-colors">{order.part_name || 'Unnamed Order'}</h4>
-                       <p className="text-xs text-slate-500 mt-1 font-mono">ID: {order.id.slice(0, 8)} | {new Date(order.created_at).toLocaleDateString()}</p>
-                     </div>
-                   </div>
-                   <div className="flex items-center gap-4">
-                     <span className="px-3 py-1 bg-slate-800 text-slate-300 rounded-full text-xs font-bold uppercase tracking-wider border border-slate-700">
-                       {(order.order_status || order.status || 'Draft').replace(/_/g, ' ')}
-                     </span>
-                     <button onClick={() => navigate(`/client-dashboard/orders/${order.id}/tracking`)} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
-                        <ArrowRight size={18} />
-                     </button>
-                   </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-slate-500 py-12 italic">No recent orders found.</div>
-            )}
-          </div>
-        </div>
-
-        {/* Activity Feed */}
-        <div className="bg-[#0f172a] border border-slate-800 rounded-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-slate-100 mb-6 border-b border-slate-800 pb-4 flex items-center gap-2">
-            <ActivityIcon /> Activity Feed
-          </h2>
-          <div className="space-y-6 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent">
-             {recentOrders.slice(0, 4).map((order, i) => (
-               <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full border border-slate-700 bg-slate-900 text-cyan-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
-                  </div>
-                  <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] p-3 rounded border border-slate-700 bg-[#1e293b] shadow-sm">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="font-bold text-slate-200 text-sm">Status Update</div>
-                      <time className="text-xs font-mono text-slate-500">{new Date(order.updated_at).toLocaleDateString()}</time>
-                    </div>
-                    <div className="text-xs text-slate-400">Order <span className="text-cyan-400">{order.part_name || order.id.slice(0,6)}</span> moved to {order.order_status?.replace(/_/g, ' ') || 'Pending'}</div>
-                  </div>
-               </div>
-             ))}
-          </div>
+  /* ── error ── */
+  if (error) return (
+    <ClientDashboardLayout>
+      <div className="flex items-center justify-center py-32">
+        <div className="rounded-2xl p-8 max-w-sm w-full text-center" style={{ background: card.bg, border: `1px solid ${card.border}` }}>
+          <AlertCircle className="mx-auto mb-4" size={36} style={{ color: '#ef4444' }} />
+          <p className="font-semibold mb-1" style={{ color: textPrimary }}>Couldn't load dashboard</p>
+          <p className="text-sm mb-5" style={{ color: textMuted }}>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ background: '#FF6B35' }}
+          >Retry</button>
         </div>
       </div>
     </ClientDashboardLayout>
   );
-};
 
-const ActivityIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className="text-cyan-500"
-  >
-    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-  </svg>
-);
+  const totalOrders     = orders.length;
+  const activeOrders    = orders.filter(o => o.order_status !== 'DELIVERED').length;
+  const completedOrders = orders.filter(o => o.order_status === 'DELIVERED').length;
+  const pendingReview   = orders.filter(o => o.order_status === 'PENDING_ADMIN_SCRUB').length;
+  const recentOrders    = orders.slice(0, 6);
 
-const MetricCard = ({ title, value, icon: Icon, color }) => {
-  const colors = {
-    cyan: "text-cyan-500 bg-cyan-950/20 border-cyan-900/50 group-hover:border-cyan-500/50",
-    emerald: "text-emerald-500 bg-emerald-950/20 border-emerald-900/50 group-hover:border-emerald-500/50",
-    amber: "text-amber-500 bg-amber-950/20 border-amber-900/50 group-hover:border-amber-500/50",
-    blue: "text-blue-500 bg-blue-950/20 border-blue-900/50 group-hover:border-blue-500/50",
-  };
+  /* ── quick actions ── */
+  const quickActions = [
+    { label: 'Track an order',     icon: Activity,  path: '/client-dashboard/orders',        color: '#3b82f6' },
+    { label: 'Browse documents',   icon: FileText,  path: '/client-dashboard/documents',     color: '#8b5cf6' },
+    { label: 'View profile',       icon: Package,   path: '/client-dashboard/profile',       color: '#10b981' },
+    { label: 'Get support',        icon: AlertCircle, path: '/client-dashboard/support',     color: '#f59e0b' },
+  ];
 
   return (
-    <motion.div 
-      whileHover={{ y: -5 }}
-      className={`bg-[#0f172a] border border-slate-800 rounded-xl p-6 transition-all group relative overflow-hidden`}
-    >
-      <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${colors[color].split(' ')[0]}`}>
-        <Icon size={80} />
-      </div>
-      <div className="flex justify-between items-start relative z-10">
-        <div>
-           <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">{title}</p>
-           <h3 className="text-4xl font-black text-white mt-2">{value}</h3>
-        </div>
-        <div className={`p-3 rounded-xl border ${colors[color]}`}>
-           <Icon size={24} />
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+    <ClientDashboardLayout>
+      <Helmet><title>Dashboard — Client Portal</title></Helmet>
 
-export default ClientDashboardPage;
+      {/* ── Greeting ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
+      >
+        <div>
+          <h1 className="text-2xl font-black tracking-tight leading-none" style={{ color: textPrimary }}>
+            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},{' '}
+            <span style={{ color: '#FF6B35' }}>{userCompanyName || 'Partner'}</span>
+          </h1>
+          <p className="mt-1.5 text-sm" style={{ color: textMuted }}>
+            Here's an overview of your manufacturing pipeline.
+          </p>
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => navigate('/client-dashboard/create-order')}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shrink-0"
+          style={{ background: 'linear-gradient(135deg, #FF6B35, #f97316)', boxShadow: '0 4px 14px rgba(255,107,53,0.35)' }}
+        >
+          <Sparkles size={15} />
+          Create New Order
+        </motion.button>
+      </motion.div>
+
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard label="Total Orders"   value={totalOrders}     icon={Layers}      accent="#FF6B35" delay={0}    isDark={isDark} />
+        <StatCard label="In Progress"    value={activeOrders}    icon={TrendingUp}  accent="#3b82f6" delay={0.06} isDark={isDark} />
+        <StatCard label="Delivered"      value={completedOrders} icon={CheckCircle} accent="#22c55e" delay={0.12} isDark={isDark} />
+        <StatCard label="Pending Review" value={pendingReview}   icon={Clock}       accent="#f59e0b" delay={0.18} isDark={isDark}
+          sub={pendingReview > 0 ? 'Awaiting admin review' : undefined}
+        />
+      </div>
+
+      {/* ── Main grid ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+
+        {/* Recent orders */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.15 }}
+          className="xl:col-span-2 rounded-2xl overflow-hidden"
+          style={{ background: card.bg, border: `1px solid ${card.border}`, boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
+        >
+          {/* Card header */}
+          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${divider}` }}>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,107,53,0.1)' }}>
+                <Package size={16} style={{ color: '#FF6B35' }} />
+              </div>
+              <p className="font-bold text-sm" style={{ color: textPrimary }}>Recent Orders</p>
+            </div>
+            <button
+              onClick={() => navigate('/client-dashboard/orders')}
+              className="flex items-center gap-1 text-xs font-semibold transition-opacity hover:opacity-70"
+              style={{ color: '#FF6B35' }}
+            >
+              View all <ArrowRight size={13} />
+            </button>
+          </div>
+
+          {/* Order list */}
+          <div className="divide-y" style={{ borderColor: divider }}>
+            {recentOrders.length > 0 ? recentOrders.map((order, i) => (
+              <OrderRow
+                key={order.id}
+                order={order}
+                index={i}
+                isDark={isDark}
+                onClick={() => navigate(`/client-dashboard/orders/${order.id}/tracking`)}
+              />
+            )) : (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: isDark ? '#1a1a1a' : '#f4f4f5' }}>
+                  <Package size={22} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} />
+                </div>
+                <p className="text-sm font-medium" style={{ color: textMuted }}>No orders yet</p>
+                <button
+                  onClick={() => navigate('/client-dashboard/create-order')}
+                  className="text-xs font-semibold transition-opacity hover:opacity-70"
+                  style={{ color: '#FF6B35' }}
+                >
+                  Create your first order →
+                </button>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Right column */}
+        <div className="flex flex-col gap-5">
+
+          {/* Quick actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.22 }}
+            className="rounded-2xl overflow-hidden"
+            style={{ background: card.bg, border: `1px solid ${card.border}`, boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
+          >
+            <div className="px-5 py-4" style={{ borderBottom: `1px solid ${divider}` }}>
+              <p className="font-bold text-sm" style={{ color: textPrimary }}>Quick Actions</p>
+            </div>
+            <div className="p-3 grid grid-cols-2 gap-2">
+              {quickActions.map(({ label, icon: Icon, path, color }) => (
+                <motion.button
+                  key={path}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => navigate(path)}
+                  className="flex flex-col items-start gap-2.5 p-3 rounded-xl text-left transition-colors"
+                  style={{ background: isDark ? '#161616' : '#fafafa', border: `1px solid ${isDark ? '#1f1f1f' : '#f0f0f0'}` }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = color + '55'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = isDark ? '#1f1f1f' : '#f0f0f0'}
+                >
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}18` }}>
+                    <Icon size={14} style={{ color }} />
+                  </div>
+                  <p className="text-xs font-semibold leading-tight" style={{ color: textPrimary }}>{label}</p>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Pipeline summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.28 }}
+            className="rounded-2xl overflow-hidden"
+            style={{ background: card.bg, border: `1px solid ${card.border}`, boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
+          >
+            <div className="px-5 py-4" style={{ borderBottom: `1px solid ${divider}` }}>
+              <p className="font-bold text-sm" style={{ color: textPrimary }}>Pipeline Breakdown</p>
+            </div>
+            <div className="p-4 space-y-3">
+              {totalOrders === 0 ? (
+                <p className="text-xs text-center py-4" style={{ color: textMuted }}>No data yet.</p>
+              ) : [
+                { label: 'In Production',   count: orders.filter(o => ['MATERIAL','CASTING','MACHINING','QC'].includes(o.order_status)).length, color: '#FF6B35' },
+                { label: 'Awaiting Dispatch', count: orders.filter(o => o.order_status === 'DISPATCH').length, color: '#3b82f6' },
+                { label: 'Delivered',        count: completedOrders, color: '#22c55e' },
+                { label: 'Under Review',     count: pendingReview,   color: '#f59e0b' },
+              ].map(({ label, count, color }) => (
+                <div key={label}>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-xs font-medium" style={{ color: textMuted }}>{label}</span>
+                    <span className="text-xs font-bold" style={{ color: textPrimary }}>{count}</span>
+                  </div>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: isDark ? '#1f1f1f' : '#f4f4f5' }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${totalOrders > 0 ? (count / totalOrders) * 100 : 0}%` }}
+                      transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
+                      className="h-full rounded-full"
+                      style={{ background: color }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </ClientDashboardLayout>
+  );
+}
