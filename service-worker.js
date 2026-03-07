@@ -1,7 +1,7 @@
 self.addEventListener('install', function(event) {
   self.skipWaiting(); // Force activate new SW immediately
   event.waitUntil(
-    caches.open('rzgb-cache-v2').then(function(cache) {
+    caches.open('rzgb-cache-v3').then(function(cache) {
       return cache.addAll([
         '/',
         '/index.html',
@@ -18,7 +18,7 @@ self.addEventListener('activate', function(event) {
     caches.keys().then(function(keys) {
       // Delete all old caches except the new one
       return Promise.all(
-        keys.filter(key => key !== 'rzgb-cache-v2').map(key => caches.delete(key))
+        keys.filter(key => key !== 'rzgb-cache-v3').map(key => caches.delete(key))
       );
     }).then(function() {
       return self.clients.claim(); // Take control of all clients immediately
@@ -32,7 +32,7 @@ self.addEventListener('fetch', function(event) {
       fetch(event.request)
         .then(function(response) {
           // Update the cache with the new index.html
-          return caches.open('rzgb-cache-v2').then(function(cache) {
+          return caches.open('rzgb-cache-v3').then(function(cache) {
             cache.put(event.request, response.clone());
             return response;
           });
