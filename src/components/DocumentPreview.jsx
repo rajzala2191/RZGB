@@ -203,7 +203,7 @@ function Lightbox({ files, activeIndex, onClose, onPrev, onNext }) {
 }
 
 /* ── Document card (thumbnail in page) ─────────────────────── */
-function DocCard({ file, onOpen, isDark }) {
+function DocCard({ file, onOpen, isDark, compact }) {
   const ext = getExt(file.name);
   const cfg = EXT_ICONS[ext] || { color: '#71717a', label: ext.toUpperCase() || 'FILE' };
   const card   = isDark ? '#18181b' : '#ffffff';
@@ -219,12 +219,12 @@ function DocCard({ file, onOpen, isDark }) {
       {/* Preview area */}
       <div
         className="relative flex items-center justify-center overflow-hidden"
-        style={{ height: 120, background: isDark ? '#111111' : '#f4f4f5' }}
+        style={{ height: 160, background: isDark ? '#111111' : '#f4f4f5' }}
       >
         {file.loading ? (
           <Loader2 size={20} className="animate-spin text-orange-500" />
         ) : file.url && isImage(file.name) ? (
-          <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
+          <img src={file.url} alt={file.name} className="w-full h-full object-contain" style={{ padding: '8px' }} />
         ) : file.url && isPdf(file.name) ? (
           <iframe
             src={`${file.url}#toolbar=0&navpanes=0&scrollbar=0`}
