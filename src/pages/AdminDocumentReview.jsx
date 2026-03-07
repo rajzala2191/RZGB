@@ -5,7 +5,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
-import DocumentPreview from '@/components/DocumentPreview';
+import DocumentPreview, { DocumentPreviewModal } from '@/components/DocumentPreview';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   FileText, CheckCircle2, XCircle, Send, Clock, Loader2,
@@ -101,6 +101,7 @@ export default function AdminDocumentReview() {
   const [notes,        setNotes]        = useState('');
   const [actionLoading,setActionLoading]= useState(null);
   const [expandedOrders, setExpandedOrders] = useState(new Set());
+  const [lightboxDoc,  setLightboxDoc]  = useState(null);
 
   // ── Theme tokens ─────────────────────────────────────────────────────────
   const t = isDark ? {
@@ -310,7 +311,7 @@ export default function AdminDocumentReview() {
           </div>
 
           {/* KPI strip */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginTop: 16 }}>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mt-4">
             {[
               { label: 'Pending Review', val: stats.pending,  color: '#f59e0b', icon: Clock },
               { label: 'Approved',       val: stats.approved, color: '#22c55e', icon: CheckCircle2 },
@@ -418,7 +419,7 @@ export default function AdminDocumentReview() {
         </motion.div>
 
         {/* ── Main: Order list + Preview panel ─────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: selectedDoc ? '420px 1fr' : '1fr', gap: 16, alignItems: 'start' }}>
+        <div className={`grid gap-4 items-start ${selectedDoc ? 'grid-cols-1 xl:grid-cols-[420px_1fr]' : 'grid-cols-1'}`}>
 
           {/* ── Order list ─────────────────────────────────────────── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -546,7 +547,18 @@ export default function AdminDocumentReview() {
                               </div>
                               <TypeChip fileType={doc.file_type} />
                               <Badge status={doc.status} />
-                              <Eye size={13} style={{ color: isSelected ? ACCENT : t.mid, flexShrink: 0 }} />
+                              <button
+                                onClick={e => { e.stopPropagation(); setLightboxDoc(doc); }}
+                                title="Open in lightbox"
+                                style={{
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  width: 26, height: 26, borderRadius: 6, flexShrink: 0, cursor: 'pointer',
+                                  background: isSelected ? 'rgba(255,107,53,0.15)' : 'rgba(255,255,255,0.05)',
+                                  border: `1px solid ${isSelected ? 'rgba(255,107,53,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                                }}
+                              >
+                                <Eye size={12} style={{ color: isSelected ? ACCENT : t.mid }} />
+                              </button>
                             </div>
                           );
                         })}
@@ -567,8 +579,8 @@ export default function AdminDocumentReview() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 24 }}
                 transition={{ duration: 0.25 }}
+                className="xl:sticky xl:top-6"
                 style={{
-                  position: 'sticky', top: 24,
                   background: t.card, border: `1px solid ${t.cardBorder}`,
                   borderRadius: 16, overflow: 'hidden',
                 }}>
@@ -710,6 +722,13 @@ export default function AdminDocumentReview() {
         </div>
 
       </div>
+
+      <DocumentPreviewModal
+        open={!!lightboxDoc}
+        onOpenChange={open => { if (!open) setLightboxDoc(null); }}
+        filePath={lightboxDoc?.file_path}
+        fileName={lightboxDoc?.file_name}
+      />
     </ControlCentreLayout>
   );
 }

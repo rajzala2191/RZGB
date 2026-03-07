@@ -148,7 +148,8 @@ const ActivityLogsPage = () => {
               <button onClick={fetchLogsAndProfiles} className="text-sm underline hover:text-red-300">Try Again</button>
             </div>
           ) : (
-            <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
                 <tr className="bg-gray-900 border-b border-gray-800 text-gray-400 text-xs uppercase tracking-wider">
                   <th className="p-4 font-medium">Timestamp</th>
@@ -194,6 +195,7 @@ const ActivityLogsPage = () => {
                 )}
               </tbody>
             </table>
+            </div>
           )}
         </div>
 

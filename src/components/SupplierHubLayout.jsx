@@ -285,7 +285,7 @@ const SupplierHubLayout = ({ children }) => {
 
           {/* Page */}
           <main
-            className="flex-1 overflow-y-auto pt-16 lg:pt-0"
+            className="flex-1 overflow-y-auto"
             style={{ background: isDark ? '#09090b' : '#f0f0f2' }}
           >
             <motion.div

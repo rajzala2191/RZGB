@@ -113,7 +113,7 @@ const SettingsPage = () => {
       </Helmet>
 
       <div className="max-w-4xl mx-auto space-y-6 pb-20">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h1 className="text-3xl font-bold text-white">Settings</h1>
           <button
             onClick={handleSave}

@@ -64,7 +64,7 @@ const SupplierManagementPage = () => {
     <ControlCentreLayout>
        <Helmet><title>Supplier Management - Admin</title></Helmet>
        
-       <div className="mb-8 flex justify-between items-center">
+       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
              <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
                 <Users className="text-sky-500" size={32} /> Supplier Management
@@ -90,7 +90,7 @@ const SupplierManagementPage = () => {
                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Email Address *</label>
                       <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded p-2" />
                    </div>
-                   <div className="grid grid-cols-2 gap-4">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Contact Person</label>
                          <input required value={formData.contact_person} onChange={e => setFormData({...formData, contact_person: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded p-2" />
@@ -112,7 +112,8 @@ const SupplierManagementPage = () => {
           {loading ? (
              <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-sky-500" /></div>
           ) : (
-             <table className="w-full text-left">
+             <div className="overflow-x-auto">
+             <table className="w-full text-left min-w-[500px]">
                 <thead className="bg-slate-950 text-slate-400 text-xs uppercase">
                    <tr>
                       <th className="p-4">Company</th>
@@ -138,6 +139,7 @@ const SupplierManagementPage = () => {
                    ))}
                 </tbody>
              </table>
+             </div>
           )}
        </div>
     </ControlCentreLayout>

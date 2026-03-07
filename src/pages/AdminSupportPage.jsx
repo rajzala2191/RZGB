@@ -175,7 +175,7 @@ export default function AdminSupportPage() {
           </div>
         ) : (
           <div className="bg-[#0f172a] border border-slate-800 rounded-xl overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm min-w-[700px]">
               <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-400 text-xs uppercase">
                 <tr>
                   <th className="p-4">Company</th>

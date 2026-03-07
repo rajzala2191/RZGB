@@ -124,7 +124,7 @@ const SanitisationEngine = () => {
         <title>Sanitisation Engine - RZ Global Solutions</title>
       </Helmet>
 
-      <div className="h-[calc(100vh-140px)] flex flex-col">
+      <div className="flex flex-col lg:h-[calc(100vh-140px)]">
         <div className="mb-6 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
@@ -135,7 +135,7 @@ const SanitisationEngine = () => {
           </div>
         </div>
 
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:flex-1 lg:min-h-0">
           {/* LEFT: Raw Upload / Preview */}
           <div className="bg-[#0f172a] border border-slate-800 rounded-xl flex flex-col overflow-hidden relative">
             <div className="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center">

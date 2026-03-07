@@ -106,13 +106,13 @@ export default function ClientOrderDetailsPage() {
           </div>
           <div className="flex flex-col items-end gap-2">
             <span className={`px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-wider border ${
-              currentStatus === 'WITHDRAWN' 
-                ? 'bg-red-950/50 border-red-800 text-red-400' 
+              currentStatus === 'WITHDRAWN'
+                ? 'bg-red-950/50 border-red-800 text-red-400'
                 : 'bg-orange-950/50 border-orange-800 text-orange-400'
             }`}>
               {currentStatus.replace(/_/g, ' ')}
             </span>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 justify-end">
               <Button onClick={() => navigate(`/client-dashboard/orders/${order.id}/tracking`)} className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold border border-slate-700">
                  <ListTree className="w-4 h-4 mr-2" /> View Workflow Tracking
               </Button>
@@ -142,7 +142,7 @@ export default function ClientOrderDetailsPage() {
           {/* Main Info */}
           <div className="md:col-span-2 space-y-8">
             <FormSection title="Order Specifications" icon={ClipboardList}>
-              <div className="grid grid-cols-2 gap-y-6 gap-x-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
                 <DisplayField label="Material"       value={order.material       || 'Not specified'} />
                 <DisplayField label="Quantity"       value={order.quantity       || 'Not specified'} />
                 <DisplayField label="Tolerance"      value={order.tolerance      || 'Standard'} />

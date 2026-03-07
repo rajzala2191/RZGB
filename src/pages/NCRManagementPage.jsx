@@ -37,7 +37,8 @@ const NCRManagementPage = () => {
         {loading ? (
           <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-sky-500" /></div>
         ) : (
-          <table className="w-full text-left">
+          <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[600px]">
             <thead className="bg-slate-950 text-slate-400 text-xs uppercase">
               <tr>
                 <th className="p-4">RZ Job ID</th>
@@ -70,6 +71,7 @@ const NCRManagementPage = () => {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </ControlCentreLayout>

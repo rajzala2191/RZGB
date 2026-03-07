@@ -85,7 +85,7 @@ const NCRReportingPage = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-bold text-slate-400 mb-2">Issue Type</label>
               <select 

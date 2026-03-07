@@ -107,7 +107,7 @@ const ClientDocumentLibraryPage = () => {
            </h1>
            <p className="text-slate-400 mt-1">Central repository for all order files.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
            <button onClick={handleExportCSV} className="px-4 py-2 bg-slate-800 rounded-lg text-slate-300 border border-slate-700 hover:text-white transition-colors">
               Export List
            </button>
@@ -135,7 +135,7 @@ const ClientDocumentLibraryPage = () => {
          <div className="text-center py-12 text-slate-500">No documents found.</div>
       ) : (
          <div className="bg-[#0f172a] border border-slate-800 rounded-xl overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left min-w-[600px]">
                <thead className="bg-slate-950 text-slate-400 text-xs uppercase">
                   <tr>
                      <th className="p-4">File Name</th>

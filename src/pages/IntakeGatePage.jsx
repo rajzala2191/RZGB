@@ -112,7 +112,8 @@ const IntakeGatePage = () => {
         ) : rfqs.length === 0 ? (
           <div className="p-16 text-center text-slate-500">The intake gate is clear. No pending RFQs.</div>
         ) : (
-          <table className="w-full text-left">
+          <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[400px]">
               <thead className="bg-slate-950/30 text-xs text-slate-500 uppercase tracking-wider">
                 <tr><th className="p-4">Client</th><th className="p-4">File Name</th><th className="p-4 text-right">Actions</th></tr>
               </thead>
@@ -132,6 +133,7 @@ const IntakeGatePage = () => {
                 ))}
               </tbody>
             </table>
+          </div>
         )}
       </div>
     </ControlCentreLayout>

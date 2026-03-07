@@ -130,7 +130,8 @@ const ReportsPage = () => {
           <div className="p-6 border-b border-gray-800">
             <h3 className="text-lg font-bold text-white">Recent Reports</h3>
           </div>
-          <table className="w-full text-left">
+          <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[400px]">
             <thead>
               <tr className="bg-gray-900 text-gray-400 text-xs uppercase">
                 <th className="p-4">Report Name</th>

@@ -329,7 +329,7 @@ export default function SanitisationReviewPage() {
             <ChevronRight size={12} style={{ color: t.mid }} />
             <span style={{ fontSize: 12, color: ACCENT }}>Review</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <div style={{ width: 40, height: 40, borderRadius: 12, background: `rgba(255,107,53,0.12)`,
               display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid rgba(255,107,53,0.25)` }}>
               <Shield size={20} style={{ color: ACCENT }} />
@@ -354,7 +354,7 @@ export default function SanitisationReviewPage() {
 
         {/* ── Section 1: Order Intel + Client Identity ─────────── */}
         <motion.div variants={fadeUp} initial="hidden" animate="show" custom={1}
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 
           {/* Order details */}
           <div style={cardStyle}>
@@ -578,7 +578,7 @@ export default function SanitisationReviewPage() {
                 <p style={{ fontSize: 11, color: t.mid, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
                   Other Documents ({otherDocs.length})
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {otherDocs.map(doc => (
                     <div key={doc.id} style={{ position: 'relative' }}>
                       <DocumentPreview filePath={doc.file_path} fileName={doc.file_name} compact />
@@ -598,7 +598,7 @@ export default function SanitisationReviewPage() {
 
         {/* ── Section 3: Public Identity + Pricing ─────────────── */}
         <motion.div variants={fadeUp} initial="hidden" animate="show" custom={3}
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 
           {/* Public identity */}
           <div style={cardStyle}>
