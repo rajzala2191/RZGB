@@ -159,6 +159,7 @@ const ReportsPage = () => {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </ControlCentreLayout>
