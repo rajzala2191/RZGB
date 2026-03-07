@@ -15,12 +15,9 @@ export function useVersionCheck() {
           const stored = localStorage.getItem(STORAGE_KEY);
 
           if (isInitial) {
-            // On first load: if stored version differs from server, we're stale — reload once
-            if (stored && stored !== latest) {
-              localStorage.setItem(STORAGE_KEY, latest);
-              window.location.reload();
-              return;
-            }
+            // On first load: just record the current version.
+            // index.html is always served fresh (no-cache via .htaccess) so no reload needed.
+            // Hashed asset filenames change per build, so stale assets can't load for new builds.
             localStorage.setItem(STORAGE_KEY, latest);
             currentVersion.current = latest;
           } else {
