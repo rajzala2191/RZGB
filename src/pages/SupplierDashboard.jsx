@@ -302,7 +302,7 @@ export default function SupplierDashboard() {
                   order={order}
                   index={i}
                   isDark={isDark}
-                  onClick={() => navigate(`/supplier-hub/orders/${order.id}`)}
+                  onClick={() => navigate(`/supplier-hub/job-tracking/${order.rz_job_id || order.id}`)}
                 />
               ))
             )}

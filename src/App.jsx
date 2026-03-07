@@ -31,7 +31,9 @@ import SanitisationGatePage from '@/pages/SanitisationGatePage';
 import SanitisationReviewPage from '@/pages/SanitisationReviewPage';
 import SupplierPoolPage from '@/pages/SupplierPoolPage';
 import AdminDocumentReview from '@/pages/AdminDocumentReview';
+import AdminShipmentsPage from '@/pages/AdminShipmentsPage';
 import AdminLiveTracking from '@/pages/AdminLiveTracking';
+import AdminOrderPreviewPage from '@/pages/AdminOrderPreviewPage';
 
 
 // Client Pages
@@ -97,6 +99,8 @@ function App() {
                 <Route path="/control-centre/reports" element={<ProtectedRoute requiredRole="admin"><ReportsPage /></ProtectedRoute>} />
                 <Route path="/control-centre/ncr-management" element={<ProtectedRoute requiredRole="admin"><NCRManagementPage /></ProtectedRoute>} />
                 <Route path="/control-centre/supplier-management" element={<ProtectedRoute requiredRole="admin"><SupplierManagementPage /></ProtectedRoute>} />
+                <Route path="/control-centre/shipments" element={<ProtectedRoute requiredRole="admin"><AdminShipmentsPage /></ProtectedRoute>} />
+                <Route path="/control-centre/order-preview/:orderId" element={<ProtectedRoute requiredRole="admin"><AdminOrderPreviewPage /></ProtectedRoute>} />
 
                 {/* --- CLIENT ROUTES --- */}
                 <Route path="/client-dashboard" element={<ProtectedRoute requiredRole="client"><ClientDashboardPage /></ProtectedRoute>} />

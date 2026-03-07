@@ -103,7 +103,7 @@ export default function SanitisationReviewPage() {
   const otherDocs  = documents.filter(d => d.file_type !== 'client_drawing');
 
   const getDocScrubbed = (doc) =>
-    doc.status === 'SCRUBBED' || scrubStatus[doc.id] === 'scrubbed';
+    doc.is_sanitised === true || doc.status === 'SCRUBBED' || scrubStatus[doc.id] === 'scrubbed';
 
   const allDrawingsScrubbed =
     drawings.length > 0 && drawings.every(getDocScrubbed);
@@ -140,7 +140,7 @@ export default function SanitisationReviewPage() {
 
       const { data: docs } = await supabaseAdmin
         .from('documents')
-        .select('id, order_id, file_name, file_path, file_type, status, scrubbed_file_path, created_at')
+        .select('id, order_id, file_name, file_path, file_type, status, is_sanitised, redaction_notes, created_at')
         .eq('order_id', orderId)
         .order('created_at', { ascending: false });
 
@@ -149,7 +149,7 @@ export default function SanitisationReviewPage() {
 
       const initStatus = {}, initView = {};
       docList.forEach(d => {
-        const done = d.status === 'SCRUBBED';
+        const done = d.is_sanitised === true || d.status === 'SCRUBBED';
         initStatus[d.id] = done ? 'scrubbed' : 'idle';
         initView[d.id]   = done ? 'scrubbed' : 'original';
       });
@@ -186,13 +186,14 @@ export default function SanitisationReviewPage() {
       if (upErr) throw upErr;
 
       await supabaseAdmin.from('documents').update({
-        status: 'SCRUBBED', scrubbed_file_path: scrubbedPath,
+        status: 'SCRUBBED', is_sanitised: true,
+        redaction_notes: `Scrubbed via AI — path: ${scrubbedPath}`,
       }).eq('id', doc.id);
 
       setScrubStatus(s => ({ ...s, [doc.id]: 'scrubbed' }));
       setDocViewMode(v => ({ ...v, [doc.id]: 'scrubbed' }));
       setDocuments(prev => prev.map(d =>
-        d.id === doc.id ? { ...d, status: 'SCRUBBED', scrubbed_file_path: scrubbedPath } : d
+        d.id === doc.id ? { ...d, status: 'SCRUBBED', is_sanitised: true } : d
       ));
       toast({ title: 'Scrubbing Complete', description: `${doc.file_name} sanitised successfully.`, variant: 'success' });
     } catch (err) {
@@ -215,8 +216,9 @@ export default function SanitisationReviewPage() {
     if (!window.confirm(`Delete "${doc.file_name}"? This cannot be undone.`)) return;
     try {
       await supabaseAdmin.storage.from('documents').remove([doc.file_path]);
-      if (doc.scrubbed_file_path)
-        await supabaseAdmin.storage.from('documents').remove([doc.scrubbed_file_path]);
+      // Also remove scrubbed copy if it was stored (path is reconstructed from original)
+      const scrubbedPath = doc.file_path.replace(/(\.[^.]+)$/, '_scrubbed$1');
+      await supabaseAdmin.storage.from('documents').remove([scrubbedPath]).catch(() => {});
       await supabaseAdmin.from('documents').delete().eq('id', doc.id);
       setDocuments(prev => prev.filter(d => d.id !== doc.id));
       toast({ title: 'Document Removed' });
