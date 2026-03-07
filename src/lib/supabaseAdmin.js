@@ -11,9 +11,8 @@
  */
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://arolzvuvrabpdakgwyjl.supabase.co';
-const supabaseServiceRoleKey =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyb2x6dnV2cmFicGRha2d3eWpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDczNzU0NiwiZXhwIjoyMDg2MzEzNTQ2fQ.CXSOEnWkak80DN3PulE506tCotqJqlW78sWTNPwM5Y4';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
   auth: { persistSession: false, autoRefreshToken: false },
