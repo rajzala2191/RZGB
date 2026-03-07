@@ -12,6 +12,12 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import RootRedirect from '@/pages/RootRedirect';
 import LoginPage from '@/pages/LoginPage';
 
+// Platform Owner Pages
+import PlatformDashboard from '@/pages/platform/PlatformDashboard';
+import PlatformAccountsPage from '@/pages/platform/PlatformAccountsPage';
+import PlatformUsersPage from '@/pages/platform/PlatformUsersPage';
+import PlatformSystemPage from '@/pages/platform/PlatformSystemPage';
+
 // Admin Pages
 import ControlCentrePage from '@/pages/ControlCentrePage';
 import UserManagementPage from '@/pages/UserManagementPage';
@@ -74,6 +80,12 @@ function App() {
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="/login" element={<LoginPage />} />
                 
+                {/* --- PLATFORM OWNER ROUTES --- */}
+                <Route path="/platform" element={<ProtectedRoute requiredRole="platform_owner"><PlatformDashboard /></ProtectedRoute>} />
+                <Route path="/platform/accounts" element={<ProtectedRoute requiredRole="platform_owner"><PlatformAccountsPage /></ProtectedRoute>} />
+                <Route path="/platform/users" element={<ProtectedRoute requiredRole="platform_owner"><PlatformUsersPage /></ProtectedRoute>} />
+                <Route path="/platform/system" element={<ProtectedRoute requiredRole="platform_owner"><PlatformSystemPage /></ProtectedRoute>} />
+
                 {/* --- ADMIN ROUTES --- */}
                 <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />
                 <Route path="/control-centre/intake-gate" element={<ProtectedRoute requiredRole="admin"><IntakeGatePage /></ProtectedRoute>} />

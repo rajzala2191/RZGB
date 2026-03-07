@@ -28,6 +28,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   if (requiredRole && userRole !== requiredRole) {
     console.warn(`ProtectedRoute: Access denied to ${location.pathname}. Required: ${requiredRole}, Found: ${userRole}`);
     // Redirect to the dashboard appropriate for their actual role to prevent getting stuck
+    if (userRole === 'platform_owner') return <Navigate to="/platform" replace />;
     if (userRole === 'admin') return <Navigate to="/control-centre" replace />;
     if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
     if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;

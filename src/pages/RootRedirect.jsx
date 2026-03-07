@@ -14,6 +14,9 @@ const RootRedirect = () => {
       } else {
         // Role-based redirection
         switch (userRole) {
+          case 'platform_owner':
+            navigate('/platform');
+            break;
           case 'admin':
             navigate('/control-centre');
             break;
