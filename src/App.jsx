@@ -62,8 +62,10 @@ import AdminSupportPage from '@/pages/AdminSupportPage';
 import AdminTicketDetailPage from '@/pages/AdminTicketDetailPage';
 
 import { Toaster } from '@/components/ui/toaster';
+import { useVersionCheck } from '@/hooks/useVersionCheck';
 
 function App() {
+  useVersionCheck();
   return (
     <ErrorBoundary>
       <ThemeProvider>

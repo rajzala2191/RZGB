@@ -170,9 +170,13 @@ function main() {
 
   const llmsTxtContent = generateLlmsTxt(pages);
   const outputPath = path.join(process.cwd(), 'public', 'llms.txt');
-  
+
   ensureDirectoryExists(path.dirname(outputPath));
   fs.writeFileSync(outputPath, llmsTxtContent, 'utf8');
+
+  // Write version.json for auto-reload version checking
+  const versionPath = path.join(process.cwd(), 'public', 'version.json');
+  fs.writeFileSync(versionPath, JSON.stringify({ v: Date.now() }), 'utf8');
 }
 
 const isMainModule = import.meta.url === `file://${process.argv[1]}`;
