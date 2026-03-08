@@ -16,6 +16,9 @@ const ALL_STAGES = [
   { id: 'DELIVERED', label: 'Delivered', icon: CheckCircle2, color: 'green' },
 ];
 
+// These stages can be toggled by client per order
+const SELECTABLE_PROCESS_IDS = ['MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH'];
+
 const COLOR_MAP = {
   blue:    { bg: 'bg-blue-500',    ring: 'ring-blue-500/30',    text: 'text-blue-400',    line: 'bg-blue-500' },
   purple:  { bg: 'bg-purple-500',  ring: 'ring-purple-500/30',  text: 'text-purple-400',  line: 'bg-purple-500' },
@@ -31,21 +34,23 @@ const COLOR_MAP = {
 
 /**
  * OrderTimeline — universal timeline for all roles.
- * 
- * @param {string} currentStatus  - The order_status from the DB
- * @param {string} createdAt      - ISO date of when order was created
- * @param {string} updatedAt      - ISO date of last update
- * @param {Array}  updates        - Array of job_updates objects (optional)
- * @param {boolean} compact       - If true, renders a single-line mini version
- * @param {boolean} isWithdrawn   - If true, shows withdrawn state
+ *
+ * @param {string}   currentStatus      - The order_status from the DB
+ * @param {string}   createdAt          - ISO date of when order was created
+ * @param {string}   updatedAt          - ISO date of last update
+ * @param {Array}    updates            - Array of job_updates objects (optional)
+ * @param {boolean}  compact            - If true, renders a single-line mini version
+ * @param {boolean}  isWithdrawn        - If true, shows withdrawn state
+ * @param {string[]} selectedProcesses  - Array of process IDs chosen by client (null = show all)
  */
-export default function OrderTimeline({ 
-  currentStatus = 'PENDING_ADMIN_SCRUB', 
-  createdAt, 
-  updatedAt, 
-  updates = [], 
+export default function OrderTimeline({
+  currentStatus = 'PENDING_ADMIN_SCRUB',
+  createdAt,
+  updatedAt,
+  updates = [],
   compact = false,
-  isWithdrawn = false
+  isWithdrawn = false,
+  selectedProcesses = null,
 }) {
   if (isWithdrawn || currentStatus === 'WITHDRAWN') {
     return (
@@ -59,19 +64,24 @@ export default function OrderTimeline({
     );
   }
 
-  const currentIndex = ALL_STAGES.findIndex(s => s.id === currentStatus);
+  // Filter stages: always show system stages, only show selected manufacturing processes
+  const visibleStages = selectedProcesses && selectedProcesses.length > 0
+    ? ALL_STAGES.filter(s => !SELECTABLE_PROCESS_IDS.includes(s.id) || selectedProcesses.includes(s.id))
+    : ALL_STAGES;
+
+  const currentIndex = visibleStages.findIndex(s => s.id === currentStatus);
 
   // Compact single-line version for tables/cards
   if (compact) {
     return (
       <div className="flex items-center gap-1 w-full">
-        {ALL_STAGES.map((stage, i) => {
+        {visibleStages.map((stage, i) => {
           const isPast = i < currentIndex;
           const isCurrent = i === currentIndex;
           const colors = COLOR_MAP[stage.color];
           return (
             <div key={stage.id} className="flex items-center flex-1 min-w-0">
-              <div 
+              <div
                 className={`h-2 flex-1 rounded-full transition-all ${
                   isPast ? colors.bg : isCurrent ? `${colors.bg} animate-pulse` : 'bg-slate-700'
                 }`}
@@ -93,7 +103,7 @@ export default function OrderTimeline({
 
   return (
     <div className="relative">
-      {ALL_STAGES.map((stage, i) => {
+      {visibleStages.map((stage, i) => {
         const isPast = i < currentIndex;
         const isCurrent = i === currentIndex;
         const isFuture = i > currentIndex;
@@ -110,7 +120,7 @@ export default function OrderTimeline({
         return (
           <div key={stage.id} className="relative flex gap-4">
             {/* Vertical line connector */}
-            {i < ALL_STAGES.length - 1 && (
+            {i < visibleStages.length - 1 && (
               <div className="absolute left-[19px] top-10 w-0.5 h-[calc(100%-16px)]">
                 <div className={`h-full rounded-full transition-all ${isPast ? colors.line : 'bg-slate-700/50'}`} />
               </div>
@@ -118,11 +128,11 @@ export default function OrderTimeline({
 
             {/* Circle icon */}
             <div className="flex-shrink-0 z-10">
-              <div 
+              <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                  isPast 
+                  isPast
                     ? `${colors.bg} text-white shadow-lg`
-                    : isCurrent 
+                    : isCurrent
                       ? `${colors.bg} text-white ring-4 ${colors.ring} shadow-lg animate-pulse`
                       : 'bg-slate-800 text-slate-500 border border-slate-700'
                 }`}
@@ -138,12 +148,12 @@ export default function OrderTimeline({
             </div>
 
             {/* Content */}
-            <div className={`flex-1 pb-8 ${i === ALL_STAGES.length - 1 ? 'pb-0' : ''}`}>
+            <div className={`flex-1 pb-8 ${i === visibleStages.length - 1 ? 'pb-0' : ''}`}>
               <div className={`rounded-lg p-3 transition-all ${
-                isCurrent 
-                  ? 'bg-slate-800/80 border border-slate-700' 
-                  : isPast 
-                    ? 'bg-transparent' 
+                isCurrent
+                  ? 'bg-slate-800/80 border border-slate-700'
+                  : isPast
+                    ? 'bg-transparent'
                     : 'bg-transparent opacity-50'
               }`}>
                 <div className="flex items-center justify-between">
@@ -186,4 +196,4 @@ export default function OrderTimeline({
   );
 }
 
-export { ALL_STAGES };
+export { ALL_STAGES, SELECTABLE_PROCESS_IDS };

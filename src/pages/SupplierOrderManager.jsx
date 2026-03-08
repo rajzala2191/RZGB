@@ -17,15 +17,30 @@ import OrderTimeline from '@/components/OrderTimeline';
 import DocumentPreview from '@/components/DocumentPreview';
 
 // Full pipeline including AWARDED so index math works correctly
-const STAGES = [
-  { id: 'AWARDED', label: 'Supplier Assigned', icon: CheckCircle2, color: 'amber' },
-  { id: 'MATERIAL', label: 'Material Sourcing', icon: Package, color: 'sky' },
-  { id: 'CASTING', label: 'Casting', icon: Zap, color: 'orange' },
-  { id: 'MACHINING', label: 'Machining', icon: Hourglass, color: 'violet' },
-  { id: 'QC', label: 'Quality Control', icon: ShieldCheck, color: 'emerald' },
-  { id: 'DISPATCH', label: 'Dispatch', icon: Truck, color: 'blue' },
-  { id: 'DELIVERED', label: 'Delivered', icon: CheckCircle2, color: 'green' },
+const ALL_SUPPLIER_STAGES = [
+  { id: 'AWARDED',   label: 'Supplier Assigned', icon: CheckCircle2, color: 'amber' },
+  { id: 'MATERIAL',  label: 'Material Sourcing',  icon: Package,      color: 'sky' },
+  { id: 'CASTING',   label: 'Casting',            icon: Zap,          color: 'orange' },
+  { id: 'MACHINING', label: 'Machining',           icon: Hourglass,    color: 'violet' },
+  { id: 'QC',        label: 'Quality Control',     icon: ShieldCheck,  color: 'emerald' },
+  { id: 'DISPATCH',  label: 'Dispatch',            icon: Truck,        color: 'blue' },
+  { id: 'DELIVERED', label: 'Delivered',           icon: CheckCircle2, color: 'green' },
 ];
+
+// Selectable manufacturing stages (can be toggled per order by client)
+const SELECTABLE_STAGE_IDS = ['MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH'];
+
+// Returns the filtered stage list for a specific order based on client's chosen processes
+function getOrderStages(order) {
+  const selected = order.manufacturing_processes;
+  if (!selected || selected.length === 0) return ALL_SUPPLIER_STAGES;
+  return ALL_SUPPLIER_STAGES.filter(
+    s => !SELECTABLE_STAGE_IDS.includes(s.id) || selected.includes(s.id)
+  );
+}
+
+// Kept for backward-compat references that don't have an order context
+const STAGES = ALL_SUPPLIER_STAGES;
 
 export default function SupplierOrderManager() {
   const { currentUser, userCompanyName } = useAuth();
@@ -55,7 +70,7 @@ export default function SupplierOrderManager() {
         .from('orders')
         .select(`
           id, rz_job_id, part_name, material, order_status, client_id,
-          created_at, updated_at, ghost_public_name, quantity
+          created_at, updated_at, ghost_public_name, quantity, manufacturing_processes
         `)
         .eq('supplier_id', currentUser.id)
         .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED'])
@@ -137,8 +152,9 @@ export default function SupplierOrderManager() {
 
   const confirmStageChange = (orderId, newStatus) => {
     const order = orders.find(p => p.id === orderId);
-    const currentStage = STAGES.find(s => s.id === order?.order_status);
-    const nextStage = STAGES.find(s => s.id === newStatus);
+    const stages = getOrderStages(order);
+    const currentStage = stages.find(s => s.id === order?.order_status);
+    const nextStage = stages.find(s => s.id === newStatus);
     setConfirmDialog({
       open: true,
       orderId,
@@ -442,7 +458,8 @@ export default function SupplierOrderManager() {
         ) : (
           <div className="grid gap-4">
             {orders.map(order => {
-              const currentStage = STAGES.find(s => s.id === order.order_status);
+              const orderStages = getOrderStages(order);
+              const currentStage = orderStages.find(s => s.id === order.order_status);
               const isExpanded = expandedOrder === order.id;
 
               return (
@@ -496,19 +513,20 @@ export default function SupplierOrderManager() {
                           updatedAt={order.updated_at}
                           updates={order.rz_job_id ? (jobUpdates[order.rz_job_id] || []) : []}
                           compact={true}
+                          selectedProcesses={order.manufacturing_processes}
                         />
                       </div>
 
                       {/* Stage Progress Summary */}
                       {order.order_status !== 'DELIVERED' && (() => {
-                        const currentIndex = STAGES.findIndex(s => s.id === order.order_status);
-                        const nextStage = STAGES[currentIndex + 1];
+                        const currentIndex = orderStages.findIndex(s => s.id === order.order_status);
+                        const nextStage = orderStages[currentIndex + 1];
                         return nextStage ? (
                           <div className="bg-[#1e293b]/50 rounded-xl p-4 border border-slate-800">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-2">
-                                  {STAGES.map((stage, idx) => {
+                                  {orderStages.map((stage, idx) => {
                                     const isDone = idx <= currentIndex;
                                     const isCurrent = idx === currentIndex;
                                     return (
@@ -520,7 +538,7 @@ export default function SupplierOrderManager() {
                                         }`}>
                                           {isDone && !isCurrent ? <CheckCircle2 className="w-3.5 h-3.5" /> : idx + 1}
                                         </div>
-                                        {idx < STAGES.length - 1 && (
+                                        {idx < orderStages.length - 1 && (
                                           <div className={`w-4 h-0.5 ${idx < currentIndex ? 'bg-emerald-500/50' : 'bg-slate-700'}`} />
                                         )}
                                       </div>
@@ -639,7 +657,7 @@ export default function SupplierOrderManager() {
                       <div className="bg-[#1e293b]/50 rounded-lg p-3 text-sm text-slate-300 border border-slate-800 space-y-1">
                         <p>
                           <strong>Current Stage:</strong>{' '}
-                          {STAGES.find(s => s.id === order.order_status)?.label || order.order_status}
+                          {orderStages.find(s => s.id === order.order_status)?.label || order.order_status}
                         </p>
                         <p className="text-xs text-slate-500">
                           RZ Job ID: <span className="font-mono text-slate-400">{order.rz_job_id || 'Pending'}</span>
@@ -649,8 +667,8 @@ export default function SupplierOrderManager() {
 
                       {/* ── Move to Next Stage CTA (bottom) ── */}
                       {order.order_status !== 'DELIVERED' && (() => {
-                        const ci = STAGES.findIndex(s => s.id === order.order_status);
-                        const next = STAGES[ci + 1];
+                        const ci = orderStages.findIndex(s => s.id === order.order_status);
+                        const next = orderStages[ci + 1];
                         if (!next) return null;
                         const NextIcon = next.icon;
                         return (

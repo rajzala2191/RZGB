@@ -361,6 +361,7 @@ const AdminLiveTracking = () => {
                       <OrderTimeline
                         currentStatus={order.order_status}
                         compact={true}
+                        selectedProcesses={order.manufacturing_processes}
                       />
                     </div>
 
@@ -412,6 +413,7 @@ const AdminLiveTracking = () => {
                               updatedAt={order.updated_at}
                               updates={orderUpdates}
                               isWithdrawn={order.order_status === 'WITHDRAWN'}
+                              selectedProcesses={order.manufacturing_processes}
                             />
                           </div>
 

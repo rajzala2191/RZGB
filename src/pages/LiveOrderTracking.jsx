@@ -233,12 +233,13 @@ const LiveOrderTracking = () => {
             Manufacturing Pipeline
           </h2>
 
-          <OrderTimeline 
+          <OrderTimeline
             currentStatus={order.order_status}
             createdAt={order.created_at}
             updatedAt={order.updated_at}
             updates={updates}
             isWithdrawn={order.order_status === 'WITHDRAWN'}
+            selectedProcesses={order.manufacturing_processes}
           />
         </div>
 

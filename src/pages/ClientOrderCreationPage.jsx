@@ -8,8 +8,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { UploadCloud, CheckCircle2, AlertCircle, X, Loader2 } from 'lucide-react';
+import { UploadCloud, CheckCircle2, AlertCircle, X, Loader2, Package, Zap, Hourglass, ShieldCheck, Truck } from 'lucide-react';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
+import { SELECTABLE_PROCESS_IDS } from '@/components/OrderTimeline';
+
+const PROCESS_OPTIONS = [
+  { id: 'MATERIAL',  label: 'Material Sourcing', description: 'Raw material procurement & preparation', icon: Package,     color: 'sky' },
+  { id: 'CASTING',   label: 'Casting',            description: 'Sand, die, or investment casting',     icon: Zap,          color: 'orange' },
+  { id: 'MACHINING', label: 'Machining',           description: 'CNC turning, milling, drilling',       icon: Hourglass,    color: 'violet' },
+  { id: 'QC',        label: 'Quality Control',     description: 'Dimensional & visual inspection',      icon: ShieldCheck,  color: 'emerald' },
+  { id: 'DISPATCH',  label: 'Dispatch',            description: 'Packaging and shipping',               icon: Truck,        color: 'blue' },
+];
+
+const PROCESS_COLOR_MAP = {
+  sky:     { border: 'border-sky-500/60',     bg: 'bg-sky-500/10',     text: 'text-sky-400',     ring: 'ring-sky-500/30' },
+  orange:  { border: 'border-orange-500/60',  bg: 'bg-orange-500/10',  text: 'text-orange-400',  ring: 'ring-orange-500/30' },
+  violet:  { border: 'border-violet-500/60',  bg: 'bg-violet-500/10',  text: 'text-violet-400',  ring: 'ring-violet-500/30' },
+  emerald: { border: 'border-emerald-500/60', bg: 'bg-emerald-500/10', text: 'text-emerald-400', ring: 'ring-emerald-500/30' },
+  blue:    { border: 'border-blue-500/60',    bg: 'bg-blue-500/10',    text: 'text-blue-400',    ring: 'ring-blue-500/30' },
+};
 
 const FORBIDDEN_STRINGS = ['confidential', 'internal', 'secret', 'proprietary'];
 
@@ -19,15 +36,22 @@ export default function ClientOrderCreationPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    part_name: '', 
+    part_name: '',
     description: '',
-    material: '', 
-    quantity: '', 
+    material: '',
+    quantity: '',
     tolerance: '',
     surface_finish: '',
     special_requirements: ''
   });
+  const [selectedProcesses, setSelectedProcesses] = useState(['MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH']);
   const [files, setFiles] = useState([]);
+
+  const toggleProcess = (id) => {
+    setSelectedProcesses(prev =>
+      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+    );
+  };
 
   const handleFileDrop = (e) => {
     e.preventDefault();
@@ -52,7 +76,13 @@ export default function ClientOrderCreationPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (selectedProcesses.length === 0) {
+      toast({ title: 'Validation Error', description: 'Please select at least one manufacturing process.', variant: 'destructive' });
+      return;
+    }
     setLoading(true);
+    // Preserve original ALL_STAGES order
+    const orderedProcesses = SELECTABLE_PROCESS_IDS.filter(id => selectedProcesses.includes(id));
     try {
       const { data, error } = await supabase.from('orders').insert([{
         client_id: currentUser.id,
@@ -64,7 +94,8 @@ export default function ClientOrderCreationPage() {
         tolerance: formData.tolerance,
         surface_finish: formData.surface_finish,
         special_requirements: formData.special_requirements,
-        order_status: 'PENDING_ADMIN_SCRUB'
+        order_status: 'PENDING_ADMIN_SCRUB',
+        manufacturing_processes: orderedProcesses,
       }]).select().single();
 
       if (error) throw error;
@@ -176,6 +207,52 @@ export default function ClientOrderCreationPage() {
                 </select>
               </div>
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <h2 className="text-xl font-bold text-cyan-400">Manufacturing Processes *</h2>
+              <span className="text-xs text-slate-500">{selectedProcesses.length} selected</span>
+            </div>
+            <p className="text-sm text-slate-400">Select the processes required for your part. Only chosen steps will appear on your order timeline.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {PROCESS_OPTIONS.map(({ id, label, description, icon: Icon, color }) => {
+                const isSelected = selectedProcesses.includes(id);
+                const c = PROCESS_COLOR_MAP[color];
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => toggleProcess(id)}
+                    className={`relative text-left p-4 rounded-xl border-2 transition-all focus:outline-none ${
+                      isSelected
+                        ? `${c.border} ${c.bg} ring-2 ${c.ring}`
+                        : 'border-slate-700 bg-[#1e293b] hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isSelected ? c.bg : 'bg-slate-800'}`}>
+                        <Icon className={`w-4 h-4 ${isSelected ? c.text : 'text-slate-500'}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-semibold text-sm ${isSelected ? c.text : 'text-slate-300'}`}>{label}</p>
+                        <p className="text-xs text-slate-500 mt-0.5 leading-snug">{description}</p>
+                      </div>
+                      <div className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected ? `${c.border} ${c.bg}` : 'border-slate-600 bg-transparent'
+                      }`}>
+                        {isSelected && <CheckCircle2 className={`w-3 h-3 ${c.text}`} />}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {selectedProcesses.length === 0 && (
+              <p className="text-xs text-red-400 flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5" /> At least one process must be selected.
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
