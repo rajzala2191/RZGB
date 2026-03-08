@@ -18,25 +18,52 @@ const CreatePasswordPage = () => {
   const sessionReadyRef = useRef(false);
 
   useEffect(() => {
-    // onAuthStateChange fires INITIAL_SESSION immediately with current state,
-    // then SIGNED_IN when a new session is established (e.g. invite hash processed).
-    // We must handle both to avoid missing the session if it was ready before we subscribed.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-        sessionReadyRef.current = true;
-        setSessionReady(true);
-      }
-    });
+    let timeoutId;
 
-    // If no session after 12s, show invalid/expired message
-    const timeout = setTimeout(() => {
-      if (!sessionReadyRef.current) setInvalidLink(true);
-    }, 12000);
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeout);
+    const markReady = () => {
+      sessionReadyRef.current = true;
+      setSessionReady(true);
     };
+
+    const init = async () => {
+      // 1. Try to manually extract tokens from the URL hash (most reliable approach).
+      //    Supabase puts access_token + refresh_token in the hash after verifying invite links.
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+          const { data, error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          if (data?.session) { markReady(); return; }
+          if (error) { setInvalidLink(true); return; }
+        }
+
+        // Hash present but no tokens — could be an error redirect
+        const errorParam = params.get('error');
+        if (errorParam) { setInvalidLink(true); return; }
+      }
+
+      // 2. No hash — check if a session already exists (e.g. auto-detected by Supabase client)
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) { markReady(); return; }
+
+      // 3. Last resort: wait for onAuthStateChange to fire SIGNED_IN
+      //    (catches the race where Supabase is still processing the hash)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) markReady();
+      });
+
+      timeoutId = setTimeout(() => {
+        subscription.unsubscribe();
+        if (!sessionReadyRef.current) setInvalidLink(true);
+      }, 10000);
+    };
+
+    init();
+
+    return () => { if (timeoutId) clearTimeout(timeoutId); };
   }, []);
 
   const handleSubmit = async (e) => {
