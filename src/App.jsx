@@ -13,6 +13,7 @@ import RootRedirect from '@/pages/RootRedirect';
 import LoginPage from '@/pages/LoginPage';
 import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import SetPasswordPage from '@/pages/SetPasswordPage';
+import CreatePasswordPage from '@/pages/CreatePasswordPage';
 
 // Admin Pages
 import ControlCentrePage from '@/pages/ControlCentrePage';
@@ -82,6 +83,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/set-password" element={<SetPasswordPage />} />
+                <Route path="/create-password" element={<CreatePasswordPage />} />
                 
                 {/* --- ADMIN ROUTES --- */}
                 <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />
