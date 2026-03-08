@@ -20,7 +20,11 @@ const InviteUserModal = ({ onClose, onSuccess }) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('invite-user', { body: form });
-      if (error) throw error;
+      if (error) {
+        // Extract the real error message from the edge function response body
+        const body = await error.context?.json?.().catch(() => null);
+        throw new Error(body?.error || error.message);
+      }
       if (data?.error) throw new Error(data.error);
 
       toast({
