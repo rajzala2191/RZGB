@@ -276,19 +276,25 @@ export default function ManufacturingProcessesPage() {
         <AnimatePresence>
           {showModal && (
             <>
+              {/* Overlay — also acts as the centering flex container */}
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={() => setShowModal(false)}
-                style={{ position: 'fixed', inset: 0, background: t.overlay, zIndex: 50 }}
-              />
+                style={{
+                  position: 'fixed', inset: 0, background: t.overlay, zIndex: 50,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '16px',
+                }}
+              >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                onClick={e => e.stopPropagation()}
                 style={{
-                  position: 'fixed', top: '50%', left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '90%', maxWidth: 480,
+                  width: '100%', maxWidth: 480,
+                  maxHeight: 'calc(100vh - 32px)',
+                  overflowY: 'auto',
                   background: t.card, border: `1px solid ${t.border}`,
                   borderRadius: 16, padding: 28, zIndex: 51,
                   boxShadow: '0 25px 60px rgba(0,0,0,0.4)',
@@ -358,6 +364,7 @@ export default function ManufacturingProcessesPage() {
                     </button>
                   </div>
                 </div>
+              </motion.div>
               </motion.div>
             </>
           )}
