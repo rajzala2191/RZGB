@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
@@ -15,27 +15,23 @@ const CreatePasswordPage = () => {
   const [done, setDone] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
   const [invalidLink, setInvalidLink] = useState(false);
+  const sessionReadyRef = useRef(false);
 
   useEffect(() => {
-    // Check if there's already an active session (invite hash already processed)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setSessionReady(true);
-    });
-
-    // Listen for the SIGNED_IN event fired when Supabase processes the invite hash
+    // onAuthStateChange fires INITIAL_SESSION immediately with current state,
+    // then SIGNED_IN when a new session is established (e.g. invite hash processed).
+    // We must handle both to avoid missing the session if it was ready before we subscribed.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        sessionReadyRef.current = true;
         setSessionReady(true);
       }
     });
 
-    // If no session after 8s, show invalid link message
+    // If no session after 12s, show invalid/expired message
     const timeout = setTimeout(() => {
-      setSessionReady(prev => {
-        if (!prev) setInvalidLink(true);
-        return prev;
-      });
-    }, 8000);
+      if (!sessionReadyRef.current) setInvalidLink(true);
+    }, 12000);
 
     return () => {
       subscription.unsubscribe();
