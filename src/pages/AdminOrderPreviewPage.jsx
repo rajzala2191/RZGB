@@ -680,6 +680,7 @@ export default function AdminOrderPreviewPage() {
                   createdAt={order.created_at}
                   updatedAt={order.updated_at}
                   updates={updates}
+                  selectedProcesses={order.selected_processes}
                 />
               </div>
             </div>

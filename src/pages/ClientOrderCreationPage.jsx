@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
@@ -16,7 +16,7 @@ import {
   ClipboardList, Wrench, UploadCloud, Eye,
   CheckCircle2, AlertCircle, X, Loader2,
   Box, MapPin, ChevronRight, ChevronLeft,
-  FileText, ArrowRight,
+  FileText, ArrowRight, Cog,
 } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -24,10 +24,11 @@ const FORBIDDEN = ['confidential', 'internal', 'secret', 'proprietary'];
 const MODEL_EXT = ['.stl', '.obj', '.gltf', '.glb', '.x_t'];
 
 const STEPS = [
-  { n: 1, label: 'Order Details',  icon: ClipboardList },
-  { n: 2, label: 'Specifications', icon: Wrench },
-  { n: 3, label: 'Files & Models', icon: UploadCloud },
-  { n: 4, label: 'Review',         icon: Eye },
+  { n: 1, label: 'Order Details',            icon: ClipboardList },
+  { n: 2, label: 'Specifications',            icon: Wrench },
+  { n: 3, label: 'Manufacturing Processes',   icon: Cog },
+  { n: 4, label: 'Files & Models',            icon: UploadCloud },
+  { n: 5, label: 'Review',                    icon: Eye },
 ];
 
 const MATERIALS = [
@@ -170,6 +171,30 @@ export default function ClientOrderCreationPage() {
 
   const set = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
 
+  // Manufacturing process selection
+  const [availableProcesses, setAvailableProcesses] = useState([]);
+  const [selectedProcesses, setSelectedProcesses] = useState([]);
+
+  useEffect(() => {
+    supabase.from('manufacturing_processes')
+      .select('id, name, status_key, description')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true })
+      .then(({ data }) => {
+        if (data) {
+          setAvailableProcesses(data);
+          // Default: select all available processes
+          setSelectedProcesses(data.map(p => p.status_key));
+        }
+      });
+  }, []);
+
+  const toggleProcess = (statusKey) => {
+    setSelectedProcesses(prev =>
+      prev.includes(statusKey) ? prev.filter(k => k !== statusKey) : [...prev, statusKey]
+    );
+  };
+
   // File state — each file becomes a documents table row
   const [drawingFiles, setDrawingFiles] = useState([]); // file_type = 'client_drawing'
   const [modelFiles,   setModelFiles]   = useState([]); // file_type = '3d_model'
@@ -192,8 +217,17 @@ export default function ClientOrderCreationPage() {
     return true;
   };
 
+  const validateStep3 = () => {
+    if (selectedProcesses.length === 0) {
+      toast({ title: 'Required', description: 'Select at least one manufacturing process.', variant: 'destructive' });
+      return false;
+    }
+    return true;
+  };
+
   const nextStep = () => {
     if (step === 1 && !validateStep1()) return;
+    if (step === 3 && !validateStep3()) return;
     setStep(s => Math.min(s + 1, STEPS.length));
   };
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
@@ -249,6 +283,7 @@ export default function ClientOrderCreationPage() {
         buy_price:            form.buy_price ? parseFloat(form.buy_price) : null,
         delivery_location:    form.delivery_location || null,
         order_status:         'PENDING_ADMIN_SCRUB',
+        selected_processes:   selectedProcesses.length > 0 ? selectedProcesses : ['MACHINING'],
       }]).select().single();
 
       if (error) throw error;
@@ -383,8 +418,65 @@ export default function ClientOrderCreationPage() {
           </FormSection>
         )}
 
-        {/* ── STEP 3: Files & Models ─────────────────────────────────────────── */}
+        {/* ── STEP 3: Manufacturing Processes ───────────────────────────────── */}
         {step === 3 && (
+          <FormSection title="Manufacturing Processes" icon={Cog}>
+            <p className="text-slate-400 text-sm mb-5">
+              Select the manufacturing processes required for your part. Only the stages you choose will appear in your order timeline.
+            </p>
+
+            {availableProcesses.length === 0 ? (
+              <div className="flex items-center gap-3 bg-[#1e293b] border border-slate-700 rounded-lg p-4">
+                <Loader2 size={16} className="animate-spin text-orange-500 shrink-0" />
+                <span className="text-sm text-slate-400">Loading available processes…</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {availableProcesses.map(proc => {
+                  const selected = selectedProcesses.includes(proc.status_key);
+                  return (
+                    <button
+                      key={proc.status_key}
+                      type="button"
+                      onClick={() => toggleProcess(proc.status_key)}
+                      className={`text-left p-4 rounded-xl border-2 transition-all duration-150 ${
+                        selected
+                          ? 'border-orange-500 bg-orange-900/20'
+                          : 'border-slate-700 bg-[#1e293b] hover:border-slate-500'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-5 h-5 rounded-md border-2 mt-0.5 flex items-center justify-center shrink-0 transition-all ${
+                          selected ? 'border-orange-500 bg-orange-500' : 'border-slate-600 bg-transparent'
+                        }`}>
+                          {selected && <CheckCircle2 size={12} className="text-white" />}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-bold ${selected ? 'text-orange-300' : 'text-slate-200'}`}>{proc.name}</p>
+                          {proc.description && (
+                            <p className="text-xs text-slate-500 mt-0.5">{proc.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {selectedProcesses.length === 0 && (
+              <div className="flex gap-2 mt-4 bg-red-950/30 border border-red-800/40 rounded-lg p-3">
+                <AlertCircle size={15} className="text-red-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-red-400">Please select at least one process to continue.</p>
+              </div>
+            )}
+
+            <StepNav step={step} onBack={prevStep} onNext={nextStep} />
+          </FormSection>
+        )}
+
+        {/* ── STEP 4: Files & Models ─────────────────────────────────────────── */}
+        {step === 4 && (
           <div className="space-y-6">
             <FormSection title="Files & Attachments" icon={UploadCloud}>
               <div className="flex gap-3 bg-[#1e293b] border border-amber-900/40 rounded-lg p-4 mb-5">
@@ -434,8 +526,8 @@ export default function ClientOrderCreationPage() {
           </div>
         )}
 
-        {/* ── STEP 4: Review & Submit ────────────────────────────────────────── */}
-        {step === 4 && (
+        {/* ── STEP 5: Review & Submit ────────────────────────────────────────── */}
+        {step === 5 && (
           <div className="space-y-5">
             <FormSection title="Order Summary" icon={Eye}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
@@ -454,6 +546,15 @@ export default function ClientOrderCreationPage() {
                     value={form.buy_price ? `£${parseFloat(form.buy_price).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : null} />
                   <SummaryRow label="Delivery"       value={form.delivery_location} />
                 </div>
+                {selectedProcesses.length > 0 && (
+                  <div className="col-span-2 pt-3 mt-3 border-t border-slate-800">
+                    <SummaryRow label="Manufacturing Processes" value={
+                      availableProcesses
+                        .filter(p => selectedProcesses.includes(p.status_key))
+                        .map(p => p.name).join(' → ')
+                    } />
+                  </div>
+                )}
                 {form.special_requirements && (
                   <div className="col-span-2 pt-3 mt-3 border-t border-slate-800">
                     <SummaryRow label="Special Requirements" value={form.special_requirements} />
@@ -493,7 +594,7 @@ export default function ClientOrderCreationPage() {
             </div>
 
             <StepNav step={step} onBack={prevStep} onSubmit={handleSubmit} loading={loading}
-              canSubmit={!!form.part_name && !!form.material && !!form.quantity} />
+              canSubmit={!!form.part_name && !!form.material && !!form.quantity && selectedProcesses.length > 0} />
           </div>
         )}
       </div>

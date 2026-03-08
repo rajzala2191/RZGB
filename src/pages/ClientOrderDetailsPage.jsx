@@ -221,6 +221,7 @@ export default function ClientOrderDetailsPage() {
                 createdAt={order.created_at}
                 updatedAt={order.updated_at}
                 updates={updates}
+                selectedProcesses={order.selected_processes}
               />
             </FormSection>
           </div>

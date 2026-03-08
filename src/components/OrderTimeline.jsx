@@ -3,28 +3,50 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/contexts/ThemeContext';
 import {
   Package, FileCheck, Zap, CheckCircle2, Hourglass,
-  ShieldCheck, Truck, Clock, XCircle, Check,
+  ShieldCheck, Truck, Clock, XCircle, Check, Cog,
 } from 'lucide-react';
 
-const ALL_STAGES = [
-  { id: 'PENDING_ADMIN_SCRUB', label: 'Order Received',    short: 'Received',    icon: Package     },
-  { id: 'SANITIZED',           label: 'Under Review',       short: 'Review',      icon: FileCheck   },
-  { id: 'AWARDED',             label: 'Supplier Assigned',  short: 'Assigned',    icon: CheckCircle2},
-  { id: 'MATERIAL',            label: 'Material Sourcing',  short: 'Material',    icon: Package     },
-  { id: 'CASTING',             label: 'Casting',            short: 'Casting',     icon: Zap         },
-  { id: 'MACHINING',           label: 'Machining',          short: 'Machining',   icon: Hourglass   },
-  { id: 'QC',                  label: 'Quality Control',    short: 'QC',          icon: ShieldCheck },
-  { id: 'DISPATCH',            label: 'Dispatched',         short: 'Dispatch',    icon: Truck       },
-  { id: 'DELIVERED',           label: 'Delivered',          short: 'Delivered',   icon: CheckCircle2},
+// ── Fixed stages — always shown ──────────────────────────────────────────────
+const PRE_STAGES = [
+  { id: 'PENDING_ADMIN_SCRUB', label: 'Order Received',   short: 'Received',  icon: Package     },
+  { id: 'SANITIZED',           label: 'Under Review',      short: 'Review',    icon: FileCheck   },
+  { id: 'AWARDED',             label: 'Supplier Assigned', short: 'Assigned',  icon: CheckCircle2},
 ];
+const POST_STAGES = [
+  { id: 'QC',        label: 'Quality Control', short: 'QC',       icon: ShieldCheck },
+  { id: 'DISPATCH',  label: 'Dispatched',      short: 'Dispatch', icon: Truck       },
+  { id: 'DELIVERED', label: 'Delivered',        short: 'Delivered',icon: CheckCircle2},
+];
+
+// Known manufacturing stage labels / icons — used as fallback for custom keys
+const PROCESS_META = {
+  MATERIAL: { label: 'Material Sourcing', short: 'Material', icon: Package   },
+  CASTING:  { label: 'Casting',           short: 'Casting',  icon: Zap       },
+  MACHINING:{ label: 'Machining',         short: 'Machining',icon: Hourglass },
+};
+
+function buildStages(selectedProcesses) {
+  const midStages = (selectedProcesses && selectedProcesses.length > 0 ? selectedProcesses : ['MATERIAL', 'MACHINING'])
+    .map(key => ({
+      id:    key,
+      label: PROCESS_META[key]?.label || key.charAt(0) + key.slice(1).toLowerCase().replace(/_/g, ' '),
+      short: PROCESS_META[key]?.short || key.slice(0, 8),
+      icon:  PROCESS_META[key]?.icon  || Cog,
+    }));
+  return [...PRE_STAGES, ...midStages, ...POST_STAGES];
+}
+
+// Kept for backwards-compatibility (compact usage without selectedProcesses)
+const ALL_STAGES = buildStages(['MATERIAL', 'CASTING', 'MACHINING']);
 
 const ACCENT = '#FF6B35';
 
-/* ── Compact: segmented bar used in tables ──────────────────── */
-function CompactTimeline({ currentIndex }) {
+/* ── Compact: segmented bar used in tables ──────────────────────────────────── */
+function CompactTimeline({ currentIndex, stageCount }) {
+  const count = stageCount || ALL_STAGES.length;
   return (
     <div className="flex items-center gap-0.5 w-full">
-      {ALL_STAGES.map((_, i) => {
+      {Array.from({ length: count }).map((_, i) => {
         const done    = i < currentIndex;
         const current = i === currentIndex;
         return (
@@ -42,7 +64,7 @@ function CompactTimeline({ currentIndex }) {
   );
 }
 
-/* ── Full pipeline ──────────────────────────────────────────── */
+/* ── Full pipeline ──────────────────────────────────────────────────────────── */
 export default function OrderTimeline({
   currentStatus = 'PENDING_ADMIN_SCRUB',
   createdAt,
@@ -50,9 +72,12 @@ export default function OrderTimeline({
   updates = [],
   compact = false,
   isWithdrawn = false,
+  selectedProcesses,   // array of status_key strings — e.g. ['CASTING', 'MACHINING']
 }) {
   const { isDark } = useTheme();
   const scrollRef = useRef(null);
+
+  const stages = buildStages(selectedProcesses);
 
   const t = isDark ? {
     card:        'rgba(255,255,255,0.04)',
@@ -110,9 +135,9 @@ export default function OrderTimeline({
     );
   }
 
-  const currentIndex = ALL_STAGES.findIndex(s => s.id === currentStatus);
+  const currentIndex = stages.findIndex(s => s.id === currentStatus);
 
-  if (compact) return <CompactTimeline currentIndex={currentIndex} />;
+  if (compact) return <CompactTimeline currentIndex={currentIndex} stageCount={stages.length} />;
 
   /* build update map */
   const updatesByStage = {};
@@ -121,7 +146,7 @@ export default function OrderTimeline({
     updatesByStage[u.stage].push(u);
   });
 
-  const pct = currentIndex < 0 ? 0 : Math.round(((currentIndex + 1) / ALL_STAGES.length) * 100);
+  const pct = currentIndex < 0 ? 0 : Math.round(((currentIndex + 1) / stages.length) * 100);
 
   /* scroll active node into view */
   useEffect(() => {
@@ -141,7 +166,7 @@ export default function OrderTimeline({
             <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ background: ACCENT }} />
           </span>
           <span className="text-xs font-bold uppercase tracking-widest" style={{ color: t.textMuted }}>
-            {currentIndex >= 0 ? ALL_STAGES[currentIndex].label : 'Processing'}
+            {currentIndex >= 0 ? stages[currentIndex].label : 'Processing'}
           </span>
         </div>
         <span className="text-xs font-bold tabular-nums" style={{ color: ACCENT }}>{pct}%</span>
@@ -161,10 +186,9 @@ export default function OrderTimeline({
       {/* ── Horizontal stage nodes (scrollable) ────────────── */}
       <div ref={scrollRef} className="overflow-x-auto pb-1 -mx-1 px-1">
         <div className="flex items-start gap-0 min-w-max">
-          {ALL_STAGES.map((stage, i) => {
+          {stages.map((stage, i) => {
             const done    = i < currentIndex;
             const current = i === currentIndex;
-            const future  = i > currentIndex;
             const Icon    = stage.icon;
 
             return (
@@ -201,7 +225,7 @@ export default function OrderTimeline({
                 </div>
 
                 {/* Connector */}
-                {i < ALL_STAGES.length - 1 && (
+                {i < stages.length - 1 && (
                   <div className="w-6 shrink-0 mb-5">
                     <div className="h-px" style={{ background: done ? `${ACCENT}60` : t.connectorFuture }} />
                   </div>
@@ -214,7 +238,7 @@ export default function OrderTimeline({
 
       {/* ── Stage detail rows ──────────────────────────────── */}
       <div className="space-y-2">
-        {ALL_STAGES.map((stage, i) => {
+        {stages.map((stage, i) => {
           const done    = i < currentIndex;
           const current = i === currentIndex;
           const future  = i > currentIndex;
@@ -331,4 +355,4 @@ export default function OrderTimeline({
   );
 }
 
-export { ALL_STAGES };
+export { ALL_STAGES, buildStages };

@@ -19,7 +19,15 @@ import DocumentPreview from '@/components/DocumentPreview';
 
 const ACCENT = '#FF6B35';
 
-// Full pipeline including AWARDED so index math works correctly
+// Build the per-order pipeline dynamically from selected_processes
+function buildPipeline(selectedProcesses) {
+  const mid = (selectedProcesses && selectedProcesses.length > 0)
+    ? selectedProcesses
+    : ['MATERIAL', 'MACHINING'];
+  return ['AWARDED', ...mid, 'QC', 'DISPATCH', 'DELIVERED'];
+}
+
+// Stage metadata for display (label, icon, hex colour)
 const STAGES = [
   { id: 'AWARDED',   label: 'Supplier Assigned', icon: CheckCircle2, hex: '#f59e0b' },
   { id: 'MATERIAL',  label: 'Material Sourcing',  icon: Package,      hex: '#0ea5e9' },
@@ -59,7 +67,7 @@ export default function SupplierOrderManager() {
         .from('orders')
         .select(`
           id, rz_job_id, part_name, material, order_status, client_id,
-          created_at, updated_at, ghost_public_name, quantity
+          created_at, updated_at, ghost_public_name, quantity, selected_processes
         `)
         .eq('supplier_id', currentUser.id)
         .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED'])
@@ -511,10 +519,12 @@ export default function SupplierOrderManager() {
           {orders.map(order => {
             const stage       = STAGES.find(s => s.id === order.order_status);
             const stageColor  = stage?.hex || ACCENT;
-            const isExpanded  = expandedOrder === order.id;
-            const currentIdx  = STAGES.findIndex(s => s.id === order.order_status);
-            const nextStage   = STAGES[currentIdx + 1];
-            const isDelivered = order.order_status === 'DELIVERED';
+            const isExpanded   = expandedOrder === order.id;
+            const pipeline     = buildPipeline(order.selected_processes);
+            const currentIdx   = pipeline.indexOf(order.order_status);
+            const nextStageId  = currentIdx >= 0 && currentIdx < pipeline.length - 1 ? pipeline[currentIdx + 1] : null;
+            const nextStage    = nextStageId ? (STAGES.find(s => s.id === nextStageId) || { id: nextStageId, label: nextStageId, icon: Package, hex: ACCENT }) : null;
+            const isDelivered  = order.order_status === 'DELIVERED';
 
             return (
               <div key={order.id} className="rounded-2xl overflow-hidden transition-all duration-200"
@@ -611,6 +621,7 @@ export default function SupplierOrderManager() {
                         createdAt={order.created_at}
                         updatedAt={order.updated_at}
                         updates={order.rz_job_id ? (jobUpdates[order.rz_job_id] || []) : []}
+                        selectedProcesses={order.selected_processes}
                         compact={true}
                       />
                     </div>

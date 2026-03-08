@@ -16,6 +16,7 @@ import {
   Moon,
   ChevronRight,
   Truck,
+  Cog,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -25,8 +26,9 @@ import SearchBar from './SearchBar';
 
 const NAV_ITEMS = [
   { path: '/control-centre',                    label: 'Dashboard',         icon: LayoutDashboard, exact: true },
-  { path: '/control-centre/sanitisation-gate',  label: 'Sanitisation Gate', icon: ShieldCheck },
-  { path: '/control-centre/live-tracking',      label: 'Live Tracking',     icon: Radio },
+  { path: '/control-centre/sanitisation-gate',         label: 'Sanitisation Gate', icon: ShieldCheck },
+  { path: '/control-centre/manufacturing-processes',   label: 'Processes',         icon: Cog },
+  { path: '/control-centre/live-tracking',             label: 'Live Tracking',     icon: Radio },
   { path: '/control-centre/supplier-pool',      label: 'Assign to Supplier',icon: Network },
   { path: '/control-centre/shipments',           label: 'Shipments',         icon: Truck },
   { path: '/control-centre/document-review',    label: 'Document Review',   icon: FolderOpen },

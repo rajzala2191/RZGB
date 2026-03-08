@@ -278,6 +278,7 @@ export default function LiveOrderTracking() {
             updatedAt={order.updated_at}
             updates={updates}
             isWithdrawn={isWithdrawn}
+            selectedProcesses={order.selected_processes}
           />
         </motion.div>
 
