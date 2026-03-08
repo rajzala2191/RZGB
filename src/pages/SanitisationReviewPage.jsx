@@ -50,8 +50,9 @@ export default function SanitisationReviewPage() {
   const [order, setOrder] = useState(null);
   const [clientProfile, setClientProfile] = useState(null);
   const [documents, setDocuments] = useState([]);
-  const [scrubStatus, setScrubStatus] = useState({});   // docId → 'idle'|'scrubbing'|'scrubbed'|'error'
-  const [docViewMode, setDocViewMode] = useState({});   // docId → 'original'|'scrubbed'
+  const [scrubStatus, setScrubStatus] = useState({});      // docId → 'idle'|'scrubbing'|'scrubbed'|'error'
+  const [docViewMode, setDocViewMode] = useState({});      // docId → 'original'|'scrubbed'
+  const [redactionReports, setRedactionReports] = useState({}); // docId → string
   const [scrubbingAll, setScrubbingAll] = useState(false);
   const [formData, setFormData] = useState({ public_name: '', description: '', markup_pct: 20 });
   const [checks, setChecks] = useState({
@@ -178,7 +179,7 @@ export default function SanitisationReviewPage() {
         address:        clientProfile?.address        || '',
       };
 
-      const scrubbedBlob = await scrubDrawingWithAI(fileData, clientInfo);
+      const { blob: scrubbedBlob, report: redactionReport } = await scrubDrawingWithAI(fileData, clientInfo);
 
       const scrubbedPath = doc.file_path.replace(/(\.[^.]+)$/, '_scrubbed$1');
       const { error: upErr } = await supabaseAdmin.storage
@@ -187,8 +188,12 @@ export default function SanitisationReviewPage() {
 
       await supabaseAdmin.from('documents').update({
         status: 'SCRUBBED', is_sanitised: true,
-        redaction_notes: `Scrubbed via AI — path: ${scrubbedPath}`,
+        redaction_notes: redactionReport || `Scrubbed via AI — path: ${scrubbedPath}`,
       }).eq('id', doc.id);
+
+      if (redactionReport) {
+        setRedactionReports(r => ({ ...r, [doc.id]: redactionReport }));
+      }
 
       setScrubStatus(s => ({ ...s, [doc.id]: 'scrubbed' }));
       setDocViewMode(v => ({ ...v, [doc.id]: 'scrubbed' }));
@@ -557,12 +562,30 @@ export default function SanitisationReviewPage() {
                           <DocumentPreview filePath={filePath} fileName={doc.file_name} compact />
                         )}
                         {isScrubbed && (
-                          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6,
-                            fontSize: 11, color: '#22c55e', fontWeight: 600 }}>
-                            <CheckCircle2 size={12} />
-                            {viewMode === 'scrubbed'
-                              ? 'Viewing scrubbed version — client identity removed'
-                              : 'Viewing original — switch to "After" to see scrubbed version'}
+                          <div style={{ marginTop: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6,
+                              fontSize: 11, color: '#22c55e', fontWeight: 600, marginBottom: redactionReports[doc.id] ? 8 : 0 }}>
+                              <CheckCircle2 size={12} />
+                              {viewMode === 'scrubbed'
+                                ? 'Viewing scrubbed version — client identity removed'
+                                : 'Viewing original — switch to "After" to see scrubbed version'}
+                            </div>
+                            {redactionReports[doc.id] && (
+                              <div style={{
+                                background: t.infoBg, border: `1px solid ${t.infoBorder}`,
+                                borderRadius: 8, padding: '10px 12px',
+                              }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 5,
+                                  fontSize: 10, fontWeight: 700, color: ACCENT,
+                                  textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+                                  <Info size={11} /> Claude Redaction Analysis
+                                </div>
+                                <pre style={{
+                                  margin: 0, fontSize: 11, color: t.sec,
+                                  whiteSpace: 'pre-wrap', lineHeight: 1.6, fontFamily: 'inherit',
+                                }}>{redactionReports[doc.id]}</pre>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
