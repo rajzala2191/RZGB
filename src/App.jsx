@@ -12,6 +12,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import RootRedirect from '@/pages/RootRedirect';
 import LoginPage from '@/pages/LoginPage';
 import ResetPasswordPage from '@/pages/ResetPasswordPage';
+import SetPasswordPage from '@/pages/SetPasswordPage';
 
 // Admin Pages
 import ControlCentrePage from '@/pages/ControlCentrePage';
@@ -80,6 +81,7 @@ function App() {
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/set-password" element={<SetPasswordPage />} />
                 
                 {/* --- ADMIN ROUTES --- */}
                 <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />
