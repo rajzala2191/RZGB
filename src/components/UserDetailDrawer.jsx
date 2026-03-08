@@ -66,9 +66,15 @@ const UserDetailDrawer = ({ user, orderCount, onClose, onUpdated, onDeleted }) =
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const { error } = await supabase.from('profiles').delete().eq('id', user.id);
-      if (error) throw error;
-      toast({ title: 'User deleted' });
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { user_id: user.id }
+      });
+      if (error) {
+        const body = await error.context?.json?.().catch(() => null);
+        throw new Error(body?.error || error.message);
+      }
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'User deleted', description: 'User fully removed from the system.' });
       onDeleted(user.id);
       onClose();
     } catch (err) {

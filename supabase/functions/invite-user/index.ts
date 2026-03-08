@@ -18,10 +18,11 @@ Deno.serve(async (req)=>{
       throw new Error('Email and role are required');
     }
 
-    // Check if user already exists
-    const { data: existingUsers } = await supabaseAdmin.from('profiles').select('id').eq('email', email);
-    if (existingUsers && existingUsers.length > 0) {
-      throw new Error('User with this email already exists');
+    // Check if user already exists in auth.users (source of truth)
+    const { data: { users: existingAuthUsers } } = await supabaseAdmin.auth.admin.listUsers();
+    const alreadyExists = existingAuthUsers?.some(u => u.email === email);
+    if (alreadyExists) {
+      throw new Error('A user with this email already exists');
     }
 
     // Invite user (creates user in auth.users and sends invite email)

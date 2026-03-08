@@ -315,6 +315,14 @@ const LoginPage = () => {
   const [error, setError] = useState(location.state?.error || '');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
+  // If Supabase redirected an invite link to this page (redirectTo not whitelisted),
+  // forward to /create-password preserving the hash so the session can be processed.
+  useEffect(() => {
+    if (window.location.hash.includes('type=invite')) {
+      navigate('/create-password' + window.location.hash, { replace: true });
+    }
+  }, [navigate]);
+
   useEffect(() => {
     // Don't redirect while the forgot-password modal is open — OTP verification
     // establishes a session mid-flow and we need to stay on the password step.
