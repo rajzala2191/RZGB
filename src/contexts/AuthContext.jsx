@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [userRole, setUserRole] = useState(null);
   const [userCompanyName, setUserCompanyName] = useState(null);
   const [userLogoUrl, setUserLogoUrl] = useState(null);
+  const [isDemo, setIsDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   
   const { toast } = useToast();
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role, company_name, status')
+        .select('role, company_name, status, is_demo')
         .eq('id', userId)
         .maybeSingle();
 
@@ -46,6 +47,7 @@ export const AuthProvider = ({ children }) => {
       if (data) {
         setUserRole(data.role);
         setUserCompanyName(data.company_name);
+        setIsDemo(data.is_demo || false);
       } else {
         // Fallback if profile doesn't exist yet (though handle_new_user trigger should create it)
         setUserRole('client');
@@ -156,6 +158,7 @@ export const AuthProvider = ({ children }) => {
       setUserRole(null);
       setUserCompanyName(null);
       setUserLogoUrl(null);
+      setIsDemo(false);
     } catch (error) {
       console.error('AuthContext: Error logging out:', error.message);
     }
@@ -166,6 +169,7 @@ export const AuthProvider = ({ children }) => {
     userRole,
     userCompanyName,
     userLogoUrl,
+    isDemo,
     loading,
     login,
     logout,
