@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Building2, Shield, Factory, ArrowRight, FlaskConical, CheckCircle2, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/customSupabaseClient';
 
 const PORTALS = [
   {
@@ -13,8 +12,7 @@ const PORTALS = [
     color: '#FF6B35',
     border: 'border-orange-200 hover:border-orange-400',
     badge: 'bg-orange-100 text-orange-700',
-    email: 'demo.client@rzglobalsolutions.co.uk',
-    dash: '/client-dashboard',
+    dash: '/demo/client/create-order',
     description: 'Submit manufacturing orders, track progress across all stages, and manage your supplier relationships.',
     perks: ['Create orders with drawings & specs', 'Real-time order tracking', 'Document vault & sign-off', 'Supplier bid visibility'],
     account: 'James Thornton · Thornton Precision Ltd',
@@ -27,8 +25,7 @@ const PORTALS = [
     color: '#3b82f6',
     border: 'border-blue-200 hover:border-blue-400',
     badge: 'bg-blue-100 text-blue-700',
-    email: 'demo.admin@rzglobalsolutions.co.uk',
-    dash: '/control-centre',
+    dash: '/demo/admin/pipeline',
     description: 'Manage the full order lifecycle — sanitise drawings, oversee bidding, and monitor production across all clients.',
     perks: ['AI drawing sanitisation queue', 'Full pipeline board (11 stages)', 'Bid management & award', 'All users & analytics'],
     account: 'Alex Morgan · RZ Global Solutions',
@@ -41,15 +38,12 @@ const PORTALS = [
     color: '#8b5cf6',
     border: 'border-violet-200 hover:border-violet-400',
     badge: 'bg-violet-100 text-violet-700',
-    email: 'demo.supplier@rzglobalsolutions.co.uk',
-    dash: '/supplier-hub',
+    dash: '/demo/supplier',
     description: 'Discover and bid on manufacturing jobs, manage your production milestones, and grow your order book.',
     perks: ['Browse sanitised job listings', 'Submit competitive bids', 'Production milestone tracking', 'Document upload & QC'],
     account: 'FoundryTech UK · Rating 4.8★',
   },
 ];
-
-const DEMO_PASSWORD = 'RZDemo2024!';
 
 const container = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
 const card = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } } };
@@ -58,7 +52,6 @@ export default function DemoEntryPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(null);
-  const [error, setError] = useState(null);
 
   // Auto-enter if ?role=client|admin|supplier is in the URL
   useEffect(() => {
@@ -68,19 +61,14 @@ export default function DemoEntryPage() {
     if (portal) handleEnter(portal);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handleEnter(portal) {
+  function handleEnter(portal) {
     setLoading(portal.key);
-    setError(null);
-    const { error: authErr } = await supabase.auth.signInWithPassword({
-      email: portal.email,
-      password: DEMO_PASSWORD,
-    });
-    if (authErr) {
-      setError('Demo accounts not yet set up. Ask the portal admin to run the seed script.');
-      setLoading(null);
-      return;
-    }
-    localStorage.setItem('rzgb-demo-session', JSON.stringify({ isDemo: true, role: portal.key }));
+    localStorage.setItem('rzgb-demo-session', JSON.stringify({
+      sessionId: Math.random().toString(36).slice(2),
+      createdAt: new Date().toISOString(),
+      orderCreated: false,
+      lastRole: portal.key,
+    }));
     navigate(portal.dash);
   }
 
@@ -95,9 +83,6 @@ export default function DemoEntryPage() {
         <p className="text-lg text-slate-500 max-w-lg mx-auto">
           One click to enter — no account or password needed. All data is pre-loaded with realistic UK manufacturing scenarios.
         </p>
-        {error && (
-          <p className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2 inline-block">{error}</p>
-        )}
       </motion.div>
 
       <motion.div variants={container} initial="hidden" animate="visible" className="grid md:grid-cols-3 gap-5 w-full max-w-5xl">
@@ -131,7 +116,7 @@ export default function DemoEntryPage() {
               style={{ background: portal.color }}
             >
               {loading === portal.key
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</>
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading…</>
                 : <>Enter {portal.label} <ArrowRight className="w-4 h-4" /></>
               }
             </button>
