@@ -101,7 +101,7 @@ const ROLES = {
       { title: 'Real-Time Tracking', body: 'Follow your job through every production stage with live status updates.' },
       { title: 'Receive & Sign Off', body: 'Get notified on dispatch. Review quality certificates and sign off on delivery.' },
     ],
-    path: '/demo/client',
+    path: '/demo?role=client',
   },
   admin: {
     label: 'Control Centre',
@@ -113,7 +113,7 @@ const ROLES = {
       { title: 'Manage Bidding', body: 'Review supplier bids, compare pricing and lead times, and award jobs with one click.' },
       { title: 'Monitor Production', body: 'Real-time pipeline board gives a live view of all active jobs across every stage.' },
     ],
-    path: '/demo/admin',
+    path: '/demo?role=admin',
   },
   supplier: {
     label: 'Supplier Hub',
@@ -125,7 +125,7 @@ const ROLES = {
       { title: 'Submit Bids', body: 'Provide competitive pricing and lead times. Bids are reviewed by the RZ admin team.' },
       { title: 'Track Production', body: 'Update job milestones, upload quality documents, and manage your production pipeline.' },
     ],
-    path: '/demo/supplier',
+    path: '/demo?role=supplier',
   },
 };
 
@@ -309,13 +309,13 @@ function HeroSection() {
         {/* CTA row */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <Link to="/demo/client" className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35 hover:-translate-y-0.5">
+            <Link to="/demo?role=client" className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35 hover:-translate-y-0.5">
               <Building2 className="w-4 h-4" /> Try as Client
             </Link>
-            <Link to="/demo/admin" className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 hover:-translate-y-0.5">
+            <Link to="/demo?role=admin" className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 hover:-translate-y-0.5">
               <Shield className="w-4 h-4" /> Try as Admin
             </Link>
-            <Link to="/demo/supplier" className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/35 hover:-translate-y-0.5">
+            <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/35 hover:-translate-y-0.5">
               <Factory className="w-4 h-4" /> Try as Supplier
             </Link>
           </div>
@@ -676,13 +676,13 @@ function CTASection() {
             Try the live demo instantly — no account required. Explore all three portals with real sample data.
           </p>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4">
-            <Link to="/demo/client" className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500 active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:-translate-y-0.5">
+            <Link to="/demo?role=client" className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500 active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:-translate-y-0.5">
               <Building2 className="w-4 h-4" /> Enter as Client
             </Link>
-            <Link to="/demo/admin" className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
+            <Link to="/demo?role=admin" className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
               <Shield className="w-4 h-4" /> Enter as Admin
             </Link>
-            <Link to="/demo/supplier" className="flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-400 active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-violet-500/20 hover:shadow-xl hover:shadow-violet-500/30 hover:-translate-y-0.5">
+            <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-400 active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-violet-500/20 hover:shadow-xl hover:shadow-violet-500/30 hover:-translate-y-0.5">
               <Factory className="w-4 h-4" /> Enter as Supplier
             </Link>
           </div>

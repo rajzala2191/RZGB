@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Building2, Shield, Factory, ArrowRight, FlaskConical, CheckCircle2, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
@@ -56,8 +56,17 @@ const card = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, trans
 
 export default function DemoEntryPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(null);
   const [error, setError] = useState(null);
+
+  // Auto-enter if ?role=client|admin|supplier is in the URL
+  useEffect(() => {
+    const role = searchParams.get('role');
+    if (!role) return;
+    const portal = PORTALS.find((p) => p.key === role);
+    if (portal) handleEnter(portal);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleEnter(portal) {
     setLoading(portal.key);
