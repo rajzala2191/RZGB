@@ -123,9 +123,9 @@ const ForgotPasswordModal = ({ onClose }) => {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.25 }}
-        className="w-full max-w-md bg-[#111111] rounded-xl shadow-2xl border border-gray-800 p-8 relative"
+        className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-slate-200 p-8 relative"
       >
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors">
           <X className="w-5 h-5" />
         </button>
 
@@ -137,20 +137,20 @@ const ForgotPasswordModal = ({ onClose }) => {
         {step === 'email' && (
           <form onSubmit={handleSendOtp} className="space-y-5">
             <div>
-              <h2 className="text-xl font-bold text-white mb-1">Forgot your password?</h2>
-              <p className="text-sm text-gray-400">Enter your registered email and we'll send you an 8-digit code.</p>
+              <h2 className="text-xl font-bold text-slate-900 mb-1">Forgot your password?</h2>
+              <p className="text-sm text-slate-500">Enter your registered email and we'll send you an 8-digit code.</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
               <div className="relative group">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoFocus
-                  className="w-full pl-11 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all"
                   placeholder="name@company.com"
                 />
               </div>
@@ -170,11 +170,11 @@ const ForgotPasswordModal = ({ onClose }) => {
         {step === 'otp' && (
           <form onSubmit={handleVerifyOtp} className="space-y-5">
             <div>
-              <button type="button" onClick={() => { setStep('email'); setError(''); setOtp(['','','','','','','','']); }} className="flex items-center gap-1 text-sm text-gray-400 hover:text-orange-400 transition-colors mb-3">
+              <button type="button" onClick={() => { setStep('email'); setError(''); setOtp(['','','','','','','','']); }} className="flex items-center gap-1 text-sm text-slate-500 hover:text-orange-400 transition-colors mb-3">
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
-              <h2 className="text-xl font-bold text-white mb-1">Enter verification code</h2>
-              <p className="text-sm text-gray-400">
+              <h2 className="text-xl font-bold text-slate-900 mb-1">Enter verification code</h2>
+              <p className="text-sm text-slate-500">
                 We sent an 8-digit code to <span className="text-orange-400 font-medium">{email}</span>. It expires in 1 hour.
               </p>
             </div>
@@ -189,7 +189,7 @@ const ForgotPasswordModal = ({ onClose }) => {
                   value={digit}
                   onChange={(e) => handleOtpChange(i, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                  className="w-full aspect-square text-center text-xl font-bold bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  className="w-full aspect-square text-center text-xl font-bold bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all"
                 />
               ))}
             </div>
@@ -203,7 +203,7 @@ const ForgotPasswordModal = ({ onClose }) => {
             </button>
             <div className="text-center">
               {resendCooldown > 0 ? (
-                <span className="text-xs text-gray-500">Resend available in {resendCooldown}s</span>
+                <span className="text-xs text-slate-400">Resend available in {resendCooldown}s</span>
               ) : (
                 <button type="button" onClick={handleSendOtp} className="text-xs text-orange-400 hover:text-orange-300 transition-colors">
                   Didn't receive it? Resend code
@@ -217,37 +217,37 @@ const ForgotPasswordModal = ({ onClose }) => {
         {step === 'password' && (
           <form onSubmit={handleSetPassword} className="space-y-5">
             <div>
-              <h2 className="text-xl font-bold text-white mb-1">Set new password</h2>
-              <p className="text-sm text-gray-400">Choose a strong password for your account.</p>
+              <h2 className="text-xl font-bold text-slate-900 mb-1">Set new password</h2>
+              <p className="text-sm text-slate-500">Choose a strong password for your account.</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">New Password</label>
               <div className="relative group">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                   autoFocus
-                  className="w-full pl-11 pr-11 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  className="w-full pl-11 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all"
                   placeholder="Minimum 8 characters"
                 />
-                <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Confirm Password</label>
               <div className="relative group">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full pl-11 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all"
                   placeholder="Re-enter password"
                 />
               </div>
@@ -271,8 +271,8 @@ const ForgotPasswordModal = ({ onClose }) => {
                 <CheckCircle2 className="w-8 h-8 text-green-400" />
               </div>
             </div>
-            <h2 className="text-xl font-bold text-white">Password updated!</h2>
-            <p className="text-sm text-gray-400">Your password has been changed. You can now sign in with your new password.</p>
+            <h2 className="text-xl font-bold text-slate-900">Password updated!</h2>
+            <p className="text-sm text-slate-500">Your password has been changed. You can now sign in with your new password.</p>
             <button
               onClick={onClose}
               className="w-full bg-gradient-to-r from-[#FF6B35] to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:from-orange-500 hover:to-orange-800 transition-all mt-2"
@@ -370,10 +370,10 @@ const LoginPage = () => {
         <meta name="description" content="Access your RZ Global Solutions account." />
       </Helmet>
 
-      <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      <div className="min-h-screen bg-[#f8f8fb] flex items-center justify-center px-4 py-12 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-600/10 rounded-full blur-[100px]" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 rounded-full blur-[100px]" />
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-400/10 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/10 rounded-full blur-[100px]" />
         </div>
 
         <motion.div
@@ -388,48 +388,48 @@ const LoginPage = () => {
               alt="RZ Global Solutions Logo"
               className="h-20 mx-auto mb-6 object-contain"
             />
-            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">RZ Global Solutions</h1>
-            <p className="text-gray-400">Secure access portal for clients & suppliers</p>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">RZ Global Solutions</h1>
+            <p className="text-slate-500">Secure access portal for clients & suppliers</p>
           </div>
 
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="bg-[#111111] rounded-xl shadow-2xl p-8 border border-gray-800 backdrop-blur-sm"
+            className="bg-white rounded-xl shadow-lg p-8 border border-slate-200"
           >
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                   Email Address
                 </label>
                 <div className="relative group">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
                   <input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full pl-11 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all"
                     placeholder="name@company.com"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
                   Password
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
                   <input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full pl-11 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all"
                     placeholder="••••••••"
                   />
                 </div>
@@ -470,7 +470,7 @@ const LoginPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-xs text-gray-500 hover:text-[#FF6B35] transition-colors"
+                  className="text-xs text-slate-400 hover:text-orange-500 transition-colors"
                 >
                   Forgot your password?
                 </button>
@@ -478,7 +478,7 @@ const LoginPage = () => {
             </form>
           </motion.div>
 
-          <p className="text-center text-gray-600 text-xs mt-8">
+          <p className="text-center text-slate-400 text-xs mt-8">
             &copy; {new Date().getFullYear()} RZ Global Solutions. All rights reserved.
           </p>
         </motion.div>

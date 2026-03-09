@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/customSupabaseClient';
+import { useAuth } from '@/contexts/AuthContext';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import UserCard from '@/components/UserCard';
 import UserDetailDrawer from '@/components/UserDetailDrawer';
@@ -22,19 +23,28 @@ const StatCard = ({ icon: Icon, label, value, color }) => (
   <motion.div
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-[#0f172a] border border-slate-800 rounded-xl p-4 flex items-center gap-4"
+    className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4 shadow-sm"
   >
     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
       <Icon size={18} />
     </div>
     <div>
-      <p className="text-2xl font-bold text-slate-100">{value}</p>
+      <p className="text-2xl font-bold text-slate-900">{value}</p>
       <p className="text-xs text-slate-500">{label}</p>
     </div>
   </motion.div>
 );
 
+const DEMO_EMAILS = [
+  'demo.client@rzglobalsolutions.co.uk',
+  'demo.admin@rzglobalsolutions.co.uk',
+  'demo.supplier@rzglobalsolutions.co.uk',
+];
+const DEMO_ADMIN_EMAIL = 'demo.admin@rzglobalsolutions.co.uk';
+
 const UserManagementPage = () => {
+  const { user: currentUser } = useAuth();
+  const isDemoAdmin = currentUser?.email === DEMO_ADMIN_EMAIL;
   const [users, setUsers]               = useState([]);
   const [orderCounts, setOrderCounts]   = useState({});
   const [loading, setLoading]           = useState(true);
@@ -50,7 +60,8 @@ const UserManagementPage = () => {
         .select('id, email, company_name, role, status, created_at, logo_url')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      setUsers(data || []);
+      const all = data || [];
+      setUsers(isDemoAdmin ? all.filter(u => DEMO_EMAILS.includes(u.email)) : all);
     } catch (err) {
       console.error('Error fetching users:', err);
     } finally {
@@ -130,7 +141,7 @@ const UserManagementPage = () => {
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
               <Users size={24} className="text-orange-400" />
               User Management
             </h1>
@@ -147,28 +158,28 @@ const UserManagementPage = () => {
 
         {/* Stats row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard icon={Users}     label="Total Users"  value={stats.total}   color="bg-slate-700/60 text-slate-300" />
-          <StatCard icon={UserCheck} label="Active"       value={stats.active}  color="bg-emerald-500/10 text-emerald-400" />
-          <StatCard icon={Clock}     label="Pending"      value={stats.pending} color="bg-yellow-500/10 text-yellow-400" />
-          <StatCard icon={Shield}    label="Admins"       value={stats.admins}  color="bg-orange-500/10 text-orange-400" />
+          <StatCard icon={Users}     label="Total Users"  value={stats.total}   color="bg-slate-100 text-slate-600" />
+          <StatCard icon={UserCheck} label="Active"       value={stats.active}  color="bg-emerald-50 text-emerald-600" />
+          <StatCard icon={Clock}     label="Pending"      value={stats.pending} color="bg-amber-50 text-amber-600" />
+          <StatCard icon={Shield}    label="Admins"       value={stats.admins}  color="bg-orange-50 text-orange-600" />
         </div>
 
         {/* Search + filter bar */}
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Search */}
           <div className="relative flex-1">
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search by email or company..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-[#0f172a] border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all"
+              className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-all shadow-sm"
             />
           </div>
 
           {/* Role filter pills */}
-          <div className="flex items-center gap-1.5 bg-[#0f172a] border border-slate-800 rounded-xl p-1">
+          <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
             {FILTER_TABS.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -177,7 +188,7 @@ const UserManagementPage = () => {
                   flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
                   ${roleFilter === key
                     ? 'bg-orange-600 text-white shadow'
-                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/60'}
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'}
                 `}
               >
                 <Icon size={12} />

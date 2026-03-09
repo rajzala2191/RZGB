@@ -12,8 +12,6 @@ import {
   Radio,
   LifeBuoy,
   Users,
-  Sun,
-  Moon,
   ChevronRight,
   Truck,
   Cog,
@@ -41,10 +39,11 @@ const ACCENT_GLOW = 'rgba(255,107,53,0.18)';
 
 const ControlCentreLayout = ({ children }) => {
   const { currentUser, userCompanyName, userLogoUrl, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const isDemo = !!localStorage.getItem('rzgb-demo-session');
 
   const handleLogout = async () => {
     if (currentUser) await logout();
@@ -97,8 +96,8 @@ const ControlCentreLayout = ({ children }) => {
   return (
     <ErrorBoundary>
       <div
-        className="flex h-screen overflow-hidden font-sans"
-        style={{ background: isDark ? '#09090b' : '#f0f0f2' }}
+        className="flex overflow-hidden font-sans"
+        style={{ background: isDark ? '#09090b' : '#f0f0f2', height: isDemo ? 'calc(100vh - 48px)' : '100vh', marginTop: isDemo ? '48px' : '0' }}
       >
 
         {/* Mobile overlay */}
@@ -241,29 +240,20 @@ const ControlCentreLayout = ({ children }) => {
               </div>
             </div>
 
-            <div className="flex gap-1.5">
-              <button
-                onClick={toggleTheme}
-                title={isDark ? 'Light mode' : 'Dark mode'}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all duration-150"
-                style={{ background: sb.btnBg, color: sb.btnColor, border: `1px solid ${sb.btnBorder}` }}
-                onMouseEnter={e => { e.currentTarget.style.color = sb.btnHoverColor; e.currentTarget.style.background = sb.btnHoverBg; }}
-                onMouseLeave={e => { e.currentTarget.style.color = sb.btnColor; e.currentTarget.style.background = sb.btnBg; }}
-              >
-                {isDark ? <Sun size={13} /> : <Moon size={13} />}
-                <span>{isDark ? 'Light' : 'Dark'}</span>
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all duration-150"
-                style={{ background: sb.btnBg, color: sb.btnColor, border: `1px solid ${sb.btnBorder}` }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.18)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = sb.btnColor; e.currentTarget.style.background = sb.btnBg; e.currentTarget.style.borderColor = sb.btnBorder; }}
-              >
-                <LogOut size={13} />
-                <span>Sign out</span>
-              </button>
-            </div>
+            {!isDemo && (
+              <div className="flex gap-1.5">
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all duration-150"
+                  style={{ background: sb.btnBg, color: sb.btnColor, border: `1px solid ${sb.btnBorder}` }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.18)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = sb.btnColor; e.currentTarget.style.background = sb.btnBg; e.currentTarget.style.borderColor = sb.btnBorder; }}
+                >
+                  <LogOut size={13} />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            )}
           </div>
         </aside>
 

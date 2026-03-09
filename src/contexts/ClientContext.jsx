@@ -3,6 +3,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 
 const ClientContext = createContext();
+export { ClientContext };
 
 export const ClientProvider = ({ children }) => {
   const { currentUser, userRole } = useAuth();

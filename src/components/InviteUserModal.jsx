@@ -135,7 +135,7 @@ const InviteUserModal = ({ onClose, onSuccess }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-orange-900/20"
+              className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 active:scale-[0.98] disabled:opacity-50 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/30"
             >
               {loading ? (
                 <><Loader2 size={15} className="animate-spin" /> Sending...</>

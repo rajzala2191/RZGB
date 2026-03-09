@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route, Routes, BrowserRouter as Router, Navigate } from 'react-router-dom';
+import { Route, Routes, BrowserRouter as Router, Outlet } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AdminProvider } from '@/contexts/AdminContext';
 import { SupplierProvider } from '@/contexts/SupplierContext';
@@ -9,8 +9,21 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import DemoBanner from '@/components/DemoBanner';
 import RootRedirect from '@/pages/RootRedirect';
 import LoginPage from '@/pages/LoginPage';
+
+// Landing & Demo
+import LandingPage from '@/pages/LandingPage';
+import DemoEntryPage from '@/pages/demo/DemoEntryPage';
+import { DemoProvider } from '@/contexts/DemoContext';
+import DemoClientCreateOrder from '@/pages/demo/client/DemoClientCreateOrder';
+import DemoClientOrderDetail from '@/pages/demo/client/DemoClientOrderDetail';
+import DemoAdminPipeline from '@/pages/demo/admin/DemoAdminPipeline';
+import DemoSupplierDashboard from '@/pages/demo/supplier/DemoSupplierDashboard';
+import DemoSupplierJobs from '@/pages/demo/supplier/DemoSupplierJobs';
+import DemoSupplierJobDetail from '@/pages/demo/supplier/DemoSupplierJobDetail';
+
 import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import SetPasswordPage from '@/pages/SetPasswordPage';
 import CreatePasswordPage from '@/pages/CreatePasswordPage';
@@ -38,7 +51,6 @@ import AdminLiveTracking from '@/pages/AdminLiveTracking';
 import AdminOrderPreviewPage from '@/pages/AdminOrderPreviewPage';
 import ManufacturingProcessesPage from '@/pages/ManufacturingProcessesPage';
 
-
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
 import NCRVisibilityPage from '@/pages/NCRVisibilityPage';
@@ -54,7 +66,6 @@ import LiveOrderTracking from '@/pages/LiveOrderTracking';
 import SupplierDashboard from '@/pages/SupplierDashboard';
 import JobDetailsPage from '@/pages/JobDetailsPage';
 import NCRReportingPage from '@/pages/NCRReportingPage';
-
 import SupplierDocumentsPortal from '@/pages/SupplierDocumentsPortal';
 import SupplierOrderManager from '@/pages/SupplierOrderManager';
 import SupplierSupportPage from '@/pages/SupplierSupportPage';
@@ -77,73 +88,86 @@ function App() {
             <AdminProvider>
               <SupplierProvider>
                 <ClientProvider>
-                <ScrollToTop />
-                <Routes>
-                {/* Root & Auth */}
-                <Route path="/" element={<RootRedirect />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/set-password" element={<SetPasswordPage />} />
-                <Route path="/create-password" element={<CreatePasswordPage />} />
-                
-                {/* --- ADMIN ROUTES --- */}
-                <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />
-                <Route path="/control-centre/intake-gate" element={<ProtectedRoute requiredRole="admin"><IntakeGatePage /></ProtectedRoute>} />
-                <Route path="/control-centre/sanitisation-gate" element={<ProtectedRoute requiredRole="admin"><SanitisationGatePage /></ProtectedRoute>} />
-                <Route path="/control-centre/sanitisation-gate/review/:orderId" element={<ProtectedRoute requiredRole="admin"><SanitisationReviewPage /></ProtectedRoute>} />
-                <Route path="/control-centre/document-review" element={<ProtectedRoute requiredRole="admin"><AdminDocumentReview /></ProtectedRoute>} />
-                <Route path="/control-centre/live-tracking" element={<ProtectedRoute requiredRole="admin"><AdminLiveTracking /></ProtectedRoute>} />
+                  <ScrollToTop />
+                  {/* DemoBanner sits outside Routes so it shows on all production pages */}
+                  <DemoBanner />
+                  <Routes>
+                    {/* Root & Auth */}
+                    <Route path="/" element={<RootRedirect />} />
+                    <Route path="/landing" element={<LandingPage />} />
+                    <Route path="/login" element={<LoginPage />} />
 
-                <Route path="/control-centre/supplier-pool" element={<ProtectedRoute requiredRole="admin"><SupplierPoolPage /></ProtectedRoute>} />
-                <Route path="/control-centre/linkage" element={<ProtectedRoute requiredRole="admin"><LinkageDashboard /></ProtectedRoute>} />
-                <Route path="/control-centre/sanitisation" element={<ProtectedRoute requiredRole="admin"><SanitisationEngine /></ProtectedRoute>} />
-                <Route path="/control-centre/audit-vault" element={<ProtectedRoute requiredRole="admin"><AuditVault /></ProtectedRoute>} />
-                <Route path="/control-centre/users" element={<ProtectedRoute requiredRole="admin"><UserManagementPage /></ProtectedRoute>} />
-                <Route path="/control-centre/analytics" element={<ProtectedRoute requiredRole="admin"><SystemAnalyticsPage /></ProtectedRoute>} />
-                <Route path="/control-centre/logs" element={<ProtectedRoute requiredRole="admin"><ActivityLogsPage /></ProtectedRoute>} />
-                <Route path="/control-centre/settings" element={<ProtectedRoute requiredRole="admin"><SettingsPage /></ProtectedRoute>} />
-                <Route path="/control-centre/communications" element={<ProtectedRoute requiredRole="admin"><CommunicationsPage /></ProtectedRoute>} />
-                <Route path="/control-centre/reports" element={<ProtectedRoute requiredRole="admin"><ReportsPage /></ProtectedRoute>} />
-                <Route path="/control-centre/ncr-management" element={<ProtectedRoute requiredRole="admin"><NCRManagementPage /></ProtectedRoute>} />
-                <Route path="/control-centre/supplier-management" element={<ProtectedRoute requiredRole="admin"><SupplierManagementPage /></ProtectedRoute>} />
-                <Route path="/control-centre/shipments" element={<ProtectedRoute requiredRole="admin"><AdminShipmentsPage /></ProtectedRoute>} />
-                <Route path="/control-centre/manufacturing-processes" element={<ProtectedRoute requiredRole="admin"><ManufacturingProcessesPage /></ProtectedRoute>} />
-                <Route path="/control-centre/order-preview/:orderId" element={<ProtectedRoute requiredRole="admin"><AdminOrderPreviewPage /></ProtectedRoute>} />
+                    {/* Demo routes — wrapped in DemoProvider for in-memory context */}
+                    <Route path="/demo" element={<DemoProvider><Outlet /></DemoProvider>}>
+                      <Route index element={<DemoEntryPage />} />
+                      <Route path="client/create-order" element={<DemoClientCreateOrder />} />
+                      <Route path="client/orders/:id" element={<DemoClientOrderDetail />} />
+                      <Route path="admin/pipeline" element={<DemoAdminPipeline />} />
+                      <Route path="supplier" element={<DemoSupplierDashboard />} />
+                      <Route path="supplier/jobs" element={<DemoSupplierJobs />} />
+                      <Route path="supplier/job/:id" element={<DemoSupplierJobDetail />} />
+                    </Route>
 
-                {/* --- CLIENT ROUTES --- */}
-                <Route path="/client-dashboard" element={<ProtectedRoute requiredRole="client"><ClientDashboardPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/create-order" element={<ProtectedRoute requiredRole="client"><ClientOrderCreationPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><OrdersOverviewPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/orders/:orderId" element={<ProtectedRoute requiredRole="client"><ClientOrderDetailsPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/orders/:orderId/tracking" element={<ProtectedRoute requiredRole="client"><LiveOrderTracking /></ProtectedRoute>} />
-<Route path="/client-dashboard/documents" element={<ProtectedRoute requiredRole="client"><ClientDocumentLibraryPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/shipping" element={<ProtectedRoute requiredRole="client"><ShippingTrackingPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/ncr-visibility" element={<ProtectedRoute requiredRole="client"><NCRVisibilityPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/profile" element={<ProtectedRoute requiredRole="client"><ClientProfilePage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/support" element={<ProtectedRoute requiredRole="client"><ClientSupportPage /></ProtectedRoute>} />
-                <Route path="/client-dashboard/support/:ticketId" element={<ProtectedRoute requiredRole="client"><TicketDetailPage /></ProtectedRoute>} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/set-password" element={<SetPasswordPage />} />
+                    <Route path="/create-password" element={<CreatePasswordPage />} />
 
-                {/* --- SUPPLIER ROUTES --- */}
-                <Route path="/supplier-hub" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
-                <Route path="/supplier-hub/dashboard" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
-                <Route path="/supplier-hub/orders" element={<ProtectedRoute requiredRole="supplier"><SupplierOrderManager /></ProtectedRoute>} />
-                <Route path="/supplier-hub/awarded" element={<ProtectedRoute requiredRole="supplier"><SupplierOrderManager /></ProtectedRoute>} />
+                    {/* --- ADMIN ROUTES --- */}
+                    <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />
+                    <Route path="/control-centre/intake-gate" element={<ProtectedRoute requiredRole="admin"><IntakeGatePage /></ProtectedRoute>} />
+                    <Route path="/control-centre/sanitisation-gate" element={<ProtectedRoute requiredRole="admin"><SanitisationGatePage /></ProtectedRoute>} />
+                    <Route path="/control-centre/sanitisation-gate/review/:orderId" element={<ProtectedRoute requiredRole="admin"><SanitisationReviewPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/document-review" element={<ProtectedRoute requiredRole="admin"><AdminDocumentReview /></ProtectedRoute>} />
+                    <Route path="/control-centre/live-tracking" element={<ProtectedRoute requiredRole="admin"><AdminLiveTracking /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-pool" element={<ProtectedRoute requiredRole="admin"><SupplierPoolPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/linkage" element={<ProtectedRoute requiredRole="admin"><LinkageDashboard /></ProtectedRoute>} />
+                    <Route path="/control-centre/sanitisation" element={<ProtectedRoute requiredRole="admin"><SanitisationEngine /></ProtectedRoute>} />
+                    <Route path="/control-centre/audit-vault" element={<ProtectedRoute requiredRole="admin"><AuditVault /></ProtectedRoute>} />
+                    <Route path="/control-centre/users" element={<ProtectedRoute requiredRole="admin"><UserManagementPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/analytics" element={<ProtectedRoute requiredRole="admin"><SystemAnalyticsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/logs" element={<ProtectedRoute requiredRole="admin"><ActivityLogsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/settings" element={<ProtectedRoute requiredRole="admin"><SettingsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/communications" element={<ProtectedRoute requiredRole="admin"><CommunicationsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/reports" element={<ProtectedRoute requiredRole="admin"><ReportsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/ncr-management" element={<ProtectedRoute requiredRole="admin"><NCRManagementPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-management" element={<ProtectedRoute requiredRole="admin"><SupplierManagementPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/shipments" element={<ProtectedRoute requiredRole="admin"><AdminShipmentsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/manufacturing-processes" element={<ProtectedRoute requiredRole="admin"><ManufacturingProcessesPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/order-preview/:orderId" element={<ProtectedRoute requiredRole="admin"><AdminOrderPreviewPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
 
-                <Route path="/supplier-hub/job-tracking/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><JobDetailsPage /></ProtectedRoute>} />
-                <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
-                <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
-                <Route path="/supplier-hub/profile" element={<ProtectedRoute requiredRole="supplier"><SupplierProfilePage /></ProtectedRoute>} />
-                <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
-                <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
-                <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
-                <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
-              </Routes>
-                <Toaster />
-              </ClientProvider>
-            </SupplierProvider>
-          </AdminProvider>
-        </AuthProvider>
-      </Router>
+                    {/* --- CLIENT ROUTES --- */}
+                    <Route path="/client-dashboard" element={<ProtectedRoute requiredRole="client"><ClientDashboardPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/create-order" element={<ProtectedRoute requiredRole="client"><ClientOrderCreationPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><OrdersOverviewPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/orders/:orderId" element={<ProtectedRoute requiredRole="client"><ClientOrderDetailsPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/orders/:orderId/tracking" element={<ProtectedRoute requiredRole="client"><LiveOrderTracking /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/documents" element={<ProtectedRoute requiredRole="client"><ClientDocumentLibraryPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/shipping" element={<ProtectedRoute requiredRole="client"><ShippingTrackingPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/ncr-visibility" element={<ProtectedRoute requiredRole="client"><NCRVisibilityPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/profile" element={<ProtectedRoute requiredRole="client"><ClientProfilePage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/support" element={<ProtectedRoute requiredRole="client"><ClientSupportPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/support/:ticketId" element={<ProtectedRoute requiredRole="client"><TicketDetailPage /></ProtectedRoute>} />
+
+                    {/* --- SUPPLIER ROUTES --- */}
+                    <Route path="/supplier-hub" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/dashboard" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/orders" element={<ProtectedRoute requiredRole="supplier"><SupplierOrderManager /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/awarded" element={<ProtectedRoute requiredRole="supplier"><SupplierOrderManager /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/job-tracking/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><JobDetailsPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/profile" element={<ProtectedRoute requiredRole="supplier"><SupplierProfilePage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
+                  </Routes>
+                  <Toaster />
+                </ClientProvider>
+              </SupplierProvider>
+            </AdminProvider>
+          </AuthProvider>
+        </Router>
       </ThemeProvider>
     </ErrorBoundary>
   );

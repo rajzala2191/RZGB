@@ -62,17 +62,17 @@ const ShippingLabelGenerator = ({ orderId, isQcApproved, rzJobId }) => {
   };
 
   return (
-    <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-6">
+    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
             <Truck className="text-sky-500" size={20} />
             Shipping Logistics
           </h3>
-          <p className="text-sm text-slate-400 mt-1">Generate official RZ shipping labels.</p>
+          <p className="text-sm text-slate-500 mt-1">Generate official RZ shipping labels.</p>
         </div>
         {!isQcApproved && (
-          <div className="bg-slate-900 text-slate-500 px-3 py-1 rounded text-xs font-bold uppercase flex items-center gap-2 border border-slate-800">
+          <div className="bg-slate-100 text-slate-500 px-3 py-1 rounded text-xs font-bold uppercase flex items-center gap-2 border border-slate-200">
             <Lock size={12} /> QC Approval Required
           </div>
         )}
@@ -80,12 +80,12 @@ const ShippingLabelGenerator = ({ orderId, isQcApproved, rzJobId }) => {
 
       <div className="flex gap-4 items-end">
         <div className="flex-1">
-          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Select Carrier</label>
-          <select 
+          <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Select Carrier</label>
+          <select
             value={carrier}
             onChange={(e) => setCarrier(e.target.value)}
             disabled={!isQcApproved}
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-sky-500 disabled:opacity-50"
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 disabled:opacity-50 transition-all"
           >
             <option value="DHL">DHL Express</option>
             <option value="FedEx">FedEx International</option>
@@ -97,9 +97,9 @@ const ShippingLabelGenerator = ({ orderId, isQcApproved, rzJobId }) => {
           disabled={!isQcApproved || generating}
           className={`
             flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all
-            ${isQcApproved 
-              ? 'bg-orange-600 hover:bg-orange-500 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]' 
-              : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+            ${isQcApproved
+              ? 'bg-orange-600 hover:bg-orange-500 text-white'
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
             }
           `}
         >

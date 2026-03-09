@@ -291,7 +291,7 @@ export default function JobDetailsPage() {
             <div className="p-5">
               <ShippingLabelGenerator
                 orderId={job.id}
-                isQcApproved={job.is_qc_approved}
+                isQcApproved={job.is_qc_approved || ['QC', 'DISPATCH', 'DELIVERED'].includes(job.order_status)}
                 rzJobId={job.rz_job_id}
               />
             </div>

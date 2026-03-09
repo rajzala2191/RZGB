@@ -87,14 +87,14 @@ function StepNav({ step, onBack, onNext, onSubmit, loading, canSubmit }) {
       <div className="flex-1" />
       {last ? (
         <Button type="button" onClick={onSubmit} disabled={loading || !canSubmit}
-          className="bg-orange-600 hover:bg-orange-500 text-white font-bold px-8">
+          className="bg-orange-600 hover:bg-orange-500 active:scale-[0.98] text-white font-bold px-8 shadow-sm hover:shadow transition-all">
           {loading
             ? <><Loader2 size={16} className="animate-spin mr-2" /> Submitting…</>
             : <><CheckCircle2 size={16} className="mr-2" /> Submit Order</>}
         </Button>
       ) : (
         <Button type="button" onClick={onNext}
-          className="bg-orange-600 hover:bg-orange-500 text-white font-bold px-8">
+          className="bg-orange-600 hover:bg-orange-500 active:scale-[0.98] text-white font-bold px-8 shadow-sm hover:shadow transition-all">
           Continue <ChevronRight size={16} className="ml-1" />
         </Button>
       )}

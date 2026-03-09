@@ -22,7 +22,7 @@ export default function AdminSupportPage() {
     try {
       const { data, error } = await supabaseAdmin
         .from('support_tickets')
-        .select('*')
+        .select('*, profile:user_id(company_name, email, role)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -89,15 +89,15 @@ export default function AdminSupportPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
               <LifeBuoy className="text-orange-500" size={30} /> Support Tickets
             </h1>
-            <p className="text-slate-400 mt-1">Manage client and supplier support requests.</p>
+            <p className="text-slate-500 mt-1">Manage client and supplier support requests.</p>
           </div>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm text-slate-300 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 transition-colors disabled:opacity-50 shadow-sm"
           >
             <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
             Refresh
@@ -107,13 +107,13 @@ export default function AdminSupportPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Open', key: 'open', color: 'text-emerald-400', bg: 'bg-emerald-900/20 border-emerald-800/50' },
-            { label: 'In Progress', key: 'in-progress', color: 'text-orange-400', bg: 'bg-orange-900/20 border-orange-800/50' },
-            { label: 'Resolved', key: 'resolved', color: 'text-purple-400', bg: 'bg-purple-900/20 border-purple-800/50' },
-            { label: 'Closed', key: 'closed', color: 'text-slate-400', bg: 'bg-slate-800 border-slate-700' },
+            { label: 'Open', key: 'open', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
+            { label: 'In Progress', key: 'in-progress', color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200' },
+            { label: 'Resolved', key: 'resolved', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200' },
+            { label: 'Closed', key: 'closed', color: 'text-slate-500', bg: 'bg-slate-100 border-slate-200' },
           ].map(s => (
-            <div key={s.key} className={`${s.bg} border rounded-xl p-4`}>
-              <p className="text-2xl font-black text-white">{stats[s.key]}</p>
+            <div key={s.key} className={`${s.bg} border rounded-xl p-4 shadow-sm`}>
+              <p className="text-2xl font-black text-slate-900">{stats[s.key]}</p>
               <p className={`text-xs font-bold uppercase tracking-wider mt-1 ${s.color}`}>{s.label}</p>
             </div>
           ))}
@@ -122,7 +122,7 @@ export default function AdminSupportPage() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Status Tabs */}
-          <div className="flex gap-1 bg-slate-900 border border-slate-800 rounded-lg p-1 flex-wrap">
+          <div className="flex gap-1 bg-slate-100 border border-slate-200 rounded-lg p-1 flex-wrap">
             {STATUS_TABS.map(tab => (
               <button
                 key={tab}
@@ -130,7 +130,7 @@ export default function AdminSupportPage() {
                 className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase transition-colors ${
                   activeTab === tab
                     ? 'bg-orange-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-500 hover:bg-slate-200'
                 }`}
               >
                 {tab === 'all' ? 'All' : tab}
@@ -142,7 +142,7 @@ export default function AdminSupportPage() {
           <select
             value={priorityFilter}
             onChange={e => setPriorityFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-orange-500"
+            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-all"
           >
             <option value="all">All Priorities</option>
             <option value="urgent">Urgent</option>
@@ -158,7 +158,7 @@ export default function AdminSupportPage() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search by company, subject..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-orange-500"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-all"
             />
           </div>
         </div>
@@ -169,14 +169,14 @@ export default function AdminSupportPage() {
             <Loader2 className="animate-spin text-orange-500 w-10 h-10" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 bg-slate-900/30 border border-slate-800 rounded-xl">
-            <MessageSquare className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+          <div className="text-center py-16 bg-slate-50 border border-slate-200 rounded-xl">
+            <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-4" />
             <p className="text-slate-400">No tickets found.</p>
           </div>
         ) : (
-          <div className="bg-[#0f172a] border border-slate-800 rounded-xl overflow-x-auto">
+          <div className="bg-white border border-slate-200 rounded-xl overflow-x-auto shadow-sm">
             <table className="w-full text-left text-sm min-w-[700px]">
-              <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-400 text-xs uppercase">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase">
                 <tr>
                   <th className="p-4">Company</th>
                   <th className="p-4">Role</th>
@@ -188,27 +188,27 @@ export default function AdminSupportPage() {
                   <th className="p-4"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-slate-100">
                 {filtered.map(ticket => (
                   <tr
                     key={ticket.id}
                     onClick={() => navigate(`/control-centre/support/${ticket.id}`)}
-                    className="hover:bg-slate-800/50 transition-colors cursor-pointer"
+                    className="hover:bg-slate-50 transition-colors cursor-pointer"
                   >
-                    <td className="p-4 font-semibold text-slate-200">
-                      {ticket.user_id?.slice(0, 8) || 'Unknown'}
+                    <td className="p-4 font-semibold text-slate-800">
+                      {ticket.profile?.company_name || ticket.profile?.email || 'Unknown'}
                     </td>
                     <td className="p-4">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
                         ticket.user_role === 'supplier'
-                          ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50'
-                          : 'bg-blue-900/30 text-blue-400 border-blue-800/50'
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                          : 'bg-blue-50 text-blue-600 border-blue-200'
                       }`}>
                         {ticket.user_role || 'client'}
                       </span>
                     </td>
-                    <td className="p-4 text-slate-200 max-w-[200px] truncate">{ticket.subject}</td>
-                    <td className="p-4 text-slate-400 text-xs">{ticket.category}</td>
+                    <td className="p-4 text-slate-800 max-w-[200px] truncate">{ticket.subject}</td>
+                    <td className="p-4 text-slate-500 text-xs">{ticket.category}</td>
                     <td className="p-4">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getPriorityColor(ticket.priority || 'medium')}`}>
                         {ticket.priority || 'medium'}
@@ -219,10 +219,10 @@ export default function AdminSupportPage() {
                         {ticket.status}
                       </span>
                     </td>
-                    <td className="p-4 text-slate-500 text-xs whitespace-nowrap">
+                    <td className="p-4 text-slate-400 text-xs whitespace-nowrap">
                       {format(new Date(ticket.created_at), 'MMM dd, yyyy')}
                     </td>
-                    <td className="p-4 text-slate-500">
+                    <td className="p-4 text-slate-300">
                       <ChevronRight size={16} />
                     </td>
                   </tr>

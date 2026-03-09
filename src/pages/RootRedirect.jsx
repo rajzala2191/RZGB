@@ -10,7 +10,7 @@ const RootRedirect = () => {
   useEffect(() => {
     if (!loading) {
       if (!currentUser) {
-        navigate('/login');
+        navigate('/landing');
       } else {
         // Role-based redirection
         switch (userRole) {

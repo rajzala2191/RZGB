@@ -1,42 +1,21 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
-const THEME_KEY = 'rz-portal-theme-v2'; // v2 wipes any stored old dark preference
-
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      // Remove old key so previous dark-mode users get light by default
-      localStorage.removeItem('rz-portal-theme');
-      const saved = localStorage.getItem(THEME_KEY);
-      if (saved) return saved === 'dark';
-    }
-    return false; // Default to light
-  });
-
-  // Apply theme on mount and whenever isDark changes
+  // Always light — clear any previously stored dark preference
   useEffect(() => {
+    localStorage.removeItem('rz-portal-theme');
+    localStorage.removeItem('rz-portal-theme-v2');
     const html = document.documentElement;
-    if (isDark) {
-      html.classList.remove('light');
-      html.classList.add('dark');
-      html.style.colorScheme = 'dark';
-      document.body.style.colorScheme = 'dark';
-      localStorage.setItem(THEME_KEY, 'dark');
-    } else {
-      html.classList.remove('dark');
-      html.classList.add('light');
-      html.style.colorScheme = 'light';
-      document.body.style.colorScheme = 'light';
-      localStorage.setItem(THEME_KEY, 'light');
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => setIsDark(prev => !prev);
+    html.classList.remove('dark');
+    html.classList.add('light');
+    html.style.colorScheme = 'light';
+    document.body.style.colorScheme = 'light';
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDark: false, toggleTheme: () => {} }}>
       {children}
     </ThemeContext.Provider>
   );
