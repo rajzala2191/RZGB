@@ -52,6 +52,7 @@ const UserManagementPage = () => {
   const [roleFilter, setRoleFilter]     = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
   const [showInvite, setShowInvite]     = useState(false);
+  const [showDemoBlock, setShowDemoBlock] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -148,7 +149,7 @@ const UserManagementPage = () => {
             <p className="text-slate-500 text-sm mt-1">Manage access, roles, and permissions across the portal.</p>
           </div>
           <button
-            onClick={() => setShowInvite(true)}
+            onClick={() => isDemoAdmin ? setShowDemoBlock(true) : setShowInvite(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-orange-900/20 shrink-0"
           >
             <Plus size={16} />
@@ -246,11 +247,47 @@ const UserManagementPage = () => {
 
       {/* Invite Modal */}
       <AnimatePresence>
-        {showInvite && (
+        {showInvite && !isDemoAdmin && (
           <InviteUserModal
             onClose={() => setShowInvite(false)}
             onSuccess={fetchUsers}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Demo block modal */}
+      <AnimatePresence>
+        {showDemoBlock && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            onClick={() => setShowDemoBlock(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.18 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#0f172a] border border-slate-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center"
+            >
+              <div className="w-12 h-12 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-4">
+                <AlertCircle size={22} className="text-orange-400" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-100 mb-2">Not available in demo</h3>
+              <p className="text-sm text-slate-400 mb-5">
+                Inviting users is disabled in the demo environment. In the live portal, admins can invite clients and suppliers who receive a password setup email.
+              </p>
+              <button
+                onClick={() => setShowDemoBlock(false)}
+                className="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold transition-colors"
+              >
+                Got it
+              </button>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </ControlCentreLayout>
