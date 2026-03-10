@@ -43,55 +43,53 @@ const AdminAccountSecurityPage = () => {
     }
   };
 
-  const cardCls = 'bg-[#1a1a1a] border border-gray-800 rounded-xl p-6';
-
   return (
     <ControlCentreLayout>
       <Helmet><title>Account Security - RZ Control Centre</title></Helmet>
 
       <div className="max-w-4xl mx-auto space-y-6 pb-20">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-3 mb-2">
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
             <Shield size={28} className="text-[#FF6B35]" />
-            <h1 className="text-2xl font-bold text-white">Account Security</h1>
-          </div>
-          <p className="text-gray-400 text-sm">Manage your password, email address, and active sessions.</p>
+            Account Security
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">Manage your password, email address, and active sessions.</p>
         </motion.div>
 
-        <AccountSecuritySection variant="dark" />
+        <AccountSecuritySection variant="light" />
 
         {/* Active sessions */}
-        <div className={cardCls}>
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <Smartphone size={18} className="text-purple-400" />
+            <div className="w-9 h-9 rounded-lg bg-purple-50 border border-purple-200 flex items-center justify-center">
+              <Smartphone size={18} className="text-purple-500" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">Active Sessions</h3>
-              <p className="text-xs text-gray-500">View and manage where you're signed in.</p>
+              <h3 className="text-lg font-semibold text-slate-900">Active Sessions</h3>
+              <p className="text-xs text-slate-500">View and manage where you're signed in.</p>
             </div>
           </div>
 
           {sessionsLoading ? (
-            <div className="flex items-center gap-2 text-gray-500 text-sm py-4">
+            <div className="flex items-center gap-2 text-slate-400 text-sm py-4">
               <Loader2 size={16} className="animate-spin" /> Loading sessions...
             </div>
           ) : (
             <div className="space-y-3">
               {sessions.map(s => (
-                <div key={s.id} className="flex items-center justify-between bg-gray-900 rounded-lg px-4 py-3 border border-gray-800">
+                <div key={s.id} className="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
                     <div>
-                      <p className="text-sm text-white font-medium">Current session</p>
+                      <p className="text-sm text-slate-800 font-medium">Current session</p>
                       {s.created_at && (
-                        <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <p className="text-xs text-slate-400 flex items-center gap-1">
                           <Clock size={10} /> Signed in {new Date(s.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </p>
                       )}
                     </div>
                   </div>
-                  <span className="text-xs text-emerald-400 font-medium px-2 py-0.5 rounded bg-emerald-900/30 border border-emerald-800">Active</span>
+                  <span className="text-xs text-emerald-600 font-semibold px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200">Active</span>
                 </div>
               ))}
             </div>
@@ -99,7 +97,7 @@ const AdminAccountSecurityPage = () => {
 
           <button
             onClick={handleSignOutAll}
-            className="mt-4 flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-red-400 border border-red-800 hover:bg-red-900/30 transition-all"
+            className="mt-4 flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 transition-all"
           >
             <LogOut size={15} /> Sign out all devices
           </button>

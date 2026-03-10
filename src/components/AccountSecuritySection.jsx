@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Mail, Eye, EyeOff, Loader2, Check, AlertCircle, KeyRound, Shield } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff, Loader2, Check, AlertCircle, KeyRound } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,18 +27,27 @@ const AccountSecuritySection = ({ variant = 'light' }) => {
     : 'bg-white border border-slate-200 rounded-xl p-6 shadow-sm';
 
   const inputCls = isDark
-    ? 'w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all'
-    : 'w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-all';
+    ? 'w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all'
+    : 'w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-all';
 
-  const labelCls = isDark ? 'text-sm font-medium text-gray-400 mb-1.5 block' : 'text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block';
+  const labelCls = isDark
+    ? 'flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block'
+    : 'flex items-center gap-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block';
+
   const headingCls = isDark ? 'text-lg font-semibold text-white' : 'text-lg font-semibold text-slate-900';
   const subCls = isDark ? 'text-xs text-gray-500' : 'text-xs text-slate-500';
+
   const errorCls = isDark
     ? 'bg-red-900/40 border border-red-500/70 text-red-300 px-3 py-2 rounded-lg text-sm'
     : 'bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded-lg text-sm';
+
   const successCls = isDark
     ? 'bg-emerald-900/30 border border-emerald-500/50 text-emerald-300 px-3 py-2 rounded-lg text-sm'
     : 'bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-2 rounded-lg text-sm';
+
+  const eyeCls = isDark
+    ? 'text-gray-500 hover:text-gray-300'
+    : 'text-slate-400 hover:text-slate-600';
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -93,7 +102,7 @@ const AccountSecuritySection = ({ variant = 'light' }) => {
       {/* Change Password */}
       <div className={cardCls}>
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-lg bg-orange-500/10 flex items-center justify-center">
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isDark ? 'bg-orange-500/10' : 'bg-orange-50 border border-orange-200'}`}>
             <KeyRound size={18} className="text-orange-500" />
           </div>
           <div>
@@ -130,7 +139,7 @@ const AccountSecuritySection = ({ variant = 'light' }) => {
                 placeholder="Minimum 8 characters"
                 autoComplete="new-password"
               />
-              <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <button type="button" onClick={() => setShowPw(v => !v)} className={`absolute right-3 top-1/2 -translate-y-1/2 ${eyeCls}`}>
                 {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
@@ -164,7 +173,7 @@ const AccountSecuritySection = ({ variant = 'light' }) => {
           <button
             type="submit"
             disabled={pwLoading}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-orange-600 hover:bg-orange-500 text-white transition-all disabled:opacity-50 shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-orange-600 hover:bg-orange-500 text-white transition-all disabled:opacity-50 shadow-sm"
           >
             {pwLoading ? <Loader2 size={15} className="animate-spin" /> : <Lock size={15} />}
             Update Password
@@ -175,7 +184,7 @@ const AccountSecuritySection = ({ variant = 'light' }) => {
       {/* Change Email */}
       <div className={cardCls}>
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isDark ? 'bg-blue-500/10' : 'bg-blue-50 border border-blue-200'}`}>
             <Mail size={18} className="text-blue-500" />
           </div>
           <div>
@@ -217,7 +226,7 @@ const AccountSecuritySection = ({ variant = 'light' }) => {
           <button
             type="submit"
             disabled={emailLoading}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-50 shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-orange-600 hover:bg-orange-500 text-white transition-all disabled:opacity-50 shadow-sm"
           >
             {emailLoading ? <Loader2 size={15} className="animate-spin" /> : <Mail size={15} />}
             Update Email
