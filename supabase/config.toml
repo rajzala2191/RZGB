@@ -222,6 +222,11 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# Recovery (forgot password): send 6-digit OTP so login modal OTP step works (default sends link only).
+[auth.email.template.recovery]
+subject = "Your password reset code – RZ Global Solutions"
+content_path = "./supabase/email-templates/recovery.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

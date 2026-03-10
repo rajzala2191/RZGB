@@ -44,7 +44,7 @@ const ForgotPasswordModal = ({ onClose }) => {
     setError('');
     setLoading(true);
     try {
-      // Forgot-password OTP flow via Supabase recovery template.
+      // Forgot-password OTP flow via Supabase recovery template (must use template with {{ .Token }} for 6-digit code).
       const { error: err } = await supabase.auth.resetPasswordForEmail(
         email.trim().toLowerCase()
       );
