@@ -31,7 +31,7 @@ const ORDER_VOLUMES = [
 
 const Field = ({ icon: Icon, label, children }) => (
   <div className="space-y-1.5">
-    <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+    <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
       <Icon size={12} />
       {label}
     </label>
@@ -39,8 +39,8 @@ const Field = ({ icon: Icon, label, children }) => (
   </div>
 );
 
-const inputCls = `w-full bg-slate-800/50 border border-slate-700/60 rounded-xl px-4 py-2.5 text-sm text-slate-100
-  placeholder-slate-600 focus:outline-none focus:border-orange-500/60 focus:ring-1 focus:ring-orange-500/20 transition-all`;
+const inputCls = `w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800
+  placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 transition-all`;
 
 const ClientProfilePage = () => {
   const { currentUser, refreshProfile } = useAuth();
@@ -169,7 +169,7 @@ const ClientProfilePage = () => {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0f172a] border border-slate-800 rounded-2xl overflow-hidden"
+          className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm"
         >
           <div className="h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400" />
 
@@ -207,23 +207,23 @@ const ClientProfilePage = () => {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-xl font-bold text-slate-100 truncate">
+                <h1 className="text-xl font-bold text-slate-900 truncate">
                   {form.company_name || 'Your Company'}
                 </h1>
-                <span className="shrink-0 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                <span className="shrink-0 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">
                   <User size={11} /> Client
                 </span>
               </div>
               <p className="text-sm text-slate-500">{currentUser?.email}</p>
               {form.industry && (
-                <p className="text-xs text-orange-400 mt-1">{form.industry}</p>
+                <p className="text-xs text-orange-500 mt-1">{form.industry}</p>
               )}
             </div>
 
             <div className="shrink-0 text-right">
-              <p className="text-xs text-slate-500 mb-1">Profile Completion</p>
-              <p className="text-2xl font-bold text-slate-100">{completionPct}%</p>
-              <div className="w-28 h-1.5 bg-slate-800 rounded-full mt-1.5 overflow-hidden">
+              <p className="text-xs text-slate-400 mb-1">Profile Completion</p>
+              <p className="text-2xl font-bold text-slate-900">{completionPct}%</p>
+              <div className="w-28 h-1.5 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-500"
                   style={{ width: `${completionPct}%` }}
@@ -234,16 +234,16 @@ const ClientProfilePage = () => {
         </motion.div>
 
         {/* Tabs + form */}
-        <div className="bg-[#0f172a] border border-slate-800 rounded-2xl overflow-hidden">
-          <div className="flex border-b border-slate-800 px-2 pt-2 gap-1">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="flex border-b border-slate-200 px-2 pt-2 gap-1">
             {TABS.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
                 className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-all relative ${
                   activeTab === key
-                    ? 'text-orange-400 bg-slate-800/50'
-                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/30'
+                    ? 'text-orange-600 bg-orange-50/60'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 <Icon size={14} />
@@ -334,7 +334,7 @@ const ClientProfilePage = () => {
               )}
             </AnimatePresence>
 
-            <div className="flex justify-end mt-6 pt-5 border-t border-slate-800">
+            <div className="flex justify-end mt-6 pt-5 border-t border-slate-200">
               <button
                 onClick={handleSave}
                 disabled={saving}
