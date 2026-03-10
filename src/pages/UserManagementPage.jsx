@@ -43,8 +43,8 @@ const DEMO_EMAILS = [
 const DEMO_ADMIN_EMAIL = 'demo.admin@rzglobalsolutions.co.uk';
 
 const UserManagementPage = () => {
-  const { user: currentUser } = useAuth();
-  const isDemoAdmin = currentUser?.email === DEMO_ADMIN_EMAIL;
+  const { currentUser, isDemo } = useAuth();
+  const isDemoAdmin = isDemo || currentUser?.email === DEMO_ADMIN_EMAIL;
   const [users, setUsers]               = useState([]);
   const [orderCounts, setOrderCounts]   = useState({});
   const [loading, setLoading]           = useState(true);
