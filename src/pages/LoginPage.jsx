@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,16 +10,17 @@ import { supabase } from '@/lib/customSupabaseClient';
 // ─── Forgot Password Modal ───────────────────────────────────────────────────
 
 const ForgotPasswordModal = ({ onClose }) => {
+  const OTP_LENGTH = Number(import.meta.env.VITE_EMAIL_OTP_LENGTH || 6);
   const [step, setStep] = useState('email'); // 'email' | 'otp' | 'password' | 'done'
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '', '', '']);
+  const [otp, setOtp] = useState(Array.from({ length: OTP_LENGTH }, () => ''));
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
-  const otpRefs = useRef([]);
+  const otpRefs = React.useRef([]);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -32,10 +33,7 @@ const ForgotPasswordModal = ({ onClose }) => {
     setError('');
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.resetPasswordForEmail(
-        email.trim().toLowerCase(),
-        { redirectTo: `${window.location.origin}/reset-password` }
-      );
+      const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase());
       if (err) throw err;
       setStep('otp');
       setResendCooldown(60);
@@ -51,7 +49,7 @@ const ForgotPasswordModal = ({ onClose }) => {
     const next = [...otp];
     next[index] = value.slice(-1);
     setOtp(next);
-    if (value && index < 7) otpRefs.current[index + 1]?.focus();
+    if (value && index < OTP_LENGTH - 1) otpRefs.current[index + 1]?.focus();
   };
 
   const handleOtpKeyDown = (index, e) => {
@@ -61,10 +59,10 @@ const ForgotPasswordModal = ({ onClose }) => {
   };
 
   const handleOtpPaste = (e) => {
-    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8);
-    if (text.length === 8) {
+    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
+    if (text.length === OTP_LENGTH) {
       setOtp(text.split(''));
-      otpRefs.current[7]?.focus();
+      otpRefs.current[OTP_LENGTH - 1]?.focus();
     }
     e.preventDefault();
   };
@@ -72,11 +70,13 @@ const ForgotPasswordModal = ({ onClose }) => {
   const handleVerifyOtp = async (e) => {
     e?.preventDefault();
     const token = otp.join('');
-    if (token.length < 8) { setError('Please enter the complete 8-digit code.'); return; }
+    if (token.length < OTP_LENGTH) {
+      setError(`Please enter the complete ${OTP_LENGTH}-digit code.`);
+      return;
+    }
     setError('');
     setLoading(true);
     try {
-      // type: 'recovery' is required for OTPs sent via resetPasswordForEmail
       const { error: err } = await supabase.auth.verifyOtp({
         email: email.trim().toLowerCase(),
         token,
@@ -138,7 +138,7 @@ const ForgotPasswordModal = ({ onClose }) => {
           <form onSubmit={handleSendOtp} className="space-y-5">
             <div>
               <h2 className="text-xl font-bold text-slate-900 mb-1">Forgot your password?</h2>
-              <p className="text-sm text-slate-500">Enter your registered email and we'll send you an 8-digit code.</p>
+              <p className="text-sm text-slate-500">Enter your registered email and we&apos;ll send you a one-time code.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
@@ -170,12 +170,20 @@ const ForgotPasswordModal = ({ onClose }) => {
         {step === 'otp' && (
           <form onSubmit={handleVerifyOtp} className="space-y-5">
             <div>
-              <button type="button" onClick={() => { setStep('email'); setError(''); setOtp(['','','','','','','','']); }} className="flex items-center gap-1 text-sm text-slate-500 hover:text-orange-400 transition-colors mb-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep('email');
+                  setError('');
+                  setOtp(Array.from({ length: OTP_LENGTH }, () => ''));
+                }}
+                className="flex items-center gap-1 text-sm text-slate-500 hover:text-orange-400 transition-colors mb-3"
+              >
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
               <h2 className="text-xl font-bold text-slate-900 mb-1">Enter verification code</h2>
               <p className="text-sm text-slate-500">
-                We sent an 8-digit code to <span className="text-orange-400 font-medium">{email}</span>. It expires in 1 hour.
+                We sent a {OTP_LENGTH}-digit code to <span className="text-orange-400 font-medium">{email}</span>. It expires in 1 hour.
               </p>
             </div>
             <div className="flex justify-between gap-2" onPaste={handleOtpPaste}>
@@ -206,7 +214,7 @@ const ForgotPasswordModal = ({ onClose }) => {
                 <span className="text-xs text-slate-400">Resend available in {resendCooldown}s</span>
               ) : (
                 <button type="button" onClick={handleSendOtp} className="text-xs text-orange-400 hover:text-orange-300 transition-colors">
-                  Didn't receive it? Resend code
+                  Didn&apos;t receive it? Resend code
                 </button>
               )}
             </div>
@@ -324,8 +332,7 @@ const LoginPage = () => {
   }, [navigate]);
 
   useEffect(() => {
-    // Don't redirect while the forgot-password modal is open — OTP verification
-    // establishes a session mid-flow and we need to stay on the password step.
+    // Don't redirect while the forgot-password modal is open.
     if (showForgotPassword) return;
     if (currentUser && userRole) {
       if (userRole === 'admin') navigate('/control-centre', { replace: true });
