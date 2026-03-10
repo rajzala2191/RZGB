@@ -8,11 +8,17 @@ const RootRedirect = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Detect Supabase invite token in the URL hash before anything else
+    const hash = window.location.hash;
+    if (hash.includes('type=invite') || hash.includes('type=signup')) {
+      navigate('/accept-invite' + hash, { replace: true });
+      return;
+    }
+
     if (!loading) {
       if (!currentUser) {
         navigate('/login');
       } else {
-        // Role-based redirection
         switch (userRole) {
           case 'platform_owner':
             navigate('/platform');
@@ -27,8 +33,6 @@ const RootRedirect = () => {
             navigate('/supplier-hub');
             break;
           default:
-            // Fallback for unknown roles (e.g. newly invited users without profile data yet)
-            // Default to client or show error
             navigate('/client-dashboard');
         }
       }

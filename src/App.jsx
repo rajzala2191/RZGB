@@ -11,6 +11,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import RootRedirect from '@/pages/RootRedirect';
 import LoginPage from '@/pages/LoginPage';
+import AcceptInvitePage from '@/pages/AcceptInvitePage';
 
 // Platform Owner Pages
 import PlatformDashboard from '@/pages/platform/PlatformDashboard';
@@ -79,6 +80,7 @@ function App() {
                 {/* Root & Auth */}
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/accept-invite" element={<AcceptInvitePage />} />
                 
                 {/* --- PLATFORM OWNER ROUTES --- */}
                 <Route path="/platform" element={<ProtectedRoute requiredRole="platform_owner"><PlatformDashboard /></ProtectedRoute>} />
