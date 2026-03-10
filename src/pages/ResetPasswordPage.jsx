@@ -7,6 +7,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
+  const MIN_PASSWORD_LENGTH = Number(import.meta.env.VITE_MIN_PASSWORD_LENGTH || 10);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +29,10 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (newPassword.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+      return;
+    }
     if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
     setError('');
     setLoading(true);
@@ -98,7 +102,7 @@ const ResetPasswordPage = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <h2 className="text-xl font-bold text-white mb-1">Choose a new password</h2>
-                  <p className="text-sm text-gray-400">Must be at least 8 characters.</p>
+                  <p className="text-sm text-gray-400">Must be at least {MIN_PASSWORD_LENGTH} characters.</p>
                 </div>
 
                 <div>
@@ -112,7 +116,7 @@ const ResetPasswordPage = () => {
                       required
                       autoFocus
                       className="w-full pl-11 pr-11 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
-                      placeholder="Minimum 8 characters"
+                      placeholder={`Minimum ${MIN_PASSWORD_LENGTH} characters`}
                     />
                     <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

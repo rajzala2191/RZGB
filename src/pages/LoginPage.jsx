@@ -11,6 +11,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 
 const ForgotPasswordModal = ({ onClose }) => {
   const OTP_LENGTH = Number(import.meta.env.VITE_EMAIL_OTP_LENGTH || 6);
+  const MIN_PASSWORD_LENGTH = Number(import.meta.env.VITE_MIN_PASSWORD_LENGTH || 10);
   const [step, setStep] = useState('email'); // 'email' | 'otp' | 'password' | 'done'
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(Array.from({ length: OTP_LENGTH }, () => ''));
@@ -46,7 +47,8 @@ const ForgotPasswordModal = ({ onClose }) => {
     try {
       // Forgot-password OTP flow via Supabase recovery template.
       const { error: err } = await supabase.auth.resetPasswordForEmail(
-        email.trim().toLowerCase()
+        email.trim().toLowerCase(),
+        { redirectTo: `${window.location.origin}/reset-password` }
       );
       if (err) throw err;
       setStep('otp');
@@ -107,7 +109,10 @@ const ForgotPasswordModal = ({ onClose }) => {
 
   const handleSetPassword = async (e) => {
     e?.preventDefault();
-    if (newPassword.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+      return;
+    }
     if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
     setError('');
     setLoading(true);
@@ -253,7 +258,7 @@ const ForgotPasswordModal = ({ onClose }) => {
                   required
                   autoFocus
                   className="w-full pl-11 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-all"
-                  placeholder="Minimum 8 characters"
+                  placeholder={`Minimum ${MIN_PASSWORD_LENGTH} characters`}
                 />
                 <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
