@@ -19,12 +19,20 @@ Deno.serve(async (req) => {
     const { user_id } = await req.json();
     if (!user_id) throw new Error('user_id is required');
 
-    // Delete from auth.users (cascades to profiles via FK, but we do both to be safe)
+    // 1) Remove rows in documents that reference this profile (FK would block profile delete)
+    const { data: docs } = await supabaseAdmin.from('documents').select('id, file_path').or(`uploaded_by.eq.${user_id},client_id.eq.${user_id},supplier_id.eq.${user_id}`);
+    if (docs?.length) {
+      const paths = docs.map((d) => d.file_path).filter(Boolean);
+      if (paths.length) await supabaseAdmin.storage.from('documents').remove(paths);
+      await supabaseAdmin.from('documents').delete().or(`uploaded_by.eq.${user_id},client_id.eq.${user_id},supplier_id.eq.${user_id}`);
+    }
+
+    // 2) Delete profile (must be before auth so no other FKs from profiles are hit)
+    await supabaseAdmin.from('profiles').delete().eq('id', user_id);
+
+    // 3) Delete from auth.users
     const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(user_id);
     if (authError) throw authError;
-
-    // Delete from profiles (in case FK cascade is not set)
-    await supabaseAdmin.from('profiles').delete().eq('id', user_id);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   X, Shield, User, Truck, Mail, Building2, Calendar,
-  Package, Edit2, Check, Trash2, ToggleLeft, ToggleRight, Loader2
+  Package, Edit2, Check, Trash2, ToggleLeft, ToggleRight, Loader2, KeyRound
 } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
@@ -20,6 +20,9 @@ const UserDetailDrawer = ({ user, orderCount, onClose, onUpdated, onDeleted }) =
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showSetPassword, setShowSetPassword] = useState(false);
+  const [setPasswordLoading, setSetPasswordLoading] = useState(false);
+  const [setPasswordForm, setSetPasswordForm] = useState({ password: '', confirm: '' });
   const [form, setForm] = useState({ role: '', company_name: '', status: '' });
 
   useEffect(() => {
@@ -27,6 +30,8 @@ const UserDetailDrawer = ({ user, orderCount, onClose, onUpdated, onDeleted }) =
       setForm({ role: user.role, company_name: user.company_name || '', status: user.status || 'pending' });
       setEditing(false);
       setConfirmDelete(false);
+      setShowSetPassword(false);
+      setSetPasswordForm({ password: '', confirm: '' });
     }
   }, [user]);
 
@@ -57,6 +62,39 @@ const UserDetailDrawer = ({ user, orderCount, onClose, onUpdated, onDeleted }) =
       onUpdated();
     } catch (err) {
       toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+    }
+  };
+
+  const handleSetPassword = async (e) => {
+    e?.preventDefault();
+    if (setPasswordForm.password.length < 8) {
+      toast({ title: 'Password too short', description: 'Use at least 8 characters.', variant: 'destructive' });
+      return;
+    }
+    if (setPasswordForm.password !== setPasswordForm.confirm) {
+      toast({ title: 'Passwords do not match', variant: 'destructive' });
+      return;
+    }
+    setSetPasswordLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-set-password', {
+        body: { user_id: user.id, new_password: setPasswordForm.password },
+      });
+      if (error) {
+        const body = await error.context?.json?.().catch(() => null);
+        throw new Error(body?.error || error.message);
+      }
+      if (data?.error) throw new Error(data.error);
+      toast({
+        title: 'Password set',
+        description: 'Share the new password with the user securely. They can log in and change it from Settings.',
+      });
+      setShowSetPassword(false);
+      setSetPasswordForm({ password: '', confirm: '' });
+    } catch (err) {
+      toast({ title: 'Failed to set password', description: err.message, variant: 'destructive' });
+    } finally {
+      setSetPasswordLoading(false);
     }
   };
 
@@ -242,16 +280,22 @@ const UserDetailDrawer = ({ user, orderCount, onClose, onUpdated, onDeleted }) =
               </button>
             </div>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setEditing(true)}
-                className="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-400 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                className="flex-1 min-w-[100px] py-2.5 rounded-lg border border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-400 text-sm font-medium transition-colors flex items-center justify-center gap-2"
               >
                 <Edit2 size={13} /> Edit
               </button>
               <button
+                onClick={() => setShowSetPassword(true)}
+                className="flex-1 min-w-[100px] py-2.5 rounded-lg border border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-400 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <KeyRound size={13} /> Set password
+              </button>
+              <button
                 onClick={handleToggleStatus}
-                className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+                className={`flex-1 min-w-[100px] py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                   user.status === 'active'
                     ? 'border border-red-200 text-red-500 hover:bg-red-50'
                     : 'border border-emerald-200 text-emerald-600 hover:bg-emerald-50'
@@ -264,6 +308,38 @@ const UserDetailDrawer = ({ user, orderCount, onClose, onUpdated, onDeleted }) =
               </button>
             </div>
           )}
+
+          {showSetPassword ? (
+            <form onSubmit={handleSetPassword} className="space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <p className="text-xs text-slate-600">Set a temporary password for this user (e.g. when they don’t receive the recovery email). Share it with them securely.</p>
+              <input
+                type="password"
+                placeholder="New password (min 8 characters)"
+                value={setPasswordForm.password}
+                onChange={e => setSetPasswordForm(f => ({ ...f, password: e.target.value }))}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                minLength={8}
+                autoComplete="new-password"
+              />
+              <input
+                type="password"
+                placeholder="Confirm password"
+                value={setPasswordForm.confirm}
+                onChange={e => setSetPasswordForm(f => ({ ...f, confirm: e.target.value }))}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                autoComplete="new-password"
+              />
+              <div className="flex gap-2">
+                <button type="button" onClick={() => { setShowSetPassword(false); setSetPasswordForm({ password: '', confirm: '' }); }} className="flex-1 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm">
+                  Cancel
+                </button>
+                <button type="submit" disabled={setPasswordLoading} className="flex-1 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50">
+                  {setPasswordLoading ? <Loader2 size={14} className="animate-spin" /> : <KeyRound size={14} />}
+                  Set Password
+                </button>
+              </div>
+            </form>
+          ) : null}
 
           {confirmDelete ? (
             <div className="flex gap-2">

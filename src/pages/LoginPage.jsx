@@ -24,8 +24,8 @@ const ForgotPasswordModal = ({ onClose }) => {
 
   const mapOtpError = (err, fallback) => {
     const message = (err?.message || '').toLowerCase();
-    if (message.includes('rate limit') || message.includes('too many') || message.includes('security purposes')) {
-      return 'Too many attempts. Please wait 60 seconds and try again.';
+    if (message.includes('rate limit') || message.includes('too many') || message.includes('security purposes') || message.includes('only request this after')) {
+      return 'Too many attempts. Please wait a moment and try again.';
     }
     if (message.includes('invalid login credentials') || message.includes('user not found')) {
       return 'No account found for this email address.';
@@ -153,6 +153,7 @@ const ForgotPasswordModal = ({ onClose }) => {
             <div>
               <h2 className="text-xl font-bold text-slate-900 mb-1">Forgot your password?</h2>
               <p className="text-sm text-slate-500">Enter your registered email and we&apos;ll send you a one-time code.</p>
+              <p className="text-xs text-slate-400 mt-2">Not receiving the email? Check your spam folder. If you're an admin, ask your project owner to set your password from the Supabase Dashboard (SQL Editor) or User Management.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>

@@ -50,6 +50,7 @@ import AdminShipmentsPage from '@/pages/AdminShipmentsPage';
 import AdminLiveTracking from '@/pages/AdminLiveTracking';
 import AdminOrderPreviewPage from '@/pages/AdminOrderPreviewPage';
 import ManufacturingProcessesPage from '@/pages/ManufacturingProcessesPage';
+import AdminAccountSecurityPage from '@/pages/AdminAccountSecurityPage';
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
@@ -134,6 +135,7 @@ function App() {
                     <Route path="/control-centre/shipments" element={<ProtectedRoute requiredRole="admin"><AdminShipmentsPage /></ProtectedRoute>} />
                     <Route path="/control-centre/manufacturing-processes" element={<ProtectedRoute requiredRole="admin"><ManufacturingProcessesPage /></ProtectedRoute>} />
                     <Route path="/control-centre/order-preview/:orderId" element={<ProtectedRoute requiredRole="admin"><AdminOrderPreviewPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/account-security" element={<ProtectedRoute requiredRole="admin"><AdminAccountSecurityPage /></ProtectedRoute>} />
                     <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
                     <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
 

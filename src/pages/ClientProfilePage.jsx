@@ -8,12 +8,14 @@ import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import { useToast } from '@/components/ui/use-toast';
 import {
   User, Building2, Phone, Mail, Globe, MapPin,
-  Briefcase, FileText, Users, Save, Loader2, Check, Camera,
+  Briefcase, FileText, Users, Save, Loader2, Check, Camera, Shield,
 } from 'lucide-react';
+import AccountSecuritySection from '@/components/AccountSecuritySection';
 
 const TABS = [
-  { key: 'contact', label: 'Contact Details',  icon: User      },
-  { key: 'company', label: 'Company Info',      icon: Building2 },
+  { key: 'contact',  label: 'Contact Details',  icon: User      },
+  { key: 'company',  label: 'Company Info',      icon: Building2 },
+  { key: 'security', label: 'Security',          icon: Shield    },
 ];
 
 const INDUSTRIES = [
@@ -332,8 +334,20 @@ const ClientProfilePage = () => {
                   </Field>
                 </motion.div>
               )}
+              {activeTab === 'security' && (
+                <motion.div
+                  key="security"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <AccountSecuritySection variant="light" />
+                </motion.div>
+              )}
             </AnimatePresence>
 
+            {activeTab !== 'security' && (
             <div className="flex justify-end mt-6 pt-5 border-t border-slate-200">
               <button
                 onClick={handleSave}
@@ -353,6 +367,7 @@ const ClientProfilePage = () => {
                 )}
               </button>
             </div>
+            )}
           </div>
         </div>
       </div>

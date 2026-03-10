@@ -9,13 +9,15 @@ import { useToast } from '@/components/ui/use-toast';
 import {
   User, Building2, Phone, Mail, Globe, MapPin,
   Wrench, Award, BadgeCheck, Calendar, Users,
-  Save, Loader2, Check, ChevronRight, Truck, FileText, Camera
+  Save, Loader2, Check, ChevronRight, Truck, FileText, Camera, Shield
 } from 'lucide-react';
+import AccountSecuritySection from '@/components/AccountSecuritySection';
 
 const TABS = [
-  { key: 'contact',      label: 'Contact Details',       icon: User    },
-  { key: 'capabilities', label: 'Capabilities',          icon: Wrench  },
+  { key: 'contact',      label: 'Contact Details',       icon: User      },
+  { key: 'capabilities', label: 'Capabilities',          icon: Wrench    },
   { key: 'overview',     label: 'Company Overview',      icon: Building2 },
+  { key: 'security',     label: 'Security',              icon: Shield    },
 ];
 
 const CAPABILITY_OPTIONS = [
@@ -469,9 +471,21 @@ const SupplierProfilePage = () => {
                   </Field>
                 </motion.div>
               )}
+              {activeTab === 'security' && (
+                <motion.div
+                  key="security"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <AccountSecuritySection variant="light" />
+                </motion.div>
+              )}
             </AnimatePresence>
 
             {/* Save button */}
+            {activeTab !== 'security' && (
             <div className="flex justify-end mt-6 pt-5 border-t border-slate-200">
               <button
                 onClick={handleSave}
@@ -491,6 +505,7 @@ const SupplierProfilePage = () => {
                 )}
               </button>
             </div>
+            )}
           </div>
         </div>
       </div>

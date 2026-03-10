@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Truck,
   Cog,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { path: '/control-centre/document-review',    label: 'Document Review',   icon: FolderOpen },
   { path: '/control-centre/users',              label: 'User Management',   icon: Users },
   { path: '/control-centre/support',            label: 'Support',           icon: LifeBuoy },
+  { path: '/control-centre/account-security',  label: 'Account Security',  icon: Shield },
 ];
 
 const ACCENT      = '#FF6B35';
