@@ -9,7 +9,7 @@ import UserDetailDrawer from '@/components/UserDetailDrawer';
 import InviteUserModal from '@/components/InviteUserModal';
 import {
   Users, Shield, User, Truck, Plus, Search,
-  Loader2, UserCheck, Clock, AlertCircle
+  Loader2, UserCheck, Clock, AlertCircle, Lock
 } from 'lucide-react';
 
 const FILTER_TABS = [
@@ -152,7 +152,7 @@ const UserManagementPage = () => {
             onClick={() => isDemoAdmin ? setShowDemoBlock(true) : setShowInvite(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-orange-900/20 shrink-0"
           >
-            <Plus size={16} />
+            {isDemoAdmin ? <Lock size={16} /> : <Plus size={16} />}
             Invite User
           </button>
         </div>
@@ -271,13 +271,13 @@ const UserManagementPage = () => {
               exit={{ opacity: 0, scale: 0.95, y: 12 }}
               transition={{ duration: 0.18 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#0f172a] border border-slate-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center"
+              className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center"
             >
-              <div className="w-12 h-12 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-4">
-                <AlertCircle size={22} className="text-orange-400" />
+              <div className="w-12 h-12 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center mx-auto mb-4">
+                <Lock size={22} className="text-orange-500" />
               </div>
-              <h3 className="text-lg font-bold text-slate-100 mb-2">Not available in demo</h3>
-              <p className="text-sm text-slate-400 mb-5">
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Not available in demo</h3>
+              <p className="text-sm text-slate-500 mb-5">
                 Inviting users is disabled in the demo environment. In the live portal, admins can invite clients and suppliers who receive a password setup email.
               </p>
               <button
