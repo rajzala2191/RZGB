@@ -22,6 +22,17 @@ const ForgotPasswordModal = ({ onClose }) => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const otpRefs = React.useRef([]);
 
+  const mapOtpError = (err, fallback) => {
+    const message = (err?.message || '').toLowerCase();
+    if (message.includes('rate limit') || message.includes('too many') || message.includes('security purposes')) {
+      return 'Too many attempts. Please wait 60 seconds and try again.';
+    }
+    if (message.includes('invalid login credentials') || message.includes('user not found')) {
+      return 'No account found for this email address.';
+    }
+    return err?.message || fallback;
+  };
+
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const t = setInterval(() => setResendCooldown(c => c - 1), 1000);
@@ -33,12 +44,19 @@ const ForgotPasswordModal = ({ onClose }) => {
     setError('');
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase());
+      // OTP-only forgot-password flow:
+      // send email OTP for existing users, then verify with type: 'email'
+      const { error: err } = await supabase.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+        options: {
+          shouldCreateUser: false,
+        },
+      });
       if (err) throw err;
       setStep('otp');
       setResendCooldown(60);
     } catch (err) {
-      setError(err.message || 'Failed to send code. Please check the email address.');
+      setError(mapOtpError(err, 'Failed to send code. Please check the email address.'));
     } finally {
       setLoading(false);
     }
@@ -80,12 +98,12 @@ const ForgotPasswordModal = ({ onClose }) => {
       const { error: err } = await supabase.auth.verifyOtp({
         email: email.trim().toLowerCase(),
         token,
-        type: 'recovery',
+        type: 'email',
       });
       if (err) throw err;
       setStep('password');
     } catch (err) {
-      setError(err.message || 'Invalid or expired code. Please try again.');
+      setError(mapOtpError(err, 'Invalid or expired code. Please try again.'));
     } finally {
       setLoading(false);
     }
