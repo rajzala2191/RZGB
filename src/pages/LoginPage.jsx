@@ -43,14 +43,11 @@ const ForgotPasswordModal = ({ onClose }) => {
     e?.preventDefault();
     setError('');
     setLoading(true);
-    const emailToSend = email.trim().toLowerCase();
     try {
       // Forgot-password OTP flow via Supabase recovery template (must use template with {{ .Token }} for 6-digit code).
-      const { data, error: err } = await supabase.auth.resetPasswordForEmail(emailToSend);
-      // #region agent log – debug email not received
-      const log = { email: emailToSend ? `${emailToSend.slice(0, 3)}***` : '', hasError: !!err, errorMessage: err?.message ?? null, errorStatus: err?.status ?? null };
-      console.log('[ForgotPassword] resetPasswordForEmail result', log);
-      // #endregion
+      const { error: err } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase()
+      );
       if (err) throw err;
       setStep('otp');
       setResendCooldown(60);
@@ -315,9 +312,10 @@ const ErrorBanner = ({ message }) => (
   <motion.div
     initial={{ opacity: 0, height: 0 }}
     animate={{ opacity: 1, height: 'auto' }}
-    className="bg-red-900/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm flex items-start gap-2"
+    className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm flex items-start gap-2"
+    role="alert"
   >
-    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" aria-hidden />
     <span>{message}</span>
   </motion.div>
 );
@@ -463,9 +461,10 @@ const LoginPage = () => {
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="bg-red-900/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm flex items-start gap-2"
+                  className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm flex items-start gap-2"
+                  role="alert"
                 >
-                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" aria-hidden />
                   <span>{error}</span>
                 </motion.div>
               )}

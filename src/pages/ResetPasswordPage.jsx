@@ -136,8 +136,8 @@ const ResetPasswordPage = () => {
                 </div>
 
                 {error && (
-                  <div className="bg-red-900/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
-                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <div className="bg-red-900/40 border border-red-500/70 text-red-300 px-4 py-3 rounded-lg text-sm flex items-start gap-2" role="alert">
+                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-400" aria-hidden />
                     <span>{error}</span>
                   </div>
                 )}

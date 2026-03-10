@@ -78,7 +78,11 @@ const SetPasswordPage = () => {
                 placeholder="Re-enter password"
               />
             </div>
-            {error && <div className="text-red-400 text-sm">{error}</div>}
+            {error && (
+              <div className="bg-red-900/40 border border-red-500/70 text-red-300 px-4 py-3 rounded-lg text-sm" role="alert">
+                {error}
+              </div>
+            )}
             <button
               type="submit"
               disabled={loading}
