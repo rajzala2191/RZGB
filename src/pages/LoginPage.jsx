@@ -44,14 +44,10 @@ const ForgotPasswordModal = ({ onClose }) => {
     setError('');
     setLoading(true);
     try {
-      // OTP-only forgot-password flow:
-      // send email OTP for existing users, then verify with type: 'email'
-      const { error: err } = await supabase.auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
-        options: {
-          shouldCreateUser: false,
-        },
-      });
+      // Forgot-password OTP flow via Supabase recovery template.
+      const { error: err } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase()
+      );
       if (err) throw err;
       setStep('otp');
       setResendCooldown(60);
@@ -98,7 +94,7 @@ const ForgotPasswordModal = ({ onClose }) => {
       const { error: err } = await supabase.auth.verifyOtp({
         email: email.trim().toLowerCase(),
         token,
-        type: 'email',
+        type: 'recovery',
       });
       if (err) throw err;
       setStep('password');
