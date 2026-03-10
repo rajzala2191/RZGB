@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
-import { useToast } from '@/components/ui/use-toast';
 
 const AuthContext = createContext(undefined);
 export { AuthContext };
@@ -12,8 +11,13 @@ export const AuthProvider = ({ children }) => {
   const [userLogoUrl, setUserLogoUrl] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  const { toast } = useToast();
+
+  const clearProfileState = useCallback(() => {
+    setUserRole(null);
+    setUserCompanyName(null);
+    setUserLogoUrl(null);
+    setIsDemo(false);
+  }, []);
 
   const logActivity = async (userId, action, status, details) => {
     try {
@@ -30,53 +34,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Helper to fetch profile data
-  const fetchUserProfile = async (userId) => {
+  // Helper to fetch profile data. Fail closed if missing/invalid.
+  const fetchUserProfile = useCallback(async (userId) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role, company_name, status')
+        .select('role, company_name, logo_url, is_demo, status')
         .eq('id', userId)
         .maybeSingle();
 
       if (error) {
         console.error('AuthContext: Error fetching user profile:', error.message);
-        setUserRole('client'); // fallback — prevents infinite spinner in ProtectedRoute
-        return null;
+        clearProfileState();
+        return false;
       }
 
-      if (data) {
-        setUserRole(data.role);
-        setUserCompanyName(data.company_name);
-      } else {
-        // Fallback if profile doesn't exist yet (though handle_new_user trigger should create it)
-        setUserRole('client');
-        setUserCompanyName(null);
-        setUserLogoUrl(null);
-        return { role: 'client' };
+      if (!data?.role) {
+        console.error('AuthContext: Missing profile or role for user:', userId);
+        clearProfileState();
+        return false;
       }
 
-      // Fetch optional columns separately so missing columns never block login
-      try {
-        const { data: extData } = await supabase
-          .from('profiles')
-          .select('logo_url, is_demo')
-          .eq('id', userId)
-          .maybeSingle();
-        setUserLogoUrl(extData?.logo_url || null);
-        setIsDemo(extData?.is_demo || false);
-      } catch (_) {
-        setUserLogoUrl(null);
-        setIsDemo(false);
-      }
-
-      return data;
+      setUserRole(data.role);
+      setUserCompanyName(data.company_name || null);
+      setUserLogoUrl(data.logo_url || null);
+      setIsDemo(Boolean(data.is_demo));
+      return true;
     } catch (error) {
       console.error('AuthContext: Unexpected error fetching profile:', error);
-      setUserRole('client'); // fallback — prevents infinite spinner in ProtectedRoute
-      return null;
+      clearProfileState();
+      return false;
     }
-  };
+  }, [clearProfileState]);
 
   useEffect(() => {
     let mounted = true;
@@ -90,11 +79,15 @@ export const AuthProvider = ({ children }) => {
         if (mounted) {
           if (session?.user) {
             setCurrentUser(session.user);
-            await fetchUserProfile(session.user.id);
+            const profileOk = await fetchUserProfile(session.user.id);
+            if (!profileOk) {
+              await supabase.auth.signOut();
+              setCurrentUser(null);
+              clearProfileState();
+            }
           } else {
             setCurrentUser(null);
-            setUserRole(null);
-            setUserCompanyName(null);
+            clearProfileState();
           }
         }
       } catch (error) {
@@ -111,18 +104,16 @@ export const AuthProvider = ({ children }) => {
         if (!mounted) return;
 
         if (session?.user) {
-          if (session.user.id !== currentUser?.id) {
-            setCurrentUser(session.user);
-            await fetchUserProfile(session.user.id);
-          } else {
-            setCurrentUser(session.user);
-            if (!userRole) await fetchUserProfile(session.user.id);
+          setCurrentUser(session.user);
+          const profileOk = await fetchUserProfile(session.user.id);
+          if (!profileOk && event !== 'SIGNED_OUT') {
+            await supabase.auth.signOut();
+            setCurrentUser(null);
+            clearProfileState();
           }
         } else {
           setCurrentUser(null);
-          setUserRole(null);
-          setUserCompanyName(null);
-          setUserLogoUrl(null);
+          clearProfileState();
         }
 
         setLoading(false);
@@ -133,7 +124,7 @@ export const AuthProvider = ({ children }) => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [clearProfileState, fetchUserProfile]);
 
   const login = async (email, password) => {
     try {
@@ -158,10 +149,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await supabase.auth.signOut();
       setCurrentUser(null);
-      setUserRole(null);
-      setUserCompanyName(null);
-      setUserLogoUrl(null);
-      setIsDemo(false);
+      clearProfileState();
     } catch (error) {
       console.error('AuthContext: Error logging out:', error.message);
     }
