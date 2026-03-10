@@ -35,11 +35,6 @@ const StatCard = ({ icon: Icon, label, value, color }) => (
   </motion.div>
 );
 
-const DEMO_EMAILS = [
-  'demo.client@rzglobalsolutions.co.uk',
-  'demo.admin@rzglobalsolutions.co.uk',
-  'demo.supplier@rzglobalsolutions.co.uk',
-];
 const DEMO_ADMIN_EMAIL = 'demo.admin@rzglobalsolutions.co.uk';
 
 const UserManagementPage = () => {
@@ -56,13 +51,14 @@ const UserManagementPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from('profiles')
         .select('id, email, company_name, role, status, created_at, logo_url')
         .order('created_at', { ascending: false });
+      if (isDemoAdmin) query.eq('is_demo', true);
+      const { data, error } = await query;
       if (error) throw error;
-      const all = data || [];
-      setUsers(isDemoAdmin ? all.filter(u => DEMO_EMAILS.includes(u.email)) : all);
+      setUsers(data || []);
     } catch (err) {
       console.error('Error fetching users:', err);
     } finally {
