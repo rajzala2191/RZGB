@@ -43,11 +43,14 @@ const ForgotPasswordModal = ({ onClose }) => {
     e?.preventDefault();
     setError('');
     setLoading(true);
+    const emailToSend = email.trim().toLowerCase();
     try {
       // Forgot-password OTP flow via Supabase recovery template (must use template with {{ .Token }} for 6-digit code).
-      const { error: err } = await supabase.auth.resetPasswordForEmail(
-        email.trim().toLowerCase()
-      );
+      const { data, error: err } = await supabase.auth.resetPasswordForEmail(emailToSend);
+      // #region agent log – debug email not received
+      const log = { email: emailToSend ? `${emailToSend.slice(0, 3)}***` : '', hasError: !!err, errorMessage: err?.message ?? null, errorStatus: err?.status ?? null };
+      console.log('[ForgotPassword] resetPasswordForEmail result', log);
+      // #endregion
       if (err) throw err;
       setStep('otp');
       setResendCooldown(60);
