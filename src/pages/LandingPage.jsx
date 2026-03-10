@@ -636,7 +636,7 @@ function TestimonialsSection() {
           className="flex gap-5 w-max"
         >
           {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-            <div key={i} className="w-72 flex-shrink-0 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+            <div key={i} className="w-[80vw] sm:w-72 flex-shrink-0 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
               <div className="flex gap-1 mb-3">
                 {[1,2,3,4,5].map((s) => <Star key={s} className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />)}
               </div>
@@ -707,7 +707,7 @@ function LandingFooter() {
         </div>
 
         {/* Link columns grid */}
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-6 md:gap-8 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-10">
           {/* Logo col — desktop only */}
           <div className="hidden md:block">
             <img src="/light-logo.png" alt="RZ" className="h-8 object-contain mb-3 invert opacity-80" />

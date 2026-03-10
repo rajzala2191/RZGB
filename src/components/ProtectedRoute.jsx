@@ -7,7 +7,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   const { currentUser, userRole, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  // Also wait if user is authenticated but profile/role hasn't loaded yet
+  if (loading || (currentUser && !userRole)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
         <div className="flex flex-col items-center gap-4">

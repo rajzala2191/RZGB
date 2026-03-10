@@ -35,19 +35,19 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role, company_name, status, is_demo')
+        .select('role, company_name, status')
         .eq('id', userId)
         .maybeSingle();
 
       if (error) {
         console.error('AuthContext: Error fetching user profile:', error.message);
+        setUserRole('client'); // fallback — prevents infinite spinner in ProtectedRoute
         return null;
       }
 
       if (data) {
         setUserRole(data.role);
         setUserCompanyName(data.company_name);
-        setIsDemo(data.is_demo || false);
       } else {
         // Fallback if profile doesn't exist yet (though handle_new_user trigger should create it)
         setUserRole('client');
@@ -56,21 +56,24 @@ export const AuthProvider = ({ children }) => {
         return { role: 'client' };
       }
 
-      // Fetch logo_url separately so a missing column never blocks login
+      // Fetch optional columns separately so missing columns never block login
       try {
-        const { data: logoData } = await supabase
+        const { data: extData } = await supabase
           .from('profiles')
-          .select('logo_url')
+          .select('logo_url, is_demo')
           .eq('id', userId)
           .maybeSingle();
-        setUserLogoUrl(logoData?.logo_url || null);
+        setUserLogoUrl(extData?.logo_url || null);
+        setIsDemo(extData?.is_demo || false);
       } catch (_) {
         setUserLogoUrl(null);
+        setIsDemo(false);
       }
 
       return data;
     } catch (error) {
       console.error('AuthContext: Unexpected error fetching profile:', error);
+      setUserRole('client'); // fallback — prevents infinite spinner in ProtectedRoute
       return null;
     }
   };
