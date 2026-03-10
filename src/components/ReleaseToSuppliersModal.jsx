@@ -78,40 +78,40 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
   const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-[#0f172a] border border-slate-800 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
-        <div className="flex justify-between items-center p-6 border-b border-slate-800">
-          <h2 className="text-xl font-bold text-slate-100">Assign to Supplier</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div className="flex justify-between items-center p-6 border-b border-slate-200">
+          <h2 className="text-xl font-bold text-slate-900">Assign to Supplier</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700">
             <X size={20} />
           </button>
         </div>
 
         <div className="p-6 space-y-6">
           {/* Order Details */}
-          <div className="bg-[#1e293b] p-4 rounded-lg border border-slate-700 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-slate-400">Order ID:</span> <span className="font-mono text-slate-200">{order?.id?.slice(0, 8)}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">Sanitised Name:</span> <span className="font-semibold text-orange-400">{order?.ghost_public_name}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">Material:</span> <span className="text-slate-200">{order?.material}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">Quantity:</span> <span className="text-slate-200">{order?.quantity}</span></div>
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2 text-sm">
+            <div className="flex justify-between"><span className="text-slate-500">Order ID:</span> <span className="font-mono text-slate-700">{order?.id?.slice(0, 8)}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Sanitised Name:</span> <span className="font-semibold text-orange-500">{order?.ghost_public_name}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Material:</span> <span className="text-slate-700">{order?.material}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Quantity:</span> <span className="text-slate-700">{order?.quantity}</span></div>
           </div>
 
           {/* Supplier Selection */}
           <div className="space-y-3">
-            <label className="text-sm font-semibold text-slate-300">Select Supplier to Assign</label>
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+            <label className="text-sm font-semibold text-slate-700">Select Supplier to Assign</label>
+            <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
               {suppliers.map(s => (
-                <div 
+                <div
                   key={s.id}
                   onClick={() => setSelectedSupplierId(s.id)}
                   className={`p-3 rounded-lg border cursor-pointer transition-colors flex items-center gap-3 ${
-                    selectedSupplierId === s.id ? 'bg-orange-900/20 border-orange-500' : 'bg-[#1e293b] border-slate-700 hover:border-slate-500'
+                    selectedSupplierId === s.id ? 'bg-orange-50 border-orange-400' : 'bg-slate-50 border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  <Building2 size={20} className={selectedSupplierId === s.id ? 'text-orange-400' : 'text-slate-500'} />
+                  <Building2 size={20} className={selectedSupplierId === s.id ? 'text-orange-500' : 'text-slate-400'} />
                   <div>
-                    <p className="font-semibold text-slate-200">{s.company_name || s.email}</p>
-                    <p className="text-xs text-slate-400">{s.specialization}</p>
+                    <p className="font-semibold text-slate-800">{s.company_name || s.email}</p>
+                    <p className="text-xs text-slate-500">{s.specialization}</p>
                   </div>
                 </div>
               ))}
@@ -120,7 +120,7 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
 
           {/* Confirmation Info */}
           {selectedSupplier && (
-            <div className="bg-emerald-950/30 border border-emerald-900/50 p-4 rounded-lg flex gap-3 text-emerald-200/90 text-sm">
+            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-lg flex gap-3 text-emerald-700 text-sm">
               <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
               <div>
                 <p>Order will be directly awarded to <strong>{selectedSupplier.company_name || selectedSupplier.email}</strong>.</p>
@@ -130,8 +130,8 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
           )}
         </div>
 
-        <div className="p-6 border-t border-slate-800 flex justify-end gap-3 bg-[#0f172a]">
-          <Button variant="outline" onClick={onClose} className="border-slate-700 text-slate-300 hover:bg-slate-800">
+        <div className="p-6 border-t border-slate-200 flex justify-end gap-3 bg-white">
+          <Button variant="outline" onClick={onClose} className="border-slate-200 text-slate-700 hover:bg-slate-50">
             Cancel
           </Button>
           <Button onClick={handleAssign} disabled={!selectedSupplierId || loading} className="bg-emerald-600 hover:bg-emerald-500 text-white">

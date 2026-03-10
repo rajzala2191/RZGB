@@ -48,7 +48,7 @@ export default function NotificationBell() {
   return (
     <div className="relative">
       <button
-        className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+        className="relative p-2 rounded-full hover:bg-gray-100"
         onClick={() => setOpen(!open)}
         aria-label="Notifications"
       >
@@ -60,20 +60,20 @@ export default function NotificationBell() {
         )}
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50">
-          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-            <span className="font-semibold text-gray-800 dark:text-gray-100">Notifications</span>
+        <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white border border-gray-200 rounded-xl shadow-xl z-50">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100">
+            <span className="font-semibold text-gray-800">Notifications</span>
             <button className="text-xs text-orange-500 hover:underline" onClick={markAllAsRead}>Mark all as read</button>
           </div>
-          <ul className="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
+          <ul className="max-h-80 overflow-y-auto divide-y divide-gray-100">
             {notifications.length === 0 && (
               <li className="px-4 py-6 text-center text-gray-400">No notifications</li>
             )}
             {notifications.map(n => (
-              <li key={n.id} className={`px-4 py-3 ${!n.read ? 'bg-orange-50 dark:bg-orange-900/10' : ''}`}>
+              <li key={n.id} className={`px-4 py-3 ${!n.read ? 'bg-orange-50' : ''}`}>
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-medium text-gray-800 dark:text-gray-100">{n.title || n.type || 'Notification'}</span>
-                  <span className="text-sm text-gray-600 dark:text-gray-300">{n.message}</span>
+                  <span className="font-medium text-gray-800">{n.title || n.type || 'Notification'}</span>
+                  <span className="text-sm text-gray-600">{n.message}</span>
                   {n.link && <a href={n.link} className="text-xs text-blue-500 hover:underline mt-1">View</a>}
                   <span className="text-xs text-gray-400 mt-1">{new Date(n.created_at).toLocaleString()}</span>
                 </div>

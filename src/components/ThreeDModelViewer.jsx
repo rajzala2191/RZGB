@@ -45,7 +45,7 @@ export default function ThreeDModelViewer({ file, url, fileName }) {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(width, height);
-    renderer.setClearColor(0x0f172a, 1);
+    renderer.setClearColor(0xf1f5f9, 1);
     mountRef.current.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -160,12 +160,12 @@ export default function ThreeDModelViewer({ file, url, fileName }) {
   };
 
   return (
-    <div className="relative w-full rounded-xl overflow-hidden bg-[#0f172a] border border-slate-700" style={{ minHeight: '340px' }}>
-      <div ref={mountRef} className="w-full" style={{ height: '340px' }} />
+    <div className="relative w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200" style={{ minHeight: 'clamp(220px, 40vw, 340px)' }}>
+      <div ref={mountRef} className="w-full" style={{ height: 'clamp(220px, 40vw, 340px)' }} />
 
       {status === 'loading' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0f172a]/80">
-          <div className="flex flex-col items-center gap-2 text-sky-400">
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+          <div className="flex flex-col items-center gap-2 text-sky-500">
             <Loader2 size={32} className="animate-spin" />
             <span className="text-sm">Loading model...</span>
           </div>
@@ -173,22 +173,22 @@ export default function ThreeDModelViewer({ file, url, fileName }) {
       )}
 
       {status === 'error' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0f172a]">
-          <p className="text-slate-400 text-sm">{errorMsg || 'Failed to load model'}</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
+          <p className="text-slate-500 text-sm">{errorMsg || 'Failed to load model'}</p>
         </div>
       )}
 
       {status === 'idle' && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-slate-600 text-sm">No model loaded</p>
+          <p className="text-slate-400 text-sm">No model loaded</p>
         </div>
       )}
 
       {status === 'unsupported' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-slate-500">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-slate-400">
           <Box size={36} className="opacity-30" />
           <p className="text-sm font-medium">3D preview not available for Parasolid (.x_t) files</p>
-          <p className="text-xs text-slate-600">File will be uploaded and available to download</p>
+          <p className="text-xs text-slate-400">File will be uploaded and available to download</p>
         </div>
       )}
 
@@ -198,7 +198,7 @@ export default function ThreeDModelViewer({ file, url, fileName }) {
             type="button"
             onClick={resetCamera}
             title="Reset view"
-            className="p-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
+            className="p-2 bg-white/90 hover:bg-white text-slate-600 rounded-lg transition-colors shadow"
           >
             <RotateCcw size={14} />
           </button>

@@ -253,12 +253,12 @@ const SupplierHubLayout = ({ children }) => {
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Header */}
-          <header className="flex items-center gap-2 sm:gap-6 px-2 sm:px-8 py-2 sm:py-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0e0e18] shadow-sm relative">
+          <header className="flex items-center gap-2 sm:gap-6 px-2 sm:px-8 py-2 sm:py-4 border-b border-gray-200 bg-white shadow-sm relative">
             <div className="flex items-center">
               {!sidebarOpen && (
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden flex items-center justify-center p-2 rounded-xl shadow-lg bg-white dark:bg-[#18181b] border border-gray-200 dark:border-gray-700 mr-2"
+                  className="lg:hidden flex items-center justify-center p-2 rounded-xl shadow-lg bg-white border border-gray-200 mr-2"
                   style={{ zIndex: 60 }}
                 >
                   <Menu size={20} />

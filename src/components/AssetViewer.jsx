@@ -57,37 +57,37 @@ const AssetViewer = ({ assets, orderId }) => {
   };
 
   return (
-    <div className="bg-[#0f172a] border border-slate-800 rounded-xl overflow-hidden">
-      <div className="p-4 border-b border-slate-800 bg-slate-950 flex justify-between items-center">
-        <h3 className="font-bold text-slate-200 flex items-center gap-2">
+    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+        <h3 className="font-bold text-slate-900 flex items-center gap-2">
           <Box size={18} className="text-sky-500" />
           Technical Assets
         </h3>
-        <span className="text-xs text-slate-500 uppercase tracking-wider flex items-center gap-1">
+        <span className="text-xs text-slate-400 uppercase tracking-wider flex items-center gap-1">
           <Lock size={12} /> Secure Viewer
         </span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 min-h-[400px]">
         {/* Asset List */}
-        <div className="border-r border-slate-800 bg-slate-900/50">
+        <div className="border-r border-slate-200 bg-slate-50">
           {assets.length === 0 ? (
-            <div className="p-8 text-center text-slate-500">No assets available.</div>
+            <div className="p-8 text-center text-slate-400">No assets available.</div>
           ) : (
-            <ul className="divide-y divide-slate-800">
+            <ul className="divide-y divide-slate-200">
               {assets.map((asset) => (
-                <li 
+                <li
                   key={asset.id}
                   onClick={() => handleView(asset)}
-                  className={`p-4 cursor-pointer hover:bg-slate-800 transition-colors ${selectedAsset?.id === asset.id ? 'bg-slate-800 border-l-2 border-sky-500' : ''}`}
+                  className={`p-4 cursor-pointer hover:bg-slate-100 transition-colors ${selectedAsset?.id === asset.id ? 'bg-slate-100 border-l-2 border-sky-500' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-900 rounded-lg text-slate-400">
+                    <div className="p-2 bg-white rounded-lg text-slate-400 border border-slate-200">
                       {asset.asset_type === 'pdf' ? <FileText size={20} /> : isModel(asset.asset_name) ? <Box size={20} className="text-orange-500" /> : <ImageIcon size={20} />}
                     </div>
                     <div className="overflow-hidden">
-                      <p className="text-sm font-medium text-slate-200 truncate">{asset.asset_name}</p>
-                      <p className="text-xs text-slate-500">{asset.file_size || 'Unknown Size'}</p>
+                      <p className="text-sm font-medium text-slate-800 truncate">{asset.asset_name}</p>
+                      <p className="text-xs text-slate-400">{asset.file_size || 'Unknown Size'}</p>
                     </div>
                   </div>
                 </li>
@@ -97,7 +97,7 @@ const AssetViewer = ({ assets, orderId }) => {
         </div>
 
         {/* Viewer Area */}
-        <div className="lg:col-span-2 relative bg-slate-950 flex items-center justify-center overflow-hidden">
+        <div className="lg:col-span-2 relative bg-slate-100 flex items-center justify-center overflow-hidden">
           {selectedAsset ? (
             <div className="relative w-full h-full flex flex-col" style={{ minHeight: '400px' }}>
               {/* File Render */}
@@ -161,14 +161,14 @@ const AssetViewer = ({ assets, orderId }) => {
                     <Download size={16} /> Download
                   </a>
                 ) : (
-                  <span className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-500 rounded-lg text-sm font-bold border border-slate-700">
+                  <span className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-400 rounded-lg text-sm font-bold border border-slate-200">
                     <Lock size={16} /> Download Locked
                   </span>
                 )}
               </div>
             </div>
           ) : (
-            <div className="text-center text-slate-600">
+            <div className="text-center text-slate-400">
               <Eye size={48} className="mx-auto mb-4 opacity-20" />
               <p>Select an asset to view</p>
             </div>

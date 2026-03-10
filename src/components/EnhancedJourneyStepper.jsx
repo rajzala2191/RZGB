@@ -60,7 +60,7 @@ const EnhancedJourneyStepper = ({ orderId, currentStatus }) => {
     <div className="w-full py-8 px-4">
       <div className="relative flex items-center justify-between w-full">
         {/* Progress Bar Background */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 -z-10 rounded-full" />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 -z-10 rounded-full" />
         
         {/* Active Progress Bar */}
         <motion.div 
@@ -82,10 +82,10 @@ const EnhancedJourneyStepper = ({ orderId, currentStatus }) => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.1 }}
                 className={cn(
-                  "w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-500 bg-[#020617] z-10",
-                  isCompleted ? "border-emerald-500 text-emerald-500 bg-emerald-950/20" :
-                  isCurrent ? "border-orange-500 text-orange-500 shadow-[0_0_20px_rgba(6,182,212,0.6)] bg-orange-950/20 scale-110" :
-                  "border-slate-800 text-slate-700 bg-slate-950"
+                  "w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-500 bg-white z-10",
+                  isCompleted ? "border-emerald-500 text-emerald-500 bg-emerald-50" :
+                  isCurrent ? "border-orange-500 text-orange-500 shadow-[0_0_20px_rgba(255,107,53,0.3)] bg-orange-50 scale-110" :
+                  "border-slate-300 text-slate-300 bg-white"
                 )}
               >
                 {isCompleted ? <Check size={20} strokeWidth={3} /> :
@@ -96,15 +96,15 @@ const EnhancedJourneyStepper = ({ orderId, currentStatus }) => {
               <div className="absolute top-16 text-center w-32">
                 <p className={cn(
                   "text-xs font-bold uppercase tracking-wider mb-1 transition-colors duration-300",
-                  isCompleted ? "text-emerald-400" :
-                  isCurrent ? "text-orange-400" :
-                  "text-slate-600"
+                  isCompleted ? "text-emerald-600" :
+                  isCurrent ? "text-orange-500" :
+                  "text-slate-400"
                 )}>
                   {stage.label}
                 </p>
                 <p className={cn(
                   "text-[10px] transition-colors duration-300",
-                  isCurrent ? "text-slate-300" : "text-slate-600"
+                  isCurrent ? "text-slate-500" : "text-slate-400"
                 )}>
                   {stage.description}
                 </p>

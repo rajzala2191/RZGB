@@ -57,7 +57,7 @@ const MilestoneTrackingDetails = ({ orderId }) => {
     };
   }, [orderId]);
 
-  if (loading) return <div className="h-24 bg-slate-900/50 animate-pulse rounded-lg"></div>;
+  if (loading) return <div className="h-24 bg-slate-100 animate-pulse rounded-lg"></div>;
 
   // Determine current active index based on completed milestones
   let activeIndex = -1;
@@ -72,11 +72,11 @@ const MilestoneTrackingDetails = ({ orderId }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Manufacturing Milestones</h3>
+        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Manufacturing Milestones</h3>
         <span className="text-xs text-orange-500 font-mono animate-pulse">● Live Updates</span>
       </div>
 
-      <div className="relative border-l-2 border-slate-800 ml-3 space-y-8 pb-2">
+      <div className="relative border-l-2 border-slate-200 ml-3 space-y-8 pb-2">
         {MILESTONES.map((step, index) => {
           const milestone = milestones[step.key];
           const isCompleted = !!milestone;
@@ -86,16 +86,16 @@ const MilestoneTrackingDetails = ({ orderId }) => {
             <div key={step.key} className="relative pl-8 group">
               {/* Dot Indicator */}
               <div className={`
-                absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 transition-all duration-300 bg-[#0f172a]
-                ${isCompleted ? 'border-emerald-500 text-emerald-500' : 
-                  isNext ? 'border-orange-500 text-orange-500 animate-pulse' : 'border-slate-700 text-slate-700'}
+                absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 transition-all duration-300 bg-white
+                ${isCompleted ? 'border-emerald-500 text-emerald-500' :
+                  isNext ? 'border-orange-500 text-orange-500 animate-pulse' : 'border-slate-300 text-slate-300'}
               `}>
                 {isCompleted && <div className="w-2 h-2 bg-emerald-500 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />}
               </div>
 
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className={`text-sm font-bold ${isCompleted ? 'text-slate-200' : 'text-slate-500'}`}>
+                  <h4 className={`text-sm font-bold ${isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>
                     {step.label}
                   </h4>
                   {isCompleted && (
@@ -117,7 +117,7 @@ const MilestoneTrackingDetails = ({ orderId }) => {
                   )}
                   {!isCompleted && !isNext && (
                     <div className="flex flex-col mt-1 opacity-50">
-                       <span className="text-xs text-slate-600 flex items-center gap-1">
+                       <span className="text-xs text-slate-400 flex items-center gap-1">
                          <Circle size={10} /> Queued
                        </span>
                     </div>

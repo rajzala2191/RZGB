@@ -43,7 +43,7 @@ const JourneyStepper = ({ currentStage }) => {
     <div className="w-full py-4">
       <div className="relative flex items-center justify-between w-full">
         {/* Progress Bar Background */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 -z-10" />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 -z-10" />
         
         {/* Active Progress Bar */}
         <motion.div 
@@ -65,10 +65,10 @@ const JourneyStepper = ({ currentStage }) => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.1 }}
                 className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center border-4 transition-colors duration-300 bg-[#020617]",
+                  "w-10 h-10 rounded-full flex items-center justify-center border-4 transition-colors duration-300 bg-white",
                   isCompleted ? "border-emerald-500 text-emerald-500" :
-                  isCurrent ? "border-orange-500 text-orange-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]" :
-                  "border-slate-700 text-slate-700"
+                  isCurrent ? "border-orange-500 text-orange-500 shadow-[0_0_15px_rgba(255,107,53,0.3)]" :
+                  "border-slate-300 text-slate-300"
                 )}
               >
                 {isCompleted ? <Check size={18} strokeWidth={3} /> :
@@ -81,15 +81,15 @@ const JourneyStepper = ({ currentStage }) => {
                   "text-xs font-bold uppercase tracking-wider mb-1",
                   isCompleted ? "text-emerald-500" :
                   isCurrent ? "text-orange-400" :
-                  "text-slate-500"
+                  "text-slate-400"
                 )}>
                   {stage.label}
                 </p>
                 {isCurrent && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-[10px] text-slate-400"
+                    className="text-[10px] text-slate-500"
                   >
                     {stage.description}
                   </motion.p>

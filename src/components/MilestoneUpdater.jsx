@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Check, ChevronRight, Loader2, Lock, CheckCircle2, Circle } from 'lucide-react';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/components/ui/use-toast';
 
 /* ── Stage definitions ───────────────────────────────────────── */
@@ -69,19 +68,20 @@ const STAGES = [
   },
 ];
 
+const textPrimary = '#0a0a0a';
+const textMuted   = '#737373';
+const inner       = '#f4f4f5';
+
 export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUpdate }) {
   const { currentUser } = useAuth();
-  const { isDark } = useTheme();
   const { toast } = useToast();
 
   const stage    = STAGES.find(s => s.id === currentStatus) || null;
   const stageIdx = STAGES.findIndex(s => s.id === currentStatus);
 
-  // Simple boolean array — one entry per checklist item, resets when stage changes
   const [checked,   setChecked]   = useState([]);
   const [advancing, setAdvancing] = useState(false);
 
-  // Reset checklist whenever stage changes
   useEffect(() => {
     if (stage) setChecked(new Array(stage.checklist.length).fill(false));
   }, [currentStatus]);
@@ -93,10 +93,6 @@ export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUp
       return next;
     });
   };
-
-  const textPrimary = isDark ? '#fafafa' : '#0a0a0a';
-  const textMuted   = isDark ? '#71717a' : '#737373';
-  const inner       = isDark ? '#232329' : '#f4f4f5';
 
   const isDone       = currentStatus === 'DELIVERED' || currentStatus === 'COMPLETED';
   const checklist    = stage?.checklist || [];
@@ -200,10 +196,8 @@ export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUp
               onClick={() => toggle(i)}
               className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-colors duration-150 cursor-pointer"
               style={{
-                background: done
-                  ? (isDark ? 'rgba(34,197,94,0.07)' : 'rgba(34,197,94,0.06)')
-                  : inner,
-                border: `1px solid ${done ? 'rgba(34,197,94,0.3)' : (isDark ? '#2e2e35' : '#e5e5e5')}`,
+                background: done ? 'rgba(34,197,94,0.06)' : inner,
+                border: `1px solid ${done ? 'rgba(34,197,94,0.3)' : '#e5e5e5'}`,
               }}
             >
               {/* Custom checkbox */}
@@ -211,7 +205,7 @@ export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUp
                 className="flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center transition-all duration-150"
                 style={{
                   background:  done ? '#22c55e' : 'transparent',
-                  border: `2px solid ${done ? '#22c55e' : (isDark ? '#52525b' : '#d4d4d8')}`,
+                  border: `2px solid ${done ? '#22c55e' : '#d4d4d8'}`,
                 }}
               >
                 {done && <Check size={11} strokeWidth={3} color="#fff" />}
@@ -221,7 +215,7 @@ export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUp
               <span
                 className="flex-1 text-sm font-medium"
                 style={{
-                  color: done ? (isDark ? '#86efac' : '#16a34a') : textPrimary,
+                  color: done ? '#16a34a' : textPrimary,
                   textDecoration: done ? 'line-through' : 'none',
                   opacity: done ? 0.65 : 1,
                 }}
@@ -242,7 +236,7 @@ export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUp
         className="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-300"
         style={{
           background: allChecked ? `${stage.color}0d` : inner,
-          border: `1px solid ${allChecked ? `${stage.color}35` : (isDark ? '#2e2e35' : '#e5e5e5')}`,
+          border: `1px solid ${allChecked ? `${stage.color}35` : '#e5e5e5'}`,
         }}
       >
         <div className="flex items-start gap-3">
@@ -266,7 +260,7 @@ export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUp
           onClick={handleAdvance}
           disabled={!allChecked || advancing}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
-          style={{ background: allChecked ? stage.color : (isDark ? '#27272a' : '#d4d4d8') }}
+          style={{ background: allChecked ? stage.color : '#d4d4d8' }}
         >
           {advancing ? <Loader2 size={15} className="animate-spin" /> : <ChevronRight size={15} />}
           {advancing ? 'Advancing…' : `Advance to ${stage.nextLabel}`}
@@ -289,7 +283,7 @@ export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUp
               >
                 {past
                   ? <Check size={10} style={{ color: '#22c55e' }} />
-                  : <Circle size={7} fill={current ? s.color : (isDark ? '#3f3f46' : '#d4d4d8')} stroke="none" />}
+                  : <Circle size={7} fill={current ? s.color : '#d4d4d8'} stroke="none" />}
                 <span className="text-[10px] font-semibold"
                   style={{ color: current ? s.color : past ? '#22c55e' : textMuted }}>
                   {s.label}
@@ -297,7 +291,7 @@ export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUp
               </div>
               {i < STAGES.length - 1 && (
                 <div className="w-3 h-px flex-shrink-0"
-                  style={{ background: past ? 'rgba(34,197,94,0.35)' : (isDark ? '#27272a' : '#e4e4e7') }} />
+                  style={{ background: past ? 'rgba(34,197,94,0.35)' : '#e4e4e7' }} />
               )}
             </div>
           );

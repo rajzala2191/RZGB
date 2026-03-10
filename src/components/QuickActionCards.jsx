@@ -21,14 +21,14 @@ const QuickActionCards = () => {
       description: 'Add a new client, supplier, or admin',
       icon: UserPlus,
       onClick: () => navigate('/control-centre/users'),
-      color: 'text-green-500',
+      color: 'text-green-600',
     },
     {
       title: 'View All Users',
       description: 'Manage existing accounts and permissions',
       icon: Users,
       onClick: () => navigate('/control-centre/users'),
-      color: 'text-blue-500',
+      color: 'text-blue-600',
     },
     {
       title: 'System Settings',
@@ -40,22 +40,22 @@ const QuickActionCards = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {actions.map((action, index) => (
         <motion.div
           key={index}
           whileHover={{ y: -4, borderColor: '#FF6B35' }}
           onClick={action.onClick}
-          className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-5 cursor-pointer group transition-all"
+          className="bg-white border border-slate-200 rounded-xl p-5 cursor-pointer group transition-all shadow-sm"
         >
           <div className="flex items-start justify-between mb-3">
-            <div className={`p-2.5 rounded-lg bg-gray-900 group-hover:bg-[#FF6B35]/10 transition-colors ${action.color} group-hover:text-[#FF6B35]`}>
+            <div className={`p-2.5 rounded-lg bg-slate-100 group-hover:bg-[#FF6B35]/10 transition-colors ${action.color} group-hover:text-[#FF6B35]`}>
               <action.icon size={20} />
             </div>
-            <ArrowRight size={16} className="text-gray-600 group-hover:text-[#FF6B35] transition-colors -rotate-45 group-hover:rotate-0" />
+            <ArrowRight size={16} className="text-slate-300 group-hover:text-[#FF6B35] transition-colors -rotate-45 group-hover:rotate-0" />
           </div>
-          <h4 className="text-white font-semibold mb-1">{action.title}</h4>
-          <p className="text-xs text-gray-400">{action.description}</p>
+          <h4 className="text-slate-900 font-semibold mb-1">{action.title}</h4>
+          <p className="text-xs text-slate-400">{action.description}</p>
         </motion.div>
       ))}
     </div>

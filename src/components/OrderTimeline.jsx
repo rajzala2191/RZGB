@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '@/contexts/ThemeContext';
 import {
   Package, FileCheck, Zap, CheckCircle2, Hourglass,
   ShieldCheck, Truck, Clock, XCircle, Check, Cog,
@@ -74,43 +73,26 @@ export default function OrderTimeline({
   isWithdrawn = false,
   selectedProcesses,   // array of status_key strings — e.g. ['CASTING', 'MACHINING']
 }) {
-  const { isDark } = useTheme();
   const scrollRef = useRef(null);
 
   const stages = buildStages(selectedProcesses);
 
-  const t = isDark ? {
-    card:        'rgba(255,255,255,0.04)',
-    cardBorder:  'rgba(255,255,255,0.08)',
-    activeBg:    'rgba(255,107,53,0.1)',
-    activeBorder:'rgba(255,107,53,0.25)',
-    doneBg:      'rgba(255,255,255,0.03)',
-    futureBg:    'transparent',
-    text:        '#ffffff',
-    textMuted:   'rgba(255,255,255,0.5)',
-    textFaint:   'rgba(255,255,255,0.25)',
-    dot:         'rgba(255,255,255,0.1)',
-    dotBorder:   'rgba(255,255,255,0.12)',
-    connectorDone:  ACCENT,
-    connectorFuture:'rgba(255,255,255,0.1)',
-    noteBg:      'rgba(255,255,255,0.04)',
-    noteBorder:  'rgba(255,255,255,0.07)',
-  } : {
-    card:        '#ffffff',
-    cardBorder:  'rgba(0,0,0,0.08)',
-    activeBg:    'rgba(255,107,53,0.07)',
-    activeBorder:'rgba(255,107,53,0.2)',
-    doneBg:      'rgba(0,0,0,0.02)',
-    futureBg:    'transparent',
-    text:        '#0f0f0f',
-    textMuted:   'rgba(0,0,0,0.5)',
-    textFaint:   'rgba(0,0,0,0.28)',
-    dot:         'rgba(0,0,0,0.07)',
-    dotBorder:   'rgba(0,0,0,0.1)',
+  const t = {
+    card:           '#ffffff',
+    cardBorder:     'rgba(0,0,0,0.08)',
+    activeBg:       'rgba(255,107,53,0.07)',
+    activeBorder:   'rgba(255,107,53,0.2)',
+    doneBg:         'rgba(0,0,0,0.02)',
+    futureBg:       'transparent',
+    text:           '#0f0f0f',
+    textMuted:      'rgba(0,0,0,0.5)',
+    textFaint:      'rgba(0,0,0,0.28)',
+    dot:            'rgba(0,0,0,0.07)',
+    dotBorder:      'rgba(0,0,0,0.1)',
     connectorDone:  ACCENT,
     connectorFuture:'rgba(0,0,0,0.1)',
-    noteBg:      'rgba(0,0,0,0.03)',
-    noteBorder:  'rgba(0,0,0,0.07)',
+    noteBg:         'rgba(0,0,0,0.03)',
+    noteBorder:     'rgba(0,0,0,0.07)',
   };
 
   /* withdrawn state */
@@ -173,7 +155,7 @@ export default function OrderTimeline({
       </div>
 
       {/* ── Master progress bar ────────────────────────────── */}
-      <div className="relative h-1 rounded-full overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }}>
+      <div className="relative h-1 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
         <motion.div
           className="absolute inset-y-0 left-0 rounded-full"
           style={{ background: `linear-gradient(90deg, ${ACCENT}, #f97316)` }}
@@ -213,7 +195,7 @@ export default function OrderTimeline({
                     )}
                     {current && (
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 animate-pulse"
-                        style={{ background: ACCENT, borderColor: isDark ? '#09090b' : '#f0f0f2' }} />
+                        style={{ background: ACCENT, borderColor: '#f0f0f2' }} />
                     )}
                   </motion.div>
                   <p

@@ -145,7 +145,7 @@ function Lightbox({ files, activeIndex, onClose, onPrev, onNext }) {
             src={file.url}
             title={file.name}
             className="w-full h-full border-0"
-            style={{ background: '#1a1a1a' }}
+            style={{ background: '#ffffff' }}
           />
         )}
 
@@ -203,23 +203,20 @@ function Lightbox({ files, activeIndex, onClose, onPrev, onNext }) {
 }
 
 /* ── Document card (thumbnail in page) ─────────────────────── */
-function DocCard({ file, onOpen, isDark, compact }) {
+function DocCard({ file, onOpen, compact }) {
   const ext = getExt(file.name);
   const cfg = EXT_ICONS[ext] || { color: '#71717a', label: ext.toUpperCase() || 'FILE' };
-  const card   = isDark ? '#18181b' : '#ffffff';
-  const border = isDark ? '#232329' : '#e5e5e5';
-  const muted  = isDark ? '#52525b' : '#a1a1aa';
 
   return (
     <div
       className="group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-150 hover:scale-[1.02]"
-      style={{ background: card, border: `1px solid ${border}` }}
+      style={{ background: '#ffffff', border: '1px solid #e5e5e5' }}
       onClick={onOpen}
     >
       {/* Preview area */}
       <div
         className="relative flex items-center justify-center overflow-hidden"
-        style={{ height: 160, background: isDark ? '#111111' : '#f4f4f5' }}
+        style={{ height: 160, background: '#f4f4f5' }}
       >
         {file.loading ? (
           <Loader2 size={20} className="animate-spin text-orange-500" />
@@ -250,13 +247,13 @@ function DocCard({ file, onOpen, isDark, compact }) {
       </div>
 
       {/* Footer */}
-      <div className="px-3 py-2.5" style={{ borderTop: `1px solid ${border}` }}>
-        <p className="text-xs font-semibold truncate" style={{ color: isDark ? '#e4e4e7' : '#18181b' }}>
+      <div className="px-3 py-2.5" style={{ borderTop: '1px solid #e5e5e5' }}>
+        <p className="text-xs font-semibold truncate" style={{ color: '#18181b' }}>
           {file.name}
         </p>
         <div className="flex items-center justify-between mt-0.5">
           <span className="text-[10px] font-bold uppercase" style={{ color: cfg.color }}>{cfg.label}</span>
-          {file.size && <span className="text-[10px]" style={{ color: muted }}>{file.size}</span>}
+          {file.size && <span className="text-[10px]" style={{ color: '#a1a1aa' }}>{file.size}</span>}
         </div>
       </div>
     </div>
@@ -272,9 +269,6 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
   const [loading, setLoading] = useState(!directUrl);
   const [error,   setError]   = useState(null);
   const [open,    setOpen]    = useState(false);
-
-  // Detect isDark from document class (works without context)
-  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
 
   const load = useCallback(async () => {
     if (directUrl) { setUrl(directUrl); setLoading(false); return; }
@@ -305,19 +299,19 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
   };
 
   if (loading) return (
-    <div className={`flex items-center justify-center p-6 rounded-xl ${className}`} style={{ background: isDark ? '#18181b' : '#f4f4f5', border: `1px solid ${isDark ? '#232329' : '#e5e5e5'}` }}>
+    <div className={`flex items-center justify-center p-6 rounded-xl ${className}`} style={{ background: '#f4f4f5', border: '1px solid #e5e5e5' }}>
       <Loader2 size={18} className="animate-spin text-orange-500 mr-2" />
-      <span className="text-sm" style={{ color: isDark ? '#71717a' : '#737373' }}>Loading preview…</span>
+      <span className="text-sm" style={{ color: '#737373' }}>Loading preview…</span>
     </div>
   );
 
   if (error) return (
-    <div className={`p-4 rounded-xl ${className}`} style={{ background: isDark ? '#18181b' : '#f4f4f5', border: `1px solid ${isDark ? '#232329' : '#e5e5e5'}` }}>
+    <div className={`p-4 rounded-xl ${className}`} style={{ background: '#f4f4f5', border: '1px solid #e5e5e5' }}>
       <div className="flex items-center gap-2 mb-2" style={{ color: '#f59e0b' }}>
         <AlertCircle size={15} />
         <span className="text-sm font-medium">Preview unavailable</span>
       </div>
-      <p className="text-xs mb-3" style={{ color: isDark ? '#52525b' : '#a1a1aa' }}>{error}</p>
+      <p className="text-xs mb-3" style={{ color: '#a1a1aa' }}>{error}</p>
       <button onClick={load} className="flex items-center gap-1.5 text-xs font-semibold text-orange-500 hover:text-orange-400">
         <RefreshCw size={12} /> Retry
       </button>
@@ -326,7 +320,7 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
 
   return (
     <>
-      <DocCard file={file} onOpen={() => setOpen(true)} isDark={isDark} />
+      <DocCard file={file} onOpen={() => setOpen(true)} />
       {open && (
         <Lightbox
           files={files}
@@ -346,7 +340,6 @@ const DocumentPreview = ({ filePath, fileName, fileUrl: directUrl, bucket = 'doc
           bucket, signedUrls (optional pre-fetched map { id: url })
    ═══════════════════════════════════════════════════════════════ */
 export function DocumentGallery({ documents = [], bucket = 'documents', signedUrls = {} }) {
-  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const [urls,   setUrls]   = useState(signedUrls);
   const [active, setActive] = useState(null); // index into documents
 
@@ -378,7 +371,7 @@ export function DocumentGallery({ documents = [], bucket = 'documents', signedUr
     <>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {files.map((f, i) => (
-          <DocCard key={i} file={f} onOpen={() => setActive(i)} isDark={isDark} />
+          <DocCard key={i} file={f} onOpen={() => setActive(i)} />
         ))}
       </div>
       {active !== null && (

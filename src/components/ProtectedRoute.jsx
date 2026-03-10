@@ -10,10 +10,10 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   // Also wait if user is authenticated but profile/role hasn't loaded yet
   if (loading || (currentUser && !userRole)) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 text-[#FF6B35] animate-spin" />
-          <p className="text-white text-xl">Verifying access...</p>
+          <p className="text-slate-600 text-xl">Verifying access...</p>
         </div>
       </div>
     );
