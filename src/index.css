@@ -15,6 +15,28 @@
     --text-primary: #f1f5f9;
     --text-secondary: #cbd5e1;
     --border-color: #334155;
+
+    /* shadcn / Tailwind semantic tokens (HSL channels) */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 96.1%;
+    --card: 222.2 47.4% 11.2%;
+    --card-foreground: 210 40% 96.1%;
+    --popover: 222.2 47.4% 11.2%;
+    --popover-foreground: 210 40% 96.1%;
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 96.1%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 96.1%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 96.1%;
+    --border: 215.3 25% 26.7%;
+    --input: 215.3 25% 26.7%;
+    --ring: 24.6 95% 53.1%;
+    --radius: 0.5rem;
 }
 
 :root.light {
@@ -25,7 +47,28 @@
     --text-primary: #0f0f0f;
     --text-secondary: #3d3d3d;
     --border-color: #f0cdb0;
-    --accent: #f97316;
+
+    /* shadcn / Tailwind semantic tokens (HSL channels) */
+    --background: 240 6.7% 94.5%;
+    --foreground: 0 0% 5.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 5.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5.9%;
+    --primary: 17.6 100% 60.2%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 92%;
+    --secondary-foreground: 0 0% 5.9%;
+    --muted: 240 4.8% 95.1%;
+    --muted-foreground: 0 0% 47.1%;
+    --accent: 240 4.8% 92%;
+    --accent-foreground: 0 0% 5.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 5.9% 87.1%;
+    --input: 240 5.9% 87.1%;
+    --ring: 17.6 100% 60.2%;
+    --radius: 0.5rem;
 }
 
 html {

@@ -17,6 +17,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import NotificationBell from './NotificationBell';
 import SearchBar from './SearchBar';
+import ThemeToggle from './ThemeToggle';
 
 const NAV_ITEMS = [
   { path: '/supplier-hub',           label: 'Dashboard',       icon: LayoutDashboard, exact: true },
@@ -253,13 +254,25 @@ const SupplierHubLayout = ({ children }) => {
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Header */}
-          <header className="flex items-center gap-2 sm:gap-6 px-2 sm:px-8 py-2 sm:py-4 border-b border-gray-200 bg-white shadow-sm relative">
+          <header
+            className="flex items-center gap-2 sm:gap-6 px-2 sm:px-8 py-2 sm:py-4 border-b shadow-sm relative"
+            style={{
+              background:     isDark ? 'rgba(9,9,11,0.9)' : 'rgba(255,255,255,0.9)',
+              backdropFilter: 'blur(12px)',
+              borderBottom:   isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.08)',
+            }}
+          >
             <div className="flex items-center">
               {!sidebarOpen && (
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden flex items-center justify-center p-2 rounded-xl shadow-lg bg-white border border-gray-200 mr-2"
-                  style={{ zIndex: 60 }}
+                  className="lg:hidden flex items-center justify-center p-2 rounded-xl shadow-lg mr-2"
+                  style={{
+                    zIndex: 60,
+                    background: isDark ? '#18181b' : '#ffffff',
+                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+                    color: isDark ? '#fff' : '#000',
+                  }}
                 >
                   <Menu size={20} />
                 </button>
@@ -272,7 +285,8 @@ const SupplierHubLayout = ({ children }) => {
                 else if (type === 'document') navigate('/supplier-hub/documents');
               }} />
             </div>
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-end gap-2">
+              <ThemeToggle />
               <NotificationBell />
             </div>
           </header>

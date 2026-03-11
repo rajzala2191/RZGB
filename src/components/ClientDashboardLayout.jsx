@@ -19,6 +19,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import NotificationBell from './NotificationBell';
 import SearchBar from './SearchBar';
+import ThemeToggle from './ThemeToggle';
 
 const NAV_ITEMS = [
   { path: '/client-dashboard',               label: 'Dashboard',  icon: LayoutDashboard, exact: true },
@@ -296,8 +297,13 @@ export default function ClientDashboardLayout({ children }) {
               {!sidebarOpen && (
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden flex items-center justify-center p-2 rounded-xl shadow-lg bg-white border border-gray-200 mr-2"
-                  style={{ zIndex: 60 }}
+                  className="lg:hidden flex items-center justify-center p-2 rounded-xl shadow-lg mr-2"
+                  style={{
+                    zIndex: 60,
+                    background: isDark ? '#18181b' : '#ffffff',
+                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+                    color: isDark ? '#fff' : '#000',
+                  }}
                 >
                   <Menu size={20} />
                 </button>
@@ -309,7 +315,8 @@ export default function ClientDashboardLayout({ children }) {
                 else if (type === 'document' && item.order_id) navigate(`/client-dashboard/orders/${item.order_id}`);
               }} />
             </div>
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-end gap-2">
+              <ThemeToggle />
               <NotificationBell />
             </div>
           </header>
