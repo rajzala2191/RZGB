@@ -136,50 +136,260 @@ const FEATURES = [
     body: 'Claude Vision automatically removes client identifiers before drawings reach suppliers. Prevents direct poaching.',
     icon: Shield,
     color: '#3b82f6',
-    span: 'col-span-1',
-    size: 'large',
+    visual: 'sanitisation',
   },
   {
     title: 'Live Pipeline Board',
     body: '11-stage Kanban across all active orders. Admin has full visibility at all times.',
     icon: GitBranch,
     color: '#FF6B35',
-    span: 'col-span-1',
-    size: 'medium',
+    visual: 'pipeline',
   },
   {
     title: 'Competitive Bidding',
     body: 'Suppliers bid on sanitised jobs. Clients get best price. Fair and transparent.',
     icon: BarChart3,
     color: '#8b5cf6',
-    span: 'col-span-1',
-    size: 'medium',
+    visual: 'bidding',
   },
   {
     title: 'Real-Time Tracking',
     body: 'WebSocket-powered live updates. Every stage change reflected instantly across all portals.',
     icon: Zap,
     color: '#10b981',
-    span: 'col-span-1',
-    size: 'medium',
+    visual: 'tracking',
   },
   {
     title: 'Document Vault',
     body: 'Certificates of conformity, quality reports, shipping documents — all stored per job.',
     icon: FileCheck,
     color: '#f59e0b',
-    span: 'col-span-1',
-    size: 'medium',
+    visual: 'documents',
   },
   {
     title: '3-Role Access System',
     body: 'Client, Admin, and Supplier portals each with role-specific permissions and views.',
     icon: Users,
     color: '#06b6d4',
-    span: 'col-span-1',
-    size: 'medium',
+    visual: 'roles',
   },
 ];
+
+function FeatureVisual({ type, color }) {
+  if (type === 'sanitisation') {
+    return (
+      <div className="space-y-3 w-full">
+        <div className="flex items-center gap-2 mb-2">
+          <Eye className="w-4 h-4 text-blue-500" />
+          <span className="text-[11px] font-bold text-slate-600">AI Sanitisation Engine</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white border border-slate-200 rounded-xl p-3 relative">
+            <p className="text-[9px] font-bold text-red-400 uppercase mb-2">Before</p>
+            <div className="space-y-1.5">
+              <div className="h-1.5 bg-slate-200 rounded-full w-full" />
+              <div className="h-1.5 bg-slate-200 rounded-full w-3/4" />
+              <div className="h-4 bg-red-100 border border-red-200 rounded px-1 flex items-center mt-2">
+                <span className="text-[8px] text-red-500 font-bold truncate">Thornton Precision Ltd</span>
+              </div>
+              <div className="h-1.5 bg-slate-200 rounded-full w-5/6" />
+              <div className="h-4 bg-red-100 border border-red-200 rounded px-1 flex items-center">
+                <span className="text-[8px] text-red-500 font-bold truncate">REF: TP-2024-0891</span>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white border border-blue-200 rounded-xl p-3 relative">
+            <p className="text-[9px] font-bold text-emerald-500 uppercase mb-2">After</p>
+            <div className="space-y-1.5">
+              <div className="h-1.5 bg-slate-200 rounded-full w-full" />
+              <div className="h-1.5 bg-slate-200 rounded-full w-3/4" />
+              <div className="h-4 bg-blue-50 border border-blue-200 rounded px-1 flex items-center mt-2">
+                <span className="text-[8px] text-blue-500 font-bold">██████████████</span>
+              </div>
+              <div className="h-1.5 bg-slate-200 rounded-full w-5/6" />
+              <div className="h-4 bg-blue-50 border border-blue-200 rounded px-1 flex items-center">
+                <span className="text-[8px] text-blue-500 font-bold">██████████████</span>
+              </div>
+            </div>
+            <div className="absolute -top-2 -right-2 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+              <CheckCircle2 className="w-3 h-3 text-white" />
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-center gap-1.5 pt-1">
+          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+          <span className="text-[10px] text-emerald-600 font-semibold">3 identifiers removed</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === 'pipeline') {
+    const stages = [
+      { label: 'Review', count: 3, color: '#f59e0b' },
+      { label: 'Bidding', count: 2, color: '#8b5cf6' },
+      { label: 'Production', count: 5, color: '#FF6B35' },
+      { label: 'QC', count: 1, color: '#10b981' },
+    ];
+    return (
+      <div className="w-full">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1.5">
+            <GitBranch className="w-3.5 h-3.5 text-orange-500" />
+            <span className="text-[11px] font-bold text-slate-600">Pipeline Board</span>
+          </div>
+          <span className="text-[10px] text-slate-400 font-medium">11 orders</span>
+        </div>
+        <div className="flex gap-2">
+          {stages.map((s) => (
+            <div key={s.label} className="flex-1 bg-white border border-slate-200 rounded-xl overflow-hidden" style={{ borderTopWidth: 2, borderTopColor: s.color }}>
+              <div className="px-2 py-1.5 border-b border-slate-100 flex items-center justify-between">
+                <span className="text-[9px] font-semibold" style={{ color: s.color }}>{s.label}</span>
+                <span className="text-[9px] text-slate-400 font-bold">{s.count}</span>
+              </div>
+              <div className="p-1.5 space-y-1">
+                {Array.from({ length: Math.min(s.count, 3) }).map((_, j) => (
+                  <div key={j} className="bg-slate-50 rounded-lg p-1.5">
+                    <div className="h-1 bg-slate-200 rounded-full w-3/4 mb-1" />
+                    <div className="h-1 bg-slate-100 rounded-full w-1/2" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (type === 'bidding') {
+    return (
+      <div className="w-full space-y-2">
+        <div className="flex items-center gap-1.5 mb-2">
+          <BarChart3 className="w-3.5 h-3.5 text-violet-500" />
+          <span className="text-[11px] font-bold text-slate-600">Bid Comparison</span>
+        </div>
+        {[
+          { name: 'Sheffield Forge', price: '£8,400', lead: '18 days', rating: '4.8★', best: true },
+          { name: 'Midlands Casting', price: '£9,100', lead: '14 days', rating: '4.6★', best: false },
+          { name: 'Northern Precision', price: '£11,200', lead: '21 days', rating: '4.3★', best: false },
+        ].map((bid) => (
+          <div
+            key={bid.name}
+            className={`flex items-center justify-between p-2.5 rounded-xl border ${bid.best ? 'bg-violet-50 border-violet-200' : 'bg-white border-slate-200'}`}
+          >
+            <div className="min-w-0">
+              <p className={`text-[11px] font-bold ${bid.best ? 'text-violet-700' : 'text-slate-700'}`}>{bid.name}</p>
+              <p className="text-[9px] text-slate-400">{bid.lead} · {bid.rating}</p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className={`text-xs font-black ${bid.best ? 'text-violet-600' : 'text-slate-600'}`}>{bid.price}</span>
+              {bid.best && (
+                <span className="text-[8px] font-bold bg-violet-500 text-white px-1.5 py-0.5 rounded-full">BEST</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (type === 'tracking') {
+    return (
+      <div className="w-full space-y-2">
+        <div className="flex items-center gap-1.5 mb-2">
+          <Zap className="w-3.5 h-3.5 text-emerald-500" />
+          <span className="text-[11px] font-bold text-slate-600">Live Activity Feed</span>
+          <span className="ml-auto flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[9px] text-emerald-600 font-semibold">LIVE</span>
+          </span>
+        </div>
+        {[
+          { action: 'Order RZ-10033 moved to QC', time: '2 min ago', color: '#10b981', icon: CheckCircle2 },
+          { action: 'New bid from Sheffield Forge', time: '5 min ago', color: '#8b5cf6', icon: BarChart3 },
+          { action: 'Drawing sanitised for RZ-10041', time: '12 min ago', color: '#3b82f6', icon: Shield },
+          { action: 'RZ-10029 dispatched to client', time: '1 hr ago', color: '#FF6B35', icon: Truck },
+        ].map((item, j) => (
+          <motion.div
+            key={j}
+            initial={{ opacity: 0, x: -8 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: j * 0.1 }}
+            className="flex items-center gap-2.5 bg-white border border-slate-200 rounded-xl p-2.5"
+          >
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15` }}>
+              <item.icon className="w-3 h-3" style={{ color: item.color }} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-semibold text-slate-700 truncate">{item.action}</p>
+              <p className="text-[9px] text-slate-400">{item.time}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    );
+  }
+
+  if (type === 'documents') {
+    const docs = [
+      { name: 'Certificate of Conformity', ext: 'PDF', color: '#ef4444', size: '1.2 MB' },
+      { name: 'Quality Inspection Report', ext: 'PDF', color: '#ef4444', size: '3.4 MB' },
+      { name: 'Technical Drawing Rev.3', ext: 'DWG', color: '#f59e0b', size: '8.1 MB' },
+      { name: 'Shipping Manifest', ext: 'PDF', color: '#ef4444', size: '0.4 MB' },
+    ];
+    return (
+      <div className="w-full space-y-2">
+        <div className="flex items-center gap-1.5 mb-2">
+          <FileCheck className="w-3.5 h-3.5 text-amber-500" />
+          <span className="text-[11px] font-bold text-slate-600">Document Vault · RZ-10033</span>
+        </div>
+        {docs.map((doc, j) => (
+          <div key={j} className="flex items-center gap-2.5 bg-white border border-slate-200 rounded-xl p-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${doc.color}12` }}>
+              <span className="text-[8px] font-black" style={{ color: doc.color }}>{doc.ext}</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-semibold text-slate-700 truncate">{doc.name}</p>
+              <p className="text-[9px] text-slate-400">{doc.size}</p>
+            </div>
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (type === 'roles') {
+    const roles = [
+      { label: 'Client Portal', icon: Building2, color: '#FF6B35', perms: ['Submit orders', 'Track progress', 'Sign off delivery'] },
+      { label: 'Control Centre', icon: Shield, color: '#3b82f6', perms: ['Sanitise drawings', 'Manage bids', 'Full pipeline'] },
+      { label: 'Supplier Hub', icon: Factory, color: '#8b5cf6', perms: ['Browse jobs', 'Submit bids', 'Update milestones'] },
+    ];
+    return (
+      <div className="w-full space-y-2">
+        {roles.map((role) => (
+          <div key={role.label} className="bg-white border border-slate-200 rounded-xl p-3 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${role.color}15` }}>
+              <role.icon className="w-4 h-4" style={{ color: role.color }} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-bold mb-1" style={{ color: role.color }}>{role.label}</p>
+              <div className="flex flex-wrap gap-1">
+                {role.perms.map((p) => (
+                  <span key={p} className="text-[8px] font-medium bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">{p}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return null;
+}
 
 // Testimonials
 const TESTIMONIALS = [
@@ -460,35 +670,9 @@ function FeaturesSection() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.3 }}
-                  className="bg-slate-50 border border-slate-100 rounded-2xl p-8 shadow-inner min-h-[200px] flex items-center justify-center"
+                  className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 min-h-[200px] flex items-center justify-center"
                 >
-                  {/* Infographic placeholder */}
-                  <div className="space-y-4 w-full max-w-xs">
-                    {[1, 2, 3].map((j) => (
-                      <motion.div
-                        key={j}
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${60 + j * 12}%` }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.8 + j * 0.1 }}
-                        className="h-3 rounded-full"
-                        style={{ background: `linear-gradient(90deg, ${f.color}40, ${f.color}20)` }}
-                      />
-                    ))}
-                    <div className="flex gap-2 pt-2">
-                      {[1, 2, 3, 4].map((j) => (
-                        <motion.div
-                          key={j}
-                          initial={{ width: 0, opacity: 0 }}
-                          whileInView={{ width: '100%', opacity: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 1.2 + j * 0.1 }}
-                          className="h-16 rounded-xl flex-1"
-                          style={{ background: `${f.color}15` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                  <FeatureVisual type={f.visual} color={f.color} />
                 </motion.div>
               </div>
             </motion.div>
