@@ -484,7 +484,8 @@ export default function SanitisationReviewPage() {
                   const isScrubbed = status === 'scrubbed';
                   const isScrubbing = status === 'scrubbing';
                   const viewMode = docViewMode[doc.id] || 'original';
-                  const filePath = viewMode === 'scrubbed' && doc.scrubbed_file_path ? doc.scrubbed_file_path : doc.file_path;
+                  const scrubbedPath = doc.file_path.replace(/(\.[^.]+)$/, '_scrubbed$1');
+                  const filePath = viewMode === 'scrubbed' && isScrubbed ? scrubbedPath : doc.file_path;
 
                   return (
                     <motion.div key={doc.id} variants={fadeUp} initial="hidden" animate="show"
