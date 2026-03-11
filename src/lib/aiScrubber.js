@@ -1,7 +1,10 @@
+import { supabase } from '@/lib/customSupabaseClient';
+
 /**
  * Scrub a drawing file using the Supabase scrub-drawing Edge Function.
  * Uses Claude vision AI to identify sensitive client information, then
  * returns a watermarked copy of the file along with a redaction report.
+ * Requires an authenticated session (Bearer token sent automatically).
  *
  * @param {File|Blob} file - The drawing file (PDF, image, etc.)
  * @param {Object} clientInfo - Client details to look for
@@ -13,6 +16,11 @@
  * @returns {Promise<{ blob: Blob, report: string }>}
  */
 export async function scrubDrawingWithAI(file, clientInfo = {}) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error('You must be signed in to use AI scrubbing');
+  }
+
   const formData = new FormData();
   formData.append('file', file);
 
@@ -25,6 +33,9 @@ export async function scrubDrawingWithAI(file, clientInfo = {}) {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const response = await fetch(`${supabaseUrl}/functions/v1/scrub-drawing`, {
     method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+    },
     body: formData,
   });
 

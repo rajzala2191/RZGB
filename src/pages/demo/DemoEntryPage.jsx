@@ -49,7 +49,8 @@ const PORTALS = [
   },
 ];
 
-const DEMO_PASSWORD = 'RZDemo2024!';
+// Demo password must be set via VITE_DEMO_PASSWORD (e.g. in .env) so it is not committed.
+const DEMO_PASSWORD = import.meta.env.VITE_DEMO_PASSWORD || '';
 
 const container = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
 const card = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } } };
@@ -71,6 +72,11 @@ export default function DemoEntryPage() {
   async function handleEnter(portal) {
     setLoading(portal.key);
     setError(null);
+    if (!DEMO_PASSWORD) {
+      setError('Demo is not configured. Set VITE_DEMO_PASSWORD in your .env (see .env.example).');
+      setLoading(null);
+      return;
+    }
     const { error: authErr } = await supabase.auth.signInWithPassword({
       email: portal.email,
       password: DEMO_PASSWORD,
@@ -129,7 +135,7 @@ export default function DemoEntryPage() {
             </div>
             <button
               onClick={() => handleEnter(portal)}
-              disabled={!!loading}
+              disabled={!!loading || !DEMO_PASSWORD}
               className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-white text-sm font-bold transition-all hover:-translate-y-0.5 shadow-sm disabled:opacity-70 disabled:cursor-wait"
               style={{ background: portal.color }}
             >
