@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/customSupabaseClient';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -18,6 +16,12 @@ import {
   Box, MapPin, ChevronRight, ChevronLeft,
   FileText, ArrowRight, Cog,
 } from 'lucide-react';
+import {
+  createOrder,
+  createOrderDocumentRecord,
+  fetchActiveManufacturingProcesses,
+  uploadDocumentToStorage,
+} from '@/services/orderService';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const FORBIDDEN = ['confidential', 'internal', 'secret', 'proprietary'];
@@ -176,11 +180,7 @@ export default function ClientOrderCreationPage() {
   const [selectedProcesses, setSelectedProcesses] = useState([]);
 
   useEffect(() => {
-    supabase.from('manufacturing_processes')
-      .select('id, name, status_key, description')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true })
-      .then(({ data }) => {
+    fetchActiveManufacturingProcesses().then(({ data }) => {
         if (data) {
           setAvailableProcesses(data);
           // Default: select all available processes
@@ -270,7 +270,7 @@ export default function ClientOrderCreationPage() {
     setLoading(true);
     try {
       // 1. Insert order row
-      const { data: order, error } = await supabase.from('orders').insert([{
+      const { data: order, error } = await createOrder({
         client_id:            currentUser.id,
         user_id:              currentUser.id,              // legacy alias
         part_name:            form.part_name.trim(),
@@ -284,16 +284,16 @@ export default function ClientOrderCreationPage() {
         delivery_location:    form.delivery_location || null,
         order_status:         'PENDING_ADMIN_SCRUB',
         selected_processes:   selectedProcesses.length > 0 ? selectedProcesses : ['MACHINING'],
-      }]).select().single();
+      });
 
       if (error) throw error;
 
       // 2. Upload technical drawings → documents.file_type = 'client_drawing'
       for (const file of drawingFiles) {
         const path = `${currentUser.id}/${order.id}/${file.name}`;
-        const { error: upErr } = await supabaseAdmin.storage.from('documents').upload(path, file);
+        const { error: upErr } = await uploadDocumentToStorage({ path, file });
         if (upErr) { toast({ title: 'Upload Warning', description: `${file.name}: ${upErr.message}`, variant: 'destructive' }); continue; }
-        await supabaseAdmin.from('documents').insert([{
+        await createOrderDocumentRecord({
           order_id:    order.id,
           client_id:   currentUser.id,
           uploaded_by: currentUser.id,
@@ -301,15 +301,15 @@ export default function ClientOrderCreationPage() {
           file_path:   path,
           file_type:   'client_drawing',
           status:      'PENDING_SCRUB',
-        }]);
+        });
       }
 
       // 3. Upload 3D models → documents.file_type = '3d_model'
       for (const file of modelFiles) {
         const path = `${currentUser.id}/${order.id}/models/${file.name}`;
-        const { error: upErr } = await supabaseAdmin.storage.from('documents').upload(path, file);
+        const { error: upErr } = await uploadDocumentToStorage({ path, file });
         if (upErr) { toast({ title: 'Upload Warning', description: `${file.name}: ${upErr.message}`, variant: 'destructive' }); continue; }
-        await supabaseAdmin.from('documents').insert([{
+        await createOrderDocumentRecord({
           order_id:    order.id,
           client_id:   currentUser.id,
           uploaded_by: currentUser.id,
@@ -317,7 +317,7 @@ export default function ClientOrderCreationPage() {
           file_path:   path,
           file_type:   '3d_model',
           status:      'ACTIVE',
-        }]);
+        });
       }
 
       toast({ title: 'Order Submitted', description: 'Your order is now pending admin review.' });

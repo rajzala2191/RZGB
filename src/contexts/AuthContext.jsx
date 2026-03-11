@@ -1,5 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/customSupabaseClient';
+import {
+  fetchProfileByUserId,
+  getSession,
+  logActivity as logAuthActivity,
+  onAuthStateChange,
+  signInWithPassword,
+  signOut,
+} from '@/services/authService';
 
 const AuthContext = createContext(undefined);
 export { AuthContext };
@@ -22,13 +29,7 @@ export const AuthProvider = ({ children }) => {
   const logActivity = async (userId, action, status, details) => {
     try {
       if (!userId) return;
-      await supabase.from('activity_logs').insert({
-        user_id: userId,
-        action,
-        status,
-        details,
-        ip_address: 'client-side'
-      });
+      await logAuthActivity({ userId, action, status, details });
     } catch (e) {
       console.error('Failed to log auth activity', e);
     }
@@ -37,11 +38,7 @@ export const AuthProvider = ({ children }) => {
   // Helper to fetch profile data. Fail closed if missing/invalid.
   const fetchUserProfile = useCallback(async (userId) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role, company_name, logo_url, is_demo, status')
-        .eq('id', userId)
-        .maybeSingle();
+      const { data, error } = await fetchProfileByUserId(userId);
 
       if (error) {
         console.error('AuthContext: Error fetching user profile:', error.message);
@@ -72,7 +69,7 @@ export const AuthProvider = ({ children }) => {
 
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await getSession();
         
         if (error) throw error;
 
@@ -81,7 +78,7 @@ export const AuthProvider = ({ children }) => {
             setCurrentUser(session.user);
             const profileOk = await fetchUserProfile(session.user.id);
             if (!profileOk) {
-              await supabase.auth.signOut();
+              await signOut();
               setCurrentUser(null);
               clearProfileState();
             }
@@ -99,7 +96,7 @@ export const AuthProvider = ({ children }) => {
 
     initializeAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription } } = onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
 
@@ -107,7 +104,7 @@ export const AuthProvider = ({ children }) => {
           setCurrentUser(session.user);
           const profileOk = await fetchUserProfile(session.user.id);
           if (!profileOk && event !== 'SIGNED_OUT') {
-            await supabase.auth.signOut();
+            await signOut();
             setCurrentUser(null);
             clearProfileState();
           }
@@ -128,7 +125,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await signInWithPassword({
         email,
         password,
       });
@@ -147,7 +144,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      await signOut();
       setCurrentUser(null);
       clearProfileState();
     } catch (error) {

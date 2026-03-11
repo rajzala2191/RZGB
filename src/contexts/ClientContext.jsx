@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  fetchClientDocumentsByClientId,
+  fetchClientOrders,
+  fetchDocumentsByOrderIds,
+} from '@/services/orderService';
 
 const ClientContext = createContext();
 export { ClientContext };
@@ -21,33 +26,20 @@ export const ClientProvider = ({ children }) => {
       if (orders.length === 0) setLoading(true);
 
       // First fetch orders
-      const ordersRes = await supabase
-        .from('orders')
-        .select('*')
-        .eq('client_id', currentUser.id)
-        .neq('order_status', 'CLEARED')
-        .order('created_at', { ascending: false });
+      const ordersRes = await fetchClientOrders(currentUser.id);
 
       if (ordersRes.error) throw ordersRes.error;
       const clientOrders = ordersRes.data || [];
 
       // Fetch docs by client_id
-      const docsRes = await supabase
-        .from('documents')
-        .select('*')
-        .eq('client_id', currentUser.id)
-        .order('created_at', { ascending: false });
+      const docsRes = await fetchClientDocumentsByClientId(currentUser.id);
 
       let allDocs = docsRes.data || [];
 
       // Also fetch docs by order_id for the client's orders (some docs may not have client_id set)
       const orderIds = clientOrders.map(o => o.id).filter(Boolean);
       if (orderIds.length > 0) {
-        const docsForOrders = await supabase
-          .from('documents')
-          .select('*')
-          .in('order_id', orderIds)
-          .order('created_at', { ascending: false });
+        const docsForOrders = await fetchDocumentsByOrderIds(orderIds);
 
         if (docsForOrders.data) {
           // Merge, deduplicate by id
