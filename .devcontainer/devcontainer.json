@@ -1,0 +1,19 @@
+{
+  "name": "RZGB Web App",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Vite dev server (RZGB app)",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "npm install",
+  "postStartCommand": "npm run dev",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "remote.autoForwardPorts": true
+      }
+    }
+  }
+}

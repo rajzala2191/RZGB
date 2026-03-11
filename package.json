@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite --host :: --port 3000",
+    "dev": "vite --host 0.0.0.0 --port 3000",
+    "open-app": "node scripts/open-app.js",
+    "tunnel": "npx --yes localtunnel --port 3000",
+    "tunnel:public": "npx --yes cloudflared-tunnel -p 3000 -h http://localhost",
     "build": "node tools/generate-llms.js || true && vite build",
     "preview": "vite preview --host :: --port 3000",
     "lint": "eslint . --quiet",

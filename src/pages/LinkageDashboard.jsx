@@ -84,7 +84,7 @@ const LinkageDashboard = () => {
             </h1>
             <p className="text-slate-400 mt-1">Master view of active supplier-client connections.</p>
           </div>
-          <button 
+          <button
             onClick={handleExportCSV}
             className="flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
           >
@@ -95,8 +95,8 @@ const LinkageDashboard = () => {
         <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search by RZ-Job-ID, Client, or Anon ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -105,7 +105,7 @@ const LinkageDashboard = () => {
           </div>
           <div className="flex items-center gap-2 min-w-[200px]">
             <Filter size={18} className="text-slate-500" />
-            <select 
+            <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-sky-500"
