@@ -275,7 +275,11 @@ const ControlCentreLayout = ({ children }) => {
               )}
             </div>
             <div className="flex-1 flex justify-start">
-              <SearchBar />
+              <SearchBar onResultSelect={(item, type) => {
+                if (type === 'order') navigate(`/control-centre/order-preview/${item.id}`);
+                else if (type === 'supplier') navigate('/control-centre/supplier-management');
+                else if (type === 'document' && item.order_id) navigate(`/control-centre/order-preview/${item.order_id}`);
+              }} />
             </div>
             <div className="flex items-center justify-end">
               <NotificationBell />

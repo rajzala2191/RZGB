@@ -3,6 +3,8 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { createNotification } from '@/lib/createNotification';
+import { useAuth } from '@/contexts/AuthContext';
 import { X, Building2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefresh }) {
@@ -10,6 +12,7 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
   const [selectedSupplierId, setSelectedSupplierId] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (isOpen) {
@@ -61,6 +64,26 @@ export default function ReleaseToSuppliersModal({ order, isOpen, onClose, onRefr
         note: 'Order assigned to supplier. Production can begin.',
         updated_by: 'ADMIN'
       });
+
+      await createNotification({
+        recipientId: selectedSupplierId,
+        senderId: currentUser?.id,
+        type: 'ORDER_AWARDED',
+        title: 'New Job Awarded',
+        message: `You have been awarded job ${rzJobId} — ${order?.ghost_public_name || order?.part_name || 'New Order'}. Production can begin.`,
+        link: `/supplier-hub/job-tracking/${rzJobId}`,
+      });
+
+      if (order?.client_id) {
+        await createNotification({
+          recipientId: order.client_id,
+          senderId: currentUser?.id,
+          type: 'ORDER_AWARDED',
+          title: 'Order Awarded to Supplier',
+          message: `Your order "${order?.part_name || 'Order'}" has been awarded to a supplier and production will begin shortly.`,
+          link: `/client-dashboard/orders/${order.id}`,
+        });
+      }
 
       toast({ title: 'Supplier Assigned', description: `Order awarded to supplier. Job ID: ${rzJobId}` });
       onRefresh();

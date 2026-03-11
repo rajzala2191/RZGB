@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Check, ChevronRight, Loader2, Lock, CheckCircle2, Circle } from 'lucide-react';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { createNotification } from '@/lib/createNotification';
 
 /* ── Stage definitions ───────────────────────────────────────── */
 const STAGES = [
@@ -118,6 +120,40 @@ export default function MilestoneUpdater({ orderId, rzJobId, currentStatus, onUp
           updated_by: currentUser?.id,
         });
       }
+
+      try {
+        const { data: orderData } = await supabaseAdmin
+          .from('orders')
+          .select('client_id, part_name, ghost_public_name')
+          .eq('id', orderId)
+          .maybeSingle();
+
+        const orderLabel = orderData?.part_name || orderData?.ghost_public_name || rzJobId || 'Order';
+        const stageMsg = `${orderLabel} advanced from ${stage.label} to ${stage.nextLabel}.`;
+
+        const { data: admins } = await supabase.from('profiles').select('id').eq('role', 'admin');
+        if (admins?.length) {
+          await createNotification({
+            recipientId: admins.map(a => a.id),
+            senderId: currentUser?.id,
+            type: 'STAGE_ADVANCED',
+            title: `Stage: ${stage.nextLabel}`,
+            message: stageMsg,
+            link: `/control-centre/order-preview/${orderId}`,
+          });
+        }
+
+        if (orderData?.client_id) {
+          await createNotification({
+            recipientId: orderData.client_id,
+            senderId: currentUser?.id,
+            type: 'STAGE_ADVANCED',
+            title: `Order Update: ${stage.nextLabel}`,
+            message: `Your order "${orderLabel}" has progressed to the ${stage.nextLabel} stage.`,
+            link: `/client-dashboard/orders/${orderId}`,
+          });
+        }
+      } catch { /* notification failure should not block UI */ }
 
       toast({
         title: 'Stage Advanced',

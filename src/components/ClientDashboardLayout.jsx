@@ -304,7 +304,10 @@ export default function ClientDashboardLayout({ children }) {
               )}
             </div>
             <div className="flex-1 flex justify-start">
-              <SearchBar />
+              <SearchBar onResultSelect={(item, type) => {
+                if (type === 'order') navigate(`/client-dashboard/orders/${item.id}`);
+                else if (type === 'document' && item.order_id) navigate(`/client-dashboard/orders/${item.order_id}`);
+              }} />
             </div>
             <div className="flex items-center justify-end">
               <NotificationBell />

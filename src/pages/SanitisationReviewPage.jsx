@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import DocumentPreview from '@/components/DocumentPreview';
 import { scrubDrawingWithAI } from '@/lib/aiScrubber';
+import { createNotification } from '@/lib/createNotification';
 import {
   Shield, CheckSquare, FileText, Loader2, AlertTriangle,
   CheckCircle2, XCircle, User, MapPin, Mail, Phone,
@@ -251,6 +252,17 @@ export default function SanitisationReviewPage() {
         order_id: orderId, admin_id: currentUser.id,
         name: formData.public_name, status: 'COMPLETED',
       }]);
+
+      if (order?.client_id) {
+        await createNotification({
+          recipientId: order.client_id,
+          senderId: currentUser.id,
+          type: 'ORDER_SANITISED',
+          title: 'Order Processing Update',
+          message: `Your order "${order.part_name || 'Order'}" has been reviewed and is now being matched with suppliers.`,
+          link: `/client-dashboard/orders/${orderId}`,
+        });
+      }
 
       toast({ title: 'Order Sanitised', description: 'Order is ready for supplier bidding.', variant: 'success' });
       navigate('/control-centre/supplier-pool');

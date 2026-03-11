@@ -266,7 +266,11 @@ const SupplierHubLayout = ({ children }) => {
               )}
             </div>
             <div className="flex-1 flex justify-start">
-              <SearchBar />
+              <SearchBar onResultSelect={(item, type) => {
+                if (type === 'order' && item.rz_job_id) navigate(`/supplier-hub/job-tracking/${item.rz_job_id}`);
+                else if (type === 'order') navigate('/supplier-hub/orders');
+                else if (type === 'document') navigate('/supplier-hub/documents');
+              }} />
             </div>
             <div className="flex items-center justify-end">
               <NotificationBell />
