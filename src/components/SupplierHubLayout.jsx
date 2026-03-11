@@ -89,7 +89,7 @@ const SupplierHubLayout = ({ children }) => {
     <ErrorBoundary>
       <div
         className="flex overflow-hidden font-sans"
-        style={{ background: isDark ? '#09090b' : '#f0f0f2', height: isDemo ? 'calc(100vh - 48px)' : '100vh', marginTop: isDemo ? '48px' : '0' }}
+        style={{ background: isDark ? '#09090b' : '#f0f0f2', height: '100vh' }}
       >
 
         {/* Mobile overlay */}
