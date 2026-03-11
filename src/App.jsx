@@ -15,6 +15,7 @@ import LoginPage from '@/pages/LoginPage';
 
 // Landing & Demo
 import LandingPage from '@/pages/LandingPage';
+import HowItWorksPage from '@/pages/HowItWorksPage';
 import DemoEntryPage from '@/pages/demo/DemoEntryPage';
 import { DemoProvider } from '@/contexts/DemoContext';
 import DemoClientCreateOrder from '@/pages/demo/client/DemoClientCreateOrder';
@@ -96,6 +97,7 @@ function App() {
                     {/* Root & Auth */}
                     <Route path="/" element={<RootRedirect />} />
                     <Route path="/landing" element={<LandingPage />} />
+                    <Route path="/how-it-works" element={<HowItWorksPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
                     {/* Demo routes — wrapped in DemoProvider for in-memory context */}

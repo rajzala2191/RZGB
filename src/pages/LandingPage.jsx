@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
   ArrowRight, Shield, Zap, Users, BarChart3, FileCheck, Clock, CheckCircle2,
   Package, Layers, GitBranch, Globe, Menu, X, ChevronRight, Star, TrendingUp,
-  Lock, Eye, Building2, Factory, Wrench, Truck, Award,
+  Lock, Eye, Building2, Factory, Wrench, Truck, Award, Play,
 } from 'lucide-react';
 
 // Force light mode
@@ -194,13 +194,18 @@ const TESTIMONIALS = [
 function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const scrollTo = (id) => {
+    setMenuOpen(false);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-100' : 'bg-transparent'}`}>
@@ -210,9 +215,9 @@ function LandingNav() {
           <span className="text-sm font-bold text-slate-800 hidden sm:block">RZ Global Solutions</span>
         </div>
         <div className="hidden md:flex items-center gap-8">
-          {['Features', 'How it Works', 'Portals'].map((item) => (
-            <button key={item} className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">{item}</button>
-          ))}
+          <button onClick={() => scrollTo('features')} className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Features</button>
+          <Link to="/how-it-works" className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">How it Works</Link>
+          <button onClick={() => scrollTo('portals')} className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Portals</button>
         </div>
         <div className="flex items-center gap-3">
           <Link to="/login" className="hidden sm:block text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">
@@ -238,6 +243,9 @@ function LandingNav() {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden bg-white border-t border-slate-100 px-4 pb-4 pt-2 space-y-2 overflow-hidden"
           >
+            <button onClick={() => scrollTo('features')} className="block py-2 text-sm text-slate-600 font-medium w-full text-left">Features</button>
+            <Link to="/how-it-works" className="block py-2 text-sm text-slate-600 font-medium">How it Works</Link>
+            <button onClick={() => scrollTo('portals')} className="block py-2 text-sm text-slate-600 font-medium w-full text-left">Portals</button>
             <Link to="/login" className="block py-2 text-sm text-slate-600 font-medium">Sign In</Link>
             <Link to="/demo" className="block py-2 text-sm text-[#FF6B35] font-bold">Try Demo →</Link>
           </motion.div>
@@ -249,7 +257,6 @@ function LandingNav() {
 
 // Hero
 function HeroSection() {
-  const navigate = useNavigate();
   const containerVariants = {
     hidden: {},
     visible: { transition: { staggerChildren: 0.1 } },
@@ -319,6 +326,12 @@ function HeroSection() {
               <Factory className="w-4 h-4" /> Try as Supplier
             </Link>
           </div>
+          <Link
+            to="/how-it-works"
+            className="flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 text-sm font-semibold px-6 py-3.5 rounded-xl transition-all border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+          >
+            <Play className="w-4 h-4" /> Watch How It Works
+          </Link>
         </motion.div>
 
         {/* Hero UI card */}
@@ -397,38 +410,87 @@ function StatsBar() {
   );
 }
 
-// Features grid
+// Features — one section per feature with full-width infographic style
 function FeaturesSection() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-100px' });
+
   return (
-    <section className="py-14 sm:py-24 px-4 bg-white">
+    <section id="features" ref={ref} className="py-14 sm:py-24 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-10 sm:mb-14"
+          className="text-center mb-16 sm:mb-20"
         >
           <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Platform Features</p>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4">Everything you need, in one place</h2>
           <p className="text-base text-slate-500 max-w-xl mx-auto">Built specifically for manufacturing procurement — not a generic tool adapted for manufacturing.</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* Individual feature sections — full-width showcase */}
+        <div className="space-y-24 sm:space-y-32">
           {FEATURES.map((f, i) => (
             <motion.div
               key={f.title}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.07 }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${i % 2 === 1 ? 'md:flex-row-reverse' : ''}`}
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: `${f.color}15` }}>
-                <f.icon className="w-5 h-5" style={{ color: f.color }} />
+              <div className={i % 2 === 1 ? 'md:order-2' : ''}>
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 }}
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
+                  style={{ background: `linear-gradient(135deg, ${f.color}15, ${f.color}25)` }}
+                >
+                  <f.icon className="w-8 h-8" style={{ color: f.color }} />
+                </motion.div>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mb-4">{f.title}</h3>
+                <p className="text-base text-slate-500 leading-relaxed">{f.body}</p>
               </div>
-              <h3 className="text-base font-bold text-slate-900 mb-2">{f.title}</h3>
-              <p className="text-sm text-slate-500 leading-relaxed">{f.body}</p>
+              <div className={i % 2 === 1 ? 'md:order-1' : ''}>
+                <motion.div
+                  initial={{ opacity: 0, x: i % 2 === 0 ? 40 : -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-slate-50 border border-slate-100 rounded-2xl p-8 shadow-inner min-h-[200px] flex items-center justify-center"
+                >
+                  {/* Infographic placeholder */}
+                  <div className="space-y-4 w-full max-w-xs">
+                    {[1, 2, 3].map((j) => (
+                      <motion.div
+                        key={j}
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${60 + j * 12}%` }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.8 + j * 0.1 }}
+                        className="h-3 rounded-full"
+                        style={{ background: `linear-gradient(90deg, ${f.color}40, ${f.color}20)` }}
+                      />
+                    ))}
+                    <div className="flex gap-2 pt-2">
+                      {[1, 2, 3, 4].map((j) => (
+                        <motion.div
+                          key={j}
+                          initial={{ width: 0, opacity: 0 }}
+                          whileInView={{ width: '100%', opacity: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 1.2 + j * 0.1 }}
+                          className="h-16 rounded-xl flex-1"
+                          style={{ background: `${f.color}15` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -443,7 +505,7 @@ function RoleTabsSection() {
   const role = ROLES[active];
 
   return (
-    <section className="py-14 sm:py-24 px-4 bg-[#f8f8fb]">
+    <section id="portals" className="py-14 sm:py-24 px-4 bg-[#f8f8fb]">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -724,7 +786,13 @@ function LandingFooter() {
               <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 sm:mb-4">{col.title}</p>
               <ul className="space-y-2">
                 {col.links.map((link) => (
-                  <li key={link}><span className="text-xs text-slate-500 hover:text-slate-300 cursor-pointer transition-colors">{link}</span></li>
+                  <li key={link}>
+                    {link === 'How It Works' ? (
+                      <Link to="/how-it-works" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">{link}</Link>
+                    ) : (
+                      <span className="text-xs text-slate-500 hover:text-slate-300 cursor-pointer transition-colors">{link}</span>
+                    )}
+                  </li>
                 ))}
               </ul>
             </div>
