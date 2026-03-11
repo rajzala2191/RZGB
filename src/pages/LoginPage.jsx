@@ -91,12 +91,23 @@ const ForgotPasswordModal = ({ onClose }) => {
     setError('');
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.verifyOtp({
+      const { data, error: err } = await supabase.auth.verifyOtp({
         email: email.trim().toLowerCase(),
         token,
         type: 'recovery',
       });
       if (err) throw err;
+      
+      // Verify that a session was established
+      if (!data?.session) {
+        // Wait a moment for the session to be established, then check again
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          throw new Error('Session not established. Please try again.');
+        }
+      }
+      
       setStep('password');
     } catch (err) {
       setError(mapOtpError(err, 'Invalid or expired code. Please try again.'));
@@ -112,6 +123,12 @@ const ForgotPasswordModal = ({ onClose }) => {
     setError('');
     setLoading(true);
     try {
+      // Verify we have an active session before updating password
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Session expired. Please start over and request a new code.');
+      }
+      
       const { error: err } = await supabase.auth.updateUser({ password: newPassword });
       if (err) throw err;
       await supabase.auth.signOut();
