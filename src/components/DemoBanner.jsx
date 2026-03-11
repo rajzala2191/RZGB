@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
+import { ACCENT } from '@/lib/theme';
 import { FlaskConical, Loader2, X, ChevronRight, LogOut } from 'lucide-react';
 
 const DEMO_ROLES = [
@@ -15,7 +16,6 @@ const DEMO_ROLES = [
   { key: 'supplier', label: 'Supplier Hub',   icon: '🏭',  email: 'demo.supplier@rzglobalsolutions.co.uk', dash: '/supplier-hub' },
 ];
 const DEMO_PASSWORD = 'RZDemo2024!';
-const ACCENT = '#FF6B35';
 
 export default function DemoBanner() {
   const { logout }  = useAuth();
@@ -83,13 +83,13 @@ export default function DemoBanner() {
             transition={{ duration: 0.18, ease: 'easeOut' }}
             className="flex flex-col gap-1 p-2 rounded-2xl min-w-[200px]"
             style={{
-              background: '#ffffff',
-              border: '1px solid rgba(0,0,0,0.09)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08)',
+              background: 'var(--surface)',
+              border: '1px solid var(--edge-subtle)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.12)',
             }}
           >
             {/* Label */}
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] px-2 py-1" style={{ color: 'rgba(0,0,0,0.35)' }}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] px-2 py-1" style={{ color: 'var(--faint)' }}>
               Switch portal
             </p>
 
@@ -105,10 +105,10 @@ export default function DemoBanner() {
                   className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 disabled:opacity-60"
                   style={{
                     background: isActive ? 'rgba(255,107,53,0.08)' : 'transparent',
-                    color: isActive ? ACCENT : 'rgba(0,0,0,0.65)',
+                    color: isActive ? ACCENT : 'var(--body)',
                     border: isActive ? '1px solid rgba(255,107,53,0.2)' : '1px solid transparent',
                   }}
-                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--sidebar-nav-hover-bg)'; }}
                   onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
                 >
                   <div className="flex items-center gap-2.5">
@@ -126,14 +126,14 @@ export default function DemoBanner() {
             })}
 
             {/* Divider */}
-            <div style={{ height: 1, background: 'rgba(0,0,0,0.07)', margin: '2px 4px' }} />
+            <div style={{ height: 1, background: 'var(--edge-subtle)', margin: '2px 4px' }} />
 
             {/* Exit */}
             <button
               onClick={handleExit}
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
               style={{ color: '#ef4444' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.06)'}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               <LogOut size={14} />

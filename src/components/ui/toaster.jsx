@@ -7,7 +7,7 @@ import {
   ToastViewport,
 } from '@/components/ui/toast';
 import { useToast } from '@/components/ui/use-toast';
-import { useTheme } from '@/contexts/ThemeContext';
+import { TOAST } from '@/lib/theme';
 import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import React from 'react';
 
@@ -40,15 +40,6 @@ const VARIANT_CONFIG = {
 
 export function Toaster() {
   const { toasts } = useToast();
-  const { isDark } = useTheme();
-
-  const bg     = isDark ? '#18181b' : '#ffffff';
-  const border = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.09)';
-  const titleColor = isDark ? '#ffffff' : '#0f0f0f';
-  const descColor  = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)';
-  const closeBg    = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
-  const closeColor = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)';
-  const closeHover = isDark ? '#ffffff' : '#0f0f0f';
 
   return (
     <ToastProvider swipeDirection="right">
@@ -61,8 +52,8 @@ export function Toaster() {
             key={id}
             variant={variant}
             style={{
-              background:   bg,
-              border:       `1px solid ${border}`,
+              background:   TOAST.bg,
+              border:       `1px solid ${TOAST.border}`,
               borderLeft:   `3px solid ${cfg.accent}`,
             }}
             {...props}
@@ -91,7 +82,7 @@ export function Toaster() {
                   style={{
                     fontSize: '0.8125rem',
                     fontWeight: 600,
-                    color: titleColor,
+                    color: TOAST.titleColor,
                     lineHeight: 1.3,
                     marginBottom: description ? '0.2rem' : 0,
                   }}
@@ -103,7 +94,7 @@ export function Toaster() {
                 <ToastDescription
                   style={{
                     fontSize: '0.75rem',
-                    color: descColor,
+                    color: TOAST.descColor,
                     lineHeight: 1.5,
                   }}
                 >
@@ -122,22 +113,22 @@ export function Toaster() {
                 width: '1.5rem',
                 height: '1.5rem',
                 borderRadius: '0.375rem',
-                background: closeBg,
+                background: TOAST.closeBg,
                 border: 'none',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: closeColor,
+                color: TOAST.closeColor,
                 transition: 'color 150ms, background 150ms',
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.color = closeHover;
-                e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)';
+                e.currentTarget.style.color = TOAST.closeHover;
+                e.currentTarget.style.background = TOAST.closeHoverBg;
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.color = closeColor;
-                e.currentTarget.style.background = closeBg;
+                e.currentTarget.style.color = TOAST.closeColor;
+                e.currentTarget.style.background = TOAST.closeBg;
               }}
             >
               <X size={12} />

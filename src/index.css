@@ -6,17 +6,73 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CSS Variables for Theming */
-:root {
-    /* Dark Theme (Default) */
-    --bg-primary: #020617;
-    --bg-secondary: #0f172a;
-    --bg-tertiary: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --border-color: #334155;
+/* ================================================================
+   THEME TOKENS — single source of truth for every colour in the app.
+   Change a value here → every surface, text, border updates globally.
+   ================================================================ */
 
-    /* shadcn / Tailwind semantic tokens (HSL channels) */
+:root {
+    /* ── Brand ─────────────────────────────────────────────── */
+    --brand: #FF6B35;
+    --brand-hover: #f97316;
+    --brand-glow: rgba(255,107,53,0.18);
+
+    /* ── App surfaces ──────────────────────────────────────── */
+    --app-bg: #09090b;
+    --surface: #18181b;
+    --surface-raised: #27272a;
+    --surface-inset: #1c1c1e;
+    --surface-overlay: rgba(0,0,0,0.6);
+
+    /* ── Text ──────────────────────────────────────────────── */
+    --heading: #fafafa;
+    --body: #a1a1aa;
+    --caption: #71717a;
+    --faint: rgba(255,255,255,0.28);
+
+    /* ── Borders & dividers ────────────────────────────────── */
+    --edge: #27272a;
+    --edge-strong: #3f3f46;
+    --edge-subtle: rgba(255,255,255,0.07);
+
+    /* ── Sidebar shell ─────────────────────────────────────── */
+    --sidebar-bg: linear-gradient(180deg, #0e0e18 0%, #0c0c14 100%);
+    --sidebar-border: rgba(255,255,255,0.07);
+    --sidebar-label: rgba(255,255,255,0.2);
+    --sidebar-nav-text: rgba(255,255,255,0.45);
+    --sidebar-nav-hover-bg: rgba(255,255,255,0.05);
+    --sidebar-nav-hover-text: rgba(255,255,255,0.8);
+    --sidebar-icon-bg: rgba(255,255,255,0.05);
+    --sidebar-icon-color: rgba(255,255,255,0.4);
+    --sidebar-card-bg: rgba(255,255,255,0.04);
+    --sidebar-card-border: rgba(255,255,255,0.07);
+    --sidebar-name: #ffffff;
+    --sidebar-email: rgba(255,255,255,0.3);
+    --sidebar-btn-bg: rgba(255,255,255,0.05);
+    --sidebar-btn-border: rgba(255,255,255,0.08);
+    --sidebar-btn-color: rgba(255,255,255,0.4);
+    --sidebar-btn-hover-bg: rgba(255,255,255,0.10);
+    --sidebar-btn-hover-color: #ffffff;
+    --sidebar-mobile-bg: #0e0e18;
+
+    /* ── Header bar ────────────────────────────────────────── */
+    --header-bg: rgba(9,9,11,0.9);
+    --header-border: rgba(255,255,255,0.07);
+    --header-btn-bg: #18181b;
+    --header-btn-border: rgba(255,255,255,0.1);
+    --header-btn-color: #ffffff;
+
+    /* ── Toast / popover chrome ─────────────────────────────── */
+    --toast-bg: #18181b;
+    --toast-border: rgba(255,255,255,0.09);
+    --toast-title: #ffffff;
+    --toast-desc: rgba(255,255,255,0.5);
+    --toast-close-bg: rgba(255,255,255,0.06);
+    --toast-close-color: rgba(255,255,255,0.4);
+    --toast-close-hover: #ffffff;
+    --toast-close-hover-bg: rgba(255,255,255,0.12);
+
+    /* ── shadcn / Tailwind primitives (HSL channels) ───────── */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 96.1%;
     --card: 222.2 47.4% 11.2%;
@@ -40,15 +96,67 @@
 }
 
 :root.light {
-    /* Light Theme — orange, white & black */
-    --bg-primary: #ffffff;
-    --bg-secondary: #fff7f0;
-    --bg-tertiary: #ffe8d6;
-    --text-primary: #0f0f0f;
-    --text-secondary: #3d3d3d;
-    --border-color: #f0cdb0;
+    /* ── Brand ─────────────────────────────────────────────── */
+    --brand: #FF6B35;
+    --brand-hover: #ea580c;
+    --brand-glow: rgba(255,107,53,0.18);
 
-    /* shadcn / Tailwind semantic tokens (HSL channels) */
+    /* ── App surfaces ──────────────────────────────────────── */
+    --app-bg: #f0f0f2;
+    --surface: #ffffff;
+    --surface-raised: #f4f4f5;
+    --surface-inset: #fafafa;
+    --surface-overlay: rgba(0,0,0,0.6);
+
+    /* ── Text ──────────────────────────────────────────────── */
+    --heading: #0a0a0a;
+    --body: #71717a;
+    --caption: #a1a1aa;
+    --faint: rgba(0,0,0,0.28);
+
+    /* ── Borders & dividers ────────────────────────────────── */
+    --edge: #e5e5e5;
+    --edge-strong: #d4d4d8;
+    --edge-subtle: rgba(0,0,0,0.09);
+
+    /* ── Sidebar shell ─────────────────────────────────────── */
+    --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+    --sidebar-border: rgba(0,0,0,0.09);
+    --sidebar-label: rgba(0,0,0,0.28);
+    --sidebar-nav-text: rgba(0,0,0,0.45);
+    --sidebar-nav-hover-bg: rgba(0,0,0,0.05);
+    --sidebar-nav-hover-text: rgba(0,0,0,0.8);
+    --sidebar-icon-bg: rgba(0,0,0,0.05);
+    --sidebar-icon-color: rgba(0,0,0,0.35);
+    --sidebar-card-bg: rgba(0,0,0,0.04);
+    --sidebar-card-border: rgba(0,0,0,0.08);
+    --sidebar-name: #0f0f0f;
+    --sidebar-email: rgba(0,0,0,0.38);
+    --sidebar-btn-bg: rgba(0,0,0,0.05);
+    --sidebar-btn-border: rgba(0,0,0,0.09);
+    --sidebar-btn-color: rgba(0,0,0,0.4);
+    --sidebar-btn-hover-bg: rgba(0,0,0,0.09);
+    --sidebar-btn-hover-color: #0f0f0f;
+    --sidebar-mobile-bg: #ffffff;
+
+    /* ── Header bar ────────────────────────────────────────── */
+    --header-bg: rgba(255,255,255,0.9);
+    --header-border: rgba(0,0,0,0.08);
+    --header-btn-bg: #ffffff;
+    --header-btn-border: rgba(0,0,0,0.1);
+    --header-btn-color: #000000;
+
+    /* ── Toast / popover chrome ─────────────────────────────── */
+    --toast-bg: #ffffff;
+    --toast-border: rgba(0,0,0,0.09);
+    --toast-title: #0f0f0f;
+    --toast-desc: rgba(0,0,0,0.45);
+    --toast-close-bg: rgba(0,0,0,0.05);
+    --toast-close-color: rgba(0,0,0,0.35);
+    --toast-close-hover: #0f0f0f;
+    --toast-close-hover-bg: rgba(0,0,0,0.1);
+
+    /* ── shadcn / Tailwind primitives (HSL channels) ───────── */
     --background: 240 6.7% 94.5%;
     --foreground: 0 0% 5.9%;
     --card: 0 0% 100%;
@@ -308,3 +416,95 @@ html.light [role="dialog"] .bg-\[\#1a1a1a\] { background-color: #ffffff !importa
 /* ── Table row hover ───────────────────────────────────────── */
 html.light .hover\:bg-slate-900\/50:hover { background-color: rgba(0,0,0,0.04) !important; }
 html.light .hover\:bg-gray-900\/50:hover  { background-color: rgba(0,0,0,0.04) !important; }
+
+/* ============================================================
+   DARK THEME — light→dark class overrides
+   For pages built with a light-first palette
+   ============================================================ */
+
+/* ── White / light surface backgrounds → dark surfaces ───── */
+html.dark .bg-white                 { background-color: #18181b !important; }
+html.dark .bg-slate-50             { background-color: #1c1c1e !important; }
+html.dark .bg-slate-100            { background-color: #27272a !important; }
+html.dark .bg-slate-200            { background-color: #3f3f46 !important; }
+
+/* ── Light hover backgrounds ─────────────────────────────── */
+html.dark .hover\:bg-slate-50:hover  { background-color: rgba(255,255,255,0.05) !important; }
+html.dark .hover\:bg-slate-100:hover { background-color: rgba(255,255,255,0.08) !important; }
+html.dark .hover\:bg-slate-200:hover { background-color: rgba(255,255,255,0.1) !important; }
+
+/* ── Light text → light-on-dark text ─────────────────────── */
+html.dark .text-slate-900          { color: #fafafa !important; }
+html.dark .text-slate-800          { color: #e4e4e7 !important; }
+html.dark .text-slate-700          { color: #d4d4d8 !important; }
+html.dark .text-slate-600          { color: #a1a1aa !important; }
+html.dark .text-slate-500          { color: #a1a1aa !important; }
+
+/* Hover text */
+html.dark .hover\:text-slate-700:hover { color: #e4e4e7 !important; }
+html.dark .hover\:text-slate-800:hover { color: #fafafa !important; }
+html.dark .hover\:text-slate-900:hover { color: #fafafa !important; }
+
+/* ── Light borders → dark borders ────────────────────────── */
+html.dark .border-slate-100        { border-color: #27272a !important; }
+html.dark .border-slate-200        { border-color: #27272a !important; }
+html.dark .border-slate-300        { border-color: #3f3f46 !important; }
+html.dark .border-gray-100         { border-color: #27272a !important; }
+html.dark .border-gray-200         { border-color: #27272a !important; }
+
+/* Hover borders */
+html.dark .hover\:border-slate-300:hover { border-color: #52525b !important; }
+
+/* ── Light dividers ──────────────────────────────────────── */
+html.dark .divide-slate-100 > * + * { border-color: #27272a !important; }
+html.dark .divide-slate-200 > * + * { border-color: #27272a !important; }
+html.dark .divide-gray-50  > * + *  { border-color: #27272a !important; }
+
+/* ── Tinted surface backgrounds ──────────────────────────── */
+html.dark .bg-orange-50            { background-color: rgba(255,107,53,0.1)  !important; }
+html.dark .bg-orange-50\/60        { background-color: rgba(255,107,53,0.08) !important; }
+html.dark .bg-emerald-50           { background-color: rgba(16,185,129,0.1)  !important; }
+html.dark .bg-red-50               { background-color: rgba(239,68,68,0.1)   !important; }
+html.dark .bg-blue-50              { background-color: rgba(59,130,246,0.1)   !important; }
+html.dark .bg-amber-50             { background-color: rgba(245,158,11,0.1)  !important; }
+html.dark .bg-yellow-50            { background-color: rgba(234,179,8,0.1)   !important; }
+html.dark .bg-purple-50            { background-color: rgba(168,85,247,0.1)  !important; }
+
+/* ── Tinted borders ──────────────────────────────────────── */
+html.dark .border-orange-100       { border-color: rgba(255,107,53,0.25)  !important; }
+html.dark .border-orange-200       { border-color: rgba(255,107,53,0.3)   !important; }
+html.dark .border-emerald-100      { border-color: rgba(16,185,129,0.25)  !important; }
+html.dark .border-emerald-200      { border-color: rgba(16,185,129,0.3)   !important; }
+html.dark .border-red-100          { border-color: rgba(239,68,68,0.25)   !important; }
+html.dark .border-red-200          { border-color: rgba(239,68,68,0.3)    !important; }
+html.dark .border-blue-100         { border-color: rgba(59,130,246,0.25)  !important; }
+html.dark .border-blue-200         { border-color: rgba(59,130,246,0.3)   !important; }
+html.dark .border-amber-100        { border-color: rgba(245,158,11,0.25)  !important; }
+html.dark .border-amber-200        { border-color: rgba(245,158,11,0.3)   !important; }
+
+/* ── Tinted hover backgrounds ────────────────────────────── */
+html.dark .hover\:bg-orange-50:hover  { background-color: rgba(255,107,53,0.12) !important; }
+
+/* ── Inputs / selects / textareas ────────────────────────── */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+    background-color: #1c1c1e !important;
+    color: #fafafa !important;
+    border-color: #3f3f46 !important;
+}
+html.dark input:disabled,
+html.dark select:disabled,
+html.dark textarea:disabled {
+    background-color: #27272a !important;
+    color: #71717a !important;
+}
+
+/* ── Placeholders ────────────────────────────────────────── */
+html.dark .placeholder-slate-400::placeholder { color: #52525b !important; }
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+html.dark ::-webkit-scrollbar-thumb  { background-color: rgba(255,255,255,0.15); }
+
+/* ── Dialog / modal (light-first) ────────────────────────── */
+html.dark [role="dialog"] .bg-white { background-color: #18181b !important; }

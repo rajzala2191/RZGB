@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import SupplierHubLayout from '@/components/SupplierHubLayout';
 import {
@@ -32,8 +33,9 @@ const STAGES = [
 ];
 
 // Inline dot-progress strip
-function StageProgress({ pipeline, currentStatus }) {
+function StageProgress({ pipeline, currentStatus, isDark }) {
   const currentIdx = pipeline.indexOf(currentStatus);
+  const inactive = isDark ? '#3f3f46' : '#e2e8f0';
   return (
     <div className="flex items-center gap-1">
       {pipeline.map((id, i) => {
@@ -47,12 +49,12 @@ function StageProgress({ pipeline, currentStatus }) {
               style={{
                 width:  current ? 8 : 6,
                 height: current ? 8 : 6,
-                background: done ? '#22c55e' : current ? stageHex : '#e2e8f0',
+                background: done ? '#22c55e' : current ? stageHex : inactive,
                 boxShadow: current ? `0 0 0 2px ${stageHex}30` : 'none',
               }}
             />
             {i < pipeline.length - 1 && (
-              <div className="h-px flex-1 min-w-[6px]" style={{ background: i < currentIdx ? '#22c55e40' : '#e2e8f0' }} />
+              <div className="h-px flex-1 min-w-[6px]" style={{ background: i < currentIdx ? '#22c55e40' : inactive }} />
             )}
           </React.Fragment>
         );
@@ -63,6 +65,7 @@ function StageProgress({ pipeline, currentStatus }) {
 
 export default function SupplierOrderManager() {
   const { currentUser } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [orders, setOrders]               = useState([]);
   const [loading, setLoading]             = useState(true);
@@ -412,7 +415,7 @@ export default function SupplierOrderManager() {
 
                   {/* Progress strip */}
                   <div className="hidden md:block w-28 shrink-0">
-                    <StageProgress pipeline={pipeline} currentStatus={order.order_status} />
+                    <StageProgress pipeline={pipeline} currentStatus={order.order_status} isDark={isDark} />
                     <p className="text-[10px] text-slate-400 mt-1 text-center">
                       Step {currentIdx + 1} of {pipeline.length}
                     </p>

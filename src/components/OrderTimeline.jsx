@@ -4,6 +4,7 @@ import {
   Package, FileCheck, Zap, CheckCircle2, Hourglass,
   ShieldCheck, Truck, Clock, XCircle, Check, Cog,
 } from 'lucide-react';
+import { ACCENT } from '@/lib/theme';
 
 // ── Fixed stages — always shown ──────────────────────────────────────────────
 const PRE_STAGES = [
@@ -37,8 +38,6 @@ function buildStages(selectedProcesses) {
 
 // Kept for backwards-compatibility (compact usage without selectedProcesses)
 const ALL_STAGES = buildStages(['MATERIAL', 'CASTING', 'MACHINING']);
-
-const ACCENT = '#FF6B35';
 
 /* ── Compact: segmented bar used in tables ──────────────────────────────────── */
 function CompactTimeline({ currentIndex, stageCount }) {
@@ -74,25 +73,24 @@ export default function OrderTimeline({
   selectedProcesses,   // array of status_key strings — e.g. ['CASTING', 'MACHINING']
 }) {
   const scrollRef = useRef(null);
-
   const stages = buildStages(selectedProcesses);
 
   const t = {
-    card:           '#ffffff',
-    cardBorder:     'rgba(0,0,0,0.08)',
+    card:           'var(--surface)',
+    cardBorder:     'var(--edge-subtle)',
     activeBg:       'rgba(255,107,53,0.07)',
     activeBorder:   'rgba(255,107,53,0.2)',
-    doneBg:         'rgba(0,0,0,0.02)',
+    doneBg:         'var(--surface-inset)',
     futureBg:       'transparent',
-    text:           '#0f0f0f',
-    textMuted:      'rgba(0,0,0,0.5)',
-    textFaint:      'rgba(0,0,0,0.28)',
-    dot:            'rgba(0,0,0,0.07)',
-    dotBorder:      'rgba(0,0,0,0.1)',
+    text:           'var(--heading)',
+    textMuted:      'var(--body)',
+    textFaint:      'var(--faint)',
+    dot:            'var(--edge)',
+    dotBorder:      'var(--edge-strong)',
     connectorDone:  ACCENT,
-    connectorFuture:'rgba(0,0,0,0.1)',
-    noteBg:         'rgba(0,0,0,0.03)',
-    noteBorder:     'rgba(0,0,0,0.07)',
+    connectorFuture:'var(--edge)',
+    noteBg:         'var(--surface-inset)',
+    noteBorder:     'var(--edge-subtle)',
   };
 
   /* withdrawn state */
@@ -155,7 +153,7 @@ export default function OrderTimeline({
       </div>
 
       {/* ── Master progress bar ────────────────────────────── */}
-      <div className="relative h-1 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
+      <div className="relative h-1 rounded-full overflow-hidden" style={{ background: 'var(--edge)' }}>
         <motion.div
           className="absolute inset-y-0 left-0 rounded-full"
           style={{ background: `linear-gradient(90deg, ${ACCENT}, #f97316)` }}
@@ -195,7 +193,7 @@ export default function OrderTimeline({
                     )}
                     {current && (
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 animate-pulse"
-                        style={{ background: ACCENT, borderColor: '#f0f0f2' }} />
+                        style={{ background: ACCENT, borderColor: 'var(--app-bg)' }} />
                     )}
                   </motion.div>
                   <p

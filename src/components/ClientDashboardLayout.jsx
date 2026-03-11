@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { ACCENT, ACCENT_GLOW, SIDEBAR, HEADER } from '@/lib/theme';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import NotificationBell from './NotificationBell';
 import SearchBar from './SearchBar';
@@ -29,8 +30,6 @@ const NAV_ITEMS = [
   { path: '/client-dashboard/support',       label: 'Support',    icon: LifeBuoy                    },
 ];
 
-const ACCENT      = '#FF6B35';
-const ACCENT_GLOW = 'rgba(255,107,53,0.18)';
 
 export default function ClientDashboardLayout({ children }) {
   const { currentUser, userCompanyName, userLogoUrl, logout } = useAuth();
@@ -50,52 +49,13 @@ export default function ClientDashboardLayout({ children }) {
 
   const isCreateOrderActive = location.pathname.startsWith('/client-dashboard/create-order');
 
-  // ── Theme-aware sidebar tokens ──────────────────────────────────
-  const sb = isDark ? {
-    bg:            'linear-gradient(180deg, #0e0e18 0%, #0c0c14 100%)',
-    border:        'rgba(255,255,255,0.07)',
-    labelColor:    'rgba(255,255,255,0.2)',
-    navInactive:   'rgba(255,255,255,0.45)',
-    navHoverBg:    'rgba(255,255,255,0.05)',
-    navHoverText:  'rgba(255,255,255,0.8)',
-    iconBg:        'rgba(255,255,255,0.05)',
-    iconColor:     'rgba(255,255,255,0.4)',
-    cardBg:        'rgba(255,255,255,0.04)',
-    cardBorder:    'rgba(255,255,255,0.07)',
-    nameColor:     '#ffffff',
-    emailColor:    'rgba(255,255,255,0.3)',
-    btnBg:         'rgba(255,255,255,0.05)',
-    btnBorder:     'rgba(255,255,255,0.08)',
-    btnColor:      'rgba(255,255,255,0.4)',
-    btnHoverBg:    'rgba(255,255,255,0.10)',
-    btnHoverColor: '#ffffff',
-    mobileBtnBg:   '#0e0e18',
-  } : {
-    bg:            'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
-    border:        'rgba(0,0,0,0.09)',
-    labelColor:    'rgba(0,0,0,0.28)',
-    navInactive:   'rgba(0,0,0,0.45)',
-    navHoverBg:    'rgba(0,0,0,0.05)',
-    navHoverText:  'rgba(0,0,0,0.8)',
-    iconBg:        'rgba(0,0,0,0.05)',
-    iconColor:     'rgba(0,0,0,0.35)',
-    cardBg:        'rgba(0,0,0,0.04)',
-    cardBorder:    'rgba(0,0,0,0.08)',
-    nameColor:     '#0f0f0f',
-    emailColor:    'rgba(0,0,0,0.38)',
-    btnBg:         'rgba(0,0,0,0.05)',
-    btnBorder:     'rgba(0,0,0,0.09)',
-    btnColor:      'rgba(0,0,0,0.4)',
-    btnHoverBg:    'rgba(0,0,0,0.09)',
-    btnHoverColor: '#0f0f0f',
-    mobileBtnBg:   '#ffffff',
-  };
+  const sb = SIDEBAR;
 
   return (
     <ErrorBoundary>
       <div
         className="flex overflow-hidden font-sans"
-        style={{ background: isDark ? '#09090b' : '#f0f0f2', height: '100vh' }}
+        style={{ background: 'var(--app-bg)', height: '100vh' }}
       >
 
         {/* Mobile overlay ──────────────────────────────────────── */}
@@ -247,7 +207,7 @@ export default function ClientDashboardLayout({ children }) {
             >
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden"
-                style={{ background: userLogoUrl ? (isDark ? '#1a1a1a' : '#f5f5f5') : `linear-gradient(135deg, ${ACCENT} 0%, #f97316 100%)` }}
+                style={{ background: userLogoUrl ? 'var(--surface-inset)' : `linear-gradient(135deg, ${ACCENT} 0%, #f97316 100%)` }}
               >
                 {userLogoUrl
                   ? <img src={userLogoUrl} alt="logo" className="w-full h-full object-contain" />
@@ -288,9 +248,9 @@ export default function ClientDashboardLayout({ children }) {
           <header
             className="flex items-center gap-2 sm:gap-6 px-2 sm:px-8 py-2 sm:py-4 border-b border-gray-200 shadow-sm"
             style={{
-              background:     isDark ? 'rgba(9,9,11,0.9)' : 'rgba(255,255,255,0.9)',
+              background:     'var(--header-bg)',
               backdropFilter: 'blur(12px)',
-              borderBottom:   isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.08)',
+              borderBottom:   `1px solid var(--header-border)`,
             }}
           >
             <div className="flex items-center">
@@ -300,9 +260,9 @@ export default function ClientDashboardLayout({ children }) {
                   className="lg:hidden flex items-center justify-center p-2 rounded-xl shadow-lg mr-2"
                   style={{
                     zIndex: 60,
-                    background: isDark ? '#18181b' : '#ffffff',
-                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
-                    color: isDark ? '#fff' : '#000',
+                    background: 'var(--header-btn-bg)',
+                    border: `1px solid var(--header-btn-border)`,
+                    color: 'var(--header-btn-color)',
                   }}
                 >
                   <Menu size={20} />
@@ -324,7 +284,7 @@ export default function ClientDashboardLayout({ children }) {
           {/* Page */}
           <main
             className="flex-1 overflow-y-auto"
-            style={{ background: isDark ? '#09090b' : '#f0f0f2' }}
+            style={{ background: 'var(--app-bg)' }}
           >
             <motion.div
               key={location.pathname}

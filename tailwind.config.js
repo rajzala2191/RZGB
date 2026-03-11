@@ -50,6 +50,27 @@ module.exports = {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))',
 				},
+				/* Semantic app tokens — use these instead of raw slate/gray */
+				brand: {
+					DEFAULT: 'var(--brand)',
+					hover: 'var(--brand-hover)',
+				},
+				surface: {
+					DEFAULT: 'var(--surface)',
+					raised: 'var(--surface-raised)',
+					inset: 'var(--surface-inset)',
+				},
+				heading: 'var(--heading)',
+				body: 'var(--body)',
+				caption: 'var(--caption)',
+				edge: {
+					DEFAULT: 'var(--edge)',
+					strong: 'var(--edge-strong)',
+					subtle: 'var(--edge-subtle)',
+				},
+			},
+			backgroundColor: {
+				'app': 'var(--app-bg)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

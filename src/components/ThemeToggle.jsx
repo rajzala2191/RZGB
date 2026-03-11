@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Moon, Sun, Monitor, Check } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { ACCENT } from '@/lib/theme';
 
 const MODES = [
   { value: 'light',  label: 'Light',  Icon: Sun     },
@@ -51,8 +52,8 @@ export const ThemeToggle = () => {
         <div
           className="absolute right-0 mt-2 w-40 rounded-xl py-1 shadow-xl border z-[100]"
           style={{
-            background: isDark ? '#18181b' : '#ffffff',
-            borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+            background: 'var(--surface)',
+            borderColor: 'var(--edge-subtle)',
           }}
         >
           {MODES.map(({ value, label, Icon }) => {
@@ -67,7 +68,7 @@ export const ThemeToggle = () => {
                     ? isDark ? 'rgba(255,107,53,0.1)' : 'rgba(255,107,53,0.08)'
                     : 'transparent',
                   color: active
-                    ? '#FF6B35'
+                    ? ACCENT
                     : isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
                 }}
                 onMouseEnter={(e) => {
