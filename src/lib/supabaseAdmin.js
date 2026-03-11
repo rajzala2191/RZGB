@@ -14,6 +14,15 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: { persistSession: false, autoRefreshToken: false },
+// Fall back to the anon key if service role key is not configured.
+// Operations that require elevated privileges will be rejected by RLS,
+// but the app will not crash on startup.
+const effectiveKey = supabaseServiceRoleKey || import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export const supabaseAdmin = createClient(supabaseUrl, effectiveKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    storageKey: 'rzgb-admin-auth',
+  },
 });
