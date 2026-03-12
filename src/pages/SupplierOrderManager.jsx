@@ -13,7 +13,9 @@ import {
   Loader2, AlertCircle, CheckCircle2, ChevronRight,
   Package, Zap, Hourglass, ShieldCheck, Truck, AlertTriangle,
   Eye, ArrowUpDown, Filter, Search, MessageSquare, ChevronDown,
+  UploadCloud, X as XIcon, FileText,
 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 
 const ACCENT = '#FF6B35';
@@ -75,6 +77,11 @@ export default function SupplierOrderManager() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, orderId: null, newStatus: null, orderName: '', fromStage: '', toStage: '', note: '' });
   const [expandedMessages, setExpandedMessages] = useState(new Set());
+  const [certDialog, setCertDialog] = useState({ open: false, orderId: null });
+  const [certType, setCertType] = useState('MTR');
+  const [certFile, setCertFile] = useState(null);
+  const [uploadingCert, setUploadingCert] = useState(false);
+  const { toast } = useToast();
 
   // Filter / sort state
   const [search, setSearch]           = useState('');
@@ -157,6 +164,38 @@ export default function SupplierOrderManager() {
       fetchAwardedOrders(false);
     } finally {
       setUpdatingOrder(null);
+    }
+  };
+
+  const handleUploadCert = async () => {
+    if (!certFile || !certDialog.orderId) return;
+    setUploadingCert(true);
+    try {
+      const filePath = `${currentUser.id}/${certDialog.orderId}/${certFile.name}`;
+      const { error: storageErr } = await supabase.storage
+        .from('certificates')
+        .upload(filePath, certFile, { upsert: true });
+      if (storageErr) throw storageErr;
+
+      const { error: dbErr } = await supabase.from('job_certificates').insert({
+        order_id:    certDialog.orderId,
+        supplier_id: currentUser.id,
+        cert_type:   certType,
+        file_path:   filePath,
+        file_name:   certFile.name,
+        uploaded_by: currentUser.id,
+        status:      'pending_review',
+      });
+      if (dbErr) throw dbErr;
+
+      toast({ title: 'Certificate Uploaded', description: `${certFile.name} submitted for review.` });
+      setCertDialog({ open: false, orderId: null });
+      setCertFile(null);
+      setCertType('MTR');
+    } catch (err) {
+      toast({ title: 'Upload Failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploadingCert(false);
     }
   };
 
@@ -460,6 +499,14 @@ export default function SupplierOrderManager() {
                       <Eye className="w-3 h-3" />
                       View
                     </button>
+                    <button
+                      onClick={() => { setCertDialog({ open: true, orderId: order.id }); setCertFile(null); setCertType('MTR'); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-100 transition-colors"
+                      title="Upload Certificate"
+                    >
+                      <UploadCloud className="w-3 h-3" />
+                      Upload Cert
+                    </button>
                   </div>
                 </div>
                 {/* Order Messages collapsible */}
@@ -488,6 +535,68 @@ export default function SupplierOrderManager() {
         </div>
 
       </div>
+
+      {/* Upload Certificate Dialog */}
+      <Dialog open={certDialog.open} onOpenChange={open => { if (!open) setCertDialog({ open: false, orderId: null }); }}>
+        <DialogContent className="sm:max-w-md rounded-2xl bg-white border border-slate-200 shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2.5 text-base font-bold text-slate-900">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center">
+                <UploadCloud className="w-3.5 h-3.5 text-blue-500" />
+              </div>
+              Upload Certificate
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Certificate Type</label>
+              <select
+                value={certType}
+                onChange={e => setCertType(e.target.value)}
+                className="w-full rounded-xl px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-orange-400 transition-all"
+              >
+                {['MTR', 'CoC', 'Inspection Report', 'Test Certificate'].map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">File</label>
+              {certFile ? (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <FileText className="w-4 h-4 text-orange-500 shrink-0" />
+                  <span className="text-sm font-medium text-slate-700 flex-1 truncate">{certFile.name}</span>
+                  <button onClick={() => setCertFile(null)} className="text-slate-400 hover:text-red-500 transition-colors">
+                    <XIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-dashed border-slate-300 hover:border-orange-400 cursor-pointer transition-colors bg-slate-50">
+                  <UploadCloud className="w-6 h-6 text-slate-400 mb-2" />
+                  <span className="text-sm text-slate-500">Click to select a file</span>
+                  <input type="file" className="hidden" onChange={e => setCertFile(e.target.files?.[0] || null)} />
+                </label>
+              )}
+            </div>
+          </div>
+          <DialogFooter className="gap-2 pt-1">
+            <button
+              onClick={() => setCertDialog({ open: false, orderId: null })}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUploadCert}
+              disabled={!certFile || uploadingCert}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-orange-600 hover:bg-orange-500 disabled:opacity-60 transition-all shadow-sm"
+            >
+              {uploadingCert ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+              Upload
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SupplierHubLayout>
   );
 }

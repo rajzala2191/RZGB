@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import DocumentPreview from '@/components/DocumentPreview';
 import OrderTimeline from '@/components/OrderTimeline';
 import { FormSection, DisplayField } from '@/components/ui/FormSection';
+import { supabase } from '@/lib/customSupabaseClient';
+import JSZip from 'jszip';
 import {
   FileText,
   Loader2,
@@ -13,6 +16,8 @@ import {
   ClipboardList,
   PoundSterling,
   MapPin,
+  Download,
+  Shield,
 } from 'lucide-react';
 
 const WITHDRAWABLE = [
@@ -36,6 +41,44 @@ export default function ClientOrderDetailsView({
   onCancelWithdraw,
   onWithdraw,
 }) {
+  const [downloadingPack, setDownloadingPack] = useState(false);
+
+  const downloadCompliancePack = async () => {
+    setDownloadingPack(true);
+    try {
+      const { data: certs, error } = await supabase
+        .from('job_certificates')
+        .select('*')
+        .eq('order_id', order.id)
+        .eq('status', 'approved');
+      if (error) throw error;
+      if (!certs || certs.length === 0) {
+        alert('No approved certificates available for download.');
+        return;
+      }
+
+      const zip = new JSZip();
+      for (const cert of certs) {
+        const { data: fileData, error: dlErr } = await supabase.storage
+          .from('certificates')
+          .download(cert.file_path);
+        if (dlErr) continue;
+        zip.file(`${cert.cert_type} - ${cert.file_name}`, fileData);
+      }
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Compliance-Pack-${order.id.slice(0, 8)}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Compliance pack download error:', err);
+    } finally {
+      setDownloadingPack(false);
+    }
+  };
+
   if (loading) {
     return (
       <ClientDashboardLayout>
@@ -168,7 +211,23 @@ export default function ClientOrderDetailsView({
               </div>
             </FormSection>
 
-            <FormSection title="Documents & Files" icon={Eye}>
+            <FormSection
+              title="Documents & Files"
+              icon={Eye}
+              action={
+                <Button
+                  onClick={downloadCompliancePack}
+                  disabled={downloadingPack}
+                  variant="outline"
+                  className="border-emerald-800/50 text-emerald-400 hover:bg-emerald-950/30 text-xs h-8 px-3"
+                >
+                  {downloadingPack
+                    ? <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                    : <Shield className="w-3 h-3 mr-1" />}
+                  Compliance Pack
+                </Button>
+              }
+            >
               <div className="space-y-3">
                 {documents.length === 0 ? (
                   <div className="text-center py-8 text-slate-500">

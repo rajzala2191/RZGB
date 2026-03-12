@@ -89,6 +89,116 @@ function getRecommendations(orders) {
   return recs;
 }
 
+// ── Collapsible certificates section ─────────────────────────────────────────
+function CertificatesSection({ orderId, adminUserId, t }) {
+  const [open, setOpen] = React.useState(false);
+  const [certs, setCerts] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [actionLoading, setActionLoading] = React.useState(null);
+  const [rejectNote, setRejectNote] = React.useState('');
+
+  const loadCerts = async () => {
+    setLoading(true);
+    const { data } = await supabaseAdmin
+      .from('job_certificates')
+      .select('*')
+      .eq('order_id', orderId)
+      .order('created_at', { ascending: false });
+    setCerts(data || []);
+    setLoading(false);
+  };
+
+  const handleToggle = () => {
+    if (!open) loadCerts();
+    setOpen(o => !o);
+  };
+
+  const runCertAction = async (certId, status, note = '') => {
+    setActionLoading(certId + status);
+    await supabaseAdmin.from('job_certificates').update({
+      status,
+      approved_by:    status === 'approved' ? adminUserId : null,
+      rejection_note: status === 'rejected' ? note : null,
+    }).eq('id', certId);
+    await loadCerts();
+    setActionLoading(null);
+    setRejectNote('');
+  };
+
+  return (
+    <div>
+      <button
+        onClick={handleToggle}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer',
+        }}
+      >
+        <span style={{ fontSize: 11, fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Certificates
+        </span>
+        <ChevronDown size={13} style={{ color: t.mid, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+      </button>
+      {open && (
+        <div style={{ padding: '0 16px 16px' }}>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 16 }}>
+              <Loader2 size={18} style={{ color: '#FF6B35' }} className="animate-spin" />
+            </div>
+          ) : certs.length === 0 ? (
+            <p style={{ fontSize: 12, color: t.mid, textAlign: 'center', padding: '12px 0' }}>No certificates uploaded yet.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {certs.map(cert => (
+                <div key={cert.id} style={{ background: t.inner, border: `1px solid ${t.innerBorder}`, borderRadius: 10, padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <FileText size={13} style={{ color: '#FF6B35', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: t.pri }} className="truncate">{cert.file_name}</div>
+                      <div style={{ fontSize: 10, color: t.mid }}>{cert.cert_type}</div>
+                    </div>
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
+                      background: cert.status === 'approved' ? 'rgba(34,197,94,0.12)' : cert.status === 'rejected' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
+                      color: cert.status === 'approved' ? '#22c55e' : cert.status === 'rejected' ? '#ef4444' : '#f59e0b',
+                    }}>{cert.status.replace('_', ' ').toUpperCase()}</span>
+                  </div>
+                  {cert.status === 'pending_review' && (
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button
+                        onClick={() => runCertAction(cert.id, 'approved')}
+                        disabled={!!actionLoading}
+                        style={{
+                          flex: 1, padding: '6px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                          background: 'rgba(34,197,94,0.1)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)',
+                          opacity: actionLoading ? 0.6 : 1,
+                        }}
+                      >
+                        {actionLoading === cert.id + 'approved' ? <Loader2 size={12} className="animate-spin mx-auto" /> : 'Approve'}
+                      </button>
+                      <button
+                        onClick={() => runCertAction(cert.id, 'rejected', rejectNote)}
+                        disabled={!!actionLoading}
+                        style={{
+                          flex: 1, padding: '6px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                          background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)',
+                          opacity: actionLoading ? 0.6 : 1,
+                        }}
+                      >
+                        {actionLoading === cert.id + 'rejected' ? <Loader2 size={12} className="animate-spin mx-auto" /> : 'Reject'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Collapsible order messages component ─────────────────────────────────────
 function OrderMessagesSection({ orderId, t }) {
   const [open, setOpen] = React.useState(false);
@@ -743,6 +853,13 @@ export default function AdminDocumentReview() {
                     </div>
                   ))}
                 </div>
+
+                {/* Certificates section */}
+                {selectedDoc.order_id && (
+                  <div style={{ borderTop: `1px solid ${t.divider}` }}>
+                    <CertificatesSection orderId={selectedDoc.order_id} adminUserId={currentUser?.id} t={t} />
+                  </div>
+                )}
 
                 {/* Order Messages section */}
                 {selectedDoc.order_id && (
