@@ -467,7 +467,7 @@ function LandingNav() {
           <ThemeToggle />
           <Link to="/login" className="hidden sm:block text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium transition-colors">Sign In</Link>
           <Link
-            to="/demo"
+            to="/request-demo"
             className="flex items-center gap-2 bg-[#FF6B35] hover:bg-orange-500 active:scale-[0.97] text-white text-sm font-bold px-4 py-2 rounded-lg transition-all shadow-md shadow-orange-500/25 hover:shadow-orange-500/40"
           >
             Try Demo <ArrowRight className="w-3.5 h-3.5" />
@@ -497,7 +497,7 @@ function LandingNav() {
             <Link   to="/pricing"                        className="block py-2 text-sm text-slate-600 dark:text-slate-400 font-medium">Pricing</Link>
             <button onClick={() => scrollTo('portals')}  className="block py-2 text-sm text-slate-600 dark:text-slate-400 font-medium w-full text-left">Portals</button>
             <Link   to="/login"                          className="block py-2 text-sm text-slate-600 dark:text-slate-400 font-medium">Sign In</Link>
-            <Link   to="/demo"                           className="block py-2 text-sm text-[#FF6B35] font-bold">Try Demo →</Link>
+            <Link   to="/request-demo"                    className="block py-2 text-sm text-[#FF6B35] font-bold">Try Demo →</Link>
           </motion.div>
         )}
       </AnimatePresence>
@@ -983,7 +983,7 @@ function LandingFooter() {
             <p className="text-xs leading-relaxed" style={{ color: 'var(--body)' }}>B2B manufacturing procurement platform for global industry. Three portals, one system.</p>
           </div>
           {[
-            { title: 'Product',  links: ['Features', 'How It Works', 'Pricing', 'Roadmap'] },
+            { title: 'Product',  links: ['Features', 'How It Works', 'Pricing', 'Request Demo', 'Roadmap'] },
             { title: 'Portals',  links: ['Client Portal', 'Control Centre', 'Supplier Hub'] },
             { title: 'Company',  links: ['About RZ', 'Contact', 'Privacy Policy', 'Terms'] },
           ].map((col) => (
@@ -996,6 +996,8 @@ function LandingFooter() {
                       ? <Link to="/how-it-works" className="text-xs transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>{link}</Link>
                       : link === 'Pricing'
                       ? <Link to="/pricing" className="text-xs transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>{link}</Link>
+                      : link === 'Request Demo'
+                      ? <Link to="/request-demo" className="text-xs transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>{link}</Link>
                       : link === 'Features'
                       ? <button type="button" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-xs transition-colors hover:opacity-80 text-left w-full" style={{ color: 'var(--body)' }}>{link}</button>
                       : link === 'Roadmap'

@@ -3,7 +3,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Building2, Users, LogOut, Menu, X,
-  ChevronRight, Shield, Activity, Settings,
+  ChevronRight, Shield, Activity, Settings, Mail,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -12,11 +12,12 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import ThemeToggle from './ThemeToggle';
 
 const NAV_ITEMS = [
-  { path: '/platform-admin',              label: 'Dashboard',   icon: LayoutDashboard, exact: true },
-  { path: '/platform-admin/workspaces',   label: 'Workspaces',  icon: Building2 },
-  { path: '/platform-admin/users',        label: 'All Users',   icon: Users },
-  { path: '/platform-admin/activity',     label: 'Activity',    icon: Activity },
-  { path: '/platform-admin/settings',     label: 'Settings',    icon: Settings },
+  { path: '/platform-admin',              label: 'Dashboard',      icon: LayoutDashboard, exact: true },
+  { path: '/platform-admin/workspaces',   label: 'Workspaces',     icon: Building2 },
+  { path: '/platform-admin/users',        label: 'All Users',      icon: Users },
+  { path: '/platform-admin/demo-requests', label: 'Demo requests',  icon: Mail },
+  { path: '/platform-admin/activity',     label: 'Activity',       icon: Activity },
+  { path: '/platform-admin/settings',     label: 'Settings',       icon: Settings },
 ];
 
 const PlatformAdminLayout = ({ children }) => {

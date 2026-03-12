@@ -10,6 +10,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import DemoBanner from '@/components/DemoBanner';
+import DemoAccessGate from '@/components/DemoAccessGate';
 import RootRedirect from '@/pages/RootRedirect';
 import LoginPage from '@/pages/LoginPage';
 
@@ -67,10 +68,12 @@ import SupplierDiscoveryPage from '@/pages/SupplierDiscoveryPage';
 import PlatformDashboardPage from '@/pages/platform/PlatformDashboardPage';
 import PlatformWorkspacesPage from '@/pages/platform/PlatformWorkspacesPage';
 import PlatformUsersPage from '@/pages/platform/PlatformUsersPage';
+import PlatformDemoRequestsPage from '@/pages/platform/PlatformDemoRequestsPage';
 
 // Public Pages
 import PricingPage from '@/pages/PricingPage';
 import RoadmapPage from '@/pages/RoadmapPage';
+import RequestDemoPage from '@/pages/RequestDemoPage';
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
@@ -127,10 +130,11 @@ function App() {
                     <Route path="/how-it-works" element={<HowItWorksPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/roadmap" element={<RoadmapPage />} />
+                    <Route path="/request-demo" element={<RequestDemoPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
-                    {/* Demo routes — wrapped in DemoProvider for in-memory context */}
-                    <Route path="/demo" element={<DemoProvider><Outlet /></DemoProvider>}>
+                    {/* Demo routes — access only with approved token; in-memory context resets on refresh */}
+                    <Route path="/demo" element={<DemoAccessGate><DemoProvider><Outlet /></DemoProvider></DemoAccessGate>}>
                       <Route index element={<DemoEntryPage />} />
                       <Route path="client/create-order" element={<DemoClientCreateOrder />} />
                       <Route path="client/orders/:id" element={<DemoClientOrderDetail />} />
@@ -148,6 +152,7 @@ function App() {
                     <Route path="/platform-admin" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformDashboardPage /></ProtectedRoute>} />
                     <Route path="/platform-admin/workspaces" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformWorkspacesPage /></ProtectedRoute>} />
                     <Route path="/platform-admin/users" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformUsersPage /></ProtectedRoute>} />
+                    <Route path="/platform-admin/demo-requests" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformDemoRequestsPage /></ProtectedRoute>} />
 
                     {/* --- ADMIN ROUTES (super_admin + customer_admin) --- */}
                     <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />

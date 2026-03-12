@@ -76,10 +76,10 @@ export default function HowItWorksPage() {
               Pricing
             </Link>
             <Link
-              to="/demo"
+              to="/request-demo"
               className="flex items-center gap-2 bg-[#FF6B35] hover:bg-orange-500 text-white text-sm font-bold px-4 py-2 rounded-lg transition-all shadow-md shadow-orange-500/25"
             >
-              Try Demo <ArrowRight className="w-3.5 h-3.5" />
+              Request Demo <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
