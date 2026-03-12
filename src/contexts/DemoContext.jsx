@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   DEMO_CLIENTS, DEMO_SUPPLIERS, DEMO_ADMINS, DEMO_ORDERS, DEMO_BIDS,
   getOrdersByClient, getOrdersBySupplier, getBidsForOrder, getUpdatesForOrder,
@@ -8,20 +8,10 @@ import {
 
 const DemoContext = createContext(null);
 
-const SESSION_KEY = 'rzgb-demo-session';
-
-function loadSession() {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (_) {}
-  return null;
-}
-
-function saveSession(session) {
-  try {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  } catch (_) {}
+function getRoleFromPath(pathname) {
+  if (pathname.includes('/demo/admin')) return 'admin';
+  if (pathname.includes('/demo/supplier')) return 'supplier';
+  return 'client';
 }
 
 function createNewSession(role = 'client') {
@@ -33,35 +23,27 @@ function createNewSession(role = 'client') {
   };
 }
 
+/**
+ * Demo state is never persisted. On every load/refresh we start with default
+ * data so viewers always see the same demo experience.
+ */
 export function DemoProvider({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Load or create session
-  const [session, setSession] = useState(() => {
-    const existing = loadSession();
-    return existing || createNewSession('client');
-  });
+  // Always start with a fresh session and default data (no localStorage)
+  const [session, setSession] = useState(() => createNewSession('client'));
+  const [demoRole, setDemoRole] = useState(() => getRoleFromPath(window.location.pathname));
+  const [orders, setOrders] = useState(() => [...DEMO_ORDERS]);
+  const [bids, setBids] = useState(() => [...DEMO_BIDS]);
 
-  const [demoRole, setDemoRole] = useState(() => {
-    const existing = loadSession();
-    return existing?.lastRole || 'client';
-  });
-
-  // In-memory orders (may include a demo-created order appended at runtime)
-  const [orders, setOrders] = useState([...DEMO_ORDERS]);
-  const [bids, setBids] = useState([...DEMO_BIDS]);
-
-  // Persist session on change
-  useEffect(() => {
-    saveSession({ ...session, lastRole: demoRole });
-  }, [session, demoRole]);
-
-  // Save new session on first mount if none existed
-  useEffect(() => {
-    const existing = loadSession();
-    if (!existing) saveSession(session);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Keep demoRole in sync with URL when navigating within /demo
+  React.useEffect(() => {
+    if (location.pathname.startsWith('/demo')) {
+      const role = getRoleFromPath(location.pathname);
+      setDemoRole(role);
+    }
+  }, [location.pathname]);
 
   const activeDemoUser = useCallback(() => {
     if (demoRole === 'client') return DEMO_CLIENTS[0];
@@ -83,9 +65,7 @@ export function DemoProvider({ children }) {
 
   function switchRole(role) {
     setDemoRole(role);
-    const updated = { ...session, lastRole: role };
-    setSession(updated);
-    saveSession(updated);
+    setSession((prev) => ({ ...prev, lastRole: role }));
   }
 
   function getDemoOrderById(id) {
@@ -117,9 +97,7 @@ export function DemoProvider({ children }) {
     };
 
     setOrders((prev) => [newOrder, ...prev]);
-    const updated = { ...session, orderCreated: true };
-    setSession(updated);
-    saveSession(updated);
+    setSession((prev) => ({ ...prev, orderCreated: true }));
     return { success: true, order: newOrder };
   }
 
@@ -151,11 +129,9 @@ export function DemoProvider({ children }) {
   }
 
   function resetDemoSession() {
-    const fresh = createNewSession(demoRole);
-    setSession(fresh);
+    setSession(createNewSession(demoRole));
     setOrders([...DEMO_ORDERS]);
     setBids([...DEMO_BIDS]);
-    saveSession(fresh);
   }
 
   const value = {

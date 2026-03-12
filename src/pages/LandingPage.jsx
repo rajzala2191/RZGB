@@ -584,29 +584,44 @@ function HeroSection() {
           </Link>
         </motion.div>
 
-        {/* Hero UI card — glass + blur */}
+        {/* Hero UI card — theme tokens */}
         <motion.div variants={itemVariants} className="relative max-w-2xl mx-auto mb-6">
-          <div className="bg-white/80 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-2xl border border-slate-200/80 dark:border-[var(--edge)] shadow-2xl shadow-slate-200/60 dark:shadow-black/30 p-6 ring-1 ring-slate-200/20 dark:ring-white/5">
+          <div
+            className="backdrop-blur-xl rounded-2xl p-6 shadow-2xl"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--edge)',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)',
+            }}
+          >
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">RZ-JOB-10033 · Valve Body Casting</p>
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-0.5">Bronze LG2 · 60 pieces</p>
+                <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--body)' }}>RZ-JOB-10033 · Valve Body Casting</p>
+                <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--heading)' }}>Bronze LG2 · 60 pieces</p>
               </div>
-              <span className="text-xs bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 px-2.5 py-1 rounded-full font-semibold">Casting Stage</span>
+              <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30">Casting Stage</span>
             </div>
             <MiniPipeline activeIdx={4} />
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-[var(--edge)] flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
+            <div className="mt-4 pt-4 flex items-center justify-between text-xs" style={{ borderTop: '1px solid var(--edge)', color: 'var(--body)' }}>
               <span>Sheffield Forge · Awarded</span>
               <span className="text-emerald-600 dark:text-emerald-400 font-semibold">£9,100</span>
             </div>
           </div>
-          {/* Floating badges */}
-          <motion.div animate={{ y: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-            className="absolute -top-3 -right-4 bg-white/90 dark:bg-[var(--surface-raised)] backdrop-blur-md border border-slate-200 dark:border-[var(--edge)] rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hidden sm:flex items-center gap-2">
+          {/* Floating badges — theme tokens */}
+          <motion.div
+            animate={{ y: [0, -6, 0] }}
+            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+            className="absolute -top-3 -right-4 backdrop-blur-md rounded-xl px-3 py-2 shadow-lg text-xs font-semibold hidden sm:flex items-center gap-2"
+            style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)', color: 'var(--heading)' }}
+          >
             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" /> Live Tracking
           </motion.div>
-          <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut', delay: 0.5 }}
-            className="absolute -bottom-3 -left-4 bg-white/90 dark:bg-[var(--surface-raised)] backdrop-blur-md border border-slate-200 dark:border-[var(--edge)] rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-blue-600 dark:text-blue-400 hidden sm:flex items-center gap-2">
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut', delay: 0.5 }}
+            className="absolute -bottom-3 -left-4 backdrop-blur-md rounded-xl px-3 py-2 shadow-lg text-xs font-semibold hidden sm:flex items-center gap-2 text-blue-600 dark:text-blue-400"
+            style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}
+          >
             <Shield className="w-3.5 h-3.5" /> IP Protected
           </motion.div>
         </motion.div>
