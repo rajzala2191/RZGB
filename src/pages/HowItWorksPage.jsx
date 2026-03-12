@@ -254,10 +254,10 @@ export default function HowItWorksPage() {
 
           <div className="mt-8 text-center">
             <Link
-              to="/demo?role=admin"
+              to="/request-demo"
               className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-orange-500 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-orange-500/25 hover:shadow-xl hover:-translate-y-0.5"
             >
-              <Play className="w-4 h-4" /> Launch Full Demo
+              <Play className="w-4 h-4" /> Request demo access
             </Link>
           </div>
         </motion.div>
@@ -272,17 +272,17 @@ export default function HowItWorksPage() {
         >
           <h2 className="text-2xl sm:text-3xl font-black mb-4" style={{ color: 'var(--heading)' }}>Ready to try it yourself?</h2>
           <p className="mb-10 max-w-lg mx-auto" style={{ color: 'var(--body)' }}>
-            Enter the demo with one click — no account required. Explore all three portals with realistic sample data.
+            Request demo access and we’ll email you a link. Once approved, explore all three portals with sample data.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/demo?role=client" className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all">
-              <Building2 className="w-4 h-4" /> Try as Client
+            <Link to="/request-demo" className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all">
+              <Building2 className="w-4 h-4" /> Request demo
             </Link>
-            <Link to="/demo?role=admin" className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all">
-              <Shield className="w-4 h-4" /> Try as Admin
+            <Link to="/request-demo" className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all">
+              <Shield className="w-4 h-4" /> Request demo
             </Link>
-            <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-400 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all">
-              <Factory className="w-4 h-4" /> Try as Supplier
+            <Link to="/request-demo" className="flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-400 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all">
+              <Factory className="w-4 h-4" /> Request demo
             </Link>
           </div>
         </motion.div>
