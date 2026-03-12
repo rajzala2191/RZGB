@@ -20,6 +20,7 @@ import {
   GitBranch,
   Globe,
   Settings,
+  BarChart2,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -43,6 +44,7 @@ const NAV_ITEMS = [
   { path: '/control-centre/supplier-discovery',       label: 'Supplier Discovery', icon: Globe },
   { path: '/control-centre/shipments',                label: 'Shipments',          icon: Truck },
   { path: '/control-centre/document-review',          label: 'Document Review',    icon: FolderOpen },
+  { path: '/control-centre/supplier-scorecard',       label: 'Supplier Scorecard', icon: BarChart2 },
   { path: '/control-centre/settings',                 label: 'Settings',           icon: Settings },
 ];
 

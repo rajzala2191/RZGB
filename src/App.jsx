@@ -88,6 +88,7 @@ import ClientProfilePage from '@/pages/ClientProfilePage';
 import ClientSettingsPage from '@/pages/ClientSettingsPage';
 import SupplierSettingsPage from '@/pages/SupplierSettingsPage';
 import SupplierCapabilitiesPage from '@/pages/SupplierCapabilitiesPage';
+import SupplierScorecardPage from '@/pages/SupplierScorecardPage';
 import TicketDetailPage from '@/pages/TicketDetailPage';
 import AdminSupportPage from '@/pages/AdminSupportPage';
 import AdminTicketDetailPage from '@/pages/AdminTicketDetailPage';
@@ -162,6 +163,7 @@ function App() {
                     <Route path="/control-centre/spend-analytics" element={<ProtectedRoute requiredRole="admin"><SpendAnalyticsPage /></ProtectedRoute>} />
                     <Route path="/control-centre/approval-workflows" element={<ProtectedRoute requiredRole="admin"><ApprovalWorkflowsPage /></ProtectedRoute>} />
                     <Route path="/control-centre/supplier-discovery" element={<ProtectedRoute requiredRole="admin"><SupplierDiscoveryPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-scorecard" element={<ProtectedRoute requiredRole="admin"><SupplierScorecardPage /></ProtectedRoute>} />
                     <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
                     <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
 
