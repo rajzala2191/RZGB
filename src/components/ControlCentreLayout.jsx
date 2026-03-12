@@ -16,6 +16,12 @@ import {
   Truck,
   Cog,
   Shield,
+  Gavel,
+  FileText,
+  Receipt,
+  TrendingUp,
+  GitBranch,
+  Globe,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -31,6 +37,12 @@ const NAV_ITEMS = [
   { path: '/control-centre/manufacturing-processes',   label: 'Processes',         icon: Cog },
   { path: '/control-centre/live-tracking',             label: 'Live Tracking',     icon: Radio },
   { path: '/control-centre/supplier-pool',      label: 'Assign to Supplier',icon: Network },
+  { path: '/control-centre/bid-management',    label: 'Bid Management',    icon: Gavel },
+  { path: '/control-centre/purchase-orders',   label: 'Purchase Orders',   icon: FileText },
+  { path: '/control-centre/invoices',          label: 'Invoices',          icon: Receipt },
+  { path: '/control-centre/spend-analytics',   label: 'Spend Analytics',   icon: TrendingUp },
+  { path: '/control-centre/approval-workflows',label: 'Approvals',         icon: GitBranch },
+  { path: '/control-centre/supplier-discovery',label: 'Supplier Discovery', icon: Globe },
   { path: '/control-centre/shipments',           label: 'Shipments',         icon: Truck },
   { path: '/control-centre/document-review',    label: 'Document Review',   icon: FolderOpen },
   { path: '/control-centre/users',              label: 'User Management',   icon: Users },

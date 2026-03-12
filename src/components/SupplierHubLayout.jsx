@@ -11,6 +11,9 @@ import {
   LifeBuoy,
   UserCircle,
   ChevronRight,
+  Gavel,
+  FileText,
+  Receipt,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -23,6 +26,9 @@ import ThemeToggle from './ThemeToggle';
 const NAV_ITEMS = [
   { path: '/supplier-hub',           label: 'Dashboard',       icon: LayoutDashboard, exact: true },
   { path: '/supplier-hub/orders',    label: 'My Orders',        icon: Briefcase },
+  { path: '/supplier-hub/bidding',  label: 'Bidding Centre',   icon: Gavel },
+  { path: '/supplier-hub/purchase-orders', label: 'Purchase Orders', icon: FileText },
+  { path: '/supplier-hub/invoices',  label: 'My Invoices',      icon: Receipt },
   { path: '/supplier-hub/documents', label: 'Documents Portal', icon: FolderOpen },
   { path: '/supplier-hub/profile',   label: 'My Profile',       icon: UserCircle },
   { path: '/supplier-hub/support',   label: 'Support',          icon: LifeBuoy },

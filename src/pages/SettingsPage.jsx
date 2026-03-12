@@ -3,7 +3,8 @@ import { Helmet } from 'react-helmet';
 import { supabase } from '@/lib/customSupabaseClient';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import { useToast } from '@/components/ui/use-toast';
-import { Save, Shield, Mail, Bell, Monitor, Loader2 } from 'lucide-react';
+import { Save, Shield, Mail, Bell, Monitor, Loader2, MessageSquare } from 'lucide-react';
+import { saveSlackWebhookUrl, saveSlackChannel } from '@/services/slackService';
 
 const SettingsPage = () => {
   const { toast } = useToast();
@@ -238,6 +239,54 @@ const SettingsPage = () => {
                   <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.email_notifications ? 'left-7' : 'left-1'}`} />
                 </button>
              </div>
+          </div>
+        </div>
+
+        {/* Section 4: Slack Integration */}
+        <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-6 border-b border-gray-800 pb-4">
+            <MessageSquare className="text-[#FF6B35]" size={24} />
+            <h2 className="text-xl font-semibold text-white">Slack Integration</h2>
+          </div>
+          <p className="text-sm text-gray-400 mb-4">
+            Connect Slack to receive real-time notifications for order status changes, bids, and purchase orders.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-white block mb-1">Webhook URL</label>
+              <input
+                type="url"
+                value={settings.slack_webhook_url || ''}
+                onChange={e => handleChange('slack_webhook_url', e.target.value)}
+                placeholder="https://hooks.slack.com/services/..."
+                className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#FF6B35]"
+              />
+              <p className="text-xs text-gray-500 mt-1">Create an Incoming Webhook in your Slack workspace settings.</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-white block mb-1">Channel (optional)</label>
+              <input
+                type="text"
+                value={settings.slack_channel || ''}
+                onChange={e => handleChange('slack_channel', e.target.value)}
+                placeholder="#procurement-alerts"
+                className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#FF6B35]"
+              />
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  if (settings.slack_webhook_url) await saveSlackWebhookUrl(settings.slack_webhook_url);
+                  if (settings.slack_channel) await saveSlackChannel(settings.slack_channel);
+                  toast({ title: 'Slack Settings Saved', description: 'Slack integration configured successfully.' });
+                } catch (err) {
+                  toast({ title: 'Error', description: 'Failed to save Slack settings.', variant: 'destructive' });
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#FF6B35] hover:bg-orange-600 text-white text-sm font-medium transition-colors"
+            >
+              <Save size={16} /> Save Slack Settings
+            </button>
           </div>
         </div>
       </div>

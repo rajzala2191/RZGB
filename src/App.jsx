@@ -52,6 +52,15 @@ import AdminLiveTracking from '@/pages/AdminLiveTracking';
 import AdminOrderPreviewPage from '@/pages/AdminOrderPreviewPage';
 import ManufacturingProcessesPage from '@/pages/ManufacturingProcessesPage';
 import AdminAccountSecurityPage from '@/pages/AdminAccountSecurityPage';
+import BidManagementPage from '@/pages/BidManagementPage';
+import BidComparisonPage from '@/pages/BidComparisonPage';
+import PurchaseOrdersPage from '@/pages/PurchaseOrdersPage';
+import RFQQandAPage from '@/pages/RFQQandAPage';
+import RFQTemplatesPage from '@/pages/RFQTemplatesPage';
+import AdminInvoicesPage from '@/pages/AdminInvoicesPage';
+import SpendAnalyticsPage from '@/pages/SpendAnalyticsPage';
+import ApprovalWorkflowsPage from '@/pages/ApprovalWorkflowsPage';
+import SupplierDiscoveryPage from '@/pages/SupplierDiscoveryPage';
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
@@ -72,6 +81,9 @@ import SupplierDocumentsPortal from '@/pages/SupplierDocumentsPortal';
 import SupplierOrderManager from '@/pages/SupplierOrderManager';
 import SupplierSupportPage from '@/pages/SupplierSupportPage';
 import SupplierProfilePage from '@/pages/SupplierProfilePage';
+import SupplierBiddingPage from '@/pages/SupplierBiddingPage';
+import SupplierPurchaseOrdersPage from '@/pages/SupplierPurchaseOrdersPage';
+import SupplierInvoicesPage from '@/pages/SupplierInvoicesPage';
 import ClientProfilePage from '@/pages/ClientProfilePage';
 import TicketDetailPage from '@/pages/TicketDetailPage';
 import AdminSupportPage from '@/pages/AdminSupportPage';
@@ -138,6 +150,15 @@ function App() {
                     <Route path="/control-centre/manufacturing-processes" element={<ProtectedRoute requiredRole="admin"><ManufacturingProcessesPage /></ProtectedRoute>} />
                     <Route path="/control-centre/order-preview/:orderId" element={<ProtectedRoute requiredRole="admin"><AdminOrderPreviewPage /></ProtectedRoute>} />
                     <Route path="/control-centre/account-security" element={<ProtectedRoute requiredRole="admin"><AdminAccountSecurityPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/bid-management" element={<ProtectedRoute requiredRole="admin"><BidManagementPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/bid-comparison/:orderId" element={<ProtectedRoute requiredRole="admin"><BidComparisonPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/purchase-orders" element={<ProtectedRoute requiredRole="admin"><PurchaseOrdersPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/rfq-qanda/:orderId" element={<ProtectedRoute requiredRole="admin"><RFQQandAPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/rfq-templates" element={<ProtectedRoute requiredRole="admin"><RFQTemplatesPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/invoices" element={<ProtectedRoute requiredRole="admin"><AdminInvoicesPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/spend-analytics" element={<ProtectedRoute requiredRole="admin"><SpendAnalyticsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/approval-workflows" element={<ProtectedRoute requiredRole="admin"><ApprovalWorkflowsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-discovery" element={<ProtectedRoute requiredRole="admin"><SupplierDiscoveryPage /></ProtectedRoute>} />
                     <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
                     <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
 
@@ -163,6 +184,9 @@ function App() {
                     <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
                     <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/profile" element={<ProtectedRoute requiredRole="supplier"><SupplierProfilePage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/bidding" element={<ProtectedRoute requiredRole="supplier"><SupplierBiddingPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/purchase-orders" element={<ProtectedRoute requiredRole="supplier"><SupplierPurchaseOrdersPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/invoices" element={<ProtectedRoute requiredRole="supplier"><SupplierInvoicesPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
                   </Routes>
