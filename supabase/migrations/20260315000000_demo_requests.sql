@@ -35,12 +35,16 @@ grant execute on function public.check_demo_token(text) to authenticated;
 -- RLS: only super_admin (platform) can read/update; anon can insert new requests
 alter table public.demo_requests enable row level security;
 
--- Super-admin: full access (uses is_super_admin() from workspace_tenancy: role=admin + admin_scope=platform)
+-- Admins can read/update (no dependency on is_super_admin or admin_scope). Restricts to role = 'admin' only.
 create policy "Super admin full access demo_requests"
   on public.demo_requests
   for all
-  using (is_super_admin())
-  with check (is_super_admin());
+  using (
+    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
+  )
+  with check (
+    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
+  );
 
 -- Anyone can insert a new request (pending only)
 create policy "Allow insert pending demo request"

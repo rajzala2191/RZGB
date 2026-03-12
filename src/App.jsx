@@ -69,6 +69,8 @@ import PlatformDashboardPage from '@/pages/platform/PlatformDashboardPage';
 import PlatformWorkspacesPage from '@/pages/platform/PlatformWorkspacesPage';
 import PlatformUsersPage from '@/pages/platform/PlatformUsersPage';
 import PlatformDemoRequestsPage from '@/pages/platform/PlatformDemoRequestsPage';
+import PlatformActivityPage from '@/pages/platform/PlatformActivityPage';
+import PlatformSettingsPage from '@/pages/platform/PlatformSettingsPage';
 
 // Public Pages
 import PricingPage from '@/pages/PricingPage';
@@ -153,6 +155,8 @@ function App() {
                     <Route path="/platform-admin/workspaces" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformWorkspacesPage /></ProtectedRoute>} />
                     <Route path="/platform-admin/users" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformUsersPage /></ProtectedRoute>} />
                     <Route path="/platform-admin/demo-requests" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformDemoRequestsPage /></ProtectedRoute>} />
+                    <Route path="/platform-admin/activity" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformActivityPage /></ProtectedRoute>} />
+                    <Route path="/platform-admin/settings" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformSettingsPage /></ProtectedRoute>} />
 
                     {/* --- ADMIN ROUTES (super_admin + customer_admin) --- */}
                     <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />
