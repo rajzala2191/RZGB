@@ -4,10 +4,11 @@ import { useToast } from '@/components/ui/use-toast';
 import SupplierHubLayout from '@/components/SupplierHubLayout';
 import SubmitBidModal from '@/components/SubmitBidModal';
 import { fetchOpenOrdersForSupplier, fetchBidsBySupplier } from '@/services/bidService';
+import { supabase } from '@/lib/customSupabaseClient';
 import { format } from 'date-fns';
 import {
   Search, Gavel, Package, Layers, Hash, Calendar,
-  Clock, ChevronRight, CheckCircle2, XCircle, Timer,
+  Clock, ChevronRight, CheckCircle2, XCircle, Timer, Loader2,
 } from 'lucide-react';
 
 export default function SupplierBiddingPage() {
@@ -32,6 +33,34 @@ export default function SupplierBiddingPage() {
     if (ordersRes.data) setOpenOrders(ordersRes.data);
     if (bidsRes.data) setMyBids(bidsRes.data);
     setLoading(false);
+  };
+
+  const [acceptingJob, setAcceptingJob] = useState(null);
+
+  const handleAcceptJob = async (bid) => {
+    setAcceptingJob(bid.id);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ po_signed_at: new Date().toISOString(), po_signed_by: currentUser.id })
+        .eq('id', bid.order_id);
+      if (error) throw error;
+
+      await supabase.from('audit_logs').insert({
+        action: 'JOB_ACCEPTED',
+        resource_type: 'order',
+        resource_id: bid.order_id,
+        details: `Supplier accepted job for order ${bid.order?.rz_job_id || bid.order_id}`,
+        created_at: new Date().toISOString(),
+      });
+
+      toast({ title: 'Job Accepted', description: 'You have confirmed acceptance of this job.' });
+      loadData();
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setAcceptingJob(null);
+    }
   };
 
   const bidOrderIds = new Set(myBids.map(b => b.order_id));
@@ -179,9 +208,24 @@ export default function SupplierBiddingPage() {
                     </div>
                   </div>
                   {bid.status === 'awarded' && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
-                      <CheckCircle2 size={12} className="text-emerald-600" />
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Won</span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                        <CheckCircle2 size={12} className="text-emerald-600" />
+                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Won</span>
+                      </div>
+                      {!bid.order?.po_signed_at && (
+                        <button
+                          onClick={() => handleAcceptJob(bid)}
+                          disabled={acceptingJob === bid.id}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-orange-600 hover:bg-orange-500 disabled:opacity-60 transition-colors"
+                        >
+                          {acceptingJob === bid.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />}
+                          Accept Job
+                        </button>
+                      )}
+                      {bid.order?.po_signed_at && (
+                        <span className="text-xs text-slate-500 dark:text-slate-400 italic">Job Accepted</span>
+                      )}
                     </div>
                   )}
                 </div>

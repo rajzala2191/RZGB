@@ -18,6 +18,7 @@ import {
   MapPin,
   Download,
   Shield,
+  CheckCircle2,
 } from 'lucide-react';
 
 const WITHDRAWABLE = [
@@ -40,6 +41,8 @@ export default function ClientOrderDetailsView({
   onRequestWithdraw,
   onCancelWithdraw,
   onWithdraw,
+  onConfirmOrder,
+  confirmingOrder,
 }) {
   const [downloadingPack, setDownloadingPack] = useState(false);
 
@@ -126,6 +129,23 @@ export default function ClientOrderDetailsView({
               {currentStatus.replace(/_/g, ' ')}
             </span>
             <div className="flex flex-wrap gap-2 justify-end">
+              {currentStatus === 'AWARDED' && !order.quote_accepted_at && onConfirmOrder && (
+                <Button
+                  onClick={onConfirmOrder}
+                  disabled={confirmingOrder}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
+                >
+                  {confirmingOrder
+                    ? <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                    : <CheckCircle2 className="w-4 h-4 mr-1" />}
+                  Confirm Order
+                </Button>
+              )}
+              {order.quote_accepted_at && (
+                <span className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-emerald-400 text-sm font-bold">
+                  <CheckCircle2 className="w-4 h-4" /> Order Confirmed
+                </span>
+              )}
               <Button
                 onClick={onTrackOrder}
                 className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold border border-slate-700"

@@ -11,8 +11,9 @@ import { createAuditLog } from '@/lib/auditLogger';
 import { format } from 'date-fns';
 import {
   Gavel, Trophy, XCircle, ArrowLeft, Clock, DollarSign,
-  Star, Building2, FileText, ChevronDown, ChevronUp, Loader2,
+  Star, Building2, FileText, ChevronDown, ChevronUp, Loader2, CheckCircle2,
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 const WEIGHT_PRICE = 0.5;
 const WEIGHT_LEAD = 0.3;
@@ -47,6 +48,7 @@ export default function BidComparisonPage() {
   const [loading, setLoading] = useState(true);
   const [awarding, setAwarding] = useState(null);
   const [expandedBid, setExpandedBid] = useState(null);
+  const [awardLetterBid, setAwardLetterBid] = useState(null); // bid pending confirmation in modal
 
   useEffect(() => { loadData(); }, [orderId]);
 
@@ -185,9 +187,9 @@ export default function BidComparisonPage() {
                       </div>
 
                       {bid.status === 'pending' && order?.order_status === 'OPEN_FOR_BIDDING' && (
-                        <Button onClick={() => handleAward(bid)} disabled={!!awarding}
+                        <Button onClick={() => setAwardLetterBid(bid)} disabled={!!awarding}
                           className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold">
-                          {awarding === bid.id ? <Loader2 size={14} className="animate-spin mr-1" /> : <Trophy size={14} className="mr-1" />}
+                          <Trophy size={14} className="mr-1" />
                           Award
                         </Button>
                       )}
@@ -244,6 +246,60 @@ export default function BidComparisonPage() {
           </>
         )}
       </div>
+      {/* Award Letter confirmation modal */}
+      <Dialog open={!!awardLetterBid} onOpenChange={open => { if (!open) setAwardLetterBid(null); }}>
+        <DialogContent className="sm:max-w-md rounded-2xl bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#232329] shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2.5 text-base font-bold text-gray-900 dark:text-slate-100">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center">
+                <Trophy size={16} className="text-emerald-600 dark:text-emerald-400" />
+              </div>
+              Award Letter Summary
+            </DialogTitle>
+          </DialogHeader>
+          {awardLetterBid && (
+            <div className="space-y-4 py-2">
+              <div className="bg-gray-50 dark:bg-[#13131f] rounded-xl p-4 space-y-3 border border-gray-200 dark:border-[#232329]">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 dark:text-slate-400">Supplier</span>
+                  <span className="font-bold text-gray-900 dark:text-slate-100">{awardLetterBid.supplier?.company_name || 'Supplier'}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 dark:text-slate-400">Order</span>
+                  <span className="font-semibold text-gray-800 dark:text-slate-200">{order?.ghost_public_name || order?.part_name}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 dark:text-slate-400">Amount</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{awardLetterBid.currency} {Number(awardLetterBid.amount).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 dark:text-slate-400">Lead Time</span>
+                  <span className="font-semibold text-gray-800 dark:text-slate-200">{awardLetterBid.lead_time_days} days</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-slate-400">
+                By confirming, you award this job to the supplier. They will be notified immediately.
+              </p>
+            </div>
+          )}
+          <DialogFooter className="gap-2 pt-1">
+            <button
+              onClick={() => setAwardLetterBid(null)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-gray-100 dark:bg-[#232329] hover:bg-gray-200 dark:hover:bg-[#2e2e35] text-gray-600 dark:text-slate-400 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => { const bid = awardLetterBid; setAwardLetterBid(null); handleAward(bid); }}
+              disabled={!!awarding}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 transition-all shadow-sm"
+            >
+              {awarding ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+              Confirm Award
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ControlCentreLayout>
   );
 }

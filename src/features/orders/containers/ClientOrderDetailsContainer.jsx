@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   fetchJobUpdatesByRzJobId,
   fetchOrderById,
   fetchOrderDocumentsByOrderId,
   withdrawOrderById,
 } from '@/services/orderService';
+import { supabase } from '@/lib/customSupabaseClient';
 import ClientOrderDetailsView from '@/features/orders/presentational/ClientOrderDetailsView';
 
 export default function ClientOrderDetailsContainer() {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { currentUser } = useAuth();
 
   const [order, setOrder] = useState(null);
   const [updates, setUpdates] = useState([]);
@@ -20,6 +23,7 @@ export default function ClientOrderDetailsContainer() {
   const [loading, setLoading] = useState(true);
   const [withdrawing, setWithdrawing] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const [confirmingOrder, setConfirmingOrder] = useState(false);
 
   useEffect(() => {
     const fetchOrderData = async () => {
@@ -83,6 +87,23 @@ export default function ClientOrderDetailsContainer() {
     }
   };
 
+  const handleConfirmOrder = async () => {
+    setConfirmingOrder(true);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ quote_accepted_at: new Date().toISOString(), quote_accepted_by: currentUser.id })
+        .eq('id', orderId);
+      if (error) throw error;
+      setOrder(prev => ({ ...prev, quote_accepted_at: new Date().toISOString(), quote_accepted_by: currentUser.id }));
+      toast({ title: 'Order Confirmed', description: 'You have confirmed this order.' });
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setConfirmingOrder(false);
+    }
+  };
+
   return (
     <ClientOrderDetailsView
       loading={loading}
@@ -96,6 +117,8 @@ export default function ClientOrderDetailsContainer() {
       onRequestWithdraw={() => setConfirmWithdraw(true)}
       onCancelWithdraw={() => setConfirmWithdraw(false)}
       onWithdraw={handleWithdraw}
+      onConfirmOrder={handleConfirmOrder}
+      confirmingOrder={confirmingOrder}
     />
   );
 }
