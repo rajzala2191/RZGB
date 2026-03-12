@@ -142,8 +142,13 @@ export default function BidComparisonPage() {
           </div>
         ) : (
           <>
-            <div className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#232329] rounded-xl p-4 text-xs text-gray-500 dark:text-slate-400">
-              Ranking uses weighted scoring: Price {WEIGHT_PRICE * 100}%, Lead Time {WEIGHT_LEAD * 100}%, Detail {WEIGHT_NOTES * 100}%
+            <div className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#232329] rounded-xl p-4 text-xs text-gray-500 dark:text-slate-400 space-y-1">
+              <div>Ranking uses weighted scoring: Price {WEIGHT_PRICE * 100}%, Lead Time {WEIGHT_LEAD * 100}%, Detail {WEIGHT_NOTES * 100}%</div>
+              {new Set(bids.map(b => b.currency)).size > 1 && (
+                <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-medium">
+                  <DollarSign size={11} /> Note: bids are in different currencies — compare amounts carefully.
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">

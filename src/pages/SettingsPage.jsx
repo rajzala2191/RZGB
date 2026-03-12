@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/lib/customSupabaseClient';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import { useToast } from '@/components/ui/use-toast';
-import { Save, Shield, Mail, Bell, Monitor, Loader2, MessageSquare, Users, LifeBuoy, ChevronRight, Palette } from 'lucide-react';
+import { Save, Shield, Mail, Bell, Monitor, Loader2, MessageSquare, Users, LifeBuoy, ChevronRight, Palette, Webhook, X, Plus, CheckCircle2 } from 'lucide-react';
 import { saveSlackWebhookUrl, saveSlackChannel } from '@/services/slackService';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ACCENT, ACCENT_GLOW } from '@/lib/theme';
@@ -21,6 +21,16 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // 2FA enrollment state
+  const [enrolling2FA, setEnrolling2FA] = useState(false);
+  const [totpData, setTotpData] = useState(null); // { qr_code, secret, factorId }
+
+  // Webhook state
+  const [webhooks, setWebhooks] = useState([]);
+  const [webhookForm, setWebhookForm] = useState({ event_type: 'order.status_changed', endpoint_url: '', secret: '' });
+  const [savingWebhook, setSavingWebhook] = useState(false);
+
   const [settings, setSettings] = useState({
     company_name: 'RZ Global Solutions',
     company_email: '',
@@ -106,6 +116,64 @@ const SettingsPage = () => {
 
   const handleChange = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  // 2FA handler
+  const handle2FAToggle = async (enable) => {
+    if (!enable) { handleChange('mfa_enabled', false); setTotpData(null); return; }
+    setEnrolling2FA(true);
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+      if (error) throw error;
+      setTotpData({ qr_code: data.totp.qr_code, secret: data.totp.secret, factorId: data.id });
+      handleChange('mfa_enabled', true);
+      toast({ title: '2FA Setup', description: 'Scan the QR code with your authenticator app.' });
+    } catch (err) {
+      toast({ title: '2FA Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setEnrolling2FA(false);
+    }
+  };
+
+  // Webhook handlers
+  const fetchWebhooks = async () => {
+    const { data } = await supabase.from('webhooks').select('*').order('created_at', { ascending: false });
+    setWebhooks(data || []);
+  };
+
+  useEffect(() => { if (!loading) fetchWebhooks(); }, [loading]);
+
+  const handleAddWebhook = async () => {
+    if (!webhookForm.endpoint_url) {
+      toast({ title: 'Validation', description: 'Endpoint URL is required.', variant: 'destructive' }); return;
+    }
+    setSavingWebhook(true);
+    try {
+      const { error } = await supabase.from('webhooks').insert({
+        event_type:   webhookForm.event_type,
+        endpoint_url: webhookForm.endpoint_url,
+        secret:       webhookForm.secret || null,
+        active:       true,
+      });
+      if (error) throw error;
+      toast({ title: 'Webhook Added', description: 'Webhook endpoint registered.' });
+      setWebhookForm({ event_type: 'order.status_changed', endpoint_url: '', secret: '' });
+      fetchWebhooks();
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setSavingWebhook(false);
+    }
+  };
+
+  const toggleWebhook = async (id, active) => {
+    await supabase.from('webhooks').update({ active }).eq('id', id);
+    fetchWebhooks();
+  };
+
+  const deleteWebhook = async (id) => {
+    await supabase.from('webhooks').delete().eq('id', id);
+    fetchWebhooks();
   };
 
   if (loading) {
@@ -249,18 +317,42 @@ const SettingsPage = () => {
                   className="w-full rounded-lg p-3 focus:outline-none" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)', color: 'var(--heading)' }}
                 />
               </div>
-              <div className="flex items-center justify-between p-4 rounded-lg" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}>
-                <div>
-                   <label className="text-sm font-medium block" style={{ color: 'var(--heading)' }}>Two-Factor Authentication</label>
-                   <p className="text-xs" style={{ color: 'var(--body)' }}>Enforce 2FA for all admin users</p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 rounded-lg" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}>
+                  <div>
+                     <label className="text-sm font-medium block" style={{ color: 'var(--heading)' }}>Two-Factor Authentication</label>
+                     <p className="text-xs" style={{ color: 'var(--body)' }}>Enforce 2FA for all admin users</p>
+                  </div>
+                  <button
+                    onClick={() => handle2FAToggle(!settings.mfa_enabled)}
+                    disabled={enrolling2FA}
+                    className={`w-12 h-6 rounded-full transition-colors relative ${settings.mfa_enabled ? '' : 'bg-gray-700'} ${enrolling2FA ? 'opacity-50' : ''}`}
+                    style={settings.mfa_enabled ? { background: 'var(--brand)' } : {}}
+                  >
+                    {enrolling2FA
+                      ? <Loader2 size={12} className="animate-spin absolute top-1.5 left-2.5 text-white" />
+                      : <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.mfa_enabled ? 'left-7' : 'left-1'}`} />
+                    }
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleChange('mfa_enabled', !settings.mfa_enabled)}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${settings.mfa_enabled ? '' : 'bg-gray-700'}`}
-                  style={settings.mfa_enabled ? { background: 'var(--brand)' } : {}}
-                >
-                  <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.mfa_enabled ? 'left-7' : 'left-1'}`} />
-                </button>
+                {totpData && (
+                  <div className="p-4 rounded-lg border" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}>
+                    <p className="text-xs font-semibold mb-3" style={{ color: 'var(--heading)' }}>Scan this QR code with your authenticator app (e.g. Google Authenticator):</p>
+                    {totpData.qr_code && (
+                      <img src={totpData.qr_code} alt="TOTP QR Code" className="w-40 h-40 mx-auto rounded-lg bg-white p-1 mb-3" />
+                    )}
+                    <p className="text-xs text-center" style={{ color: 'var(--body)' }}>
+                      Or enter the secret manually: <span className="font-mono font-bold" style={{ color: 'var(--brand)' }}>{totpData.secret}</span>
+                    </p>
+                    <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg bg-emerald-950/30 border border-emerald-800/40">
+                      <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                      <p className="text-xs text-emerald-400">2FA enrollment initiated. Verify with a code from your app to complete setup.</p>
+                    </div>
+                    <button onClick={() => setTotpData(null)} className="mt-2 text-xs" style={{ color: 'var(--body)' }}>
+                      Dismiss
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -302,7 +394,99 @@ const SettingsPage = () => {
           </div>
         </div>
 
-        {/* Section 4: Slack Integration */}
+        {/* Section 4: Webhook Integrations */}
+        <div className="rounded-xl p-6" style={{ background: 'var(--surface)', border: '1px solid var(--edge)' }}>
+          <div className="flex items-center gap-3 mb-6 pb-4" style={{ borderBottom: '1px solid var(--edge)' }}>
+            <Webhook size={24} style={{ color: 'var(--brand)' }} />
+            <h2 className="text-xl font-semibold" style={{ color: 'var(--heading)' }}>Webhook Integrations</h2>
+          </div>
+          <p className="text-sm mb-5" style={{ color: 'var(--body)' }}>
+            Register ERP or third-party endpoints to receive real-time event notifications.
+          </p>
+
+          {/* Add form */}
+          <div className="rounded-xl p-4 mb-5 space-y-3" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--caption)' }}>New Webhook</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--body)' }}>Event Type</label>
+                <select
+                  value={webhookForm.event_type}
+                  onChange={e => setWebhookForm(f => ({ ...f, event_type: e.target.value }))}
+                  className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none" style={{ background: 'var(--surface)', border: '1px solid var(--edge)', color: 'var(--heading)' }}
+                >
+                  <option value="order.status_changed">order.status_changed</option>
+                  <option value="bid.awarded">bid.awarded</option>
+                  <option value="invoice.created">invoice.created</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--body)' }}>Endpoint URL *</label>
+                <input
+                  type="url"
+                  value={webhookForm.endpoint_url}
+                  onChange={e => setWebhookForm(f => ({ ...f, endpoint_url: e.target.value }))}
+                  placeholder="https://your-erp.com/webhook"
+                  className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none" style={{ background: 'var(--surface)', border: '1px solid var(--edge)', color: 'var(--heading)' }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--body)' }}>Secret (optional)</label>
+                <input
+                  type="text"
+                  value={webhookForm.secret}
+                  onChange={e => setWebhookForm(f => ({ ...f, secret: e.target.value }))}
+                  placeholder="signing secret"
+                  className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none" style={{ background: 'var(--surface)', border: '1px solid var(--edge)', color: 'var(--heading)' }}
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleAddWebhook}
+              disabled={savingWebhook}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors" style={{ background: 'var(--brand)' }}
+            >
+              {savingWebhook ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+              Add Webhook
+            </button>
+          </div>
+
+          {/* Webhook list */}
+          {webhooks.length === 0 ? (
+            <p className="text-sm text-center py-6" style={{ color: 'var(--caption)' }}>No webhooks registered yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {webhooks.map(wh => (
+                <div key={wh.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background: 'rgba(255,107,53,0.12)', color: 'var(--brand)' }}>{wh.event_type}</span>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded ${wh.active ? 'bg-emerald-950/40 text-emerald-400' : 'bg-red-950/40 text-red-400'}`}>
+                        {wh.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                    <p className="text-xs truncate" style={{ color: 'var(--body)' }}>{wh.endpoint_url}</p>
+                  </div>
+                  <button
+                    onClick={() => toggleWebhook(wh.id, !wh.active)}
+                    className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--edge)', color: 'var(--body)' }}
+                  >
+                    {wh.active ? 'Disable' : 'Enable'}
+                  </button>
+                  <button
+                    onClick={() => deleteWebhook(wh.id)}
+                    className="text-red-400 hover:text-red-500 transition-colors p-1"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Section 5: Slack Integration */}
         <div className="rounded-xl p-6" style={{ background: 'var(--surface)', border: '1px solid var(--edge)' }}>
           <div className="flex items-center gap-3 mb-6 pb-4" style={{ borderBottom: '1px solid var(--edge)' }}>
             <MessageSquare size={24} style={{ color: 'var(--brand)' }} />
