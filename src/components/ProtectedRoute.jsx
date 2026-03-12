@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/customSupabaseClient';
 import { Loader2 } from 'lucide-react';
 
-const ProtectedRoute = ({ children, requiredRole }) => {
+const ProtectedRoute = ({ children, requiredRole, skipOnboardingCheck = false }) => {
   const { currentUser, userRole, loading } = useAuth();
   const location = useLocation();
+  const [onboardingStatus, setOnboardingStatus] = useState(null);
+  const [onboardingLoading, setOnboardingLoading] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser || userRole !== 'supplier' || skipOnboardingCheck) return;
+    setOnboardingLoading(true);
+    supabase
+      .from('profiles')
+      .select('onboarding_status')
+      .eq('id', currentUser.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setOnboardingStatus(data?.onboarding_status ?? 'approved');
+        setOnboardingLoading(false);
+      });
+  }, [currentUser, userRole, skipOnboardingCheck]);
 
   // Also wait if user is authenticated but profile/role hasn't loaded yet
-  if (loading || (currentUser && !userRole)) {
+  if (loading || (currentUser && !userRole) || onboardingLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="flex flex-col items-center gap-4">
@@ -33,7 +50,14 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // 3. Access Granted
+  // 3. Supplier onboarding check (only for supplier role, skip when explicitly flagged)
+  if (userRole === 'supplier' && !skipOnboardingCheck && onboardingStatus && onboardingStatus !== 'approved') {
+    if (location.pathname !== '/supplier-hub/onboarding') {
+      return <Navigate to="/supplier-hub/onboarding" replace />;
+    }
+  }
+
+  // 4. Access Granted
   return children;
 };
 
