@@ -473,7 +473,7 @@ function LandingNav() {
           >
             Try Demo <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-slate-500 hover:text-slate-900 p-1">
+          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 p-1" aria-label="Toggle menu">
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -489,11 +489,15 @@ function LandingNav() {
             className="md:hidden px-4 pb-4 pt-2 space-y-2 overflow-hidden"
             style={{ background: 'var(--header-bg)', borderTop: '1px solid var(--header-border)' }}
           >
-            <button onClick={() => scrollTo('features')} className="block py-2 text-sm text-slate-600 font-medium w-full text-left">Features</button>
-            <Link   to="/how-it-works"                   className="block py-2 text-sm text-slate-600 font-medium">How it Works</Link>
-            <Link   to="/pricing"                        className="block py-2 text-sm text-slate-600 font-medium">Pricing</Link>
-            <button onClick={() => scrollTo('portals')}  className="block py-2 text-sm text-slate-600 font-medium w-full text-left">Portals</button>
-            <Link   to="/login"                          className="block py-2 text-sm text-slate-600 font-medium">Sign In</Link>
+            <div className="flex items-center justify-between py-2 border-b border-slate-200 dark:border-slate-700 mb-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Theme</span>
+              <ThemeToggle />
+            </div>
+            <button onClick={() => scrollTo('features')} className="block py-2 text-sm text-slate-600 dark:text-slate-400 font-medium w-full text-left">Features</button>
+            <Link   to="/how-it-works"                   className="block py-2 text-sm text-slate-600 dark:text-slate-400 font-medium">How it Works</Link>
+            <Link   to="/pricing"                        className="block py-2 text-sm text-slate-600 dark:text-slate-400 font-medium">Pricing</Link>
+            <button onClick={() => scrollTo('portals')}  className="block py-2 text-sm text-slate-600 dark:text-slate-400 font-medium w-full text-left">Portals</button>
+            <Link   to="/login"                          className="block py-2 text-sm text-slate-600 dark:text-slate-400 font-medium">Sign In</Link>
             <Link   to="/demo"                           className="block py-2 text-sm text-[#FF6B35] font-bold">Try Demo →</Link>
           </motion.div>
         )}
