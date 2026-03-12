@@ -99,9 +99,6 @@ const ControlCentreLayout = ({ children }) => {
             borderRight: `1px solid ${sb.border}`,
           }}
         >
-          {/* Orange accent line */}
-          <div style={{ height: 3, background: `linear-gradient(90deg, ${ACCENT}, #f97316, transparent)`, flexShrink: 0 }} />
-
           {/* Logo / Brand */}
           <div
             className="flex items-center justify-between px-5 py-4"
@@ -110,7 +107,7 @@ const ControlCentreLayout = ({ children }) => {
             <div className="flex items-center gap-3">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: 'rgba(255,107,53,0.12)', border: '1px solid rgba(255,107,53,0.25)' }}
+                style={{ background: 'rgba(148,163,184,0.07)', border: '1px solid rgba(148,163,184,0.1)' }}
               >
                 <img
                   src={isDark
@@ -125,13 +122,12 @@ const ControlCentreLayout = ({ children }) => {
                 <p style={{ color: sb.nameColor }} className="font-bold text-sm leading-none tracking-tight">RZ Global</p>
                 <p
                   className="text-[10px] font-semibold tracking-[0.12em] uppercase mt-1"
-                  style={{ color: ACCENT }}
+                  style={{ color: 'var(--sidebar-label)' }}
                 >
                   Control Centre
                 </p>
               </div>
             </div>
-            {/* NotificationBell removed from sidebar header */}
           </div>
 
           {/* Section label */}
@@ -155,10 +151,9 @@ const ControlCentreLayout = ({ children }) => {
                   onClick={() => setSidebarOpen(false)}
                   className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
                   style={{
-                    background: isActive ? 'rgba(255,107,53,0.1)' : 'transparent',
-                    color:      isActive ? ACCENT : sb.navInactive,
-                    border:     isActive ? '1px solid rgba(255,107,53,0.22)' : '1px solid transparent',
-                    boxShadow:  isActive ? '0 0 14px rgba(255,107,53,0.06)' : 'none',
+                    background: isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
+                    color:      isActive ? '#e5e5e5' : sb.navInactive,
+                    border:     isActive ? '1px solid rgba(255,255,255,0.09)' : '1px solid transparent',
                   }}
                   onMouseEnter={e => {
                     if (!isActive) {
@@ -176,13 +171,13 @@ const ControlCentreLayout = ({ children }) => {
                   <div className="flex items-center gap-3">
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: isActive ? 'rgba(255,107,53,0.18)' : sb.iconBg }}
+                      style={{ background: isActive ? 'rgba(255,255,255,0.07)' : sb.iconBg }}
                     >
-                      <item.icon size={15} style={{ color: isActive ? ACCENT : sb.iconColor }} />
+                      <item.icon size={15} style={{ color: isActive ? '#e5e5e5' : sb.iconColor }} />
                     </div>
                     <span>{item.label}</span>
                   </div>
-                  {isActive && <ChevronRight size={13} style={{ color: ACCENT }} />}
+                  {isActive && <ChevronRight size={13} style={{ color: '#666666' }} />}
                 </NavLink>
               );
             })}
@@ -199,7 +194,7 @@ const ControlCentreLayout = ({ children }) => {
             >
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden"
-                style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #f97316 100%)` }}
+                style={{ background: '#2a2a2a' }}
               >
                 {userLogoUrl
                   ? <img src={userLogoUrl} alt="logo" className="w-full h-full object-contain rounded-xl" />

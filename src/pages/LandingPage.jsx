@@ -2,26 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
-  ArrowRight, Shield, Zap, Users, BarChart3, FileCheck, Clock, CheckCircle2,
-  Package, Layers, GitBranch, Globe, Menu, X, ChevronRight, Star, TrendingUp,
-  Lock, Eye, Building2, Factory, Wrench, Truck, Award, Play,
+  ArrowRight, Shield, Zap, Users, BarChart3, FileCheck, CheckCircle2,
+  GitBranch, Globe, Menu, X, Star,
+  Eye, Building2, Factory, Wrench, Truck, Award, Package, Play,
 } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
+import { useTheme } from '@/contexts/ThemeContext';
 
-// Force light mode
-function useForceLightTheme() {
-  useEffect(() => {
-    const root = document.documentElement;
-    const prev = root.classList.contains('dark');
-    root.classList.remove('dark');
-    root.classList.add('light');
-    return () => {
-      root.classList.remove('light');
-      if (prev) root.classList.add('dark');
-    };
-  }, []);
-}
-
-// Animated counter
+// ─── Animated counter ────────────────────────────────────────────────────────
 function Counter({ target, suffix = '', prefix = '' }) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
@@ -44,43 +32,57 @@ function Counter({ target, suffix = '', prefix = '' }) {
   return <span ref={ref}>{prefix}{count.toLocaleString()}{suffix}</span>;
 }
 
-// Order pipeline mini visual
+// ─── Pipeline stages ──────────────────────────────────────────────────────────
 const PIPELINE_STAGES = [
-  { label: 'Submit', color: '#6366f1', icon: Package },
-  { label: 'Review', color: '#f59e0b', icon: Eye },
-  { label: 'Bidding', color: '#8b5cf6', icon: BarChart3 },
-  { label: 'Awarded', color: '#FF6B35', icon: Award },
+  { label: 'Submit',     color: '#6366f1', icon: Package },
+  { label: 'Review',     color: '#f59e0b', icon: Eye },
+  { label: 'Bidding',    color: '#8b5cf6', icon: BarChart3 },
+  { label: 'Awarded',    color: '#FF6B35', icon: Award },
   { label: 'Production', color: '#10b981', icon: Wrench },
-  { label: 'QC', color: '#06b6d4', icon: CheckCircle2 },
-  { label: 'Delivered', color: '#22c55e', icon: Truck },
+  { label: 'QC',         color: '#06b6d4', icon: CheckCircle2 },
+  { label: 'Delivered',  color: '#22c55e', icon: Truck },
 ];
 
 function MiniPipeline({ activeIdx = 4 }) {
+  const { isDark } = useTheme();
+  const inactiveBg     = isDark ? 'var(--surface-raised)' : '#f1f5f9';
+  const inactiveBorder = isDark ? 'var(--edge)'           : '#e2e8f0';
+  const connectorBg    = isDark ? 'var(--edge)'           : '#e2e8f0';
+
   return (
     <div className="flex items-center gap-0 overflow-x-auto pb-1 scrollbar-none">
       {PIPELINE_STAGES.map((stage, i) => {
-        const done = i < activeIdx;
+        const done   = i < activeIdx;
         const active = i === activeIdx;
         return (
           <React.Fragment key={stage.label}>
             <div className="flex flex-col items-center flex-shrink-0">
               <motion.div
-                animate={active ? { scale: [1, 1.08, 1], boxShadow: [`0 0 0px ${stage.color}00`, `0 0 16px ${stage.color}66`, `0 0 0px ${stage.color}00`] } : {}}
+                animate={active ? {
+                  scale: [1, 1.08, 1],
+                  boxShadow: [`0 0 0px ${stage.color}00`, `0 0 16px ${stage.color}66`, `0 0 0px ${stage.color}00`],
+                } : {}}
                 transition={{ repeat: Infinity, duration: 2.5 }}
                 className="w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all"
                 style={{
-                  background: done || active ? stage.color : '#f1f5f9',
-                  borderColor: done || active ? stage.color : '#e2e8f0',
+                  background:   done || active ? stage.color : inactiveBg,
+                  borderColor:  done || active ? stage.color : inactiveBorder,
                 }}
               >
                 <stage.icon className="w-4 h-4" style={{ color: done || active ? '#fff' : '#94a3b8' }} />
               </motion.div>
-              <span className="text-[9px] mt-1.5 font-semibold text-center" style={{ color: active ? stage.color : done ? '#64748b' : '#cbd5e1' }}>
+              <span
+                className="text-[9px] mt-1.5 font-semibold text-center"
+                style={{ color: active ? stage.color : done ? '#64748b' : '#94a3b8' }}
+              >
                 {stage.label}
               </span>
             </div>
             {i < PIPELINE_STAGES.length - 1 && (
-              <div className="w-8 h-0.5 flex-shrink-0 mb-4 rounded-full" style={{ background: i < activeIdx ? stage.color : '#e2e8f0' }} />
+              <div
+                className="w-8 h-0.5 flex-shrink-0 mb-4 rounded-full"
+                style={{ background: i < activeIdx ? stage.color : connectorBg }}
+              />
             )}
           </React.Fragment>
         );
@@ -89,7 +91,7 @@ function MiniPipeline({ activeIdx = 4 }) {
   );
 }
 
-// Role data
+// ─── Role data ────────────────────────────────────────────────────────────────
 const ROLES = {
   client: {
     label: 'Client Portal',
@@ -97,9 +99,9 @@ const ROLES = {
     icon: Building2,
     description: 'For manufacturers needing precision parts sourced and tracked end-to-end.',
     steps: [
-      { title: 'Submit Your Order', body: 'Upload technical drawings, specify material, quantity, and delivery requirements.' },
-      { title: 'Real-Time Tracking', body: 'Follow your job through every production stage with live status updates.' },
-      { title: 'Receive & Sign Off', body: 'Get notified on dispatch. Review quality certificates and sign off on delivery.' },
+      { title: 'Submit Your Order',   body: 'Upload technical drawings, specify material, quantity, and delivery requirements.' },
+      { title: 'Real-Time Tracking',  body: 'Follow your job through every production stage with live status updates.' },
+      { title: 'Receive & Sign Off',  body: 'Get notified on dispatch. Review quality certificates and sign off on delivery.' },
     ],
     path: '/demo?role=client',
   },
@@ -109,9 +111,9 @@ const ROLES = {
     icon: Shield,
     description: 'Full command over the procurement pipeline — from intake through final delivery.',
     steps: [
-      { title: 'Sanitise Drawings', body: 'AI-powered engine strips client identifiers from technical drawings before supplier release.' },
-      { title: 'Manage Bidding', body: 'Review supplier bids, compare pricing and lead times, and award jobs with one click.' },
-      { title: 'Monitor Production', body: 'Real-time pipeline board gives a live view of all active jobs across every stage.' },
+      { title: 'Sanitise Drawings',   body: 'AI-powered engine strips client identifiers from technical drawings before supplier release.' },
+      { title: 'Manage Bidding',      body: 'Review supplier bids, compare pricing and lead times, and award jobs with one click.' },
+      { title: 'Monitor Production',  body: 'Real-time pipeline board gives a live view of all active jobs across every stage.' },
     ],
     path: '/demo?role=admin',
   },
@@ -121,92 +123,62 @@ const ROLES = {
     icon: Factory,
     description: 'Manufacturers worldwide compete fairly for jobs with sanitised drawings and transparent bidding.',
     steps: [
-      { title: 'Discover New Jobs', body: 'Browse open jobs matching your specialisms — sanitised drawings protect client IP.' },
-      { title: 'Submit Bids', body: 'Provide competitive pricing and lead times. Bids are reviewed by the RZ admin team.' },
-      { title: 'Track Production', body: 'Update job milestones, upload quality documents, and manage your production pipeline.' },
+      { title: 'Discover New Jobs',   body: 'Browse open jobs matching your specialisms — sanitised drawings protect client IP.' },
+      { title: 'Submit Bids',         body: 'Provide competitive pricing and lead times. Bids are reviewed by the RZ admin team.' },
+      { title: 'Track Production',    body: 'Update job milestones, upload quality documents, and manage your production pipeline.' },
     ],
     path: '/demo?role=supplier',
   },
 };
 
-// Features bento grid
+// ─── Features ─────────────────────────────────────────────────────────────────
 const FEATURES = [
-  {
-    title: 'AI Drawing Sanitisation',
-    body: 'Claude Vision automatically removes client identifiers before drawings reach suppliers. Prevents direct poaching.',
-    icon: Shield,
-    color: '#3b82f6',
-    visual: 'sanitisation',
-  },
-  {
-    title: 'Live Pipeline Board',
-    body: '11-stage Kanban across all active orders. Admin has full visibility at all times.',
-    icon: GitBranch,
-    color: '#FF6B35',
-    visual: 'pipeline',
-  },
-  {
-    title: 'Competitive Bidding',
-    body: 'Suppliers bid on sanitised jobs. Clients get best price. Fair and transparent.',
-    icon: BarChart3,
-    color: '#8b5cf6',
-    visual: 'bidding',
-  },
-  {
-    title: 'Real-Time Tracking',
-    body: 'WebSocket-powered live updates. Every stage change reflected instantly across all portals.',
-    icon: Zap,
-    color: '#10b981',
-    visual: 'tracking',
-  },
-  {
-    title: 'Document Vault',
-    body: 'Certificates of conformity, quality reports, shipping documents — all stored per job.',
-    icon: FileCheck,
-    color: '#f59e0b',
-    visual: 'documents',
-  },
-  {
-    title: '3-Role Access System',
-    body: 'Client, Admin, and Supplier portals each with role-specific permissions and views.',
-    icon: Users,
-    color: '#06b6d4',
-    visual: 'roles',
-  },
+  { title: 'AI Drawing Sanitisation', body: 'Claude Vision automatically removes client identifiers before drawings reach suppliers. Prevents direct poaching.', icon: Shield,    color: '#3b82f6', visual: 'sanitisation' },
+  { title: 'Live Pipeline Board',     body: '11-stage Kanban across all active orders. Admin has full visibility at all times.',                                   icon: GitBranch, color: '#FF6B35', visual: 'pipeline'     },
+  { title: 'Competitive Bidding',     body: 'Suppliers bid on sanitised jobs. Clients get best price. Fair and transparent.',                                      icon: BarChart3,  color: '#8b5cf6', visual: 'bidding'      },
+  { title: 'Real-Time Tracking',      body: 'WebSocket-powered live updates. Every stage change reflected instantly across all portals.',                          icon: Zap,        color: '#10b981', visual: 'tracking'     },
+  { title: 'Document Vault',          body: 'Certificates of conformity, quality reports, shipping documents — all stored per job.',                               icon: FileCheck,  color: '#f59e0b', visual: 'documents'    },
+  { title: '3-Role Access System',    body: 'Client, Admin, and Supplier portals each with role-specific permissions and views.',                                   icon: Users,      color: '#06b6d4', visual: 'roles'        },
 ];
 
-function FeatureVisual({ type, color }) {
+function FeatureVisual({ type }) {
+  const { isDark } = useTheme();
+  const cardBg     = isDark ? 'var(--surface-raised)' : '#ffffff';
+  const cardBorder = isDark ? 'var(--edge)'           : '#e2e8f0';
+  const labelColor = isDark ? 'var(--body)'           : '#475569';
+  const barBg      = isDark ? 'var(--edge-strong)'    : '#e2e8f0';
+
   if (type === 'sanitisation') {
     return (
       <div className="space-y-3 w-full">
         <div className="flex items-center gap-2 mb-2">
           <Eye className="w-4 h-4 text-blue-500" />
-          <span className="text-[11px] font-bold text-slate-600">AI Sanitisation Engine</span>
+          <span className="text-[11px] font-bold" style={{ color: labelColor }}>AI Sanitisation Engine</span>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white border border-slate-200 rounded-xl p-3 relative">
+          <div className="rounded-xl p-3 relative border" style={{ background: cardBg, borderColor: cardBorder }}>
             <p className="text-[9px] font-bold text-red-400 uppercase mb-2">Before</p>
             <div className="space-y-1.5">
-              <div className="h-1.5 bg-slate-200 rounded-full w-full" />
-              <div className="h-1.5 bg-slate-200 rounded-full w-3/4" />
+              <div className="h-1.5 rounded-full w-full"   style={{ background: barBg }} />
+              <div className="h-1.5 rounded-full w-3/4"   style={{ background: barBg }} />
               <div className="h-4 bg-red-100 border border-red-200 rounded px-1 flex items-center mt-2">
                 <span className="text-[8px] text-red-500 font-bold truncate">Thornton Precision Ltd</span>
               </div>
-              <div className="h-1.5 bg-slate-200 rounded-full w-5/6" />
+              <div className="h-1.5 rounded-full w-5/6"   style={{ background: barBg }} />
               <div className="h-4 bg-red-100 border border-red-200 rounded px-1 flex items-center">
                 <span className="text-[8px] text-red-500 font-bold truncate">REF: TP-2024-0891</span>
               </div>
             </div>
           </div>
-          <div className="bg-white border border-blue-200 rounded-xl p-3 relative">
+          <div className="rounded-xl p-3 relative border border-blue-200" style={{ background: cardBg }}>
             <p className="text-[9px] font-bold text-emerald-500 uppercase mb-2">After</p>
             <div className="space-y-1.5">
-              <div className="h-1.5 bg-slate-200 rounded-full w-full" />
-              <div className="h-1.5 bg-slate-200 rounded-full w-3/4" />
+              <div className="h-1.5 rounded-full w-full"   style={{ background: barBg }} />
+              <div className="h-1.5 rounded-full w-3/4"   style={{ background: barBg }} />
               <div className="h-4 bg-blue-50 border border-blue-200 rounded px-1 flex items-center mt-2">
                 <span className="text-[8px] text-blue-500 font-bold">██████████████</span>
               </div>
-              <div className="h-1.5 bg-slate-200 rounded-full w-5/6" />
+              <div className="h-1.5 rounded-full w-5/6"   style={{ background: barBg }} />
               <div className="h-4 bg-blue-50 border border-blue-200 rounded px-1 flex items-center">
                 <span className="text-[8px] text-blue-500 font-bold">██████████████</span>
               </div>
@@ -226,32 +198,32 @@ function FeatureVisual({ type, color }) {
 
   if (type === 'pipeline') {
     const stages = [
-      { label: 'Review', count: 3, color: '#f59e0b' },
-      { label: 'Bidding', count: 2, color: '#8b5cf6' },
+      { label: 'Review',     count: 3, color: '#f59e0b' },
+      { label: 'Bidding',    count: 2, color: '#8b5cf6' },
       { label: 'Production', count: 5, color: '#FF6B35' },
-      { label: 'QC', count: 1, color: '#10b981' },
+      { label: 'QC',         count: 1, color: '#10b981' },
     ];
     return (
       <div className="w-full">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">
             <GitBranch className="w-3.5 h-3.5 text-orange-500" />
-            <span className="text-[11px] font-bold text-slate-600">Pipeline Board</span>
+            <span className="text-[11px] font-bold" style={{ color: labelColor }}>Pipeline Board</span>
           </div>
           <span className="text-[10px] text-slate-400 font-medium">11 orders</span>
         </div>
         <div className="flex gap-2">
           {stages.map((s) => (
-            <div key={s.label} className="flex-1 bg-white border border-slate-200 rounded-xl overflow-hidden" style={{ borderTopWidth: 2, borderTopColor: s.color }}>
-              <div className="px-2 py-1.5 border-b border-slate-100 flex items-center justify-between">
+            <div key={s.label} className="flex-1 rounded-xl overflow-hidden border" style={{ background: cardBg, borderColor: cardBorder, borderTopWidth: 2, borderTopColor: s.color }}>
+              <div className="px-2 py-1.5 flex items-center justify-between" style={{ borderBottom: `1px solid ${cardBorder}` }}>
                 <span className="text-[9px] font-semibold" style={{ color: s.color }}>{s.label}</span>
                 <span className="text-[9px] text-slate-400 font-bold">{s.count}</span>
               </div>
               <div className="p-1.5 space-y-1">
                 {Array.from({ length: Math.min(s.count, 3) }).map((_, j) => (
-                  <div key={j} className="bg-slate-50 rounded-lg p-1.5">
-                    <div className="h-1 bg-slate-200 rounded-full w-3/4 mb-1" />
-                    <div className="h-1 bg-slate-100 rounded-full w-1/2" />
+                  <div key={j} className="rounded-lg p-1.5" style={{ background: isDark ? 'var(--surface-inset)' : '#f8fafc' }}>
+                    <div className="h-1 rounded-full w-3/4 mb-1" style={{ background: barBg }} />
+                    <div className="h-1 rounded-full w-1/2"      style={{ background: barBg }} />
                   </div>
                 ))}
               </div>
@@ -267,26 +239,28 @@ function FeatureVisual({ type, color }) {
       <div className="w-full space-y-2">
         <div className="flex items-center gap-1.5 mb-2">
           <BarChart3 className="w-3.5 h-3.5 text-violet-500" />
-          <span className="text-[11px] font-bold text-slate-600">Bid Comparison</span>
+          <span className="text-[11px] font-bold" style={{ color: labelColor }}>Bid Comparison</span>
         </div>
         {[
-          { name: 'Sheffield Forge', price: '£8,400', lead: '18 days', rating: '4.8★', best: true },
-          { name: 'Midlands Casting', price: '£9,100', lead: '14 days', rating: '4.6★', best: false },
-          { name: 'Northern Precision', price: '£11,200', lead: '21 days', rating: '4.3★', best: false },
+          { name: 'Sheffield Forge',   price: '£8,400',  lead: '18 days', rating: '4.8★', best: true  },
+          { name: 'Midlands Casting',  price: '£9,100',  lead: '14 days', rating: '4.6★', best: false },
+          { name: 'Northern Precision',price: '£11,200', lead: '21 days', rating: '4.3★', best: false },
         ].map((bid) => (
           <div
             key={bid.name}
-            className={`flex items-center justify-between p-2.5 rounded-xl border ${bid.best ? 'bg-violet-50 border-violet-200' : 'bg-white border-slate-200'}`}
+            className="flex items-center justify-between p-2.5 rounded-xl border"
+            style={{
+              background:   bid.best ? (isDark ? 'rgba(139,92,246,0.12)' : '#f5f3ff') : cardBg,
+              borderColor:  bid.best ? (isDark ? 'rgba(139,92,246,0.3)' : '#ddd6fe') : cardBorder,
+            }}
           >
             <div className="min-w-0">
-              <p className={`text-[11px] font-bold ${bid.best ? 'text-violet-700' : 'text-slate-700'}`}>{bid.name}</p>
+              <p className="text-[11px] font-bold" style={{ color: bid.best ? '#7c3aed' : isDark ? 'var(--heading)' : '#374151' }}>{bid.name}</p>
               <p className="text-[9px] text-slate-400">{bid.lead} · {bid.rating}</p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <span className={`text-xs font-black ${bid.best ? 'text-violet-600' : 'text-slate-600'}`}>{bid.price}</span>
-              {bid.best && (
-                <span className="text-[8px] font-bold bg-violet-500 text-white px-1.5 py-0.5 rounded-full">BEST</span>
-              )}
+              <span className="text-xs font-black" style={{ color: bid.best ? '#7c3aed' : isDark ? 'var(--body)' : '#374151' }}>{bid.price}</span>
+              {bid.best && <span className="text-[8px] font-bold bg-violet-500 text-white px-1.5 py-0.5 rounded-full">BEST</span>}
             </div>
           </div>
         ))}
@@ -299,17 +273,17 @@ function FeatureVisual({ type, color }) {
       <div className="w-full space-y-2">
         <div className="flex items-center gap-1.5 mb-2">
           <Zap className="w-3.5 h-3.5 text-emerald-500" />
-          <span className="text-[11px] font-bold text-slate-600">Live Activity Feed</span>
+          <span className="text-[11px] font-bold" style={{ color: labelColor }}>Live Activity Feed</span>
           <span className="ml-auto flex items-center gap-1">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
             <span className="text-[9px] text-emerald-600 font-semibold">LIVE</span>
           </span>
         </div>
         {[
-          { action: 'Order RZ-10033 moved to QC', time: '2 min ago', color: '#10b981', icon: CheckCircle2 },
-          { action: 'New bid from Sheffield Forge', time: '5 min ago', color: '#8b5cf6', icon: BarChart3 },
-          { action: 'Drawing sanitised for RZ-10041', time: '12 min ago', color: '#3b82f6', icon: Shield },
-          { action: 'RZ-10029 dispatched to client', time: '1 hr ago', color: '#FF6B35', icon: Truck },
+          { action: 'Order RZ-10033 moved to QC',        time: '2 min ago',  color: '#10b981', icon: CheckCircle2 },
+          { action: 'New bid from Sheffield Forge',       time: '5 min ago',  color: '#8b5cf6', icon: BarChart3 },
+          { action: 'Drawing sanitised for RZ-10041',     time: '12 min ago', color: '#3b82f6', icon: Shield },
+          { action: 'RZ-10029 dispatched to client',      time: '1 hr ago',   color: '#FF6B35', icon: Truck },
         ].map((item, j) => (
           <motion.div
             key={j}
@@ -317,13 +291,14 @@ function FeatureVisual({ type, color }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ delay: j * 0.1 }}
-            className="flex items-center gap-2.5 bg-white border border-slate-200 rounded-xl p-2.5"
+            className="flex items-center gap-2.5 rounded-xl p-2.5 border"
+            style={{ background: cardBg, borderColor: cardBorder }}
           >
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15` }}>
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}18` }}>
               <item.icon className="w-3 h-3" style={{ color: item.color }} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold text-slate-700 truncate">{item.action}</p>
+              <p className="text-[10px] font-semibold truncate" style={{ color: isDark ? 'var(--heading)' : '#374151' }}>{item.action}</p>
               <p className="text-[9px] text-slate-400">{item.time}</p>
             </div>
           </motion.div>
@@ -334,24 +309,24 @@ function FeatureVisual({ type, color }) {
 
   if (type === 'documents') {
     const docs = [
-      { name: 'Certificate of Conformity', ext: 'PDF', color: '#ef4444', size: '1.2 MB' },
-      { name: 'Quality Inspection Report', ext: 'PDF', color: '#ef4444', size: '3.4 MB' },
-      { name: 'Technical Drawing Rev.3', ext: 'DWG', color: '#f59e0b', size: '8.1 MB' },
-      { name: 'Shipping Manifest', ext: 'PDF', color: '#ef4444', size: '0.4 MB' },
+      { name: 'Certificate of Conformity',   ext: 'PDF', color: '#ef4444', size: '1.2 MB' },
+      { name: 'Quality Inspection Report',   ext: 'PDF', color: '#ef4444', size: '3.4 MB' },
+      { name: 'Technical Drawing Rev.3',     ext: 'DWG', color: '#f59e0b', size: '8.1 MB' },
+      { name: 'Shipping Manifest',           ext: 'PDF', color: '#ef4444', size: '0.4 MB' },
     ];
     return (
       <div className="w-full space-y-2">
         <div className="flex items-center gap-1.5 mb-2">
           <FileCheck className="w-3.5 h-3.5 text-amber-500" />
-          <span className="text-[11px] font-bold text-slate-600">Document Vault · RZ-10033</span>
+          <span className="text-[11px] font-bold" style={{ color: labelColor }}>Document Vault · RZ-10033</span>
         </div>
         {docs.map((doc, j) => (
-          <div key={j} className="flex items-center gap-2.5 bg-white border border-slate-200 rounded-xl p-2.5">
+          <div key={j} className="flex items-center gap-2.5 rounded-xl p-2.5 border" style={{ background: cardBg, borderColor: cardBorder }}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${doc.color}12` }}>
               <span className="text-[8px] font-black" style={{ color: doc.color }}>{doc.ext}</span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold text-slate-700 truncate">{doc.name}</p>
+              <p className="text-[10px] font-semibold truncate" style={{ color: isDark ? 'var(--heading)' : '#374151' }}>{doc.name}</p>
               <p className="text-[9px] text-slate-400">{doc.size}</p>
             </div>
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
@@ -363,14 +338,14 @@ function FeatureVisual({ type, color }) {
 
   if (type === 'roles') {
     const roles = [
-      { label: 'Client Portal', icon: Building2, color: '#FF6B35', perms: ['Submit orders', 'Track progress', 'Sign off delivery'] },
-      { label: 'Control Centre', icon: Shield, color: '#3b82f6', perms: ['Sanitise drawings', 'Manage bids', 'Full pipeline'] },
-      { label: 'Supplier Hub', icon: Factory, color: '#8b5cf6', perms: ['Browse jobs', 'Submit bids', 'Update milestones'] },
+      { label: 'Client Portal',   icon: Building2, color: '#FF6B35', perms: ['Submit orders', 'Track progress', 'Sign off delivery'] },
+      { label: 'Control Centre',  icon: Shield,    color: '#3b82f6', perms: ['Sanitise drawings', 'Manage bids', 'Full pipeline'] },
+      { label: 'Supplier Hub',    icon: Factory,   color: '#8b5cf6', perms: ['Browse jobs', 'Submit bids', 'Update milestones'] },
     ];
     return (
       <div className="w-full space-y-2">
         {roles.map((role) => (
-          <div key={role.label} className="bg-white border border-slate-200 rounded-xl p-3 flex items-start gap-3">
+          <div key={role.label} className="rounded-xl p-3 flex items-start gap-3 border" style={{ background: cardBg, borderColor: cardBorder }}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${role.color}15` }}>
               <role.icon className="w-4 h-4" style={{ color: role.color }} />
             </div>
@@ -378,7 +353,7 @@ function FeatureVisual({ type, color }) {
               <p className="text-[11px] font-bold mb-1" style={{ color: role.color }}>{role.label}</p>
               <div className="flex flex-wrap gap-1">
                 {role.perms.map((p) => (
-                  <span key={p} className="text-[8px] font-medium bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">{p}</span>
+                  <span key={p} className="text-[8px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: isDark ? 'var(--surface-raised)' : '#f1f5f9', color: isDark ? 'var(--body)' : '#64748b' }}>{p}</span>
                 ))}
               </div>
             </div>
@@ -391,19 +366,20 @@ function FeatureVisual({ type, color }) {
   return null;
 }
 
-// Testimonials
+// ─── Testimonials data ────────────────────────────────────────────────────────
 const TESTIMONIALS = [
-  { quote: 'We cut sourcing time by 60% in the first month. The pipeline visibility alone is worth it.', name: 'James T.', title: 'Procurement Director', company: 'Aerospace OEM' },
-  { quote: 'The AI sanitisation gives us confidence our IP is protected every time we tender a job.', name: 'Priya P.', title: 'Engineering Manager', company: 'Precision Manufacturer' },
-  { quote: 'We went from 3 email chains per order to one platform. Night and day difference.', name: 'Oliver W.', title: 'Operations Lead', company: 'Industrial Supply Co.' },
-  { quote: 'As a supplier, the sanitised drawings are always clean and professional. Bid process is fast.', name: 'Sheffield Forge', title: 'Managing Director', company: 'Precision Foundry' },
-  { quote: 'The dispatch tracking and document vault eliminated all our post-delivery disputes.', name: 'Marcus B.', title: 'Supply Chain Manager', company: 'Engineering Works' },
+  { quote: 'We cut sourcing time by 60% in the first month. The pipeline visibility alone is worth it.',             name: 'James T.',       title: 'Procurement Director',   company: 'Aerospace OEM' },
+  { quote: 'The AI sanitisation gives us confidence our IP is protected every time we tender a job.',                name: 'Priya P.',       title: 'Engineering Manager',    company: 'Precision Manufacturer' },
+  { quote: 'We went from 3 email chains per order to one platform. Night and day difference.',                       name: 'Oliver W.',      title: 'Operations Lead',        company: 'Industrial Supply Co.' },
+  { quote: 'As a supplier, the sanitised drawings are always clean and professional. Bid process is fast.',          name: 'Sheffield Forge',title: 'Managing Director',      company: 'Precision Foundry' },
+  { quote: 'The dispatch tracking and document vault eliminated all our post-delivery disputes.',                    name: 'Marcus B.',      title: 'Supply Chain Manager',   company: 'Engineering Works' },
 ];
 
-// Navbar
+// ─── Navbar ───────────────────────────────────────────────────────────────────
 function LandingNav() {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { isDark } = useTheme();
+  const [scrolled, setScrolled]   = useState(false);
+  const [menuOpen, setMenuOpen]   = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -418,21 +394,37 @@ function LandingNav() {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-100' : 'bg-transparent'}`}>
+    <nav
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-xl"
+      style={scrolled ? {
+        background:   'var(--header-bg)',
+        borderBottom: '1px solid var(--header-border)',
+        boxShadow:    '0 1px 3px rgba(0,0,0,0.06)',
+      } : { background: 'transparent' }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        {/* Logo */}
         <div className="flex items-center gap-3">
-          <img src="/light-logo.png" alt="RZ" className="h-8 object-contain" />
+          <img
+            src="/light-logo.png"
+            alt="RZ"
+            className="h-8 object-contain transition-all"
+            style={isDark ? { filter: 'brightness(0) invert(1)', opacity: 0.9 } : {}}
+          />
           <span className="text-sm font-bold text-slate-800 hidden sm:block">RZ Global Solutions</span>
         </div>
+
+        {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
-          <button onClick={() => scrollTo('features')} className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Features</button>
-          <Link to="/how-it-works" className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">How it Works</Link>
-          <button onClick={() => scrollTo('portals')} className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Portals</button>
+          <button onClick={() => scrollTo('features')}  className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Features</button>
+          <Link   to="/how-it-works"                    className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">How it Works</Link>
+          <button onClick={() => scrollTo('portals')}   className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Portals</button>
         </div>
+
+        {/* Actions */}
         <div className="flex items-center gap-3">
-          <Link to="/login" className="hidden sm:block text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">
-            Sign In
-          </Link>
+          <ThemeToggle />
+          <Link to="/login" className="hidden sm:block text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">Sign In</Link>
           <Link
             to="/demo"
             className="flex items-center gap-2 bg-[#FF6B35] hover:bg-orange-500 active:scale-[0.97] text-white text-sm font-bold px-4 py-2 rounded-lg transition-all shadow-md shadow-orange-500/25 hover:shadow-orange-500/40"
@@ -444,6 +436,7 @@ function LandingNav() {
           </button>
         </div>
       </div>
+
       {/* Mobile menu */}
       <AnimatePresence>
         {menuOpen && (
@@ -451,13 +444,14 @@ function LandingNav() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t border-slate-100 px-4 pb-4 pt-2 space-y-2 overflow-hidden"
+            className="md:hidden px-4 pb-4 pt-2 space-y-2 overflow-hidden"
+            style={{ background: 'var(--header-bg)', borderTop: '1px solid var(--header-border)' }}
           >
             <button onClick={() => scrollTo('features')} className="block py-2 text-sm text-slate-600 font-medium w-full text-left">Features</button>
-            <Link to="/how-it-works" className="block py-2 text-sm text-slate-600 font-medium">How it Works</Link>
-            <button onClick={() => scrollTo('portals')} className="block py-2 text-sm text-slate-600 font-medium w-full text-left">Portals</button>
-            <Link to="/login" className="block py-2 text-sm text-slate-600 font-medium">Sign In</Link>
-            <Link to="/demo" className="block py-2 text-sm text-[#FF6B35] font-bold">Try Demo →</Link>
+            <Link   to="/how-it-works"                   className="block py-2 text-sm text-slate-600 font-medium">How it Works</Link>
+            <button onClick={() => scrollTo('portals')}  className="block py-2 text-sm text-slate-600 font-medium w-full text-left">Portals</button>
+            <Link   to="/login"                          className="block py-2 text-sm text-slate-600 font-medium">Sign In</Link>
+            <Link   to="/demo"                           className="block py-2 text-sm text-[#FF6B35] font-bold">Try Demo →</Link>
           </motion.div>
         )}
       </AnimatePresence>
@@ -465,32 +459,25 @@ function LandingNav() {
   );
 }
 
-// Hero
+// ─── Hero ─────────────────────────────────────────────────────────────────────
 function HeroSection() {
-  const containerVariants = {
-    hidden: {},
-    visible: { transition: { staggerChildren: 0.1 } },
-  };
+  const { isDark } = useTheme();
+  const containerVariants = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
   const itemVariants = {
-    hidden: { opacity: 0, y: 28 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+    hidden:   { opacity: 0, y: 28 },
+    visible:  { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center pt-16 pb-16 px-4 overflow-hidden bg-[#fafafa]">
+    <section className="relative min-h-screen flex flex-col items-center justify-center pt-16 pb-16 px-4 overflow-hidden bg-white">
       {/* Gradient mesh */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-15%] right-[-5%] w-[700px] h-[700px] rounded-full opacity-40" style={{ background: 'radial-gradient(circle, #FF6B3520 0%, transparent 70%)' }} />
-        <div className="absolute bottom-[-10%] left-[-8%] w-[500px] h-[500px] rounded-full opacity-30" style={{ background: 'radial-gradient(circle, #3b82f615 0%, transparent 70%)' }} />
-        <div className="absolute top-[30%] left-[10%] w-[300px] h-[300px] rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #8b5cf610 0%, transparent 70%)' }} />
+        <div className="absolute top-[-15%] right-[-5%] w-[700px] h-[700px] rounded-full" style={{ background: 'radial-gradient(circle, #FF6B3520 0%, transparent 70%)', opacity: isDark ? 0.6 : 0.4 }} />
+        <div className="absolute bottom-[-10%] left-[-8%] w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, #3b82f615 0%, transparent 70%)', opacity: isDark ? 0.5 : 0.3 }} />
+        <div className="absolute top-[30%] left-[10%] w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(circle, #8b5cf610 0%, transparent 70%)', opacity: isDark ? 0.4 : 0.2 }} />
       </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 max-w-5xl w-full text-center"
-      >
+      <motion.div variants={containerVariants} initial="hidden" animate="visible" className="relative z-10 max-w-5xl w-full text-center">
         {/* Badge */}
         <motion.div variants={itemVariants} className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-600 text-xs font-bold px-4 py-2 rounded-full mb-6">
           <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
@@ -526,38 +513,24 @@ function HeroSection() {
         {/* CTA row */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <Link to="/demo?role=client" className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35 hover:-translate-y-0.5">
-              <Building2 className="w-4 h-4" /> Try as Client
-            </Link>
-            <Link to="/demo?role=admin" className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 hover:-translate-y-0.5">
-              <Shield className="w-4 h-4" /> Try as Admin
-            </Link>
-            <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/35 hover:-translate-y-0.5">
-              <Factory className="w-4 h-4" /> Try as Supplier
-            </Link>
+            <Link to="/demo?role=client"   className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500   active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-orange-500/25  hover:shadow-xl hover:-translate-y-0.5"><Building2 className="w-4 h-4" /> Try as Client</Link>
+            <Link to="/demo?role=admin"    className="flex items-center justify-center gap-2 bg-blue-600   hover:bg-blue-500     active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/25    hover:shadow-xl hover:-translate-y-0.5"><Shield    className="w-4 h-4" /> Try as Admin</Link>
+            <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500   active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-violet-500/25  hover:shadow-xl hover:-translate-y-0.5"><Factory   className="w-4 h-4" /> Try as Supplier</Link>
           </div>
-          <Link
-            to="/how-it-works"
-            className="flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 text-sm font-semibold px-6 py-3.5 rounded-xl transition-all border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-          >
+          <Link to="/how-it-works" className="flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 text-sm font-semibold px-6 py-3.5 rounded-xl transition-all border border-slate-200 hover:border-slate-300 hover:bg-slate-50">
             <Play className="w-4 h-4" /> Watch How It Works
           </Link>
         </motion.div>
 
         {/* Hero UI card */}
-        <motion.div
-          variants={itemVariants}
-          className="relative max-w-2xl mx-auto mb-6"
-        >
+        <motion.div variants={itemVariants} className="relative max-w-2xl mx-auto mb-6">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-slate-200/60 p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-xs text-slate-400 font-medium">RZ-JOB-10033 · Valve Body Casting</p>
                 <p className="text-sm font-bold text-slate-800 mt-0.5">Bronze LG2 · 60 pieces</p>
               </div>
-              <span className="text-xs bg-teal-50 text-teal-700 border border-teal-200 px-2.5 py-1 rounded-full font-semibold">
-                Casting Stage
-              </span>
+              <span className="text-xs bg-teal-50 text-teal-700 border border-teal-200 px-2.5 py-1 rounded-full font-semibold">Casting Stage</span>
             </div>
             <MiniPipeline activeIdx={4} />
             <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
@@ -566,21 +539,13 @@ function HeroSection() {
             </div>
           </div>
           {/* Floating badges */}
-          <motion.div
-            animate={{ y: [0, -6, 0] }}
-            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-            className="absolute -top-3 -right-4 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-slate-700 flex items-center gap-2 hidden sm:flex"
-          >
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            Live Tracking
+          <motion.div animate={{ y: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+            className="absolute -top-3 -right-4 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-slate-700 hidden sm:flex items-center gap-2">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" /> Live Tracking
           </motion.div>
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut', delay: 0.5 }}
-            className="absolute -bottom-3 -left-4 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-blue-600 flex items-center gap-2 hidden sm:flex"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            IP Protected
+          <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut', delay: 0.5 }}
+            className="absolute -bottom-3 -left-4 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-blue-600 hidden sm:flex items-center gap-2">
+            <Shield className="w-3.5 h-3.5" /> IP Protected
           </motion.div>
         </motion.div>
       </motion.div>
@@ -588,30 +553,20 @@ function HeroSection() {
   );
 }
 
-// Stats bar
+// ─── Stats bar ────────────────────────────────────────────────────────────────
 function StatsBar() {
   const stats = [
-    { label: 'Orders Processed', value: 340, suffix: '+', color: '#FF6B35' },
-    { label: 'On-Time Delivery', value: 98, suffix: '%', color: '#10b981' },
-    { label: 'Active Suppliers', value: 47, suffix: '', color: '#8b5cf6' },
-    { label: 'Portals in One Platform', value: 3, suffix: '', color: '#3b82f6' },
+    { label: 'Orders Processed',       value: 340, suffix: '+', color: '#FF6B35' },
+    { label: 'On-Time Delivery',        value: 98,  suffix: '%', color: '#10b981' },
+    { label: 'Active Suppliers',        value: 47,  suffix: '',  color: '#8b5cf6' },
+    { label: 'Portals in One Platform', value: 3,   suffix: '',  color: '#3b82f6' },
   ];
-
   return (
     <section className="bg-slate-900 py-14">
       <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
         {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
-            className="text-center"
-          >
-            <p className="text-4xl font-black mb-2" style={{ color: s.color }}>
-              <Counter target={s.value} suffix={s.suffix} />
-            </p>
+          <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center">
+            <p className="text-4xl font-black mb-2" style={{ color: s.color }}><Counter target={s.value} suffix={s.suffix} /></p>
             <p className="text-sm text-slate-400 font-medium">{s.label}</p>
           </motion.div>
         ))}
@@ -620,58 +575,36 @@ function StatsBar() {
   );
 }
 
-// Features — one section per feature with full-width infographic style
+// ─── Features ─────────────────────────────────────────────────────────────────
 function FeaturesSection() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-100px' });
-
   return (
-    <section id="features" ref={ref} className="py-14 sm:py-24 px-4 bg-white">
+    <section id="features" className="py-14 sm:py-24 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16 sm:mb-20"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16 sm:mb-20">
           <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Platform Features</p>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4">Everything you need, in one place</h2>
           <p className="text-base text-slate-500 max-w-xl mx-auto">Built specifically for manufacturing procurement — not a generic tool adapted for manufacturing.</p>
         </motion.div>
 
-        {/* Individual feature sections — full-width showcase */}
         <div className="space-y-24 sm:space-y-32">
           {FEATURES.map((f, i) => (
             <motion.div
               key={f.title}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${i % 2 === 1 ? 'md:flex-row-reverse' : ''}`}
+              initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center`}
             >
               <div className={i % 2 === 1 ? 'md:order-2' : ''}>
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  whileInView={{ scale: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
                   className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
-                  style={{ background: `linear-gradient(135deg, ${f.color}15, ${f.color}25)` }}
-                >
+                  style={{ background: `linear-gradient(135deg, ${f.color}15, ${f.color}25)` }}>
                   <f.icon className="w-8 h-8" style={{ color: f.color }} />
                 </motion.div>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mb-4">{f.title}</h3>
                 <p className="text-base text-slate-500 leading-relaxed">{f.body}</p>
               </div>
               <div className={i % 2 === 1 ? 'md:order-1' : ''}>
-                <motion.div
-                  initial={{ opacity: 0, x: i % 2 === 0 ? 40 : -40 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 min-h-[200px] flex items-center justify-center"
-                >
+                <motion.div initial={{ opacity: 0, x: i % 2 === 0 ? 40 : -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
+                  className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 min-h-[200px] flex items-center justify-center">
                   <FeatureVisual type={f.visual} color={f.color} />
                 </motion.div>
               </div>
@@ -683,20 +616,15 @@ function FeaturesSection() {
   );
 }
 
-// Role tabs
+// ─── Role tabs ────────────────────────────────────────────────────────────────
 function RoleTabsSection() {
   const [active, setActive] = useState('client');
   const role = ROLES[active];
 
   return (
-    <section id="portals" className="py-14 sm:py-24 px-4 bg-[#f8f8fb]">
+    <section id="portals" className="py-14 sm:py-24 px-4 bg-slate-50">
       <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-8 sm:mb-12"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 sm:mb-12">
           <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Three Portals, One System</p>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4">A dedicated portal for every role</h2>
           <p className="text-base text-slate-500 max-w-xl mx-auto">Each portal is purpose-built — not just the same dashboard with hidden buttons.</p>
@@ -709,9 +637,7 @@ function RoleTabsSection() {
               <button
                 key={key}
                 onClick={() => setActive(key)}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
-                  active === key ? 'text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'
-                }`}
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${active === key ? 'text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
                 style={active === key ? { background: r.color } : {}}
               >
                 <r.icon className="w-4 h-4" />
@@ -723,23 +649,15 @@ function RoleTabsSection() {
 
         {/* Tab content */}
         <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.25 }}
-            className="grid md:grid-cols-2 gap-4 md:gap-8 items-start"
-          >
+          <motion.div key={active} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}
+            className="grid md:grid-cols-2 gap-4 md:gap-8 items-start">
             {/* Steps */}
             <div>
               <p className="text-slate-500 text-base mb-6 leading-relaxed">{role.description}</p>
               <div className="space-y-5">
                 {role.steps.map((step, i) => (
                   <div key={i} className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold" style={{ background: role.color }}>
-                      {i + 1}
-                    </div>
+                    <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold" style={{ background: role.color }}>{i + 1}</div>
                     <div>
                       <p className="text-base font-bold text-slate-900">{step.title}</p>
                       <p className="text-sm text-slate-500 mt-0.5 leading-relaxed">{step.body}</p>
@@ -748,11 +666,8 @@ function RoleTabsSection() {
                 ))}
               </div>
               <div className="mt-8">
-                <Link
-                  to={role.path}
-                  className="inline-flex items-center gap-2 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5 active:scale-[0.97] shadow-md hover:shadow-lg"
-                  style={{ background: role.color, boxShadow: `0 4px 14px ${role.color}40` }}
-                >
+                <Link to={role.path} className="inline-flex items-center gap-2 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5 active:scale-[0.97] shadow-md hover:shadow-lg"
+                  style={{ background: role.color, boxShadow: `0 4px 14px ${role.color}40` }}>
                   Try {role.label} <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -760,25 +675,19 @@ function RoleTabsSection() {
 
             {/* Mock portal card */}
             <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 shadow-xl">
-              {/* Mock sidebar + content */}
               <div className="flex">
                 <div className="w-16 bg-slate-950 flex flex-col items-center py-4 gap-4 border-r border-slate-800">
                   {[BarChart3, Package, FileCheck, Users].map((Icon, j) => (
-                    <div key={j} className={`w-8 h-8 rounded-lg flex items-center justify-center ${j === 0 ? 'text-white' : 'text-slate-600'}`}
-                      style={j === 0 ? { background: role.color } : {}}>
+                    <div key={j} className={`w-8 h-8 rounded-lg flex items-center justify-center ${j === 0 ? 'text-white' : 'text-slate-600'}`} style={j === 0 ? { background: role.color } : {}}>
                       <Icon className="w-4 h-4" />
                     </div>
                   ))}
                 </div>
                 <div className="flex-1 p-4 min-h-[220px]">
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: role.color }}>{role.label}</p>
-                  {/* Skeleton content */}
                   <div className="space-y-2 mb-4">
-                    {[80, 60, 70, 50].map((w, j) => (
-                      <div key={j} className="h-2 bg-slate-700 rounded-full" style={{ width: `${w}%` }} />
-                    ))}
+                    {[80, 60, 70, 50].map((w, j) => <div key={j} className="h-2 bg-slate-700 rounded-full" style={{ width: `${w}%` }} />)}
                   </div>
-                  {/* Mini stat cards */}
                   <div className="grid grid-cols-3 gap-2">
                     {['12', '4', '8'].map((n, j) => (
                       <div key={j} className="bg-slate-800 rounded-lg p-2 text-center">
@@ -806,26 +715,19 @@ function RoleTabsSection() {
   );
 }
 
-// Pipeline visual
+// ─── Pipeline section ─────────────────────────────────────────────────────────
 function PipelineSection() {
   const [activeIdx, setActiveIdx] = useState(4);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveIdx((i) => (i + 1) % PIPELINE_STAGES.length);
-    }, 1800);
+    const interval = setInterval(() => setActiveIdx((i) => (i + 1) % PIPELINE_STAGES.length), 1800);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <section className="py-14 sm:py-24 px-4 bg-white">
       <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10 sm:mb-14"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
           <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Order Lifecycle</p>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4">From drawing to delivery, fully tracked</h2>
           <p className="text-base text-slate-500 max-w-xl mx-auto">Every order moves through a defined 11-stage pipeline. Nothing gets lost, nothing gets overlooked.</p>
@@ -835,26 +737,21 @@ function PipelineSection() {
           <div className="flex justify-center mb-8">
             <MiniPipeline activeIdx={activeIdx} />
           </div>
-
-          {/* Stage description */}
           <div className="text-center">
-            <span
-              className="inline-block text-sm font-bold px-4 py-1.5 rounded-full mb-2"
-              style={{ background: `${PIPELINE_STAGES[activeIdx]?.color}15`, color: PIPELINE_STAGES[activeIdx]?.color }}
-            >
+            <span className="inline-block text-sm font-bold px-4 py-1.5 rounded-full mb-2"
+              style={{ background: `${PIPELINE_STAGES[activeIdx]?.color}15`, color: PIPELINE_STAGES[activeIdx]?.color }}>
               Currently: {PIPELINE_STAGES[activeIdx]?.label}
             </span>
             <p className="text-sm text-slate-500">Click any stage above or watch the auto-animation</p>
           </div>
         </div>
 
-        {/* Stage cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
           {[
-            { label: 'Auto-scrubbed drawings', icon: Shield, color: '#3b82f6' },
-            { label: 'Competitive bidding', icon: BarChart3, color: '#8b5cf6' },
-            { label: 'Real-time updates', icon: Zap, color: '#FF6B35' },
-            { label: 'Quality certificates', icon: FileCheck, color: '#10b981' },
+            { label: 'Auto-scrubbed drawings',  icon: Shield,    color: '#3b82f6' },
+            { label: 'Competitive bidding',      icon: BarChart3, color: '#8b5cf6' },
+            { label: 'Real-time updates',         icon: Zap,       color: '#FF6B35' },
+            { label: 'Quality certificates',     icon: FileCheck, color: '#10b981' },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl p-4">
               <item.icon className="w-5 h-5 flex-shrink-0" style={{ color: item.color }} />
@@ -867,10 +764,16 @@ function PipelineSection() {
   );
 }
 
-// Testimonials marquee
+// ─── Testimonials ─────────────────────────────────────────────────────────────
 function TestimonialsSection() {
+  const { isDark } = useTheme();
+  // Match the section bg so fade gradients disappear correctly in both modes
+  const sectionBg  = isDark ? '#1c1c1e' : '#f8fafc'; // slate-50 in dark = #1c1c1e
+  const fadeLeft   = `linear-gradient(to right, ${sectionBg}, transparent)`;
+  const fadeRight  = `linear-gradient(to left, ${sectionBg}, transparent)`;
+
   return (
-    <section className="py-20 bg-[#f8f8fb] overflow-hidden">
+    <section className="py-20 bg-slate-50 overflow-hidden">
       <div className="text-center mb-10 px-4">
         <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">What People Say</p>
         <h2 className="text-3xl font-black text-slate-900">Trusted by manufacturers worldwide</h2>
@@ -894,23 +797,19 @@ function TestimonialsSection() {
             </div>
           ))}
         </motion.div>
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#f8f8fb] to-transparent pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#f8f8fb] to-transparent pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none" style={{ background: fadeLeft }} />
+        <div className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none" style={{ background: fadeRight }} />
       </div>
     </section>
   );
 }
 
-// Final CTA
+// ─── CTA ──────────────────────────────────────────────────────────────────────
 function CTASection() {
   return (
     <section className="py-14 sm:py-24 px-4 bg-slate-900">
       <div className="max-w-3xl mx-auto text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <p className="text-sm font-bold text-orange-400 uppercase tracking-widest mb-4">Get Started Today</p>
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-6 leading-tight">
             Ready to modernise your{' '}
@@ -918,19 +817,11 @@ function CTASection() {
               manufacturing procurement?
             </span>
           </h2>
-          <p className="text-lg text-slate-400 mb-10">
-            Try the live demo instantly — no account required. Explore all three portals with real sample data.
-          </p>
+          <p className="text-lg text-slate-400 mb-10">Try the live demo instantly — no account required. Explore all three portals with real sample data.</p>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4">
-            <Link to="/demo?role=client" className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500 active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:-translate-y-0.5">
-              <Building2 className="w-4 h-4" /> Enter as Client
-            </Link>
-            <Link to="/demo?role=admin" className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
-              <Shield className="w-4 h-4" /> Enter as Admin
-            </Link>
-            <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-400 active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-violet-500/20 hover:shadow-xl hover:shadow-violet-500/30 hover:-translate-y-0.5">
-              <Factory className="w-4 h-4" /> Enter as Supplier
-            </Link>
+            <Link to="/demo?role=client"   className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500   active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/30  hover:shadow-xl hover:-translate-y-0.5"><Building2 className="w-4 h-4" /> Enter as Client</Link>
+            <Link to="/demo?role=admin"    className="flex items-center justify-center gap-2 bg-blue-500   hover:bg-blue-400     active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-500/20    hover:shadow-xl hover:-translate-y-0.5"><Shield    className="w-4 h-4" /> Enter as Admin</Link>
+            <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-400   active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-violet-500/20  hover:shadow-xl hover:-translate-y-0.5"><Factory   className="w-4 h-4" /> Enter as Supplier</Link>
           </div>
           <p className="text-xs text-slate-600 mt-6">5 sample clients · 5 sample suppliers · Orders across all 11 stages</p>
         </motion.div>
@@ -939,66 +830,51 @@ function CTASection() {
   );
 }
 
-// Footer
+// ─── Footer ───────────────────────────────────────────────────────────────────
 function LandingFooter() {
   return (
     <footer className="bg-slate-950 py-12 px-4">
       <div className="max-w-6xl mx-auto">
-        {/* Logo + tagline — full width on mobile */}
         <div className="mb-8 md:hidden">
           <img src="/light-logo.png" alt="RZ" className="h-8 object-contain mb-3 invert opacity-80" />
-          <p className="text-xs text-slate-500 leading-relaxed max-w-xs">
-            B2B manufacturing procurement platform for global industry. Three portals, one system.
-          </p>
+          <p className="text-xs text-slate-500 leading-relaxed max-w-xs">B2B manufacturing procurement platform for global industry. Three portals, one system.</p>
         </div>
-
-        {/* Link columns grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-10">
-          {/* Logo col — desktop only */}
           <div className="hidden md:block">
             <img src="/light-logo.png" alt="RZ" className="h-8 object-contain mb-3 invert opacity-80" />
-            <p className="text-xs text-slate-500 leading-relaxed">
-              B2B manufacturing procurement platform for global industry. Three portals, one system.
-            </p>
+            <p className="text-xs text-slate-500 leading-relaxed">B2B manufacturing procurement platform for global industry. Three portals, one system.</p>
           </div>
           {[
-            { title: 'Product', links: ['Features', 'How It Works', 'Pricing', 'Roadmap'] },
-            { title: 'Portals', links: ['Client Portal', 'Control Centre', 'Supplier Hub'] },
-            { title: 'Company', links: ['About RZ', 'Contact', 'Privacy Policy', 'Terms'] },
+            { title: 'Product',  links: ['Features', 'How It Works', 'Pricing', 'Roadmap'] },
+            { title: 'Portals',  links: ['Client Portal', 'Control Centre', 'Supplier Hub'] },
+            { title: 'Company',  links: ['About RZ', 'Contact', 'Privacy Policy', 'Terms'] },
           ].map((col) => (
             <div key={col.title}>
               <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 sm:mb-4">{col.title}</p>
               <ul className="space-y-2">
                 {col.links.map((link) => (
                   <li key={link}>
-                    {link === 'How It Works' ? (
-                      <Link to="/how-it-works" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">{link}</Link>
-                    ) : (
-                      <span className="text-xs text-slate-500 hover:text-slate-300 cursor-pointer transition-colors">{link}</span>
-                    )}
+                    {link === 'How It Works'
+                      ? <Link to="/how-it-works" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">{link}</Link>
+                      : <span className="text-xs text-slate-500 hover:text-slate-300 cursor-pointer transition-colors">{link}</span>
+                    }
                   </li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
-
         <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <p className="text-xs text-slate-600">© 2026 RZ Global Solutions Ltd. All rights reserved.</p>
-          <p className="text-xs text-slate-600 flex items-center gap-1.5">
-            <Globe className="w-3 h-3" />
-            Global Platform
-          </p>
+          <p className="text-xs text-slate-600 flex items-center gap-1.5"><Globe className="w-3 h-3" /> Global Platform</p>
         </div>
       </div>
     </footer>
   );
 }
 
-// Main page
+// ─── Main ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
-  useForceLightTheme();
-
   return (
     <div className="font-sans antialiased" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <LandingNav />

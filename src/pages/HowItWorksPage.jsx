@@ -5,20 +5,7 @@ import {
   ArrowRight, Building2, Shield, Factory, Upload, Eye, CheckCircle2, Play,
 } from 'lucide-react';
 import EmbeddedPipelineDemo from '@/components/EmbeddedPipelineDemo';
-
-// Force light mode
-function useForceLightTheme() {
-  useEffect(() => {
-    const root = document.documentElement;
-    const prev = root.classList.contains('dark');
-    root.classList.remove('dark');
-    root.classList.add('light');
-    return () => {
-      root.classList.remove('light');
-      if (prev) root.classList.add('dark');
-    };
-  }, []);
-}
+import ThemeToggle from '@/components/ThemeToggle';
 
 const STEPS = [
   {
@@ -60,7 +47,6 @@ const STEPS = [
 ];
 
 export default function HowItWorksPage() {
-  useForceLightTheme();
   const [activeStep, setActiveStep] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
 
@@ -73,15 +59,16 @@ export default function HowItWorksPage() {
   }, [autoPlay]);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans antialiased" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen bg-white font-sans antialiased" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100">
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl" style={{ background: 'var(--header-bg)', borderBottom: '1px solid var(--header-border)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/landing" className="flex items-center gap-3">
             <img src="/light-logo.png" alt="RZ" className="h-8 object-contain" />
             <span className="text-sm font-bold text-slate-800 hidden sm:block">RZ Global Solutions</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link to="/landing" className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">
               Back to Home
             </Link>

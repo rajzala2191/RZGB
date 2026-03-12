@@ -60,22 +60,22 @@ function StatCard({ label, value, icon: Icon, accent, delay, isDark, sub }) {
       whileHover={{ y: -3, transition: { duration: 0.15 } }}
       className="rounded-2xl p-5 flex flex-col gap-4 cursor-default"
       style={{
-        background:  isDark ? '#111111' : '#ffffff',
-        border:      `1px solid ${isDark ? '#1f1f1f' : '#e5e5e5'}`,
+        background:  isDark ? '#181818' : '#ffffff',
+        border:      `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#e5e5e5'}`,
         boxShadow:   isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
       }}
     >
       <div className="flex items-start justify-between">
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: `${accent}18` }}
+          style={{ background: 'rgba(255,255,255,0.06)' }}
         >
-          <Icon size={19} style={{ color: accent }} />
+          <Icon size={19} style={{ color: isDark ? '#808080' : '#525252' }} />
         </div>
-        <BarChart3 size={14} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} />
+        <BarChart3 size={14} style={{ color: isDark ? '#383838' : '#d4d4d8' }} />
       </div>
       <div>
-        <p className="text-3xl font-black tracking-tight" style={{ color: isDark ? '#fafafa' : '#0a0a0a' }}>
+        <p className="text-3xl font-black tracking-tight" style={{ color: isDark ? '#e5e5e5' : '#0a0a0a' }}>
           <AnimatedNumber value={value} />
         </p>
         <p className="text-sm font-medium mt-0.5" style={{ color: isDark ? '#71717a' : '#737373' }}>{label}</p>
@@ -96,21 +96,21 @@ function OrderRow({ order, onClick, isDark, index }) {
       onClick={onClick}
       className="flex items-center justify-between px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-150 group"
       style={{ background: 'transparent' }}
-      onMouseEnter={e => e.currentTarget.style.background = isDark ? '#161616' : '#fafafa'}
+      onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : '#fafafa'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
     >
       <div className="flex items-center gap-3 min-w-0">
         <div
           className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: isDark ? '#1a1a1a' : '#f4f4f5' }}
+          style={{ background: isDark ? '#212121' : '#f4f4f5' }}
         >
-          <FileText size={16} style={{ color: '#FF6B35' }} />
+          <FileText size={16} style={{ color: isDark ? '#808080' : '#525252' }} />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold truncate" style={{ color: isDark ? '#fafafa' : '#0a0a0a' }}>
+          <p className="text-sm font-semibold truncate" style={{ color: isDark ? '#e5e5e5' : '#0a0a0a' }}>
             {order.part_name || 'Unnamed Order'}
           </p>
-          <p className="text-xs font-mono mt-0.5" style={{ color: isDark ? '#52525b' : '#a1a1aa' }}>
+          <p className="text-xs font-mono mt-0.5" style={{ color: isDark ? '#525252' : '#a1a1aa' }}>
             {order.rz_job_id || order.id?.slice(0, 8)} · {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
           </p>
         </div>
@@ -123,7 +123,7 @@ function OrderRow({ order, onClick, isDark, index }) {
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
           {st.label}
         </span>
-        <ChevronRight size={15} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} className="group-hover:translate-x-0.5 transition-transform" />
+        <ChevronRight size={15} style={{ color: isDark ? '#383838' : '#d4d4d8' }} className="group-hover:translate-x-0.5 transition-transform" />
       </div>
     </motion.div>
   );
@@ -136,10 +136,10 @@ export default function ClientDashboardPage() {
   const { orders, loading, error } = useClientOrders();
   const navigate = useNavigate();
 
-  const card = { bg: isDark ? '#111111' : '#ffffff', border: isDark ? '#1f1f1f' : '#e5e5e5' };
-  const textPrimary  = isDark ? '#fafafa'  : '#0a0a0a';
-  const textMuted    = isDark ? '#71717a'  : '#737373';
-  const divider      = isDark ? '#1f1f1f'  : '#f0f0f0';
+  const card = { bg: isDark ? '#181818' : '#ffffff', border: isDark ? 'rgba(255,255,255,0.08)' : '#e5e5e5' };
+  const textPrimary  = isDark ? '#e5e5e5'  : '#0a0a0a';
+  const textMuted    = isDark ? '#525252'  : '#737373';
+  const divider      = isDark ? 'rgba(255,255,255,0.06)' : '#f0f0f0';
 
   /* ── loading ── */
   if (loading) return (
@@ -182,10 +182,10 @@ export default function ClientDashboardPage() {
 
   /* ── quick actions ── */
   const quickActions = [
-    { label: 'Track an order',     icon: Activity,  path: '/client-dashboard/orders',        color: '#3b82f6' },
-    { label: 'Browse documents',   icon: FileText,  path: '/client-dashboard/documents',     color: '#8b5cf6' },
-    { label: 'View profile',       icon: Package,   path: '/client-dashboard/profile',       color: '#10b981' },
-    { label: 'Get support',        icon: AlertCircle, path: '/client-dashboard/support',     color: '#f59e0b' },
+    { label: 'Track an order',     icon: Activity,    path: '/client-dashboard/orders'    },
+    { label: 'Browse documents',   icon: FileText,    path: '/client-dashboard/documents' },
+    { label: 'View profile',       icon: Package,     path: '/client-dashboard/profile'   },
+    { label: 'Get support',        icon: AlertCircle, path: '/client-dashboard/support'   },
   ];
 
   return (
@@ -244,8 +244,8 @@ export default function ClientDashboardPage() {
           {/* Card header */}
           <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${divider}` }}>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,107,53,0.1)' }}>
-                <Package size={16} style={{ color: '#FF6B35' }} />
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                <Package size={16} style={{ color: isDark ? '#808080' : '#525252' }} />
               </div>
               <p className="font-bold text-sm" style={{ color: textPrimary }}>Recent Orders</p>
             </div>
@@ -270,8 +270,8 @@ export default function ClientDashboardPage() {
               />
             )) : (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: isDark ? '#1a1a1a' : '#f4f4f5' }}>
-                  <Package size={22} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} />
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: isDark ? '#212121' : '#f4f4f5' }}>
+                  <Package size={22} style={{ color: isDark ? '#334155' : '#d4d4d8' }} />
                 </div>
                 <p className="text-sm font-medium" style={{ color: textMuted }}>No orders yet</p>
                 <button
@@ -301,19 +301,19 @@ export default function ClientDashboardPage() {
               <p className="font-bold text-sm" style={{ color: textPrimary }}>Quick Actions</p>
             </div>
             <div className="p-3 grid grid-cols-2 gap-2">
-              {quickActions.map(({ label, icon: Icon, path, color }) => (
+              {quickActions.map(({ label, icon: Icon, path }) => (
                 <motion.button
                   key={path}
-                  whileHover={{ scale: 1.03 }}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => navigate(path)}
-                  className="flex flex-col items-start gap-2.5 p-3 rounded-xl text-left transition-colors"
-                  style={{ background: isDark ? '#161616' : '#fafafa', border: `1px solid ${isDark ? '#1f1f1f' : '#f0f0f0'}` }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = color + '55'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = isDark ? '#1f1f1f' : '#f0f0f0'}
+                  className="flex flex-col items-start gap-2.5 p-3 rounded-xl text-left transition-all"
+                  style={{ background: isDark ? '#212121' : '#fafafa', border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : '#f0f0f0'}` }}
+                  onMouseEnter={e => { e.currentTarget.style.background = isDark ? '#262626' : '#f4f4f5'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = isDark ? '#212121' : '#fafafa'; }}
                 >
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}18` }}>
-                    <Icon size={14} style={{ color }} />
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <Icon size={14} style={{ color: isDark ? '#808080' : '#525252' }} />
                   </div>
                   <p className="text-xs font-semibold leading-tight" style={{ color: textPrimary }}>{label}</p>
                 </motion.button>
@@ -346,7 +346,7 @@ export default function ClientDashboardPage() {
                     <span className="text-xs font-medium" style={{ color: textMuted }}>{label}</span>
                     <span className="text-xs font-bold" style={{ color: textPrimary }}>{count}</span>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: isDark ? '#1f1f1f' : '#f4f4f5' }}>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: isDark ? '#262626' : '#f4f4f5' }}>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${totalOrders > 0 ? (count / totalOrders) * 100 : 0}%` }}

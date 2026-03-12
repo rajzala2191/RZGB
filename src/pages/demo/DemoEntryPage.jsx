@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Building2, Shield, Factory, ArrowRight, FlaskConical, CheckCircle2, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const PORTALS = [
   {
@@ -88,7 +89,11 @@ export default function DemoEntryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center px-4 py-16 font-sans" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-16 font-sans" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      {/* Theme toggle — top right */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
         <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-600 text-xs font-bold px-4 py-2 rounded-full mb-5">
           <FlaskConical className="w-3.5 h-3.5" />

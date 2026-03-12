@@ -18,59 +18,59 @@
     --brand-glow: rgba(255,107,53,0.18);
 
     /* ── App surfaces ──────────────────────────────────────── */
-    --app-bg: #09090b;
-    --surface: #18181b;
-    --surface-raised: #27272a;
-    --surface-inset: #1c1c1e;
+    --app-bg: #0f0f0f;
+    --surface: #181818;
+    --surface-raised: #212121;
+    --surface-inset: #0f0f0f;
     --surface-overlay: rgba(0,0,0,0.6);
 
     /* ── Text ──────────────────────────────────────────────── */
-    --heading: #fafafa;
-    --body: #a1a1aa;
-    --caption: #71717a;
-    --faint: rgba(255,255,255,0.28);
+    --heading: #e5e5e5;
+    --body: #737373;
+    --caption: #525252;
+    --faint: rgba(255,255,255,0.2);
 
     /* ── Borders & dividers ────────────────────────────────── */
-    --edge: #27272a;
-    --edge-strong: #3f3f46;
-    --edge-subtle: rgba(255,255,255,0.07);
+    --edge: #262626;
+    --edge-strong: #333333;
+    --edge-subtle: rgba(255,255,255,0.06);
 
     /* ── Sidebar shell ─────────────────────────────────────── */
-    --sidebar-bg: linear-gradient(180deg, #0e0e18 0%, #0c0c14 100%);
-    --sidebar-border: rgba(255,255,255,0.07);
-    --sidebar-label: rgba(255,255,255,0.2);
-    --sidebar-nav-text: rgba(255,255,255,0.45);
+    --sidebar-bg: #111111;
+    --sidebar-border: rgba(255,255,255,0.06);
+    --sidebar-label: #444444;
+    --sidebar-nav-text: #555555;
     --sidebar-nav-hover-bg: rgba(255,255,255,0.05);
-    --sidebar-nav-hover-text: rgba(255,255,255,0.8);
+    --sidebar-nav-hover-text: #e5e5e5;
     --sidebar-icon-bg: rgba(255,255,255,0.05);
-    --sidebar-icon-color: rgba(255,255,255,0.4);
+    --sidebar-icon-color: #555555;
     --sidebar-card-bg: rgba(255,255,255,0.04);
     --sidebar-card-border: rgba(255,255,255,0.07);
-    --sidebar-name: #ffffff;
-    --sidebar-email: rgba(255,255,255,0.3);
+    --sidebar-name: #e5e5e5;
+    --sidebar-email: #525252;
     --sidebar-btn-bg: rgba(255,255,255,0.05);
     --sidebar-btn-border: rgba(255,255,255,0.08);
-    --sidebar-btn-color: rgba(255,255,255,0.4);
-    --sidebar-btn-hover-bg: rgba(255,255,255,0.10);
-    --sidebar-btn-hover-color: #ffffff;
-    --sidebar-mobile-bg: #0e0e18;
+    --sidebar-btn-color: #555555;
+    --sidebar-btn-hover-bg: rgba(255,255,255,0.09);
+    --sidebar-btn-hover-color: #e5e5e5;
+    --sidebar-mobile-bg: #111111;
 
     /* ── Header bar ────────────────────────────────────────── */
-    --header-bg: rgba(9,9,11,0.9);
+    --header-bg: rgba(15,15,15,0.92);
     --header-border: rgba(255,255,255,0.07);
-    --header-btn-bg: #18181b;
+    --header-btn-bg: #1a1a1a;
     --header-btn-border: rgba(255,255,255,0.1);
-    --header-btn-color: #ffffff;
+    --header-btn-color: #e5e5e5;
 
     /* ── Toast / popover chrome ─────────────────────────────── */
-    --toast-bg: #18181b;
-    --toast-border: rgba(255,255,255,0.09);
-    --toast-title: #ffffff;
-    --toast-desc: rgba(255,255,255,0.5);
+    --toast-bg: #181818;
+    --toast-border: rgba(255,255,255,0.08);
+    --toast-title: #e5e5e5;
+    --toast-desc: rgba(200,200,200,0.6);
     --toast-close-bg: rgba(255,255,255,0.06);
-    --toast-close-color: rgba(255,255,255,0.4);
-    --toast-close-hover: #ffffff;
-    --toast-close-hover-bg: rgba(255,255,255,0.12);
+    --toast-close-color: #555555;
+    --toast-close-hover: #e5e5e5;
+    --toast-close-hover-bg: rgba(255,255,255,0.11);
 
     /* ── shadcn / Tailwind primitives (HSL channels) ───────── */
     --background: 222.2 84% 4.9%;
@@ -182,7 +182,7 @@
 html {
     transition: background-color 300ms ease, color 300ms ease;
     color-scheme: dark;
-    background-color: #020617;
+    background-color: #0f0f0f;
 }
 
 html.light {
@@ -191,8 +191,8 @@ html.light {
 }
 
 body {
-    background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #0f172a 100%);
-    color: #f1f5f9;
+    background: #0f0f0f;
+    color: #e5e5e5;
     font-family: 'DM Sans', sans-serif;
     transition: background-color 300ms ease, color 300ms ease, background-image 300ms ease;
     /* Prevent horizontal scroll on iOS */
