@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import OrderMessageThread from '@/components/OrderMessageThread';
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,7 +12,7 @@ import {
 import {
   Loader2, AlertCircle, CheckCircle2, ChevronRight,
   Package, Zap, Hourglass, ShieldCheck, Truck, AlertTriangle,
-  Eye, ArrowUpDown, Filter, Search,
+  Eye, ArrowUpDown, Filter, Search, MessageSquare, ChevronDown,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -73,6 +74,7 @@ export default function SupplierOrderManager() {
   const [error, setError]                 = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, orderId: null, newStatus: null, orderName: '', fromStage: '', toStage: '', note: '' });
+  const [expandedMessages, setExpandedMessages] = useState(new Set());
 
   // Filter / sort state
   const [search, setSearch]           = useState('');
@@ -459,6 +461,26 @@ export default function SupplierOrderManager() {
                       View
                     </button>
                   </div>
+                </div>
+                {/* Order Messages collapsible */}
+                <div className="border-t border-slate-200">
+                  <button
+                    onClick={() => setExpandedMessages(prev => {
+                      const next = new Set(prev);
+                      next.has(order.id) ? next.delete(order.id) : next.add(order.id);
+                      return next;
+                    })}
+                    className="flex items-center gap-2 w-full px-4 py-2.5 text-left hover:bg-slate-50 transition-colors"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                    <span className="text-xs font-semibold text-slate-600">Order Messages</span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 ml-auto transition-transform ${expandedMessages.has(order.id) ? 'rotate-180' : ''}`} />
+                  </button>
+                  {expandedMessages.has(order.id) && (
+                    <div className="px-4 pb-4">
+                      <OrderMessageThread orderId={order.id} />
+                    </div>
+                  )}
                 </div>
               </div>
             );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -158,21 +158,25 @@ function SummaryRow({ label, value }) {
 export default function ClientOrderCreationPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
   // Form state — every key maps to an orders table column
-  const [form, setForm] = useState({
-    part_name:            '',   // orders.part_name            TEXT NOT NULL
-    description:          '',   // orders.description           TEXT
-    material:             '',   // orders.material              TEXT
-    quantity:             '',   // orders.quantity              INTEGER
-    tolerance:            '',   // orders.tolerance             TEXT
-    surface_finish:       '',   // orders.surface_finish        TEXT
-    special_requirements: '',   // orders.special_requirements  TEXT
-    buy_price:            '',   // orders.buy_price              NUMERIC (GBP per part)
-    delivery_location:    '',   // orders.delivery_location     TEXT
+  const [form, setForm] = useState(() => {
+    const reorder = location.state?.reorder;
+    return {
+      part_name:            reorder?.part_name            || '',
+      description:          reorder?.description          || '',
+      material:             reorder?.material             || '',
+      quantity:             reorder?.quantity             ? String(reorder.quantity) : '',
+      tolerance:            reorder?.tolerance            || '',
+      surface_finish:       reorder?.surface_finish       || '',
+      special_requirements: reorder?.special_requirements || '',
+      buy_price:            reorder?.buy_price            ? String(reorder.buy_price) : '',
+      delivery_location:    reorder?.delivery_location    || '',
+    };
   });
 
   const set = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
@@ -347,6 +351,14 @@ export default function ClientOrderCreationPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-black text-slate-100 mb-1">Create New Order</h1>
           <p className="text-slate-400 text-sm">Complete each step to submit your manufacturing request.</p>
+          {location.state?.reorder && (
+            <div className="mt-3 flex items-center gap-2 bg-emerald-950/30 border border-emerald-800/40 rounded-lg px-4 py-2.5">
+              <ArrowRight size={14} className="text-emerald-400 shrink-0" />
+              <p className="text-sm text-emerald-400">
+                Pre-filled from previous order: <span className="font-bold">{location.state.reorder.part_name}</span>. Review and adjust before submitting.
+              </p>
+            </div>
+          )}
         </div>
 
         <StepIndicator current={step} />

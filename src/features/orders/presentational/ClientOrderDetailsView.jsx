@@ -219,6 +219,12 @@ export default function ClientOrderDetailsView({
                 selectedProcesses={order.selected_processes}
               />
             </FormSection>
+             <FormSection title="Order Messages">
+               <div className="pt-2">
+                 {/* Per-order chat thread */}
+                 <OrderMessageThread orderId={order.id} />
+               </div>
+             </FormSection>
           </div>
         </div>
       </div>

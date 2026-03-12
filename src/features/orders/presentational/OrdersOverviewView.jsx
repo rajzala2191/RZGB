@@ -13,6 +13,7 @@ import {
   Clock,
   PackageX,
   Zap,
+  RotateCcw,
 } from 'lucide-react';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import OrderTimeline from '@/components/OrderTimeline';
@@ -66,6 +67,7 @@ export default function OrdersOverviewView({
   onClearWithdrawn,
   onCreateOrder,
   onTrackOrder,
+  onReorder,
 }) {
   const t = isDark
     ? {
@@ -271,7 +273,7 @@ export default function OrdersOverviewView({
             <table className="w-full text-left text-sm">
               <thead>
                 <tr style={{ background: t.thead, borderBottom: `1px solid ${t.divider}` }}>
-                  {['Job ID', 'Part Name', 'Material', 'Qty', 'Status', 'Progress', 'Created', ''].map((h) => (
+                  {['Job ID', 'Part Name', 'Material', 'Qty', 'Status', 'Progress', 'Created', 'Actions', ''].map((h) => (
                     <th key={h} className="px-5 py-3 text-xs font-bold uppercase tracking-widest" style={{ color: t.textFaint }}>
                       {h}
                     </th>
@@ -335,6 +337,22 @@ export default function OrdersOverviewView({
                               year: 'numeric',
                             })}
                           </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <button
+                            onClick={() => onReorder && onReorder(order)}
+                            className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all duration-150"
+                            style={{
+                              color: '#22c55e',
+                              background: 'rgba(34,197,94,0.08)',
+                              border: '1px solid rgba(34,197,94,0.18)',
+                            }}
+                            title="Re-order this part"
+                            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(34,197,94,0.15)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(34,197,94,0.08)'; }}
+                          >
+                            <RotateCcw size={12} /> Re-order
+                          </button>
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-2">

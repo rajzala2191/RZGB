@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import OrderMessageThread from '@/components/OrderMessageThread';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -86,6 +87,32 @@ function getRecommendations(orders) {
     recs.push({ type: 'info',    icon: AlertTriangle, msg: `${pendingHigh.length} order${pendingHigh.length > 1 ? 's have' : ' has'} 3+ documents pending — prioritise review.`, orders: pendingHigh });
 
   return recs;
+}
+
+// ── Collapsible order messages component ─────────────────────────────────────
+function OrderMessagesSection({ orderId, t }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer',
+        }}
+      >
+        <span style={{ fontSize: 11, fontWeight: 700, color: '#FF6B35', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Order Messages
+        </span>
+        <ChevronDown size={13} style={{ color: t.mid, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+      </button>
+      {open && (
+        <div style={{ padding: '0 16px 16px' }}>
+          <OrderMessageThread orderId={orderId} />
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function AdminDocumentReview() {
@@ -716,6 +743,13 @@ export default function AdminDocumentReview() {
                     </div>
                   ))}
                 </div>
+
+                {/* Order Messages section */}
+                {selectedDoc.order_id && (
+                  <div style={{ borderTop: `1px solid ${t.divider}` }}>
+                    <OrderMessagesSection orderId={selectedDoc.order_id} t={t} />
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

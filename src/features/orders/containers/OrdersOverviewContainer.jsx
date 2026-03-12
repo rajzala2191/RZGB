@@ -87,6 +87,7 @@ export default function OrdersOverviewContainer() {
       onClearWithdrawn={handleClearWithdrawn}
       onCreateOrder={() => navigate('/client-dashboard/create-order')}
       onTrackOrder={(orderId) => navigate(`/client-dashboard/orders/${orderId}/tracking`)}
+      onReorder={(order) => navigate('/client-dashboard/create-order', { state: { reorder: order } })}
     />
   );
 }
