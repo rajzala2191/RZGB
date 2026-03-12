@@ -308,12 +308,21 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <button
-                  onClick={() => navigate(plan.id === 'enterprise' ? '/how-it-works' : '/login')}
-                  className={`w-full py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98] ${a.bg} ${a.hover}`}
-                >
-                  {plan.cta} <ArrowRight size={14} className="inline ml-1" />
-                </button>
+                {plan.id === 'enterprise' ? (
+                  <a
+                    href="mailto:sales@rzglobalsolutions.co.uk?subject=Zaproc%20Enterprise%20plan%20inquiry"
+                    className={`w-full py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98] flex items-center justify-center gap-1 ${a.bg} ${a.hover}`}
+                  >
+                    {plan.cta} <ArrowRight size={14} className="inline" />
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => navigate('/login')}
+                    className={`w-full py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98] ${a.bg} ${a.hover}`}
+                  >
+                    {plan.cta} <ArrowRight size={14} className="inline ml-1" />
+                  </button>
+                )}
               </motion.div>
             );
           })}

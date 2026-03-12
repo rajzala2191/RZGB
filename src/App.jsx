@@ -70,6 +70,7 @@ import PlatformUsersPage from '@/pages/platform/PlatformUsersPage';
 
 // Public Pages
 import PricingPage from '@/pages/PricingPage';
+import RoadmapPage from '@/pages/RoadmapPage';
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
@@ -125,6 +126,7 @@ function App() {
                     <Route path="/landing" element={<LandingPage />} />
                     <Route path="/how-it-works" element={<HowItWorksPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/roadmap" element={<RoadmapPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
                     {/* Demo routes — wrapped in DemoProvider for in-memory context */}

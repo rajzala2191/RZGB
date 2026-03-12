@@ -418,6 +418,7 @@ function LandingNav() {
         <div className="hidden md:flex items-center gap-8">
           <button onClick={() => scrollTo('features')}  className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Features</button>
           <Link   to="/how-it-works"                    className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">How it Works</Link>
+          <Link   to="/pricing"                         className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Pricing</Link>
           <button onClick={() => scrollTo('portals')}   className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Portals</button>
         </div>
 
@@ -449,6 +450,7 @@ function LandingNav() {
           >
             <button onClick={() => scrollTo('features')} className="block py-2 text-sm text-slate-600 font-medium w-full text-left">Features</button>
             <Link   to="/how-it-works"                   className="block py-2 text-sm text-slate-600 font-medium">How it Works</Link>
+            <Link   to="/pricing"                        className="block py-2 text-sm text-slate-600 font-medium">Pricing</Link>
             <button onClick={() => scrollTo('portals')}  className="block py-2 text-sm text-slate-600 font-medium w-full text-left">Portals</button>
             <Link   to="/login"                          className="block py-2 text-sm text-slate-600 font-medium">Sign In</Link>
             <Link   to="/demo"                           className="block py-2 text-sm text-[#FF6B35] font-bold">Try Demo →</Link>
@@ -856,6 +858,12 @@ function LandingFooter() {
                   <li key={link}>
                     {link === 'How It Works'
                       ? <Link to="/how-it-works" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">{link}</Link>
+                      : link === 'Pricing'
+                      ? <Link to="/pricing" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">{link}</Link>
+                      : link === 'Features'
+                      ? <button type="button" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-xs text-slate-500 hover:text-slate-300 transition-colors text-left w-full">{link}</button>
+                      : link === 'Roadmap'
+                      ? <Link to="/roadmap" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">{link}</Link>
                       : <span className="text-xs text-slate-500 hover:text-slate-300 cursor-pointer transition-colors">{link}</span>
                     }
                   </li>

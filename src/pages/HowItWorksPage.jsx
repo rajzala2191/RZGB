@@ -72,6 +72,9 @@ export default function HowItWorksPage() {
             <Link to="/landing" className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">
               Back to Home
             </Link>
+            <Link to="/pricing" className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">
+              Pricing
+            </Link>
             <Link
               to="/demo"
               className="flex items-center gap-2 bg-[#FF6B35] hover:bg-orange-500 text-white text-sm font-bold px-4 py-2 rounded-lg transition-all shadow-md shadow-orange-500/25"
