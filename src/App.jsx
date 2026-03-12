@@ -68,6 +68,9 @@ import PlatformDashboardPage from '@/pages/platform/PlatformDashboardPage';
 import PlatformWorkspacesPage from '@/pages/platform/PlatformWorkspacesPage';
 import PlatformUsersPage from '@/pages/platform/PlatformUsersPage';
 
+// Public Pages
+import PricingPage from '@/pages/PricingPage';
+
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
 import NCRVisibilityPage from '@/pages/NCRVisibilityPage';
@@ -121,6 +124,7 @@ function App() {
                     <Route path="/" element={<RootRedirect />} />
                     <Route path="/landing" element={<LandingPage />} />
                     <Route path="/how-it-works" element={<HowItWorksPage />} />
+                    <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
                     {/* Demo routes — wrapped in DemoProvider for in-memory context */}
