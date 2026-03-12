@@ -1,4 +1,6 @@
-# RZGB Master Implementation Plan
+# Zaproc — Master Implementation Plan
+
+> **Zaproc** is the product name. **RZ Global Solutions** is the company that builds it.
 
 Each phase is self-contained. We tackle them in order — no phase depends on a later one. Within each phase, steps are numbered and sequenced.
 
@@ -237,6 +239,19 @@ Each phase is self-contained. We tackle them in order — no phase depends on a 
 - Claude parses the message: extracts `rz_job_id`, `stage`, and description
 - Auto-creates a `job_updates` record and attaches evidence URL
 - Admin gets a Slack notification to review and confirm
+
+---
+
+## Branding Reference
+
+| Layer | Name |
+|---|---|
+| Company | RZ Global Solutions |
+| Product | **Zaproc** |
+| Product domain | `zaproc.com` / `zaproc.io` / `zaproc.co.uk` |
+| Company domain | `rzglobalsolutions.co.uk` |
+| Product tagline | *"Manufacturing procurement intelligence"* |
+| Internal repo | RZGB (codename, keep as-is) |
 
 ---
 

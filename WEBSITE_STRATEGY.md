@@ -1,5 +1,8 @@
 # RZ Global Solutions — Website Strategy & Recommendations
 
+> **Product name confirmed: Zaproc**
+> All references to "the software product" or "[productname]" below now refer to **Zaproc**.
+
 ## What the Site Currently Says
 
 From public search index (`rzglobalsolutions.co.uk/sectors`):
@@ -38,8 +41,8 @@ Currently it answers none of those for a software buyer.
 
 **What it needs to say:**
 ```
-RZ Global Solutions builds manufacturing procurement
-software for companies that buy custom parts.
+Introducing Zaproc — manufacturing procurement intelligence
+by RZ Global Solutions.
 
 Stop managing suppliers over email and spreadsheets.
 [Request a Demo]  [See How It Works]
@@ -102,11 +105,10 @@ visitors must understand this immediately. Two clean options:
 
 **Option B — Two separate sites** *(recommended long-term)*
 - `rzglobalsolutions.co.uk` — company overview and sourcing services
-- `[productname].com` — the software product
+- `zaproc.com` (or `zaproc.io`) — the Zaproc software product
 
 Option B matches the OpenAI/ChatGPT separation model and is the cleaner
-long-term move. See `MASTER_PLAN.md` and the business strategy notes for
-product naming guidance.
+long-term move. See `MASTER_PLAN.md` for the full branding reference.
 
 ---
 
@@ -147,7 +149,7 @@ No social proof is visible anywhere on the site. Add:
 | 5        | Separate components vs software business lines  | Half day  |
 | 6        | Add About page with founder story               | 2 hours   |
 | 7        | Add trust signals (quotes, logos, team)         | Ongoing   |
-| 8        | Launch separate product domain                  | Strategic |
+| 8        | Launch `zaproc.com` as separate product domain  | Strategic |
 
 Priorities 1–3 take a few hours and immediately stop the website from
 actively undermining the software business. Do those first.
@@ -158,9 +160,9 @@ actively undermining the software business. Do those first.
 
 This document sits alongside:
 
-- `MASTER_PLAN.md` — technical implementation roadmap (Phases 0–9)
+- `MASTER_PLAN.md` — technical implementation roadmap (Phases 0–9) + branding reference
 - Business strategy discussion — company vs product identity, pricing model,
   ICP, go-to-market sequencing
 
-The website is the front door. Until it reflects the software product, every
+The website is the front door. Until it reflects **Zaproc** clearly, every
 other improvement to the platform is harder to monetise.
