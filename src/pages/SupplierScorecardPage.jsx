@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useToast } from '@/components/ui/use-toast';
 import { BarChart2, Search, Loader2, Trophy, AlertCircle } from 'lucide-react';
 
-function pctColor(pct, invert = false) {
+export function pctColor(pct, invert = false) {
   if (pct == null) return 'text-slate-500';
   if (!invert) {
     if (pct >= 90) return 'text-emerald-400';
@@ -18,7 +18,7 @@ function pctColor(pct, invert = false) {
   }
 }
 
-function pctBg(pct, invert = false) {
+export function pctBg(pct, invert = false) {
   if (pct == null) return 'bg-slate-800/40';
   if (!invert) {
     if (pct >= 90) return 'bg-emerald-950/30';

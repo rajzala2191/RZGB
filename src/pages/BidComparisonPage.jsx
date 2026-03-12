@@ -19,7 +19,7 @@ const WEIGHT_PRICE = 0.5;
 const WEIGHT_LEAD = 0.3;
 const WEIGHT_NOTES = 0.2;
 
-function scoreBids(bids) {
+export function scoreBids(bids) {
   if (!bids.length) return [];
   const minPrice = Math.min(...bids.map(b => b.amount));
   const maxPrice = Math.max(...bids.map(b => b.amount));
