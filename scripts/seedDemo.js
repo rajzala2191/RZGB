@@ -7,7 +7,8 @@
  * Run once:
  *   node scripts/seedDemo.js
  *
- * Requires VITE_SUPABASE_URL and VITE_SUPABASE_SERVICE_ROLE_KEY in .env
+ * Requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.seed
+ * (falls back to .env for backward compatibility)
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -15,9 +16,10 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 
-// ── Load .env manually (no dotenv dependency needed) ──────────────────────────
+// ── Load seed env manually (no dotenv dependency needed) ──────────────────────
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const envPath = resolve(__dirname, '../.env');
+const envPath = resolve(__dirname, '../.env.seed');
+const fallbackEnvPath = resolve(__dirname, '../.env');
 const env = {};
 try {
   readFileSync(envPath, 'utf-8').split('\n').forEach((line) => {
@@ -25,15 +27,22 @@ try {
     if (key && rest.length) env[key.trim()] = rest.join('=').trim();
   });
 } catch {
-  console.error('Could not read .env file. Make sure it exists in the project root.');
-  process.exit(1);
+  try {
+    readFileSync(fallbackEnvPath, 'utf-8').split('\n').forEach((line) => {
+      const [key, ...rest] = line.split('=');
+      if (key && rest.length) env[key.trim()] = rest.join('=').trim();
+    });
+  } catch {
+    console.error('Could not read .env.seed (or fallback .env).');
+    process.exit(1);
+  }
 }
 
-const SUPABASE_URL          = env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY  = env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL         = env.SUPABASE_URL || env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  console.error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_SERVICE_ROLE_KEY in .env');
+  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.seed');
   process.exit(1);
 }
 

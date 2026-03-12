@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Check, X, Zap, Shield, Building2, ArrowRight,
   Users, FileText, BarChart2, GitBranch, Globe,
-  Lock, Download, Webhook, Crown,
+  Lock, Download, Webhook, Crown, ArrowLeft,
 } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const PLANS = [
   {
@@ -231,27 +232,36 @@ export default function PricingPage() {
   const allCategories = Object.keys(PLANS[0].features);
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--app-bg, #ffffff)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--app-bg)' }}>
+      <nav className="sticky top-0 z-50 backdrop-blur-xl" style={{ background: 'var(--header-bg)', borderBottom: '1px solid var(--header-border)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <Link to="/landing" className="flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>
+            <ArrowLeft size={16} /> Back to Home
+          </Link>
+          <ThemeToggle />
+        </div>
+      </nav>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
 
         <div className="text-center mb-16">
           <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-3">Pricing</p>
-          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-slate-100 mb-4">
+          <h1 className="text-4xl sm:text-5xl font-black mb-4" style={{ color: 'var(--heading)' }}>
             Procurement governance that<br />scales with your business
           </h1>
-          <p className="text-lg text-gray-500 dark:text-slate-400 max-w-2xl mx-auto">
+          <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--body)' }}>
             From first RFQ to enterprise compliance. Reduce procurement risk, accelerate sourcing cycles, and prove ROI with every order.
           </p>
 
           <div className="flex items-center justify-center gap-3 mt-8">
-            <span className={`text-sm font-semibold ${!annual ? 'text-gray-900 dark:text-slate-100' : 'text-gray-400'}`}>Monthly</span>
+            <span className="text-sm font-semibold" style={{ color: !annual ? 'var(--heading)' : 'var(--caption)' }}>Monthly</span>
             <button
               onClick={() => setAnnual(!annual)}
-              className={`w-12 h-6 rounded-full transition-colors relative ${annual ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+              className={`w-12 h-6 rounded-full transition-colors relative ${annual ? 'bg-orange-500' : ''}`}
+              style={!annual ? { background: 'var(--edge-strong)' } : {}}
             >
-              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${annual ? 'left-7' : 'left-1'}`} />
+              <span className={`absolute top-1 w-4 h-4 rounded-full transition-all`} style={{ background: 'var(--surface)', left: annual ? 28 : 4 }} />
             </button>
-            <span className={`text-sm font-semibold ${annual ? 'text-gray-900 dark:text-slate-100' : 'text-gray-400'}`}>
+            <span className="text-sm font-semibold" style={{ color: annual ? 'var(--heading)' : 'var(--caption)' }}>
               Annual <span className="text-emerald-500 text-xs font-bold">Save 20%</span>
             </span>
           </div>
@@ -267,9 +277,12 @@ export default function PricingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className={`relative bg-white dark:bg-[#18181b] border rounded-2xl p-6 sm:p-8 flex flex-col ${
-                  plan.popular ? 'border-blue-400 dark:border-blue-600 shadow-lg shadow-blue-500/10' : 'border-gray-200 dark:border-[#232329]'
-                }`}
+                className="relative rounded-2xl p-6 sm:p-8 flex flex-col"
+                style={{
+                  background: 'var(--surface)',
+                  border: `1px solid ${plan.popular ? 'rgba(59,130,246,0.6)' : 'var(--edge)'}`,
+                  boxShadow: plan.popular ? '0 10px 40px -10px rgba(59,130,246,0.15)' : undefined,
+                }}
               >
                 {plan.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
@@ -278,30 +291,30 @@ export default function PricingPage() {
                 )}
 
                 <div className="mb-6">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${a.light} ${a.border} border`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 border ${a.light} ${a.border}`}>
                     <plan.icon size={18} className={a.text} />
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 dark:text-slate-100">{plan.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{plan.tagline}</p>
+                  <h3 className="text-xl font-black" style={{ color: 'var(--heading)' }}>{plan.name}</h3>
+                  <p className="text-sm mt-1" style={{ color: 'var(--body)' }}>{plan.tagline}</p>
                 </div>
 
                 <div className="mb-6">
                   {displayPrice !== null ? (
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-gray-900 dark:text-slate-100">${displayPrice.toLocaleString()}</span>
-                      <span className="text-sm text-gray-400">{plan.period}</span>
+                      <span className="text-4xl font-black" style={{ color: 'var(--heading)' }}>${displayPrice.toLocaleString()}</span>
+                      <span className="text-sm" style={{ color: 'var(--caption)' }}>{plan.period}</span>
                     </div>
                   ) : (
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-gray-900 dark:text-slate-100">{plan.priceLabel}</span>
-                      <span className="text-sm text-gray-400">{plan.period}</span>
+                      <span className="text-4xl font-black" style={{ color: 'var(--heading)' }}>{plan.priceLabel}</span>
+                      <span className="text-sm" style={{ color: 'var(--caption)' }}>{plan.period}</span>
                     </div>
                   )}
                 </div>
 
                 <ul className="space-y-3 mb-8 flex-1">
                   {plan.highlights.map((h, j) => (
-                    <li key={j} className="flex items-center gap-2.5 text-sm text-gray-700 dark:text-slate-300">
+                    <li key={j} className="flex items-center gap-2.5 text-sm" style={{ color: 'var(--body)' }}>
                       <Check size={16} className="text-emerald-500 flex-shrink-0" />
                       <span>{h}</span>
                     </li>
@@ -341,13 +354,14 @@ export default function PricingPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#232329] rounded-2xl overflow-hidden"
+            className="rounded-2xl overflow-hidden"
+            style={{ background: 'var(--surface)', border: '1px solid var(--edge)' }}
           >
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-[#232329]">
-                    <th className="text-left p-4 w-1/4 text-gray-400 dark:text-slate-500 text-xs uppercase">Feature</th>
+                  <tr style={{ borderBottom: '1px solid var(--edge)' }}>
+                    <th className="text-left p-4 w-1/4 text-xs uppercase" style={{ color: 'var(--caption)' }}>Feature</th>
                     {PLANS.map(p => (
                       <th key={p.id} className="p-4 text-center">
                         <span className={`text-sm font-bold ${ACCENT_MAP[p.accent].text}`}>{p.name}</span>
@@ -361,16 +375,16 @@ export default function PricingPage() {
                     const featureKeys = Object.keys(PLANS[0].features[cat]);
                     return (
                       <React.Fragment key={cat}>
-                        <tr className="bg-gray-50 dark:bg-[#131316]">
+                        <tr style={{ background: 'var(--surface-raised)' }}>
                           <td colSpan={4} className="p-3 pl-4">
-                            <span className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase flex items-center gap-2">
+                            <span className="text-xs font-bold uppercase flex items-center gap-2" style={{ color: 'var(--body)' }}>
                               <CatIcon size={12} /> {cat}
                             </span>
                           </td>
                         </tr>
                         {featureKeys.map(feat => (
-                          <tr key={feat} className="border-t border-gray-100 dark:border-[#232329] hover:bg-gray-50/50 dark:hover:bg-[#232329]/50">
-                            <td className="p-3 pl-6 text-gray-700 dark:text-slate-300">{feat}</td>
+                          <tr key={feat} className="border-t hover:opacity-90" style={{ borderColor: 'var(--edge)' }}>
+                            <td className="p-3 pl-6" style={{ color: 'var(--body)' }}>{feat}</td>
                             {PLANS.map(p => (
                               <td key={p.id} className="p-3 text-center">
                                 <FeatureCheck included={p.features[cat][feat]} />
@@ -388,17 +402,18 @@ export default function PricingPage() {
         )}
 
         <div className="mt-16 text-center">
-          <div className="bg-gray-50 dark:bg-[#131316] border border-gray-200 dark:border-[#232329] rounded-2xl p-8 sm:p-12 max-w-3xl mx-auto">
+          <div className="rounded-2xl p-8 sm:p-12 max-w-3xl mx-auto" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}>
             <Crown size={32} className="mx-auto mb-4 text-orange-500" />
-            <h2 className="text-2xl font-black text-gray-900 dark:text-slate-100 mb-3">
+            <h2 className="text-2xl font-black mb-3" style={{ color: 'var(--heading)' }}>
               Need a custom solution?
             </h2>
-            <p className="text-gray-500 dark:text-slate-400 mb-6 max-w-lg mx-auto">
+            <p className="mb-6 max-w-lg mx-auto" style={{ color: 'var(--body)' }}>
               Enterprise procurement teams with complex compliance requirements, ERP integration needs, or multi-site operations — let's talk.
             </p>
             <button
               onClick={() => navigate('/how-it-works')}
-              className="px-8 py-3 rounded-xl text-sm font-bold bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors active:scale-[0.98]"
+              className="px-8 py-3 rounded-xl text-sm font-bold transition-colors active:scale-[0.98]"
+              style={{ background: 'var(--heading)', color: 'var(--app-bg)' }}
             >
               Talk to Sales
             </button>
@@ -421,8 +436,8 @@ export default function PricingPage() {
               <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 flex items-center justify-center mx-auto mb-4">
                 <item.icon size={20} className="text-orange-600 dark:text-orange-400" />
               </div>
-              <h3 className="text-sm font-bold text-gray-900 dark:text-slate-100 mb-2">{item.title}</h3>
-              <p className="text-xs text-gray-500 dark:text-slate-400">{item.desc}</p>
+              <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--heading)' }}>{item.title}</h3>
+              <p className="text-xs" style={{ color: 'var(--body)' }}>{item.desc}</p>
             </motion.div>
           ))}
         </div>

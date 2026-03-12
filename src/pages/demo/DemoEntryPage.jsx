@@ -89,22 +89,22 @@ export default function DemoEntryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-16 font-sans" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-16 font-sans" style={{ fontFamily: "'DM Sans', sans-serif", background: 'var(--app-bg)' }}>
       {/* Theme toggle — top right */}
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle />
       </div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-600 text-xs font-bold px-4 py-2 rounded-full mb-5">
+        <div className="inline-flex items-center gap-2 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 text-xs font-bold px-4 py-2 rounded-full mb-5">
           <FlaskConical className="w-3.5 h-3.5" />
           SANDBOX ENVIRONMENT — No real data affected
         </div>
-        <h1 className="text-4xl sm:text-5xl font-black text-slate-900 mb-4">Choose your portal</h1>
-        <p className="text-lg text-slate-500 max-w-lg mx-auto">
+        <h1 className="text-4xl sm:text-5xl font-black mb-4" style={{ color: 'var(--heading)' }}>Choose your portal</h1>
+        <p className="text-lg max-w-lg mx-auto" style={{ color: 'var(--body)' }}>
           One click to enter — no account or password needed. All data is pre-loaded with realistic UK manufacturing scenarios.
         </p>
         {error && (
-          <p className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2 inline-block">{error}</p>
+          <p className="mt-4 text-sm text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg px-4 py-2 inline-block">{error}</p>
         )}
       </motion.div>
 
@@ -113,23 +113,24 @@ export default function DemoEntryPage() {
           <motion.div
             key={portal.key}
             variants={card}
-            className={`relative bg-white border-2 rounded-2xl p-6 flex flex-col transition-all duration-200 ${portal.border}`}
+            className="relative rounded-2xl p-6 flex flex-col transition-all duration-200 border-2"
+            style={{ background: 'var(--surface)', borderColor: 'var(--edge)' }}
           >
             <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: `${portal.color}18` }}>
               <portal.icon className="w-6 h-6" style={{ color: portal.color }} />
             </div>
             <span className={`text-xs font-bold px-2.5 py-1 rounded-full self-start mb-3 ${portal.badge}`}>{portal.role}</span>
-            <h2 className="text-xl font-black text-slate-900 mb-2">{portal.label}</h2>
-            <p className="text-sm text-slate-500 leading-relaxed mb-5">{portal.description}</p>
+            <h2 className="text-xl font-black mb-2" style={{ color: 'var(--heading)' }}>{portal.label}</h2>
+            <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--body)' }}>{portal.description}</p>
             <ul className="space-y-2 mb-6 flex-1">
               {portal.perks.map((perk) => (
-                <li key={perk} className="flex items-start gap-2 text-sm text-slate-600">
+                <li key={perk} className="flex items-start gap-2 text-sm" style={{ color: 'var(--body)' }}>
                   <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: portal.color }} />
                   {perk}
                 </li>
               ))}
             </ul>
-            <div className="text-xs text-slate-400 bg-slate-50 rounded-lg px-3 py-2 mb-4 font-medium">
+            <div className="text-xs rounded-lg px-3 py-2 mb-4 font-medium" style={{ color: 'var(--caption)', background: 'var(--surface-inset)' }}>
               Demo account: {portal.account}
             </div>
             <button
@@ -148,8 +149,8 @@ export default function DemoEntryPage() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-10 text-center">
-        <p className="text-xs text-slate-400 mb-2">You can switch between portals at any time using the demo bar at the top.</p>
-        <Link to="/landing" className="text-xs text-slate-400 hover:text-slate-600 underline">← Back to product overview</Link>
+        <p className="text-xs mb-2" style={{ color: 'var(--caption)' }}>You can switch between portals at any time using the demo bar at the top.</p>
+        <Link to="/landing" className="text-xs underline hover:opacity-80" style={{ color: 'var(--body)' }}>← Back to product overview</Link>
       </motion.div>
     </div>
   );

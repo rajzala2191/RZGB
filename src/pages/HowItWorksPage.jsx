@@ -59,20 +59,20 @@ export default function HowItWorksPage() {
   }, [autoPlay]);
 
   return (
-    <div className="min-h-screen bg-white font-sans antialiased" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen font-sans antialiased" style={{ fontFamily: "'DM Sans', sans-serif", background: 'var(--app-bg)' }}>
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl" style={{ background: 'var(--header-bg)', borderBottom: '1px solid var(--header-border)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/landing" className="flex items-center gap-3">
-            <img src="/light-logo.png" alt="RZ" className="h-8 object-contain" />
-            <span className="text-sm font-bold text-slate-800 hidden sm:block">RZ Global Solutions</span>
+            <img src="/light-logo.png" alt="RZ" className="h-8 object-contain dark:invert dark:opacity-90" />
+            <span className="text-sm font-bold hidden sm:block" style={{ color: 'var(--heading)' }}>RZ Global Solutions</span>
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Link to="/landing" className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">
+            <Link to="/landing" className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>
               Back to Home
             </Link>
-            <Link to="/pricing" className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">
+            <Link to="/pricing" className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>
               Pricing
             </Link>
             <Link
@@ -93,13 +93,13 @@ export default function HowItWorksPage() {
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">How It Works</p>
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 mb-4 leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black mb-4 leading-tight" style={{ color: 'var(--heading)' }}>
             From order to delivery in{' '}
             <span style={{ background: 'linear-gradient(135deg, #FF6B35, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               three simple steps
             </span>
           </h1>
-          <p className="text-lg text-slate-500">
+          <p className="text-lg" style={{ color: 'var(--body)' }}>
             See how clients, admins, and suppliers work together on one platform — with IP protection at every stage.
           </p>
         </motion.div>
@@ -110,9 +110,8 @@ export default function HowItWorksPage() {
             <button
               key={step.id}
               onClick={() => { setActiveStep(i); setAutoPlay(false); setTimeout(() => setAutoPlay(true), 8000); }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                activeStep === i ? 'text-white shadow-md' : 'text-slate-500 hover:text-slate-900'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${activeStep === i ? 'text-white shadow-md' : ''}`}
+              style={activeStep === i ? { background: step.color } : { color: 'var(--body)' }}
               style={activeStep === i ? { background: step.color } : {}}
             >
               <step.icon className="w-4 h-4" />
@@ -141,25 +140,25 @@ export default function HowItWorksPage() {
                     >
                       <step.icon className="w-7 h-7" style={{ color: step.color }} />
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2">{step.title}</h2>
-                    <p className="text-slate-500 mb-6">{step.subtitle}</p>
+                    <h2 className="text-2xl sm:text-3xl font-black mb-2" style={{ color: 'var(--heading)' }}>{step.title}</h2>
+                    <p className="mb-6" style={{ color: 'var(--body)' }}>{step.subtitle}</p>
                     <ul className="space-y-3">
                       {step.details.map((d, j) => (
-                        <li key={j} className="flex items-start gap-2 text-slate-600">
+                        <li key={j} className="flex items-start gap-2" style={{ color: 'var(--body)' }}>
                           <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: step.color }} />
                           {d}
                         </li>
                       ))}
                     </ul>
                   </div>
-                  <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6">
+                  <div className="rounded-2xl shadow-lg p-6" style={{ background: 'var(--surface)', border: '1px solid var(--edge)' }}>
                     {/* Animated mock UI for this step */}
                     <div className="space-y-4">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${step.color}20` }}>
                           <step.icon className="w-4 h-4" style={{ color: step.color }} />
                         </div>
-                        <span className="text-sm font-bold text-slate-800">{step.title}</span>
+                        <span className="text-sm font-bold" style={{ color: 'var(--heading)' }}>{step.title}</span>
                       </div>
                       {step.id === 'client' && (
                         <motion.div
@@ -168,13 +167,13 @@ export default function HowItWorksPage() {
                           transition={{ delay: 0.2 }}
                           className="space-y-3"
                         >
-                          <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center">
-                            <Upload className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-                            <p className="text-xs text-slate-500">Click to upload drawings</p>
+                          <div className="rounded-xl p-6 text-center border-2 border-dashed" style={{ borderColor: 'var(--edge)' }}>
+                            <Upload className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--caption)' }} />
+                            <p className="text-xs" style={{ color: 'var(--body)' }}>Click to upload drawings</p>
                           </div>
                           <div className="flex gap-2">
                             {['Material', 'Qty', 'Delivery'].map((l, j) => (
-                              <div key={j} className="flex-1 h-6 bg-slate-100 rounded-lg" />
+                              <div key={j} className="flex-1 h-6 rounded-lg" style={{ background: 'var(--surface-inset)' }} />
                             ))}
                           </div>
                         </motion.div>
@@ -186,19 +185,19 @@ export default function HowItWorksPage() {
                           transition={{ delay: 0.2 }}
                           className="space-y-2"
                         >
-                          <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+                          <div className="flex items-center gap-2 p-2 rounded-lg" style={{ background: 'var(--surface-inset)' }}>
                             <Eye className="w-4 h-4 text-blue-500" />
-                            <div className="h-2 bg-slate-200 rounded flex-1" style={{ width: '60%' }} />
+                            <div className="h-2 rounded flex-1" style={{ width: '60%', background: 'var(--edge-strong)' }} />
                           </div>
-                          <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+                          <div className="flex items-center gap-2 p-2 rounded-lg" style={{ background: 'var(--surface-inset)' }}>
                             <Eye className="w-4 h-4 text-blue-500" />
-                            <div className="h-2 bg-slate-200 rounded flex-1" style={{ width: '40%' }} />
+                            <div className="h-2 rounded flex-1" style={{ width: '40%', background: 'var(--edge-strong)' }} />
                           </div>
                           <div className="flex gap-2 mt-3">
-                            <div className="flex-1 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <span className="text-xs font-semibold text-blue-700">Approve</span>
+                            <div className="flex-1 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center">
+                              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Approve</span>
                             </div>
-                            <div className="flex-1 h-8 bg-slate-100 rounded-lg" />
+                            <div className="flex-1 h-8 rounded-lg" style={{ background: 'var(--surface-inset)' }} />
                           </div>
                         </motion.div>
                       )}
@@ -209,12 +208,12 @@ export default function HowItWorksPage() {
                           transition={{ delay: 0.2 }}
                           className="space-y-3"
                         >
-                          <div className="border border-slate-200 rounded-xl p-3">
-                            <p className="text-xs font-semibold text-slate-700 mb-1">Valve Body Casting</p>
-                            <p className="text-[10px] text-slate-500">Bronze LG2 · 60 pcs · Sanitised</p>
+                          <div className="rounded-xl p-3" style={{ border: '1px solid var(--edge)' }}>
+                            <p className="text-xs font-semibold mb-1" style={{ color: 'var(--heading)' }}>Valve Body Casting</p>
+                            <p className="text-[10px]" style={{ color: 'var(--body)' }}>Bronze LG2 · 60 pcs · Sanitised</p>
                           </div>
                           <div className="flex gap-2">
-                            <input type="text" placeholder="£ / bid" className="flex-1 h-8 bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs" readOnly />
+                            <input type="text" placeholder="£ / bid" className="flex-1 h-8 rounded-lg px-3 text-xs" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }} readOnly />
                             <div className="w-20 h-8 bg-violet-500 rounded-lg flex items-center justify-center">
                               <span className="text-xs font-bold text-white">Bid</span>
                             </div>
@@ -238,8 +237,8 @@ export default function HowItWorksPage() {
         >
           <div className="text-center mb-8">
             <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-2">Live Demo</p>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2">See the real pipeline in action</h2>
-            <p className="text-slate-500 max-w-xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-black mb-2" style={{ color: 'var(--heading)' }}>See the real pipeline in action</h2>
+            <p className="max-w-xl mx-auto" style={{ color: 'var(--body)' }}>
               This is the actual Control Centre pipeline board — with real demo data. Try the full demo to interact with it.
             </p>
           </div>
@@ -268,10 +267,11 @@ export default function HowItWorksPage() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-24 bg-slate-900 rounded-2xl p-8 sm:p-12 text-center max-w-4xl mx-auto"
+          className="mt-24 rounded-2xl p-8 sm:p-12 text-center max-w-4xl mx-auto"
+          style={{ background: 'var(--surface)' }}
         >
-          <h2 className="text-2xl sm:text-3xl font-black text-white mb-4">Ready to try it yourself?</h2>
-          <p className="text-slate-400 mb-10 max-w-lg mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-black mb-4" style={{ color: 'var(--heading)' }}>Ready to try it yourself?</h2>
+          <p className="mb-10 max-w-lg mx-auto" style={{ color: 'var(--body)' }}>
             Enter the demo with one click — no account required. Explore all three portals with realistic sample data.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

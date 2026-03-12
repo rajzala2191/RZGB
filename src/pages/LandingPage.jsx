@@ -85,10 +85,9 @@ const PIPELINE_STAGES = [
 ];
 
 function MiniPipeline({ activeIdx = 4 }) {
-  const { isDark } = useTheme();
-  const inactiveBg     = isDark ? 'var(--surface-raised)' : '#f1f5f9';
-  const inactiveBorder = isDark ? 'var(--edge)'           : '#e2e8f0';
-  const connectorBg    = isDark ? 'var(--edge)'           : '#e2e8f0';
+  const inactiveBg     = 'var(--surface-raised)';
+  const inactiveBorder = 'var(--edge)';
+  const connectorBg    = 'var(--edge)';
 
   return (
     <div className="flex items-center gap-0 overflow-x-auto pb-1 scrollbar-none">
@@ -183,11 +182,11 @@ const FEATURES = [
 ];
 
 function FeatureVisual({ type }) {
-  const { isDark } = useTheme();
-  const cardBg     = isDark ? 'var(--surface-raised)' : '#ffffff';
-  const cardBorder = isDark ? 'var(--edge)'           : '#e2e8f0';
-  const labelColor = isDark ? 'var(--body)'           : '#475569';
-  const barBg      = isDark ? 'var(--edge-strong)'    : '#e2e8f0';
+  const cardBg     = 'var(--surface-raised)';
+  const cardBorder = 'var(--edge)';
+  const labelColor = 'var(--body)';
+  const barBg      = 'var(--edge-strong)';
+  const insetBg    = 'var(--surface-inset)';
 
   if (type === 'sanitisation') {
     return (
@@ -202,25 +201,25 @@ function FeatureVisual({ type }) {
             <div className="space-y-1.5">
               <div className="h-1.5 rounded-full w-full"   style={{ background: barBg }} />
               <div className="h-1.5 rounded-full w-3/4"   style={{ background: barBg }} />
-              <div className="h-4 bg-red-100 border border-red-200 rounded px-1 flex items-center mt-2">
+              <div className="h-4 rounded px-1 flex items-center mt-2" style={{ background: insetBg, border: '1px solid var(--edge)' }}>
                 <span className="text-[8px] text-red-500 font-bold truncate">Thornton Precision Ltd</span>
               </div>
               <div className="h-1.5 rounded-full w-5/6"   style={{ background: barBg }} />
-              <div className="h-4 bg-red-100 border border-red-200 rounded px-1 flex items-center">
+              <div className="h-4 rounded px-1 flex items-center" style={{ background: insetBg, border: '1px solid var(--edge)' }}>
                 <span className="text-[8px] text-red-500 font-bold truncate">REF: TP-2024-0891</span>
               </div>
             </div>
           </div>
-          <div className="rounded-xl p-3 relative border border-blue-200" style={{ background: cardBg }}>
+          <div className="rounded-xl p-3 relative border" style={{ background: cardBg, borderColor: cardBorder }}>
             <p className="text-[9px] font-bold text-emerald-500 uppercase mb-2">After</p>
             <div className="space-y-1.5">
               <div className="h-1.5 rounded-full w-full"   style={{ background: barBg }} />
               <div className="h-1.5 rounded-full w-3/4"   style={{ background: barBg }} />
-              <div className="h-4 bg-blue-50 border border-blue-200 rounded px-1 flex items-center mt-2">
+              <div className="h-4 rounded px-1 flex items-center mt-2" style={{ background: insetBg, border: '1px solid var(--edge)' }}>
                 <span className="text-[8px] text-blue-500 font-bold">██████████████</span>
               </div>
               <div className="h-1.5 rounded-full w-5/6"   style={{ background: barBg }} />
-              <div className="h-4 bg-blue-50 border border-blue-200 rounded px-1 flex items-center">
+              <div className="h-4 rounded px-1 flex items-center" style={{ background: insetBg, border: '1px solid var(--edge)' }}>
                 <span className="text-[8px] text-blue-500 font-bold">██████████████</span>
               </div>
             </div>
@@ -251,18 +250,18 @@ function FeatureVisual({ type }) {
             <GitBranch className="w-3.5 h-3.5 text-orange-500" />
             <span className="text-[11px] font-bold" style={{ color: labelColor }}>Pipeline Board</span>
           </div>
-          <span className="text-[10px] text-slate-400 font-medium">11 orders</span>
+          <span className="text-[10px] font-medium" style={{ color: labelColor }}>11 orders</span>
         </div>
         <div className="flex gap-2">
           {stages.map((s) => (
             <div key={s.label} className="flex-1 rounded-xl overflow-hidden border" style={{ background: cardBg, borderColor: cardBorder, borderTopWidth: 2, borderTopColor: s.color }}>
               <div className="px-2 py-1.5 flex items-center justify-between" style={{ borderBottom: `1px solid ${cardBorder}` }}>
                 <span className="text-[9px] font-semibold" style={{ color: s.color }}>{s.label}</span>
-                <span className="text-[9px] text-slate-400 font-bold">{s.count}</span>
+                <span className="text-[9px] font-bold" style={{ color: labelColor }}>{s.count}</span>
               </div>
               <div className="p-1.5 space-y-1">
                 {Array.from({ length: Math.min(s.count, 3) }).map((_, j) => (
-                  <div key={j} className="rounded-lg p-1.5" style={{ background: isDark ? 'var(--surface-inset)' : '#f8fafc' }}>
+                  <div key={j} className="rounded-lg p-1.5" style={{ background: insetBg }}>
                     <div className="h-1 rounded-full w-3/4 mb-1" style={{ background: barBg }} />
                     <div className="h-1 rounded-full w-1/2"      style={{ background: barBg }} />
                   </div>
@@ -291,16 +290,16 @@ function FeatureVisual({ type }) {
             key={bid.name}
             className="flex items-center justify-between p-2.5 rounded-xl border"
             style={{
-              background:   bid.best ? (isDark ? 'rgba(139,92,246,0.12)' : '#f5f3ff') : cardBg,
-              borderColor:  bid.best ? (isDark ? 'rgba(139,92,246,0.3)' : '#ddd6fe') : cardBorder,
+              background:   bid.best ? 'rgba(139,92,246,0.12)' : cardBg,
+              borderColor:  bid.best ? 'rgba(139,92,246,0.3)' : cardBorder,
             }}
           >
             <div className="min-w-0">
-              <p className="text-[11px] font-bold" style={{ color: bid.best ? '#7c3aed' : isDark ? 'var(--heading)' : '#374151' }}>{bid.name}</p>
-              <p className="text-[9px] text-slate-400">{bid.lead} · {bid.rating}</p>
+              <p className="text-[11px] font-bold" style={{ color: bid.best ? '#7c3aed' : 'var(--heading)' }}>{bid.name}</p>
+              <p className="text-[9px]" style={{ color: labelColor }}>{bid.lead} · {bid.rating}</p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-xs font-black" style={{ color: bid.best ? '#7c3aed' : isDark ? 'var(--body)' : '#374151' }}>{bid.price}</span>
+              <span className="text-xs font-black" style={{ color: bid.best ? '#7c3aed' : 'var(--body)' }}>{bid.price}</span>
               {bid.best && <span className="text-[8px] font-bold bg-violet-500 text-white px-1.5 py-0.5 rounded-full">BEST</span>}
             </div>
           </div>
@@ -339,8 +338,8 @@ function FeatureVisual({ type }) {
               <item.icon className="w-3 h-3" style={{ color: item.color }} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold truncate" style={{ color: isDark ? 'var(--heading)' : '#374151' }}>{item.action}</p>
-              <p className="text-[9px] text-slate-400">{item.time}</p>
+              <p className="text-[10px] font-semibold truncate" style={{ color: 'var(--heading)' }}>{item.action}</p>
+              <p className="text-[9px]" style={{ color: labelColor }}>{item.time}</p>
             </div>
           </motion.div>
         ))}
@@ -367,8 +366,8 @@ function FeatureVisual({ type }) {
               <span className="text-[8px] font-black" style={{ color: doc.color }}>{doc.ext}</span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold truncate" style={{ color: isDark ? 'var(--heading)' : '#374151' }}>{doc.name}</p>
-              <p className="text-[9px] text-slate-400">{doc.size}</p>
+              <p className="text-[10px] font-semibold truncate" style={{ color: 'var(--heading)' }}>{doc.name}</p>
+              <p className="text-[9px]" style={{ color: labelColor }}>{doc.size}</p>
             </div>
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
           </div>
@@ -394,7 +393,7 @@ function FeatureVisual({ type }) {
               <p className="text-[11px] font-bold mb-1" style={{ color: role.color }}>{role.label}</p>
               <div className="flex flex-wrap gap-1">
                 {role.perms.map((p) => (
-                  <span key={p} className="text-[8px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: isDark ? 'var(--surface-raised)' : '#f1f5f9', color: isDark ? 'var(--body)' : '#64748b' }}>{p}</span>
+                  <span key={p} className="text-[8px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: 'var(--surface-raised)', color: 'var(--body)' }}>{p}</span>
                 ))}
               </div>
             </div>
@@ -508,7 +507,6 @@ function LandingNav() {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 function HeroSection() {
-  const { isDark } = useTheme();
   const containerVariants = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
   const itemVariants = {
     hidden:   { opacity: 0, y: 28 },
@@ -626,9 +624,9 @@ function StatsBar() {
     { label: 'Portals in One Platform', value: 3,   suffix: '',  color: '#3b82f6' },
   ];
   return (
-    <section className="relative bg-slate-900 dark:bg-slate-950 py-14 overflow-hidden">
+    <section className="relative py-14 overflow-hidden" style={{ background: 'var(--app-bg)' }}>
       <GridDotsBackground className="opacity-30" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-900/80 dark:to-slate-950/80 pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none opacity-30" style={{ background: 'linear-gradient(to bottom, transparent 60%, var(--app-bg))' }} />
       <div className="relative max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
         {stats.map((s, i) => (
           <motion.div
@@ -638,10 +636,11 @@ function StatsBar() {
             viewport={{ once: true }}
             transition={{ delay: i * 0.1, duration: 0.5 }}
             whileHover={{ scale: 1.02, y: -2 }}
-            className="text-center p-4 rounded-2xl bg-white/5 dark:bg-white/[0.06] backdrop-blur-sm border border-white/10 dark:border-white/5"
+            className="text-center p-4 rounded-2xl backdrop-blur-sm"
+            style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}
           >
             <p className="text-4xl font-black mb-2" style={{ color: s.color }}><Counter target={s.value} suffix={s.suffix} /></p>
-            <p className="text-sm text-slate-400 font-medium">{s.label}</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--body)' }}>{s.label}</p>
           </motion.div>
         ))}
       </div>
@@ -692,7 +691,8 @@ function FeaturesSection() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.3 }}
-                  className="bg-slate-50/80 dark:bg-[var(--surface)]/80 backdrop-blur-xl border border-slate-100 dark:border-[var(--edge)] rounded-2xl p-6 sm:p-8 min-h-[200px] flex items-center justify-center shadow-lg shadow-slate-200/30 dark:shadow-black/20"
+                  className="backdrop-blur-xl rounded-2xl p-6 sm:p-8 min-h-[200px] flex items-center justify-center shadow-lg"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--edge)' }}
                 >
                   <FeatureVisual type={f.visual} color={f.color} />
                 </motion.div>
@@ -763,17 +763,18 @@ function RoleTabsSection() {
               </div>
             </div>
 
-            {/* Mock portal card */}
+            {/* Mock portal card — theme tokens */}
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
-              className="bg-slate-900 dark:bg-slate-950 rounded-2xl overflow-hidden border border-slate-700 dark:border-slate-800 shadow-xl backdrop-blur-sm"
+              className="rounded-2xl overflow-hidden shadow-xl backdrop-blur-sm"
+              style={{ background: 'var(--surface)', border: '1px solid var(--edge)' }}
             >
               <div className="flex">
-                <div className="w-16 bg-slate-950 flex flex-col items-center py-4 gap-4 border-r border-slate-800">
+                <div className="w-16 flex flex-col items-center py-4 gap-4 border-r" style={{ background: 'var(--surface-raised)', borderColor: 'var(--edge)' }}>
                   {[BarChart3, Package, FileCheck, Users].map((Icon, j) => (
-                    <div key={j} className={`w-8 h-8 rounded-lg flex items-center justify-center ${j === 0 ? 'text-white' : 'text-slate-600'}`} style={j === 0 ? { background: role.color } : {}}>
+                    <div key={j} className={`w-8 h-8 rounded-lg flex items-center justify-center ${j === 0 ? 'text-white' : ''}`} style={j === 0 ? { background: role.color } : { color: 'var(--body)' }}>
                       <Icon className="w-4 h-4" />
                     </div>
                   ))}
@@ -781,22 +782,22 @@ function RoleTabsSection() {
                 <div className="flex-1 p-4 min-h-[220px]">
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: role.color }}>{role.label}</p>
                   <div className="space-y-2 mb-4">
-                    {[80, 60, 70, 50].map((w, j) => <div key={j} className="h-2 bg-slate-700 rounded-full" style={{ width: `${w}%` }} />)}
+                    {[80, 60, 70, 50].map((w, j) => <div key={j} className="h-2 rounded-full" style={{ width: `${w}%`, background: 'var(--edge-strong)' }} />)}
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {['12', '4', '8'].map((n, j) => (
-                      <div key={j} className="bg-slate-800 rounded-lg p-2 text-center">
-                        <p className="text-base font-black text-white">{n}</p>
-                        <div className="h-1.5 bg-slate-700 rounded-full mt-1 w-10 mx-auto" />
+                      <div key={j} className="rounded-lg p-2 text-center" style={{ background: 'var(--surface-raised)' }}>
+                        <p className="text-base font-black" style={{ color: 'var(--heading)' }}>{n}</p>
+                        <div className="h-1.5 rounded-full mt-1 w-10 mx-auto" style={{ background: 'var(--edge-strong)' }} />
                       </div>
                     ))}
                   </div>
                   <div className="mt-3 space-y-1.5">
                     {[1, 2, 3].map((j) => (
-                      <div key={j} className="flex items-center gap-2 bg-slate-800/60 rounded-lg p-2">
+                      <div key={j} className="flex items-center gap-2 rounded-lg p-2" style={{ background: 'var(--surface-inset)' }}>
                         <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: role.color }} />
-                        <div className="h-1.5 bg-slate-700 rounded-full flex-1" />
-                        <div className="h-4 w-12 bg-slate-700 rounded-full" />
+                        <div className="h-1.5 rounded-full flex-1" style={{ background: 'var(--edge-strong)' }} />
+                        <div className="h-4 w-12 rounded-full" style={{ background: 'var(--edge-strong)' }} />
                       </div>
                     ))}
                   </div>
@@ -840,7 +841,8 @@ function PipelineSection() {
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-white/80 dark:bg-[var(--surface)]/80 backdrop-blur-xl border border-slate-200 dark:border-[var(--edge)] rounded-2xl p-4 sm:p-8 shadow-lg ring-1 ring-slate-200/20 dark:ring-white/5"
+          className="backdrop-blur-xl rounded-2xl p-4 sm:p-8 shadow-lg"
+          style={{ background: 'var(--surface)', border: '1px solid var(--edge)' }}
         >
           <div className="flex justify-center mb-8">
             <MiniPipeline activeIdx={activeIdx} />
@@ -850,7 +852,7 @@ function PipelineSection() {
               style={{ background: `${PIPELINE_STAGES[activeIdx]?.color}15`, color: PIPELINE_STAGES[activeIdx]?.color }}>
               Currently: {PIPELINE_STAGES[activeIdx]?.label}
             </span>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Click any stage above or watch the auto-animation</p>
+            <p className="text-sm" style={{ color: 'var(--body)' }}>Click any stage above or watch the auto-animation</p>
           </div>
         </motion.div>
 
@@ -863,10 +865,11 @@ function PipelineSection() {
               viewport={{ once: true }}
               transition={{ delay: j * 0.08 }}
               whileHover={{ y: -2, transition: { duration: 0.2 } }}
-              className="flex items-center gap-3 bg-slate-50/80 dark:bg-[var(--surface-raised)]/80 backdrop-blur-sm border border-slate-100 dark:border-[var(--edge)] rounded-xl p-4"
+              className="flex items-center gap-3 backdrop-blur-sm rounded-xl p-4"
+              style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" style={{ color: item.color }} />
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">{item.label}</p>
+              <p className="text-xs font-semibold" style={{ color: 'var(--heading)' }}>{item.label}</p>
             </motion.div>
           ))}
         </div>
@@ -877,13 +880,12 @@ function PipelineSection() {
 
 // ─── Testimonials ─────────────────────────────────────────────────────────────
 function TestimonialsSection() {
-  const { isDark } = useTheme();
-  const sectionBg  = isDark ? 'var(--app-bg)' : '#f8fafc';
-  const fadeLeft   = `linear-gradient(to right, ${sectionBg}, transparent)`;
-  const fadeRight  = `linear-gradient(to left, ${sectionBg}, transparent)`;
+  const sectionBg = 'var(--surface-raised)';
+  const fadeLeft  = `linear-gradient(to right, ${sectionBg}, transparent)`;
+  const fadeRight = `linear-gradient(to left, ${sectionBg}, transparent)`;
 
   return (
-    <section className="relative py-20 bg-slate-50 dark:bg-[var(--surface-raised)]/30 overflow-hidden">
+    <section className="relative py-20 overflow-hidden" style={{ background: sectionBg }}>
       <GridDotsBackground />
       <div className="relative text-center mb-10 px-4">
         <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">What People Say</p>
@@ -898,15 +900,16 @@ function TestimonialsSection() {
           {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
             <div
               key={i}
-              className="w-[80vw] sm:w-72 flex-shrink-0 bg-white/90 dark:bg-[var(--surface)]/90 backdrop-blur-md border border-slate-100 dark:border-[var(--edge)] rounded-2xl p-6 shadow-lg"
+              className="w-[80vw] sm:w-72 flex-shrink-0 backdrop-blur-md rounded-2xl p-6 shadow-lg"
+              style={{ background: 'var(--surface)', border: '1px solid var(--edge)' }}
             >
               <div className="flex gap-1 mb-3">
                 {[1,2,3,4,5].map((s) => <Star key={s} className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />)}
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">"{t.quote}"</p>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--body)' }}>"{t.quote}"</p>
               <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{t.name}</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500">{t.title} · {t.company}</p>
+                <p className="text-xs font-bold" style={{ color: 'var(--heading)' }}>{t.name}</p>
+                <p className="text-xs" style={{ color: 'var(--caption)' }}>{t.title} · {t.company}</p>
               </div>
             </div>
           ))}
@@ -921,25 +924,25 @@ function TestimonialsSection() {
 // ─── CTA ──────────────────────────────────────────────────────────────────────
 function CTASection() {
   return (
-    <section className="relative py-14 sm:py-24 px-4 bg-slate-900 dark:bg-slate-950 overflow-hidden">
+    <section className="relative py-14 sm:py-24 px-4 overflow-hidden" style={{ background: 'var(--app-bg)' }}>
       <GradientBlobs />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,107,53,0.15),transparent)] pointer-events-none" />
       <div className="relative max-w-3xl mx-auto text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <p className="text-sm font-bold text-orange-400 uppercase tracking-widest mb-4">Get Started Today</p>
-          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-6 leading-tight">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black mb-6 leading-tight" style={{ color: 'var(--heading)' }}>
             Ready to modernise your{' '}
             <span style={{ background: 'linear-gradient(135deg, #FF6B35, #fb923c)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               manufacturing procurement?
             </span>
           </h2>
-          <p className="text-lg text-slate-400 mb-10">Try the live demo instantly — no account required. Explore all three portals with real sample data.</p>
+          <p className="text-lg mb-10" style={{ color: 'var(--body)' }}>Try the live demo instantly — no account required. Explore all three portals with real sample data.</p>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4">
             <Link to="/demo?role=client"   className="flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-orange-500   active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/30  hover:shadow-xl hover:-translate-y-0.5"><Building2 className="w-4 h-4" /> Enter as Client</Link>
             <Link to="/demo?role=admin"    className="flex items-center justify-center gap-2 bg-blue-500   hover:bg-blue-400     active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-500/20    hover:shadow-xl hover:-translate-y-0.5"><Shield    className="w-4 h-4" /> Enter as Admin</Link>
             <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-400   active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-violet-500/20  hover:shadow-xl hover:-translate-y-0.5"><Factory   className="w-4 h-4" /> Enter as Supplier</Link>
           </div>
-          <p className="text-xs text-slate-500 mt-6">5 sample clients · 5 sample suppliers · Orders across all 11 stages</p>
+          <p className="text-xs mt-6" style={{ color: 'var(--caption)' }}>5 sample clients · 5 sample suppliers · Orders across all 11 stages</p>
           <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-4">
             <Link to="/pricing" className="text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors underline underline-offset-2">View pricing</Link>
             {' '}· Starter, Growth & Enterprise plans
@@ -953,16 +956,16 @@ function CTASection() {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function LandingFooter() {
   return (
-    <footer className="bg-slate-950 py-12 px-4">
+    <footer className="py-12 px-4" style={{ background: 'var(--app-bg)' }}>
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 md:hidden">
           <img src="/light-logo.png" alt="RZ" className="h-8 object-contain mb-3 invert opacity-80" />
-          <p className="text-xs text-slate-500 leading-relaxed max-w-xs">B2B manufacturing procurement platform for global industry. Three portals, one system.</p>
+          <p className="text-xs leading-relaxed max-w-xs" style={{ color: 'var(--body)' }}>B2B manufacturing procurement platform for global industry. Three portals, one system.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-10">
           <div className="hidden md:block">
             <img src="/light-logo.png" alt="RZ" className="h-8 object-contain mb-3 invert opacity-80" />
-            <p className="text-xs text-slate-500 leading-relaxed">B2B manufacturing procurement platform for global industry. Three portals, one system.</p>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--body)' }}>B2B manufacturing procurement platform for global industry. Three portals, one system.</p>
           </div>
           {[
             { title: 'Product',  links: ['Features', 'How It Works', 'Pricing', 'Roadmap'] },
@@ -970,19 +973,19 @@ function LandingFooter() {
             { title: 'Company',  links: ['About RZ', 'Contact', 'Privacy Policy', 'Terms'] },
           ].map((col) => (
             <div key={col.title}>
-              <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 sm:mb-4">{col.title}</p>
+              <p className="text-xs font-bold uppercase tracking-wider mb-3 sm:mb-4" style={{ color: 'var(--heading)' }}>{col.title}</p>
               <ul className="space-y-2">
                 {col.links.map((link) => (
                   <li key={link}>
                     {link === 'How It Works'
-                      ? <Link to="/how-it-works" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">{link}</Link>
+                      ? <Link to="/how-it-works" className="text-xs transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>{link}</Link>
                       : link === 'Pricing'
-                      ? <Link to="/pricing" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">{link}</Link>
+                      ? <Link to="/pricing" className="text-xs transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>{link}</Link>
                       : link === 'Features'
-                      ? <button type="button" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-xs text-slate-500 hover:text-slate-300 transition-colors text-left w-full">{link}</button>
+                      ? <button type="button" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-xs transition-colors hover:opacity-80 text-left w-full" style={{ color: 'var(--body)' }}>{link}</button>
                       : link === 'Roadmap'
-                      ? <Link to="/roadmap" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">{link}</Link>
-                      : <span className="text-xs text-slate-500 hover:text-slate-300 cursor-pointer transition-colors">{link}</span>
+                      ? <Link to="/roadmap" className="text-xs transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>{link}</Link>
+                      : <span className="text-xs transition-colors hover:opacity-80 cursor-pointer" style={{ color: 'var(--body)' }}>{link}</span>
                     }
                   </li>
                 ))}
@@ -990,9 +993,9 @@ function LandingFooter() {
             </div>
           ))}
         </div>
-        <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <p className="text-xs text-slate-600">© 2026 RZ Global Solutions Ltd. All rights reserved.</p>
-          <p className="text-xs text-slate-600 flex items-center gap-1.5"><Globe className="w-3 h-3" /> Global Platform</p>
+        <div className="pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2" style={{ borderTop: '1px solid var(--edge)' }}>
+          <p className="text-xs" style={{ color: 'var(--body)' }}>© 2026 RZ Global Solutions Ltd. All rights reserved.</p>
+          <p className="text-xs flex items-center gap-1.5" style={{ color: 'var(--body)' }}><Globe className="w-3 h-3" /> Global Platform</p>
         </div>
       </div>
     </footer>
