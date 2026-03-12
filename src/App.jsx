@@ -63,6 +63,11 @@ import ApprovalWorkflowsPage from '@/pages/ApprovalWorkflowsPage';
 import ContractManagementPage from '@/pages/ContractManagementPage';
 import SupplierDiscoveryPage from '@/pages/SupplierDiscoveryPage';
 
+// Platform Admin Pages
+import PlatformDashboardPage from '@/pages/platform/PlatformDashboardPage';
+import PlatformWorkspacesPage from '@/pages/platform/PlatformWorkspacesPage';
+import PlatformUsersPage from '@/pages/platform/PlatformUsersPage';
+
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
 import NCRVisibilityPage from '@/pages/NCRVisibilityPage';
@@ -133,7 +138,12 @@ function App() {
                     <Route path="/set-password" element={<SetPasswordPage />} />
                     <Route path="/create-password" element={<CreatePasswordPage />} />
 
-                    {/* --- ADMIN ROUTES --- */}
+                    {/* --- PLATFORM ADMIN ROUTES (super_admin only) --- */}
+                    <Route path="/platform-admin" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformDashboardPage /></ProtectedRoute>} />
+                    <Route path="/platform-admin/workspaces" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformWorkspacesPage /></ProtectedRoute>} />
+                    <Route path="/platform-admin/users" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformUsersPage /></ProtectedRoute>} />
+
+                    {/* --- ADMIN ROUTES (super_admin + customer_admin) --- */}
                     <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />
                     <Route path="/control-centre/intake-gate" element={<ProtectedRoute requiredRole="admin"><IntakeGatePage /></ProtectedRoute>} />
                     <Route path="/control-centre/sanitisation-gate" element={<ProtectedRoute requiredRole="admin"><SanitisationGatePage /></ProtectedRoute>} />

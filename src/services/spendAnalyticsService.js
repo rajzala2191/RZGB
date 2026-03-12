@@ -1,11 +1,13 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { applyWorkspaceFilter } from '@/lib/workspaceFilter';
 
-export const fetchSpendBySupplier = async () => {
-  const { data } = await supabaseAdmin
+export const fetchSpendBySupplier = async (workspaceId) => {
+  let query = supabaseAdmin
     .from('orders')
     .select('supplier_id, buy_price, supplier:supplier_id(company_name)')
     .not('buy_price', 'is', null)
     .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED']);
+  const { data } = await applyWorkspaceFilter(query, workspaceId);
 
   if (!data) return [];
   const map = {};
@@ -18,13 +20,14 @@ export const fetchSpendBySupplier = async () => {
   return Object.values(map).sort((a, b) => b.total - a.total);
 };
 
-export const fetchSpendByMaterial = async () => {
-  const { data } = await supabaseAdmin
+export const fetchSpendByMaterial = async (workspaceId) => {
+  let query = supabaseAdmin
     .from('orders')
     .select('material, buy_price')
     .not('buy_price', 'is', null)
     .not('material', 'is', null)
     .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED']);
+  const { data } = await applyWorkspaceFilter(query, workspaceId);
 
   if (!data) return [];
   const map = {};
@@ -37,17 +40,18 @@ export const fetchSpendByMaterial = async () => {
   return Object.values(map).sort((a, b) => b.total - a.total);
 };
 
-export const fetchSpendOverTime = async (months = 12) => {
+export const fetchSpendOverTime = async (months = 12, workspaceId) => {
   const since = new Date();
   since.setMonth(since.getMonth() - months);
 
-  const { data } = await supabaseAdmin
+  let query = supabaseAdmin
     .from('orders')
     .select('created_at, buy_price')
     .not('buy_price', 'is', null)
     .gte('created_at', since.toISOString())
     .in('order_status', ['AWARDED', 'MATERIAL', 'CASTING', 'MACHINING', 'QC', 'DISPATCH', 'DELIVERED'])
     .order('created_at', { ascending: true });
+  const { data } = await applyWorkspaceFilter(query, workspaceId);
 
   if (!data) return [];
   const map = {};
@@ -61,11 +65,12 @@ export const fetchSpendOverTime = async (months = 12) => {
   return Object.values(map).sort((a, b) => a.month.localeCompare(b.month));
 };
 
-export const fetchSpendSummary = async () => {
-  const { data } = await supabaseAdmin
+export const fetchSpendSummary = async (workspaceId) => {
+  let query = supabaseAdmin
     .from('orders')
     .select('buy_price, order_status')
     .not('buy_price', 'is', null);
+  const { data } = await applyWorkspaceFilter(query, workspaceId);
 
   if (!data) return { totalSpend: 0, activeOrders: 0, deliveredOrders: 0, avgOrderValue: 0 };
 

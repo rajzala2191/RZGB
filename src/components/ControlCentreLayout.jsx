@@ -50,7 +50,7 @@ const NAV_ITEMS = [
 ];
 
 const ControlCentreLayout = ({ children }) => {
-  const { currentUser, userCompanyName, userLogoUrl, logout } = useAuth();
+  const { currentUser, userCompanyName, userLogoUrl, isSuperAdmin, logout } = useAuth();
   const { isDark } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
@@ -138,6 +138,26 @@ const ControlCentreLayout = ({ children }) => {
 
           {/* Nav items */}
           <nav className="flex-1 overflow-y-auto px-3 space-y-0.5 pb-4">
+            {isSuperAdmin && (
+              <NavLink
+                to="/platform-admin"
+                onClick={() => setSidebarOpen(false)}
+                className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 mb-2"
+                style={{
+                  background: 'rgba(239,68,68,0.08)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239,68,68,0.18)',
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(239,68,68,0.15)' }}>
+                    <ShieldCheck size={15} style={{ color: '#ef4444' }} />
+                  </div>
+                  <span>Platform Admin</span>
+                </div>
+                <ChevronRight size={13} style={{ color: '#ef4444' }} />
+              </NavLink>
+            )}
             {NAV_ITEMS.map(item => {
               const isActive = item.exact
                 ? location.pathname === item.path

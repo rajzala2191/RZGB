@@ -2,6 +2,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { notifyPOIssued, notifyPOAcknowledged } from '@/services/slackService';
 import { dispatchWebhookEvent } from '@/services/webhookService';
+import { applyWorkspaceFilter } from '@/lib/workspaceFilter';
 
 const now = () => new Date().toISOString();
 
@@ -48,11 +49,13 @@ export const createPurchaseOrder = async ({
     .single();
 };
 
-export const fetchAllPurchaseOrders = async () =>
-  supabaseAdmin
+export const fetchAllPurchaseOrders = async (workspaceId) => {
+  let query = supabaseAdmin
     .from('purchase_orders')
     .select('*, order:order_id(id, rz_job_id, part_name, ghost_public_name, material, quantity), supplier:supplier_id(id, company_name, email)')
     .order('created_at', { ascending: false });
+  return applyWorkspaceFilter(query, workspaceId);
+};
 
 export const fetchPOById = async (poId) =>
   supabaseAdmin

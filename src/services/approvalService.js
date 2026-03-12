@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { applyWorkspaceFilter } from '@/lib/workspaceFilter';
 
 const now = () => new Date().toISOString();
 

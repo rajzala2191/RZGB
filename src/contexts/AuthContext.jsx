@@ -17,13 +17,25 @@ export const AuthProvider = ({ children }) => {
   const [userCompanyName, setUserCompanyName] = useState(null);
   const [userLogoUrl, setUserLogoUrl] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
+  const [workspaceId, setWorkspaceId] = useState(null);
+  const [adminScope, setAdminScope] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const isSuperAdmin = userRole === 'admin' && adminScope === 'platform';
+  const isCustomerAdmin = userRole === 'admin' && adminScope === 'workspace';
+
+  const canAccessWorkspace = useCallback((resourceWorkspaceId) => {
+    if (isSuperAdmin) return true;
+    return workspaceId && resourceWorkspaceId === workspaceId;
+  }, [isSuperAdmin, workspaceId]);
 
   const clearProfileState = useCallback(() => {
     setUserRole(null);
     setUserCompanyName(null);
     setUserLogoUrl(null);
     setIsDemo(false);
+    setWorkspaceId(null);
+    setAdminScope(null);
   }, []);
 
   const logActivity = async (userId, action, status, details) => {
@@ -56,6 +68,8 @@ export const AuthProvider = ({ children }) => {
       setUserCompanyName(data.company_name || null);
       setUserLogoUrl(data.logo_url || null);
       setIsDemo(Boolean(data.is_demo));
+      setWorkspaceId(data.workspace_id || null);
+      setAdminScope(data.admin_scope || 'workspace');
       return true;
     } catch (error) {
       console.error('AuthContext: Unexpected error fetching profile:', error);
@@ -158,6 +172,11 @@ export const AuthProvider = ({ children }) => {
     userCompanyName,
     userLogoUrl,
     isDemo,
+    workspaceId,
+    adminScope,
+    isSuperAdmin,
+    isCustomerAdmin,
+    canAccessWorkspace,
     loading,
     login,
     logout,

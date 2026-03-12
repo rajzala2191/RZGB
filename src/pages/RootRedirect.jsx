@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const RootRedirect = () => {
-  const { currentUser, userRole, loading } = useAuth();
+  const { currentUser, userRole, isSuperAdmin, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,10 +12,9 @@ const RootRedirect = () => {
       if (!currentUser) {
         navigate('/landing');
       } else {
-        // Role-based redirection
         switch (userRole) {
           case 'admin':
-            navigate('/control-centre');
+            navigate(isSuperAdmin ? '/platform-admin' : '/control-centre');
             break;
           case 'client':
             navigate('/client-dashboard');

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { applyWorkspaceFilter } from '@/lib/workspaceFilter';
 import { dispatchWebhookEvent } from '@/services/webhookService';
 
 const now = () => new Date().toISOString();
@@ -45,11 +46,13 @@ export const fetchSupplierInvoices = async (supplierId) =>
     .eq('supplier_id', supplierId)
     .order('created_at', { ascending: false });
 
-export const fetchAllInvoices = async () =>
-  supabaseAdmin
+export const fetchAllInvoices = async (workspaceId) => {
+  let query = supabaseAdmin
     .from('invoices')
     .select('*, supplier:supplier_id(id, company_name, email), order:order_id(rz_job_id, part_name, ghost_public_name), po:po_id(po_number)')
     .order('created_at', { ascending: false });
+  return applyWorkspaceFilter(query, workspaceId);
+};
 
 export const fetchInvoiceById = async (invoiceId) =>
   supabaseAdmin

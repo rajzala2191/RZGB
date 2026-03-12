@@ -4,13 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
 import { Loader2 } from 'lucide-react';
 
-const ProtectedRoute = ({ children, requiredRole, skipOnboardingCheck = false }) => {
-  const { currentUser, userRole, loading } = useAuth();
+const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingCheck = false }) => {
+  const { currentUser, userRole, isSuperAdmin, isCustomerAdmin, adminScope, loading } = useAuth();
   const location = useLocation();
   const [onboardingStatus, setOnboardingStatus] = useState(null);
   const [onboardingLoading, setOnboardingLoading] = useState(false);
   const [mfaVerified, setMfaVerified] = useState(null);
   const [mfaLoading, setMfaLoading] = useState(false);
+
+  const allowedRoles = requiredRoles || (requiredRole ? [requiredRole] : []);
 
   useEffect(() => {
     if (!currentUser || userRole !== 'supplier' || skipOnboardingCheck) return;
@@ -36,7 +38,6 @@ const ProtectedRoute = ({ children, requiredRole, skipOnboardingCheck = false })
     });
   }, [currentUser, userRole]);
 
-  // Also wait if user is authenticated but profile/role hasn't loaded yet
   if (loading || (currentUser && !userRole) || onboardingLoading || mfaLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
@@ -48,33 +49,49 @@ const ProtectedRoute = ({ children, requiredRole, skipOnboardingCheck = false })
     );
   }
 
-  // 1. Not logged in -> Redirect to Login
   if (!currentUser) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 2. Admin MFA enforcement
   if (userRole === 'admin' && mfaVerified === false) {
     return <Navigate to="/settings?mfa=required" state={{ from: location }} replace />;
   }
 
-  // 3. Role Check
-  if (requiredRole && userRole !== requiredRole) {
-    console.warn(`ProtectedRoute: Access denied to ${location.pathname}. Required: ${requiredRole}, Found: ${userRole}`);
-    if (userRole === 'admin') return <Navigate to="/control-centre" replace />;
-    if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
-    if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
-    return <Navigate to="/login" replace />;
+  if (allowedRoles.length > 0) {
+    const isPlatformRoute = allowedRoles.includes('super_admin');
+    const isAdminRoute = allowedRoles.includes('admin');
+
+    if (isPlatformRoute) {
+      if (!isSuperAdmin) {
+        if (userRole === 'admin') return <Navigate to="/control-centre" replace />;
+        if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
+        if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
+        return <Navigate to="/login" replace />;
+      }
+    } else if (isAdminRoute) {
+      if (userRole !== 'admin') {
+        if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
+        if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
+        return <Navigate to="/login" replace />;
+      }
+    } else {
+      const hasRole = allowedRoles.includes(userRole);
+      const superAdminBypass = isSuperAdmin;
+      if (!hasRole && !superAdminBypass) {
+        if (userRole === 'admin') return <Navigate to="/control-centre" replace />;
+        if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
+        if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
+        return <Navigate to="/login" replace />;
+      }
+    }
   }
 
-  // 4. Supplier onboarding check (only for supplier role, skip when explicitly flagged)
   if (userRole === 'supplier' && !skipOnboardingCheck && onboardingStatus && onboardingStatus !== 'approved') {
     if (location.pathname !== '/supplier-hub/onboarding') {
       return <Navigate to="/supplier-hub/onboarding" replace />;
     }
   }
 
-  // 5. Access Granted
   return children;
 };
 

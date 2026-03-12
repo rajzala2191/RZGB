@@ -25,7 +25,7 @@ export const updateUserPassword = async (password) =>
 export const fetchProfileByUserId = async (userId) =>
   supabase
     .from('profiles')
-    .select('role, company_name, logo_url, is_demo, status')
+    .select('role, company_name, logo_url, is_demo, status, workspace_id, admin_scope')
     .eq('id', userId)
     .maybeSingle();
 

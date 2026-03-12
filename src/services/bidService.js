@@ -2,6 +2,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { notifyNewBid, notifyBidAwarded, notifyNewTender } from '@/services/slackService';
 import { dispatchWebhookEvent } from '@/services/webhookService';
+import { applyWorkspaceFilter } from '@/lib/workspaceFilter';
 
 const now = () => new Date().toISOString();
 
@@ -19,12 +20,14 @@ export const fetchBidsBySupplier = async (supplierId) =>
     .eq('supplier_id', supplierId)
     .order('submitted_at', { ascending: false });
 
-export const fetchOpenOrders = async () =>
-  supabaseAdmin
+export const fetchOpenOrders = async (workspaceId) => {
+  let query = supabaseAdmin
     .from('orders')
     .select('*')
     .eq('order_status', 'OPEN_FOR_BIDDING')
     .order('updated_at', { ascending: false });
+  return applyWorkspaceFilter(query, workspaceId);
+};
 
 export const fetchOpenOrdersForSupplier = async (supplierId) =>
   supabase
