@@ -4,16 +4,14 @@ import { supabase } from '@/lib/customSupabaseClient';
 export const DEMO_ACCESS_KEY = 'rzgb-demo-access-token';
 
 /**
- * Submit a demo access request (public). RLS allows insert with status = 'pending'.
+ * Submit a demo access request (public). Uses RPC so insert is not blocked by RLS.
  */
 export async function submitDemoRequest(email) {
-  const { data, error } = await supabase
-    .from('demo_requests')
-    .insert({ email: email.trim().toLowerCase(), status: 'pending' })
-    .select('id')
-    .single();
+  const { data, error } = await supabase.rpc('submit_demo_request', {
+    p_email: email.trim().toLowerCase(),
+  });
   if (error) throw error;
-  return data;
+  return { id: data };
 }
 
 /**
