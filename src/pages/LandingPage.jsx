@@ -9,6 +9,47 @@ import {
 import ThemeToggle from '@/components/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeContext';
 
+// ─── Decorative backgrounds (theme-aware) ─────────────────────────────────────
+function GridDotsBackground({ opacity = 0.4, className = '' }) {
+  const { isDark } = useTheme();
+  const dotColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  return (
+    <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`}>
+      <div className="absolute inset-0" style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, ${dotColor} 1px, transparent 0)`,
+        backgroundSize: '24px 24px',
+      }} />
+    </div>
+  );
+}
+
+function GradientBlobs({ className = '' }) {
+  const { isDark } = useTheme();
+  const o = isDark ? 0.5 : 0.35;
+  return (
+    <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`}>
+      <motion.div
+        animate={{ scale: [1, 1.15, 1], opacity: [o, o * 0.8, o] }}
+        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute top-[-15%] right-[-5%] w-[700px] h-[700px] rounded-full"
+        style={{ background: 'radial-gradient(circle, #FF6B3520 0%, transparent 70%)' }}
+      />
+      <motion.div
+        animate={{ scale: [1.1, 1, 1.1], opacity: [o * 0.9, o, o * 0.9] }}
+        transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute bottom-[-10%] left-[-8%] w-[500px] h-[500px] rounded-full"
+        style={{ background: 'radial-gradient(circle, #3b82f615 0%, transparent 70%)' }}
+      />
+      <motion.div
+        animate={{ scale: [1, 1.2, 1], opacity: [o * 0.6, o * 0.4, o * 0.6] }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute top-[30%] left-[10%] w-[300px] h-[300px] rounded-full"
+        style={{ background: 'radial-gradient(circle, #8b5cf610 0%, transparent 70%)' }}
+      />
+    </div>
+  );
+}
+
 // ─── Animated counter ────────────────────────────────────────────────────────
 function Counter({ target, suffix = '', prefix = '' }) {
   const [count, setCount] = useState(0);
@@ -411,21 +452,21 @@ function LandingNav() {
             className="h-8 object-contain transition-all"
             style={isDark ? { filter: 'brightness(0) invert(1)', opacity: 0.9 } : {}}
           />
-          <span className="text-sm font-bold text-slate-800 hidden sm:block">RZ Global Solutions</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-slate-100 hidden sm:block">RZ Global Solutions</span>
         </div>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
-          <button onClick={() => scrollTo('features')}  className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Features</button>
-          <Link   to="/how-it-works"                    className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">How it Works</Link>
-          <Link   to="/pricing"                         className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Pricing</Link>
-          <button onClick={() => scrollTo('portals')}   className="text-sm text-slate-500 hover:text-slate-900 font-medium transition-colors">Portals</button>
+          <button onClick={() => scrollTo('features')}  className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium transition-colors">Features</button>
+          <Link   to="/how-it-works"                    className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium transition-colors">How it Works</Link>
+          <Link   to="/pricing"                         className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium transition-colors">Pricing</Link>
+          <button onClick={() => scrollTo('portals')}   className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium transition-colors">Portals</button>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Link to="/login" className="hidden sm:block text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">Sign In</Link>
+          <Link to="/login" className="hidden sm:block text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium transition-colors">Sign In</Link>
           <Link
             to="/demo"
             className="flex items-center gap-2 bg-[#FF6B35] hover:bg-orange-500 active:scale-[0.97] text-white text-sm font-bold px-4 py-2 rounded-lg transition-all shadow-md shadow-orange-500/25 hover:shadow-orange-500/40"
@@ -471,23 +512,40 @@ function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center pt-16 pb-16 px-4 overflow-hidden bg-white">
-      {/* Gradient mesh */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-15%] right-[-5%] w-[700px] h-[700px] rounded-full" style={{ background: 'radial-gradient(circle, #FF6B3520 0%, transparent 70%)', opacity: isDark ? 0.6 : 0.4 }} />
-        <div className="absolute bottom-[-10%] left-[-8%] w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, #3b82f615 0%, transparent 70%)', opacity: isDark ? 0.5 : 0.3 }} />
-        <div className="absolute top-[30%] left-[10%] w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(circle, #8b5cf610 0%, transparent 70%)', opacity: isDark ? 0.4 : 0.2 }} />
-      </div>
+    <section className="relative min-h-screen flex flex-col items-center justify-center pt-16 pb-16 px-4 overflow-hidden bg-white dark:bg-[var(--app-bg)]">
+      <GridDotsBackground opacity={0.5} />
+      <GradientBlobs />
+      {/* Decorative vector arc */}
+      <svg className="absolute bottom-[15%] left-0 w-full h-48 pointer-events-none opacity-20 dark:opacity-10" viewBox="0 0 1200 120" fill="none" preserveAspectRatio="none">
+        <motion.path
+          d="M0 80 Q300 20 600 60 T1200 40"
+          stroke="#FF6B35"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 1.5, delay: 0.5 }}
+        />
+        <motion.path
+          d="M0 95 Q400 50 800 70 T1200 55"
+          stroke="#3b82f6"
+          strokeWidth="1"
+          strokeLinecap="round"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 1.8, delay: 0.8 }}
+        />
+      </svg>
 
       <motion.div variants={containerVariants} initial="hidden" animate="visible" className="relative z-10 max-w-5xl w-full text-center">
         {/* Badge */}
-        <motion.div variants={itemVariants} className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-600 text-xs font-bold px-4 py-2 rounded-full mb-6">
+        <motion.div variants={itemVariants} className="inline-flex items-center gap-2 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 text-xs font-bold px-4 py-2 rounded-full mb-6">
           <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
           Global Manufacturing Procurement Platform
         </motion.div>
 
         {/* Headline */}
-        <motion.h1 variants={itemVariants} className="text-3xl sm:text-5xl lg:text-7xl font-black text-slate-900 leading-[1.05] tracking-tight mb-6">
+        <motion.h1 variants={itemVariants} className="text-3xl sm:text-5xl lg:text-7xl font-black text-slate-900 dark:text-slate-100 leading-[1.05] tracking-tight mb-6">
           The smarter way to{' '}
           <span className="relative inline-block">
             <span style={{ background: 'linear-gradient(135deg, #FF6B35, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
@@ -507,7 +565,7 @@ function HeroSection() {
         </motion.h1>
 
         {/* Subtitle */}
-        <motion.p variants={itemVariants} className="text-base sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+        <motion.p variants={itemVariants} className="text-base sm:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
           One platform connecting clients, admins, and suppliers across the entire manufacturing lifecycle —
           from order intake to final delivery, with built-in IP protection.
         </motion.p>
@@ -519,34 +577,34 @@ function HeroSection() {
             <Link to="/demo?role=admin"    className="flex items-center justify-center gap-2 bg-blue-600   hover:bg-blue-500     active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/25    hover:shadow-xl hover:-translate-y-0.5"><Shield    className="w-4 h-4" /> Try as Admin</Link>
             <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500   active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-violet-500/25  hover:shadow-xl hover:-translate-y-0.5"><Factory   className="w-4 h-4" /> Try as Supplier</Link>
           </div>
-          <Link to="/how-it-works" className="flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 text-sm font-semibold px-6 py-3.5 rounded-xl transition-all border border-slate-200 hover:border-slate-300 hover:bg-slate-50">
+          <Link to="/how-it-works" className="flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 text-sm font-semibold px-6 py-3.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50">
             <Play className="w-4 h-4" /> Watch How It Works
           </Link>
         </motion.div>
 
-        {/* Hero UI card */}
+        {/* Hero UI card — glass + blur */}
         <motion.div variants={itemVariants} className="relative max-w-2xl mx-auto mb-6">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-slate-200/60 p-6">
+          <div className="bg-white/80 dark:bg-[var(--surface)]/90 backdrop-blur-xl rounded-2xl border border-slate-200/80 dark:border-[var(--edge)] shadow-2xl shadow-slate-200/60 dark:shadow-black/30 p-6 ring-1 ring-slate-200/20 dark:ring-white/5">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-xs text-slate-400 font-medium">RZ-JOB-10033 · Valve Body Casting</p>
-                <p className="text-sm font-bold text-slate-800 mt-0.5">Bronze LG2 · 60 pieces</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">RZ-JOB-10033 · Valve Body Casting</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-0.5">Bronze LG2 · 60 pieces</p>
               </div>
-              <span className="text-xs bg-teal-50 text-teal-700 border border-teal-200 px-2.5 py-1 rounded-full font-semibold">Casting Stage</span>
+              <span className="text-xs bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 px-2.5 py-1 rounded-full font-semibold">Casting Stage</span>
             </div>
             <MiniPipeline activeIdx={4} />
-            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-[var(--edge)] flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
               <span>Sheffield Forge · Awarded</span>
-              <span className="text-emerald-600 font-semibold">£9,100</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">£9,100</span>
             </div>
           </div>
           {/* Floating badges */}
           <motion.div animate={{ y: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-            className="absolute -top-3 -right-4 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-slate-700 hidden sm:flex items-center gap-2">
+            className="absolute -top-3 -right-4 bg-white/90 dark:bg-[var(--surface-raised)] backdrop-blur-md border border-slate-200 dark:border-[var(--edge)] rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hidden sm:flex items-center gap-2">
             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" /> Live Tracking
           </motion.div>
           <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut', delay: 0.5 }}
-            className="absolute -bottom-3 -left-4 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-blue-600 hidden sm:flex items-center gap-2">
+            className="absolute -bottom-3 -left-4 bg-white/90 dark:bg-[var(--surface-raised)] backdrop-blur-md border border-slate-200 dark:border-[var(--edge)] rounded-xl px-3 py-2 shadow-lg text-xs font-semibold text-blue-600 dark:text-blue-400 hidden sm:flex items-center gap-2">
             <Shield className="w-3.5 h-3.5" /> IP Protected
           </motion.div>
         </motion.div>
@@ -564,10 +622,20 @@ function StatsBar() {
     { label: 'Portals in One Platform', value: 3,   suffix: '',  color: '#3b82f6' },
   ];
   return (
-    <section className="bg-slate-900 py-14">
-      <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+    <section className="relative bg-slate-900 dark:bg-slate-950 py-14 overflow-hidden">
+      <GridDotsBackground className="opacity-30" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-900/80 dark:to-slate-950/80 pointer-events-none" />
+      <div className="relative max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
         {stats.map((s, i) => (
-          <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center">
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1, duration: 0.5 }}
+            whileHover={{ scale: 1.02, y: -2 }}
+            className="text-center p-4 rounded-2xl bg-white/5 dark:bg-white/[0.06] backdrop-blur-sm border border-white/10 dark:border-white/5"
+          >
             <p className="text-4xl font-black mb-2" style={{ color: s.color }}><Counter target={s.value} suffix={s.suffix} /></p>
             <p className="text-sm text-slate-400 font-medium">{s.label}</p>
           </motion.div>
@@ -580,33 +648,48 @@ function StatsBar() {
 // ─── Features ─────────────────────────────────────────────────────────────────
 function FeaturesSection() {
   return (
-    <section id="features" className="py-14 sm:py-24 px-4 bg-white">
-      <div className="max-w-6xl mx-auto">
+    <section id="features" className="relative py-14 sm:py-24 px-4 bg-white dark:bg-[var(--app-bg)] overflow-hidden">
+      <GridDotsBackground />
+      <div className="relative max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16 sm:mb-20">
           <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Platform Features</p>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4">Everything you need, in one place</h2>
-          <p className="text-base text-slate-500 max-w-xl mx-auto">Built specifically for manufacturing procurement — not a generic tool adapted for manufacturing.</p>
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 mb-4">Everything you need, in one place</h2>
+          <p className="text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto">Built specifically for manufacturing procurement — not a generic tool adapted for manufacturing.</p>
         </motion.div>
 
         <div className="space-y-24 sm:space-y-32">
           {FEATURES.map((f, i) => (
             <motion.div
               key={f.title}
-              initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
+              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: i * 0.05 }}
               className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center`}
             >
               <div className={i % 2 === 1 ? 'md:order-2' : ''}>
-                <motion.div initial={{ scale: 0.9, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
-                  style={{ background: `linear-gradient(135deg, ${f.color}15, ${f.color}25)` }}>
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 }}
+                  whileHover={{ scale: 1.03, rotate: 1 }}
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg ring-2 ring-white/20 dark:ring-white/10"
+                  style={{ background: `linear-gradient(135deg, ${f.color}20, ${f.color}30)` }}
+                >
                   <f.icon className="w-8 h-8" style={{ color: f.color }} />
                 </motion.div>
-                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mb-4">{f.title}</h3>
-                <p className="text-base text-slate-500 leading-relaxed">{f.body}</p>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 mb-4">{f.title}</h3>
+                <p className="text-base text-slate-500 dark:text-slate-400 leading-relaxed">{f.body}</p>
               </div>
               <div className={i % 2 === 1 ? 'md:order-1' : ''}>
-                <motion.div initial={{ opacity: 0, x: i % 2 === 0 ? 40 : -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
-                  className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 min-h-[200px] flex items-center justify-center">
+                <motion.div
+                  initial={{ opacity: 0, x: i % 2 === 0 ? 40 : -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-slate-50/80 dark:bg-[var(--surface)]/80 backdrop-blur-xl border border-slate-100 dark:border-[var(--edge)] rounded-2xl p-6 sm:p-8 min-h-[200px] flex items-center justify-center shadow-lg shadow-slate-200/30 dark:shadow-black/20"
+                >
                   <FeatureVisual type={f.visual} color={f.color} />
                 </motion.div>
               </div>
@@ -624,22 +707,23 @@ function RoleTabsSection() {
   const role = ROLES[active];
 
   return (
-    <section id="portals" className="py-14 sm:py-24 px-4 bg-slate-50">
-      <div className="max-w-5xl mx-auto">
+    <section id="portals" className="relative py-14 sm:py-24 px-4 bg-slate-50 dark:bg-[var(--surface-raised)]/30 overflow-hidden">
+      <GridDotsBackground />
+      <div className="relative max-w-5xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 sm:mb-12">
           <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Three Portals, One System</p>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4">A dedicated portal for every role</h2>
-          <p className="text-base text-slate-500 max-w-xl mx-auto">Each portal is purpose-built — not just the same dashboard with hidden buttons.</p>
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 mb-4">A dedicated portal for every role</h2>
+          <p className="text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto">Each portal is purpose-built — not just the same dashboard with hidden buttons.</p>
         </motion.div>
 
         {/* Tab switcher */}
         <div className="flex justify-center mb-10">
-          <div className="inline-flex bg-white border border-slate-200 rounded-xl p-1 gap-1 shadow-sm">
+          <div className="inline-flex bg-white dark:bg-[var(--surface)]/90 backdrop-blur-sm border border-slate-200 dark:border-[var(--edge)] rounded-xl p-1 gap-1 shadow-sm">
             {Object.entries(ROLES).map(([key, r]) => (
               <button
                 key={key}
                 onClick={() => setActive(key)}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${active === key ? 'text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${active === key ? 'text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'}`}
                 style={active === key ? { background: r.color } : {}}
               >
                 <r.icon className="w-4 h-4" />
@@ -655,16 +739,16 @@ function RoleTabsSection() {
             className="grid md:grid-cols-2 gap-4 md:gap-8 items-start">
             {/* Steps */}
             <div>
-              <p className="text-slate-500 text-base mb-6 leading-relaxed">{role.description}</p>
+              <p className="text-slate-500 dark:text-slate-400 text-base mb-6 leading-relaxed">{role.description}</p>
               <div className="space-y-5">
                 {role.steps.map((step, i) => (
-                  <div key={i} className="flex gap-4">
+                  <motion.div key={i} className="flex gap-4" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}>
                     <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold" style={{ background: role.color }}>{i + 1}</div>
                     <div>
-                      <p className="text-base font-bold text-slate-900">{step.title}</p>
-                      <p className="text-sm text-slate-500 mt-0.5 leading-relaxed">{step.body}</p>
+                      <p className="text-base font-bold text-slate-900 dark:text-slate-100">{step.title}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{step.body}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
               <div className="mt-8">
@@ -676,7 +760,12 @@ function RoleTabsSection() {
             </div>
 
             {/* Mock portal card */}
-            <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 shadow-xl">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="bg-slate-900 dark:bg-slate-950 rounded-2xl overflow-hidden border border-slate-700 dark:border-slate-800 shadow-xl backdrop-blur-sm"
+            >
               <div className="flex">
                 <div className="w-16 bg-slate-950 flex flex-col items-center py-4 gap-4 border-r border-slate-800">
                   {[BarChart3, Package, FileCheck, Users].map((Icon, j) => (
@@ -709,7 +798,7 @@ function RoleTabsSection() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -726,16 +815,29 @@ function PipelineSection() {
     return () => clearInterval(interval);
   }, []);
 
+  const pipelineHighlights = [
+    { label: 'Auto-scrubbed drawings',  icon: Shield,    color: '#3b82f6' },
+    { label: 'Competitive bidding',      icon: BarChart3, color: '#8b5cf6' },
+    { label: 'Real-time updates',       icon: Zap,       color: '#FF6B35' },
+    { label: 'Quality certificates',    icon: FileCheck, color: '#10b981' },
+  ];
+
   return (
-    <section className="py-14 sm:py-24 px-4 bg-white">
-      <div className="max-w-5xl mx-auto">
+    <section className="relative py-14 sm:py-24 px-4 bg-white dark:bg-[var(--app-bg)] overflow-hidden">
+      <GridDotsBackground />
+      <div className="relative max-w-5xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-14">
           <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Order Lifecycle</p>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4">From drawing to delivery, fully tracked</h2>
-          <p className="text-base text-slate-500 max-w-xl mx-auto">Every order moves through a defined 11-stage pipeline. Nothing gets lost, nothing gets overlooked.</p>
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 mb-4">From drawing to delivery, fully tracked</h2>
+          <p className="text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto">Every order moves through a defined 11-stage pipeline. Nothing gets lost, nothing gets overlooked.</p>
         </motion.div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-8 shadow-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-white/80 dark:bg-[var(--surface)]/80 backdrop-blur-xl border border-slate-200 dark:border-[var(--edge)] rounded-2xl p-4 sm:p-8 shadow-lg ring-1 ring-slate-200/20 dark:ring-white/5"
+        >
           <div className="flex justify-center mb-8">
             <MiniPipeline activeIdx={activeIdx} />
           </div>
@@ -744,21 +846,24 @@ function PipelineSection() {
               style={{ background: `${PIPELINE_STAGES[activeIdx]?.color}15`, color: PIPELINE_STAGES[activeIdx]?.color }}>
               Currently: {PIPELINE_STAGES[activeIdx]?.label}
             </span>
-            <p className="text-sm text-slate-500">Click any stage above or watch the auto-animation</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Click any stage above or watch the auto-animation</p>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-          {[
-            { label: 'Auto-scrubbed drawings',  icon: Shield,    color: '#3b82f6' },
-            { label: 'Competitive bidding',      icon: BarChart3, color: '#8b5cf6' },
-            { label: 'Real-time updates',         icon: Zap,       color: '#FF6B35' },
-            { label: 'Quality certificates',     icon: FileCheck, color: '#10b981' },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl p-4">
+          {pipelineHighlights.map((item, j) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: j * 0.08 }}
+              whileHover={{ y: -2, transition: { duration: 0.2 } }}
+              className="flex items-center gap-3 bg-slate-50/80 dark:bg-[var(--surface-raised)]/80 backdrop-blur-sm border border-slate-100 dark:border-[var(--edge)] rounded-xl p-4"
+            >
               <item.icon className="w-5 h-5 flex-shrink-0" style={{ color: item.color }} />
-              <p className="text-xs font-semibold text-slate-700">{item.label}</p>
-            </div>
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">{item.label}</p>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -769,16 +874,16 @@ function PipelineSection() {
 // ─── Testimonials ─────────────────────────────────────────────────────────────
 function TestimonialsSection() {
   const { isDark } = useTheme();
-  // Match the section bg so fade gradients disappear correctly in both modes
-  const sectionBg  = isDark ? '#1c1c1e' : '#f8fafc'; // slate-50 in dark = #1c1c1e
+  const sectionBg  = isDark ? 'var(--app-bg)' : '#f8fafc';
   const fadeLeft   = `linear-gradient(to right, ${sectionBg}, transparent)`;
   const fadeRight  = `linear-gradient(to left, ${sectionBg}, transparent)`;
 
   return (
-    <section className="py-20 bg-slate-50 overflow-hidden">
-      <div className="text-center mb-10 px-4">
+    <section className="relative py-20 bg-slate-50 dark:bg-[var(--surface-raised)]/30 overflow-hidden">
+      <GridDotsBackground />
+      <div className="relative text-center mb-10 px-4">
         <p className="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">What People Say</p>
-        <h2 className="text-3xl font-black text-slate-900">Trusted by manufacturers worldwide</h2>
+        <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100">Trusted by manufacturers worldwide</h2>
       </div>
       <div className="relative overflow-hidden">
         <motion.div
@@ -787,14 +892,17 @@ function TestimonialsSection() {
           className="flex gap-5 w-max"
         >
           {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-            <div key={i} className="w-[80vw] sm:w-72 flex-shrink-0 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+            <div
+              key={i}
+              className="w-[80vw] sm:w-72 flex-shrink-0 bg-white/90 dark:bg-[var(--surface)]/90 backdrop-blur-md border border-slate-100 dark:border-[var(--edge)] rounded-2xl p-6 shadow-lg"
+            >
               <div className="flex gap-1 mb-3">
                 {[1,2,3,4,5].map((s) => <Star key={s} className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />)}
               </div>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">"{t.quote}"</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">"{t.quote}"</p>
               <div>
-                <p className="text-xs font-bold text-slate-900">{t.name}</p>
-                <p className="text-xs text-slate-400">{t.title} · {t.company}</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{t.name}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">{t.title} · {t.company}</p>
               </div>
             </div>
           ))}
@@ -809,8 +917,10 @@ function TestimonialsSection() {
 // ─── CTA ──────────────────────────────────────────────────────────────────────
 function CTASection() {
   return (
-    <section className="py-14 sm:py-24 px-4 bg-slate-900">
-      <div className="max-w-3xl mx-auto text-center">
+    <section className="relative py-14 sm:py-24 px-4 bg-slate-900 dark:bg-slate-950 overflow-hidden">
+      <GradientBlobs />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,107,53,0.15),transparent)] pointer-events-none" />
+      <div className="relative max-w-3xl mx-auto text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <p className="text-sm font-bold text-orange-400 uppercase tracking-widest mb-4">Get Started Today</p>
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-6 leading-tight">
@@ -825,7 +935,11 @@ function CTASection() {
             <Link to="/demo?role=admin"    className="flex items-center justify-center gap-2 bg-blue-500   hover:bg-blue-400     active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-500/20    hover:shadow-xl hover:-translate-y-0.5"><Shield    className="w-4 h-4" /> Enter as Admin</Link>
             <Link to="/demo?role=supplier" className="flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-400   active:scale-[0.97] text-white text-sm font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-violet-500/20  hover:shadow-xl hover:-translate-y-0.5"><Factory   className="w-4 h-4" /> Enter as Supplier</Link>
           </div>
-          <p className="text-xs text-slate-600 mt-6">5 sample clients · 5 sample suppliers · Orders across all 11 stages</p>
+          <p className="text-xs text-slate-500 mt-6">5 sample clients · 5 sample suppliers · Orders across all 11 stages</p>
+          <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-4">
+            <Link to="/pricing" className="text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors underline underline-offset-2">View pricing</Link>
+            {' '}· Starter, Growth & Enterprise plans
+          </motion.p>
         </motion.div>
       </div>
     </section>
@@ -884,7 +998,7 @@ function LandingFooter() {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   return (
-    <div className="font-sans antialiased" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="font-sans antialiased bg-white dark:bg-[var(--app-bg)] text-slate-900 dark:text-slate-100 min-h-screen" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <LandingNav />
       <HeroSection />
       <StatsBar />
