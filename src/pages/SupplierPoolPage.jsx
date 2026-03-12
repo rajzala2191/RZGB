@@ -1,9 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { Send, Search, Package, Layers, Hash, Calendar, ChevronRight } from 'lucide-react';
+import { Send, Search, Package, Layers, Hash, Calendar, ChevronRight, Filter } from 'lucide-react';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import ReleaseToSuppliersModal from '@/components/ReleaseToSuppliersModal';
 import { format } from 'date-fns';
+
+const FILTER_PROCESSES = [
+  'CNC Machining', 'Casting', 'Forging', 'Welding', 'Sheet Metal',
+  'Injection Moulding', 'Heat Treatment', 'Surface Finishing', '3D Printing',
+];
+const FILTER_MATERIALS = [
+  'Aluminium', 'Stainless Steel', 'Mild Steel', 'Titanium', 'Brass',
+  'Copper', 'Inconel', 'Plastics', 'Composites',
+];
 
 export default function SupplierPoolPage() {
   const [orders,        setOrders]        = useState([]);
@@ -11,8 +20,27 @@ export default function SupplierPoolPage() {
   const [loading,       setLoading]       = useState(true);
   const [isModalOpen,   setIsModalOpen]   = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [capFilter,     setCapFilter]     = useState({ process: '', material: '' });
+  const [capSupplierIds, setCapSupplierIds] = useState(null); // null = no filter active
 
   useEffect(() => { fetchSanitizedOrders(); }, []);
+
+  const applyCapFilter = async () => {
+    if (!capFilter.process && !capFilter.material) {
+      setCapSupplierIds(null);
+      return;
+    }
+    let query = supabaseAdmin.from('supplier_capabilities').select('supplier_id');
+    if (capFilter.process) query = query.contains('processes', [capFilter.process]);
+    if (capFilter.material) query = query.contains('materials', [capFilter.material]);
+    const { data } = await query;
+    setCapSupplierIds((data || []).map(r => r.supplier_id));
+  };
+
+  const clearCapFilter = () => {
+    setCapFilter({ process: '', material: '' });
+    setCapSupplierIds(null);
+  };
 
   const fetchSanitizedOrders = async () => {
     setLoading(true);
@@ -64,6 +92,57 @@ export default function SupplierPoolPage() {
             onChange={e => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#232329] text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-600 focus:outline-none focus:border-orange-500 transition-colors"
           />
+        </div>
+
+        {/* Capability filter */}
+        <div className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#232329] rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Filter size={13} className="text-orange-500" />
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">Filter by Supplier Capability</p>
+          </div>
+          <div className="flex flex-wrap gap-3 items-end">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-500 dark:text-slate-500">Process</label>
+              <select
+                value={capFilter.process}
+                onChange={e => setCapFilter(f => ({ ...f, process: e.target.value }))}
+                className="text-xs rounded-lg px-3 py-2 bg-gray-50 dark:bg-[#13131f] border border-gray-200 dark:border-[#232329] text-gray-800 dark:text-slate-200 focus:outline-none focus:border-orange-500"
+              >
+                <option value="">Any process</option>
+                {FILTER_PROCESSES.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-500 dark:text-slate-500">Material</label>
+              <select
+                value={capFilter.material}
+                onChange={e => setCapFilter(f => ({ ...f, material: e.target.value }))}
+                className="text-xs rounded-lg px-3 py-2 bg-gray-50 dark:bg-[#13131f] border border-gray-200 dark:border-[#232329] text-gray-800 dark:text-slate-200 focus:outline-none focus:border-orange-500"
+              >
+                <option value="">Any material</option>
+                {FILTER_MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+            <button
+              onClick={applyCapFilter}
+              className="px-4 py-2 rounded-lg text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white transition-colors"
+            >
+              Apply
+            </button>
+            {capSupplierIds !== null && (
+              <button
+                onClick={clearCapFilter}
+                className="px-4 py-2 rounded-lg text-xs font-bold bg-gray-100 dark:bg-[#232329] hover:bg-gray-200 dark:hover:bg-[#2e2e35] text-gray-600 dark:text-slate-400 transition-colors"
+              >
+                Clear Filter
+              </button>
+            )}
+          </div>
+          {capSupplierIds !== null && (
+            <p className="text-xs text-orange-500 font-medium">
+              {capSupplierIds.length} supplier{capSupplierIds.length !== 1 ? 's' : ''} match this capability filter — shown in the assignment modal.
+            </p>
+          )}
         </div>
 
         {/* Cards */}

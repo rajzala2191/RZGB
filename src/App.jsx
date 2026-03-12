@@ -87,6 +87,7 @@ import SupplierInvoicesPage from '@/pages/SupplierInvoicesPage';
 import ClientProfilePage from '@/pages/ClientProfilePage';
 import ClientSettingsPage from '@/pages/ClientSettingsPage';
 import SupplierSettingsPage from '@/pages/SupplierSettingsPage';
+import SupplierCapabilitiesPage from '@/pages/SupplierCapabilitiesPage';
 import TicketDetailPage from '@/pages/TicketDetailPage';
 import AdminSupportPage from '@/pages/AdminSupportPage';
 import AdminTicketDetailPage from '@/pages/AdminTicketDetailPage';
@@ -191,6 +192,7 @@ function App() {
                     <Route path="/supplier-hub/purchase-orders" element={<ProtectedRoute requiredRole="supplier"><SupplierPurchaseOrdersPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/invoices" element={<ProtectedRoute requiredRole="supplier"><SupplierInvoicesPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/settings" element={<ProtectedRoute requiredRole="supplier"><SupplierSettingsPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/capabilities" element={<ProtectedRoute requiredRole="supplier"><SupplierCapabilitiesPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
                   </Routes>

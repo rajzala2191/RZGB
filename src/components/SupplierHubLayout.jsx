@@ -13,6 +13,7 @@ import {
   Gavel,
   FileText,
   Receipt,
+  Wrench,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { path: '/supplier-hub/purchase-orders',  label: 'Purchase Orders', icon: FileText },
   { path: '/supplier-hub/invoices',         label: 'My Invoices',     icon: Receipt },
   { path: '/supplier-hub/documents',        label: 'Documents Portal',icon: FolderOpen },
+  { path: '/supplier-hub/capabilities',     label: 'My Capabilities', icon: Wrench },
   { path: '/supplier-hub/settings',         label: 'Settings',        icon: Settings },
 ];
 

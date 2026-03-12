@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import { supabase } from '@/lib/customSupabaseClient';
-import { Users, UserPlus, Loader2, Mail } from 'lucide-react';
+import { Users, UserPlus, Loader2, Mail, ChevronDown, ChevronRight, BarChart2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const SupplierManagementPage = () => {
@@ -12,7 +13,27 @@ const SupplierManagementPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({ company_name: '', email: '', contact_person: '', phone: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [expandedCaps, setExpandedCaps] = useState({});
+  const [capsData, setCapsData] = useState({});
+  const [loadingCaps, setLoadingCaps] = useState({});
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const toggleCaps = async (supplierId) => {
+    if (expandedCaps[supplierId]) {
+      setExpandedCaps(prev => ({ ...prev, [supplierId]: false }));
+      return;
+    }
+    setLoadingCaps(prev => ({ ...prev, [supplierId]: true }));
+    const { data } = await supabase
+      .from('supplier_capabilities')
+      .select('*')
+      .eq('supplier_id', supplierId)
+      .maybeSingle();
+    setCapsData(prev => ({ ...prev, [supplierId]: data || null }));
+    setLoadingCaps(prev => ({ ...prev, [supplierId]: false }));
+    setExpandedCaps(prev => ({ ...prev, [supplierId]: true }));
+  };
 
   const fetchSuppliers = async () => {
     const { data } = await supabase.from('profiles').select('*').eq('role', 'supplier').order('created_at', { ascending: false });
@@ -124,18 +145,64 @@ const SupplierManagementPage = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-800 text-slate-300">
                    {suppliers.map(s => (
-                      <tr key={s.id} className="hover:bg-slate-900/50">
-                         <td className="p-4 font-bold text-white">{s.company_name}</td>
-                         <td className="p-4">{s.email}</td>
-                         <td className="p-4">
-                            <span className={`px-2 py-1 rounded text-xs uppercase font-bold ${s.status === 'active' ? 'bg-emerald-950 text-emerald-500' : 'bg-amber-950 text-amber-500'}`}>
-                               {s.status || 'Pending'}
-                            </span>
-                         </td>
-                         <td className="p-4 text-right">
-                            <button className="text-sky-400 hover:text-white p-2"><Mail size={16} /></button>
-                         </td>
-                      </tr>
+                      <React.Fragment key={s.id}>
+                        <tr className="hover:bg-slate-900/50">
+                           <td className="p-4 font-bold text-white">{s.company_name}</td>
+                           <td className="p-4">{s.email}</td>
+                           <td className="p-4">
+                              <span className={`px-2 py-1 rounded text-xs uppercase font-bold ${s.status === 'active' ? 'bg-emerald-950 text-emerald-500' : 'bg-amber-950 text-amber-500'}`}>
+                                 {s.status || 'Pending'}
+                              </span>
+                           </td>
+                           <td className="p-4 text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  onClick={() => toggleCaps(s.id)}
+                                  className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                                  title="View Capabilities"
+                                >
+                                  {loadingCaps[s.id] ? <Loader2 size={12} className="animate-spin" /> : expandedCaps[s.id] ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                                  Capabilities
+                                </button>
+                                <button
+                                  onClick={() => navigate('/control-centre/supplier-scorecard')}
+                                  className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                                  title="View Scorecard"
+                                >
+                                  <BarChart2 size={12} /> Scorecard
+                                </button>
+                                <button className="text-sky-400 hover:text-white p-2"><Mail size={16} /></button>
+                              </div>
+                           </td>
+                        </tr>
+                        {expandedCaps[s.id] && (
+                          <tr className="bg-slate-950/50">
+                            <td colSpan={4} className="px-6 py-4">
+                              {capsData[s.id] ? (
+                                <div className="space-y-2 text-xs text-slate-400">
+                                  {capsData[s.id].processes?.length > 0 && (
+                                    <div><span className="font-bold text-slate-300 mr-2">Processes:</span>{capsData[s.id].processes.join(', ')}</div>
+                                  )}
+                                  {capsData[s.id].materials?.length > 0 && (
+                                    <div><span className="font-bold text-slate-300 mr-2">Materials:</span>{capsData[s.id].materials.join(', ')}</div>
+                                  )}
+                                  {capsData[s.id].certifications?.length > 0 && (
+                                    <div><span className="font-bold text-slate-300 mr-2">Certifications:</span>{capsData[s.id].certifications.join(', ')}</div>
+                                  )}
+                                  <div className="flex gap-6">
+                                    {capsData[s.id].min_order_qty != null && <span><span className="font-bold text-slate-300 mr-1">Min Qty:</span>{capsData[s.id].min_order_qty}</span>}
+                                    {capsData[s.id].max_order_qty != null && <span><span className="font-bold text-slate-300 mr-1">Max Qty:</span>{capsData[s.id].max_order_qty}</span>}
+                                    {capsData[s.id].lead_time_days != null && <span><span className="font-bold text-slate-300 mr-1">Lead Time:</span>{capsData[s.id].lead_time_days} days</span>}
+                                    {capsData[s.id].country && <span><span className="font-bold text-slate-300 mr-1">Location:</span>{[capsData[s.id].country, capsData[s.id].region].filter(Boolean).join(', ')}</span>}
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-xs text-slate-500 italic">No capability profile submitted yet.</p>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                    ))}
                 </tbody>
              </table>
