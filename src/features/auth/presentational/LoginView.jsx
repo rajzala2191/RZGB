@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, ArrowRight, Eye, EyeOff, Globe, Lock, LogIn, Mail, Package, Shield, Zap } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, Eye, EyeOff, Globe, Lock, LogIn, Mail, Package, Shield, Zap } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import ForgotPasswordModalView from '@/features/auth/presentational/ForgotPasswordModalView';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -123,15 +124,21 @@ export default function LoginView({
 
         {/* ── Right form panel ── */}
         <div className="flex-1 flex flex-col">
-          {/* Top bar with theme toggle */}
-          <div className="flex items-center justify-between px-6 py-4">
-            {/* Mobile logo */}
+          {/* Top bar: Back to Home + theme toggle */}
+          <div className="relative flex items-center justify-between px-6 py-4">
+            <Link
+              to="/landing"
+              className="flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
+              style={{ color: 'var(--body)' }}
+            >
+              <ArrowLeft size={16} /> Back to Home
+            </Link>
             <img
               src="/light-logo.png"
               alt="RZ Global Solutions"
-              className="h-8 object-contain lg:hidden"
+              className="h-8 object-contain absolute left-1/2 -translate-x-1/2 lg:hidden"
             />
-            <div className="hidden lg:block" />
+            <div className="hidden lg:block flex-1" />
             <ThemeToggle />
           </div>
 
