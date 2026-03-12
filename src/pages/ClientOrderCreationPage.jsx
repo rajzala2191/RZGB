@@ -20,6 +20,8 @@ import {
   createOrder,
   createOrderDocumentRecord,
   fetchActiveManufacturingProcesses,
+  fetchProcessTemplates,
+  generateOrderStepProgress,
   uploadDocumentToStorage,
 } from '@/services/orderService';
 
@@ -178,15 +180,20 @@ export default function ClientOrderCreationPage() {
   // Manufacturing process selection
   const [availableProcesses, setAvailableProcesses] = useState([]);
   const [selectedProcesses, setSelectedProcesses] = useState([]);
+  const [processTemplates, setProcessTemplates] = useState([]);
 
   useEffect(() => {
-    fetchActiveManufacturingProcesses().then(({ data }) => {
-        if (data) {
-          setAvailableProcesses(data);
-          // Default: select all available processes
-          setSelectedProcesses(data.map(p => p.status_key));
-        }
-      });
+    Promise.all([
+      fetchActiveManufacturingProcesses(),
+      fetchProcessTemplates(),
+    ]).then(([{ data: procs }, { data: tpls }]) => {
+      if (procs) {
+        setAvailableProcesses(procs);
+        const defaultTpl = (tpls || []).find(t => t.is_default);
+        setSelectedProcesses(defaultTpl ? defaultTpl.process_keys : procs.map(p => p.status_key));
+      }
+      if (tpls) setProcessTemplates(tpls);
+    });
   }, []);
 
   const toggleProcess = (statusKey) => {
@@ -287,6 +294,10 @@ export default function ClientOrderCreationPage() {
       });
 
       if (error) throw error;
+
+      // Auto-generate order_step_progress rows for selected processes
+      const selectedProcessObjects = availableProcesses.filter(p => selectedProcesses.includes(p.status_key));
+      await generateOrderStepProgress(order.id, selectedProcessObjects);
 
       // 2. Upload technical drawings → documents.file_type = 'client_drawing'
       for (const file of drawingFiles) {
@@ -424,6 +435,33 @@ export default function ClientOrderCreationPage() {
             <p className="text-slate-400 text-sm mb-5">
               Select the manufacturing processes required for your part. Only the stages you choose will appear in your order timeline.
             </p>
+
+            {/* Quick Templates */}
+            {processTemplates.length > 0 && (
+              <div className="mb-5">
+                <p className="text-xs text-slate-500 font-semibold uppercase tracking-widest mb-2">Quick Templates</p>
+                <div className="flex flex-wrap gap-2">
+                  {processTemplates.map(tpl => {
+                    const isActive = JSON.stringify(selectedProcesses) === JSON.stringify(tpl.process_keys);
+                    return (
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        onClick={() => setSelectedProcesses(tpl.process_keys)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150 ${
+                          isActive
+                            ? 'bg-orange-500 border-orange-500 text-white'
+                            : 'bg-transparent border-slate-600 text-slate-400 hover:border-orange-400 hover:text-orange-400'
+                        }`}
+                      >
+                        {tpl.name}
+                        {tpl.is_default && !isActive && <span className="ml-1 opacity-60">(default)</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {availableProcesses.length === 0 ? (
               <div className="flex items-center gap-3 bg-[#1e293b] border border-slate-700 rounded-lg p-4">

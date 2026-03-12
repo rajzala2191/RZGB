@@ -85,6 +85,8 @@ import SupplierBiddingPage from '@/pages/SupplierBiddingPage';
 import SupplierPurchaseOrdersPage from '@/pages/SupplierPurchaseOrdersPage';
 import SupplierInvoicesPage from '@/pages/SupplierInvoicesPage';
 import ClientProfilePage from '@/pages/ClientProfilePage';
+import ClientSettingsPage from '@/pages/ClientSettingsPage';
+import SupplierSettingsPage from '@/pages/SupplierSettingsPage';
 import TicketDetailPage from '@/pages/TicketDetailPage';
 import AdminSupportPage from '@/pages/AdminSupportPage';
 import AdminTicketDetailPage from '@/pages/AdminTicketDetailPage';
@@ -172,6 +174,7 @@ function App() {
                     <Route path="/client-dashboard/shipping" element={<ProtectedRoute requiredRole="client"><ShippingTrackingPage /></ProtectedRoute>} />
                     <Route path="/client-dashboard/ncr-visibility" element={<ProtectedRoute requiredRole="client"><NCRVisibilityPage /></ProtectedRoute>} />
                     <Route path="/client-dashboard/profile" element={<ProtectedRoute requiredRole="client"><ClientProfilePage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/settings" element={<ProtectedRoute requiredRole="client"><ClientSettingsPage /></ProtectedRoute>} />
                     <Route path="/client-dashboard/support" element={<ProtectedRoute requiredRole="client"><ClientSupportPage /></ProtectedRoute>} />
                     <Route path="/client-dashboard/support/:ticketId" element={<ProtectedRoute requiredRole="client"><TicketDetailPage /></ProtectedRoute>} />
 
@@ -187,6 +190,7 @@ function App() {
                     <Route path="/supplier-hub/bidding" element={<ProtectedRoute requiredRole="supplier"><SupplierBiddingPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/purchase-orders" element={<ProtectedRoute requiredRole="supplier"><SupplierPurchaseOrdersPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/invoices" element={<ProtectedRoute requiredRole="supplier"><SupplierInvoicesPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/settings" element={<ProtectedRoute requiredRole="supplier"><SupplierSettingsPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
                   </Routes>

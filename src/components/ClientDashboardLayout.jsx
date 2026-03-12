@@ -9,8 +9,7 @@ import {
   Menu,
   X,
   FolderPlus,
-  LifeBuoy,
-  UserCircle,
+  Settings,
   ChevronRight,
   Zap,
 } from 'lucide-react';
@@ -26,8 +25,7 @@ const NAV_ITEMS = [
   { path: '/client-dashboard',               label: 'Dashboard',  icon: LayoutDashboard, exact: true },
   { path: '/client-dashboard/orders',        label: 'My Orders',  icon: Briefcase                   },
   { path: '/client-dashboard/documents',     label: 'Documents',  icon: Library                     },
-  { path: '/client-dashboard/profile',       label: 'Profile',    icon: UserCircle                  },
-  { path: '/client-dashboard/support',       label: 'Support',    icon: LifeBuoy                    },
+  { path: '/client-dashboard/settings',      label: 'Settings',   icon: Settings                    },
 ];
 
 
@@ -151,9 +149,9 @@ export default function ClientDashboardLayout({ children }) {
                   onClick={() => setSidebarOpen(false)}
                   className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
                   style={{
-                    background: isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
-                    color:      isActive ? '#e5e5e5' : sb.navInactive,
-                    border:     isActive ? '1px solid rgba(255,255,255,0.09)' : '1px solid transparent',
+                    background: isActive ? sb.navActiveBg : 'transparent',
+                    color:      isActive ? sb.navActiveText : sb.navInactive,
+                    border:     isActive ? `1px solid ${sb.navActiveBorder}` : '1px solid transparent',
                   }}
                   onMouseEnter={e => {
                     if (!isActive) {
@@ -172,17 +170,17 @@ export default function ClientDashboardLayout({ children }) {
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                       style={{
-                        background: isActive ? 'rgba(255,255,255,0.07)' : sb.iconBg,
+                        background: isActive ? sb.navActiveIconBg : sb.iconBg,
                       }}
                     >
                       <item.icon
                         size={15}
-                        style={{ color: isActive ? '#e5e5e5' : sb.iconColor }}
+                        style={{ color: isActive ? sb.navActiveIconColor : sb.iconColor }}
                       />
                     </div>
                     <span>{item.label}</span>
                   </div>
-                  {isActive && <ChevronRight size={13} style={{ color: '#666666' }} />}
+                  {isActive && <ChevronRight size={13} style={{ color: sb.navActiveIconColor }} />}
                 </NavLink>
               );
             })}

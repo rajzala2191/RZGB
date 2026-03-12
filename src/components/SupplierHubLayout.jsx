@@ -8,8 +8,7 @@ import {
   LogOut,
   Menu,
   X,
-  LifeBuoy,
-  UserCircle,
+  Settings,
   ChevronRight,
   Gavel,
   FileText,
@@ -24,14 +23,13 @@ import SearchBar from './SearchBar';
 import ThemeToggle from './ThemeToggle';
 
 const NAV_ITEMS = [
-  { path: '/supplier-hub',           label: 'Dashboard',       icon: LayoutDashboard, exact: true },
-  { path: '/supplier-hub/orders',    label: 'My Orders',        icon: Briefcase },
-  { path: '/supplier-hub/bidding',  label: 'Bidding Centre',   icon: Gavel },
-  { path: '/supplier-hub/purchase-orders', label: 'Purchase Orders', icon: FileText },
-  { path: '/supplier-hub/invoices',  label: 'My Invoices',      icon: Receipt },
-  { path: '/supplier-hub/documents', label: 'Documents Portal', icon: FolderOpen },
-  { path: '/supplier-hub/profile',   label: 'My Profile',       icon: UserCircle },
-  { path: '/supplier-hub/support',   label: 'Support',          icon: LifeBuoy },
+  { path: '/supplier-hub',                  label: 'Dashboard',       icon: LayoutDashboard, exact: true },
+  { path: '/supplier-hub/orders',           label: 'My Orders',       icon: Briefcase },
+  { path: '/supplier-hub/bidding',          label: 'Bidding Centre',  icon: Gavel },
+  { path: '/supplier-hub/purchase-orders',  label: 'Purchase Orders', icon: FileText },
+  { path: '/supplier-hub/invoices',         label: 'My Invoices',     icon: Receipt },
+  { path: '/supplier-hub/documents',        label: 'Documents Portal',icon: FolderOpen },
+  { path: '/supplier-hub/settings',         label: 'Settings',        icon: Settings },
 ];
 
 const SupplierHubLayout = ({ children }) => {
@@ -135,9 +133,9 @@ const SupplierHubLayout = ({ children }) => {
                   onClick={() => setSidebarOpen(false)}
                   className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
                   style={{
-                    background: isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
-                    color:      isActive ? '#e5e5e5' : sb.navInactive,
-                    border:     isActive ? '1px solid rgba(255,255,255,0.09)' : '1px solid transparent',
+                    background: isActive ? sb.navActiveBg : 'transparent',
+                    color:      isActive ? sb.navActiveText : sb.navInactive,
+                    border:     isActive ? `1px solid ${sb.navActiveBorder}` : '1px solid transparent',
                   }}
                   onMouseEnter={e => {
                     if (!isActive) {
@@ -155,13 +153,13 @@ const SupplierHubLayout = ({ children }) => {
                   <div className="flex items-center gap-3">
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: isActive ? 'rgba(255,255,255,0.07)' : sb.iconBg }}
+                      style={{ background: isActive ? sb.navActiveIconBg : sb.iconBg }}
                     >
-                      <item.icon size={15} style={{ color: isActive ? '#e5e5e5' : sb.iconColor }} />
+                      <item.icon size={15} style={{ color: isActive ? sb.navActiveIconColor : sb.iconColor }} />
                     </div>
                     <span>{item.label}</span>
                   </div>
-                  {isActive && <ChevronRight size={13} style={{ color: '#666666' }} />}
+                  {isActive && <ChevronRight size={13} style={{ color: sb.navActiveIconColor }} />}
                 </NavLink>
               );
             })}

@@ -42,6 +42,11 @@
     --sidebar-nav-text: #555555;
     --sidebar-nav-hover-bg: rgba(255,255,255,0.05);
     --sidebar-nav-hover-text: #e5e5e5;
+    --sidebar-nav-active-bg: rgba(255,255,255,0.06);
+    --sidebar-nav-active-border: rgba(255,255,255,0.09);
+    --sidebar-nav-active-text: #e5e5e5;
+    --sidebar-nav-active-icon-bg: rgba(255,255,255,0.07);
+    --sidebar-nav-active-icon-color: #e5e5e5;
     --sidebar-icon-bg: rgba(255,255,255,0.05);
     --sidebar-icon-color: #555555;
     --sidebar-card-bg: rgba(255,255,255,0.04);
@@ -126,6 +131,11 @@
     --sidebar-nav-text: rgba(0,0,0,0.45);
     --sidebar-nav-hover-bg: rgba(0,0,0,0.05);
     --sidebar-nav-hover-text: rgba(0,0,0,0.8);
+    --sidebar-nav-active-bg: rgba(0,0,0,0.07);
+    --sidebar-nav-active-border: rgba(0,0,0,0.11);
+    --sidebar-nav-active-text: #0f0f0f;
+    --sidebar-nav-active-icon-bg: rgba(0,0,0,0.09);
+    --sidebar-nav-active-icon-color: #0f0f0f;
     --sidebar-icon-bg: rgba(0,0,0,0.05);
     --sidebar-icon-color: rgba(0,0,0,0.35);
     --sidebar-card-bg: rgba(0,0,0,0.04);

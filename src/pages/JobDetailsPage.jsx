@@ -13,7 +13,11 @@ import {
   Loader2, ArrowLeft, AlertTriangle, Package,
   Layers, Hash, Calendar, ShieldCheck, Truck,
   Zap, Hourglass, CheckCircle2, FileCheck,
+  ListChecks, ChevronDown, Check, Upload,
 } from 'lucide-react';
+import {
+  fetchOrderStepProgress, fetchSubStepsForProcesses, updateStepProgress,
+} from '@/services/orderService';
 
 const STAGE_CFG = {
   AWARDED:   { label: 'Awarded',   color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
@@ -38,7 +42,7 @@ const PIPELINE = [
 function SpecField({ label, value, icon: Icon }) {
   return value ? (
     <div className="flex items-center gap-2">
-      {Icon && <Icon size={13} style={{ color: '#FF6B35', flexShrink: 0 }} />}
+      {Icon && <Icon size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />}
       <span className="text-xs" style={{ color: 'inherit' }}>
         <span style={{ opacity: 0.6 }}>{label}: </span>
         <span className="font-semibold">{value}</span>
@@ -53,16 +57,21 @@ export default function JobDetailsPage() {
   const { currentUser } = useAuth();
   const { isDark } = useTheme();
 
-  const [job,       setJob]       = useState(null);
-  const [documents, setDocuments] = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState(null);
+  const [job,             setJob]             = useState(null);
+  const [documents,       setDocuments]       = useState([]);
+  const [loading,         setLoading]         = useState(true);
+  const [error,           setError]           = useState(null);
+  const [subStepsByKey,   setSubStepsByKey]   = useState({});
+  const [progressById,    setProgressById]    = useState({});
+  const [expandedStages,  setExpandedStages]  = useState(new Set());
+  const [savingStepId,    setSavingStepId]    = useState(null);
+  const [uploadingStepId, setUploadingStepId] = useState(null);
 
-  const card      = { bg: isDark ? '#18181b' : '#ffffff', border: isDark ? '#232329' : '#e5e5e5' };
-  const textPrimary = isDark ? '#fafafa' : '#0a0a0a';
-  const textMuted   = isDark ? '#71717a' : '#737373';
-  const divider     = isDark ? '#232329' : '#f0f0f0';
-  const inner       = isDark ? '#232329' : '#f4f4f5';
+  const card      = { bg: 'var(--surface)', border: 'var(--edge)' };
+  const textPrimary = 'var(--heading)';
+  const textMuted   = 'var(--body)';
+  const divider     = 'var(--edge)';
+  const inner       = 'var(--surface-raised)';
 
   const fetchJob = async () => {
     try {
@@ -80,11 +89,83 @@ export default function JobDetailsPage() {
         .eq('order_id', data.id)
         .order('created_at', { ascending: true });
       if (docs) setDocuments(docs);
+      // Fetch sub-steps and progress
+      if (data.selected_processes?.length) {
+        const { data: procs } = await supabase
+          .from('manufacturing_processes')
+          .select('id, status_key')
+          .in('status_key', data.selected_processes);
+        if (procs?.length) {
+          const processIds = procs.map(p => p.id);
+          const { data: steps } = await fetchSubStepsForProcesses(processIds);
+          if (steps) {
+            const byKey = {};
+            procs.forEach(proc => { byKey[proc.status_key] = steps.filter(s => s.process_id === proc.id); });
+            setSubStepsByKey(byKey);
+          }
+        }
+        const { data: prog } = await fetchOrderStepProgress(data.id);
+        if (prog) {
+          const byId = Object.fromEntries(prog.map(p => [p.sub_step_id, p]));
+          setProgressById(byId);
+        }
+      }
     } catch {
       setError('Job not found or access denied.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleStageExpand = (key) => {
+    setExpandedStages(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
+
+  const handleToggleStep = async (subStepId, processKey) => {
+    if (!job) return;
+    const current = progressById[subStepId];
+    const newStatus = current?.status === 'completed' ? 'pending' : 'completed';
+    setSavingStepId(subStepId);
+    const { data: updated } = await updateStepProgress(job.id, subStepId, { status: newStatus, notes: current?.notes, evidenceUrl: current?.evidence_url });
+    setSavingStepId(null);
+    if (updated) {
+      setProgressById(prev => ({ ...prev, [subStepId]: updated }));
+      // Check if all required steps for this stage are now complete → notify admin
+      if (newStatus === 'completed') {
+        const stageSteps = subStepsByKey[processKey] || [];
+        const requiredIds = stageSteps.filter(s => s.is_required).map(s => s.id);
+        const allDone = requiredIds.every(id => (id === subStepId ? true : progressById[id]?.status === 'completed'));
+        if (allDone && requiredIds.length > 0) {
+          await supabase.from('notifications').insert({
+            type: 'supplier_stage_complete',
+            title: `All sub-steps complete: ${processKey}`,
+            body: `Supplier completed all required sub-steps for ${processKey} on job ${job.rz_job_id}.`,
+            order_id: job.id,
+            rz_job_id: job.rz_job_id,
+          }).select();
+        }
+      }
+    }
+  };
+
+  const handleEvidenceUpload = async (subStepId, file) => {
+    if (!job || !file) return;
+    setUploadingStepId(subStepId);
+    const path = `order-evidence/${job.id}/${subStepId}/${file.name}`;
+    const { error: upErr } = await supabaseAdmin.storage.from('order-evidence').upload(path, file, { upsert: true });
+    if (upErr) { setUploadingStepId(null); return; }
+    const { data: urlData } = supabaseAdmin.storage.from('order-evidence').getPublicUrl(path);
+    const { data: updated } = await updateStepProgress(job.id, subStepId, {
+      status: progressById[subStepId]?.status || 'in_progress',
+      notes: progressById[subStepId]?.notes,
+      evidenceUrl: urlData?.publicUrl,
+    });
+    setUploadingStepId(null);
+    if (updated) setProgressById(prev => ({ ...prev, [subStepId]: updated }));
   };
 
   useEffect(() => {
@@ -104,7 +185,7 @@ export default function JobDetailsPage() {
   if (loading) return (
     <SupplierHubLayout>
       <div className="flex justify-center py-32">
-        <Loader2 className="w-10 h-10 animate-spin" style={{ color: '#FF6B35' }} />
+        <Loader2 className="w-10 h-10 animate-spin" style={{ color: 'var(--brand)' }} />
       </div>
     </SupplierHubLayout>
   );
@@ -119,7 +200,7 @@ export default function JobDetailsPage() {
           <button
             onClick={() => navigate('/supplier-hub')}
             className="w-full py-2.5 rounded-xl text-sm font-semibold text-white"
-            style={{ background: '#FF6B35' }}
+            style={{ background: 'var(--brand)' }}
           >
             Back to Dashboard
           </button>
@@ -158,7 +239,7 @@ export default function JobDetailsPage() {
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-lg font-black" style={{ color: '#FF6B35' }}>
+                  <span className="font-mono text-lg font-black" style={{ color: 'var(--brand)' }}>
                     {job.rz_job_id}
                   </span>
                   <span
@@ -252,6 +333,106 @@ export default function JobDetailsPage() {
           </div>
         </div>
 
+        {/* Process Progress */}
+        {Object.keys(subStepsByKey).some(k => subStepsByKey[k].length > 0) && (
+          <div className="rounded-2xl overflow-hidden" style={{ background: card.bg, border: `1px solid ${card.border}` }}>
+            <div className="px-5 py-4 flex items-center gap-2" style={{ borderBottom: `1px solid ${divider}` }}>
+              <ListChecks size={16} style={{ color: 'var(--brand)' }} />
+              <p className="text-sm font-bold" style={{ color: textPrimary }}>Process Progress</p>
+            </div>
+            <div className="p-5 space-y-4">
+              {(job.selected_processes || []).map(processKey => {
+                const steps = subStepsByKey[processKey];
+                if (!steps?.length) return null;
+                const completedCount = steps.filter(s => progressById[s.id]?.status === 'completed').length;
+                const isExpanded = expandedStages.has(processKey);
+                const pct = Math.round((completedCount / steps.length) * 100);
+                return (
+                  <div key={processKey} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${divider}` }}>
+                    <button
+                      onClick={() => toggleStageExpand(processKey)}
+                      className="w-full flex items-center gap-3 px-4 py-3"
+                      style={{ background: inner, border: 'none', cursor: 'pointer' }}
+                    >
+                      <span className="text-sm font-bold flex-1 text-left" style={{ color: textPrimary }}>
+                        {processKey.charAt(0) + processKey.slice(1).toLowerCase().replace(/_/g, ' ')}
+                      </span>
+                      <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>{completedCount}/{steps.length}</span>
+                      <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ background: divider }}>
+                        <div style={{ height: '100%', width: `${pct}%`, background: 'var(--brand)', borderRadius: 999 }} />
+                      </div>
+                      <span className="text-xs font-mono" style={{ color: textMuted }}>{pct}%</span>
+                      <div style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}>
+                        <ChevronDown size={14} style={{ color: textMuted }} />
+                      </div>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-4 pb-4 pt-2 space-y-2">
+                        {steps.map(step => {
+                          const prog = progressById[step.id];
+                          const isComplete = prog?.status === 'completed';
+                          const isSaving = savingStepId === step.id;
+                          const isUploading = uploadingStepId === step.id;
+                          return (
+                            <div key={step.id} className="rounded-lg p-3" style={{ background: card.bg, border: `1px solid ${divider}` }}>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => !isSaving && handleToggleStep(step.id, processKey)}
+                                  disabled={isSaving}
+                                  style={{
+                                    width: 20, height: 20, borderRadius: 5, flexShrink: 0, cursor: 'pointer',
+                                    border: `2px solid ${isComplete ? 'var(--brand)' : textMuted}`,
+                                    background: isComplete ? 'var(--brand)' : 'transparent',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  }}
+                                >
+                                  {isSaving
+                                    ? <Loader2 size={11} className="animate-spin" style={{ color: isComplete ? '#fff' : textMuted }} />
+                                    : isComplete ? <Check size={11} style={{ color: '#fff' }} strokeWidth={3} /> : null
+                                  }
+                                </button>
+                                <span className="flex-1 text-sm font-medium" style={{ color: isComplete ? textMuted : textPrimary, textDecoration: isComplete ? 'line-through' : 'none' }}>
+                                  {step.name}
+                                </span>
+                                {step.is_required && !isComplete && (
+                                  <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'var(--brand-glow)', color: 'var(--brand)', border: '1px solid rgba(255,107,53,0.2)' }}>Required</span>
+                                )}
+                              </div>
+
+                              {/* Evidence + notes row */}
+                              <div className="flex items-center gap-3 mt-2 pl-8">
+                                {prog?.evidence_url ? (
+                                  <a href={prog.evidence_url} target="_blank" rel="noreferrer" className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
+                                    View evidence
+                                  </a>
+                                ) : (
+                                  <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                    <input type="file" className="hidden" onChange={e => handleEvidenceUpload(step.id, e.target.files?.[0])} />
+                                    <span className="text-xs font-semibold flex items-center gap-1" style={{ color: isUploading ? textMuted : 'var(--brand)', opacity: isUploading ? 0.6 : 1 }}>
+                                      {isUploading ? <Loader2 size={11} className="animate-spin" /> : <Upload size={11} />}
+                                      {isUploading ? 'Uploading…' : 'Add evidence'}
+                                    </span>
+                                  </label>
+                                )}
+                                {isComplete && prog?.completed_at && (
+                                  <span className="text-xs font-mono ml-auto" style={{ color: textMuted }}>
+                                    {new Date(prog.completed_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Documents / Drawings */}
         <div
           className="rounded-2xl overflow-hidden"
@@ -260,7 +441,7 @@ export default function JobDetailsPage() {
           <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${divider}` }}>
             <p className="text-sm font-bold" style={{ color: textPrimary }}>Drawings &amp; Documents</p>
             {documents.length > 0 && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,107,53,0.1)', color: '#FF6B35' }}>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--brand-glow)', color: 'var(--brand)' }}>
                 {documents.length} file{documents.length !== 1 ? 's' : ''}
               </span>
             )}

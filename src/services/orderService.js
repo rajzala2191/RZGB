@@ -79,3 +79,103 @@ export const uploadDocumentToStorage = async ({ path, file }) =>
 
 export const createOrderDocumentRecord = async (payload) =>
   supabaseAdmin.from('documents').insert([payload]);
+
+// ─── Process Templates ────────────────────────────────────────────────────────
+
+export const fetchProcessTemplates = async () =>
+  supabaseAdmin
+    .from('process_templates')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+export const createProcessTemplate = async (payload) =>
+  supabaseAdmin.from('process_templates').insert([payload]).select().single();
+
+export const updateProcessTemplate = async (id, payload) =>
+  supabaseAdmin.from('process_templates').update(payload).eq('id', id);
+
+export const deleteProcessTemplate = async (id) =>
+  supabaseAdmin.from('process_templates').delete().eq('id', id);
+
+// ─── Per-Order Process Override ───────────────────────────────────────────────
+
+export const updateOrderProcesses = async (orderId, processKeys) => {
+  const { error } = await supabaseAdmin
+    .from('orders')
+    .update({ selected_processes: processKeys, updated_at: buildUpdatedAt() })
+    .eq('id', orderId);
+  return { error };
+};
+
+// ─── Sub-Steps ────────────────────────────────────────────────────────────────
+
+export const fetchSubStepsForProcess = async (processId) =>
+  supabaseAdmin
+    .from('process_sub_steps')
+    .select('*')
+    .eq('process_id', processId)
+    .order('display_order', { ascending: true });
+
+export const fetchSubStepsForProcesses = async (processIds) =>
+  supabaseAdmin
+    .from('process_sub_steps')
+    .select('*')
+    .in('process_id', processIds)
+    .order('display_order', { ascending: true });
+
+export const createSubStep = async (payload) =>
+  supabaseAdmin.from('process_sub_steps').insert([payload]).select().single();
+
+export const updateSubStep = async (id, payload) =>
+  supabaseAdmin.from('process_sub_steps').update(payload).eq('id', id);
+
+export const deleteSubStep = async (id) =>
+  supabaseAdmin.from('process_sub_steps').delete().eq('id', id);
+
+// ─── Order Step Progress ──────────────────────────────────────────────────────
+
+export const fetchOrderStepProgress = async (orderId) =>
+  supabase
+    .from('order_step_progress')
+    .select('*')
+    .eq('order_id', orderId);
+
+export const updateStepProgress = async (orderId, subStepId, { status, notes, evidenceUrl }) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  const payload = {
+    order_id: orderId,
+    sub_step_id: subStepId,
+    status,
+    notes: notes ?? null,
+    evidence_url: evidenceUrl ?? null,
+    completed_by: status === 'completed' ? user?.id : null,
+    completed_at: status === 'completed' ? buildUpdatedAt() : null,
+  };
+  return supabase
+    .from('order_step_progress')
+    .upsert(payload, { onConflict: 'order_id,sub_step_id' })
+    .select()
+    .single();
+};
+
+// selectedProcesses: array of { id: UUID, status_key: string }
+export const generateOrderStepProgress = async (orderId, selectedProcesses) => {
+  if (!selectedProcesses?.length) return;
+  const processIds = selectedProcesses.map((p) => p.id);
+  const { data: subSteps, error } = await supabaseAdmin
+    .from('process_sub_steps')
+    .select('id, process_id')
+    .in('process_id', processIds);
+  if (error || !subSteps?.length) return;
+  const processKeyMap = Object.fromEntries(selectedProcesses.map((p) => [p.id, p.status_key]));
+  const rows = subSteps.map((s) => ({
+    order_id: orderId,
+    sub_step_id: s.id,
+    process_key: processKeyMap[s.process_id] ?? '',
+    status: 'pending',
+  }));
+  return supabaseAdmin
+    .from('order_step_progress')
+    .insert(rows)
+    .select();
+};

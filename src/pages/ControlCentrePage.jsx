@@ -78,13 +78,13 @@ const ControlCentrePage = () => {
   const [lastSync, setLastSync] = useState(null);
 
   // ── Color tokens ──────────────────────────────────────────────────────────────
-  const cardBg     = isDark ? 'rgba(255,255,255,0.03)' : '#ffffff';
-  const cardBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
-  const textPri    = isDark ? '#ffffff' : '#0f0f0f';
-  const textSec    = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
-  const textMid    = isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.55)';
-  const rowHover   = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)';
-  const rowBorder  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const cardBg     = 'var(--surface)';
+  const cardBorder = 'var(--edge)';
+  const textPri    = 'var(--heading)';
+  const textSec    = 'var(--body)';
+  const textMid    = 'var(--body)';
+  const rowHover   = 'var(--surface-raised)';
+  const rowBorder  = 'var(--edge-subtle)';
 
   // ── Stats fetch ───────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -265,7 +265,7 @@ const ControlCentrePage = () => {
                   </div>
                   <div
                     className="w-full h-1 rounded-full"
-                    style={{ background: stage.count > 0 ? stage.color : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)') }}
+                    style={{ background: stage.count > 0 ? stage.color : 'var(--edge-subtle)' }}
                   />
                   <p className="text-[10px] font-semibold text-center leading-tight" style={{ color: stage.count > 0 ? stage.color : textSec }}>
                     {stage.label}
@@ -426,7 +426,7 @@ const ControlCentrePage = () => {
               const dotColor = s === 'ok' ? '#22c55e' : s === 'warning' ? '#f59e0b' : s === 'error' ? '#ef4444' : '#6b7280';
               return (
                 <div key={key} className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                  style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}` }}>
+                  style={{ background: 'var(--surface-raised)', border: `1px solid var(--edge-subtle)` }}>
                   <Icon size={12} style={{ color: textSec }} />
                   <span className="text-[11px] font-medium" style={{ color: textMid }}>{label}</span>
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: dotColor, boxShadow: `0 0 6px ${dotColor}80` }} />

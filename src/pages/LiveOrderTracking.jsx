@@ -14,8 +14,11 @@ import {
   Loader2, ArrowLeft, AlertCircle, Package,
   Truck, Calendar, PoundSterling, MapPin, Activity,
 } from 'lucide-react';
+import {
+  fetchOrderStepProgress, fetchSubStepsForProcesses,
+} from '@/services/orderService';
 
-const ACCENT = '#FF6B35';
+const ACCENT = 'var(--brand)';
 
 
 const STATUS_LABEL = {
@@ -39,35 +42,26 @@ export default function LiveOrderTracking() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { isDark } = useTheme();
-  const [order, setOrder]       = useState(null);
-  const [updates, setUpdates]   = useState([]);
-  const [drawings, setDrawings] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState(null);
+  const [order, setOrder]           = useState(null);
+  const [updates, setUpdates]       = useState([]);
+  const [drawings, setDrawings]     = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
+  const [subStepsByKey, setSubStepsByKey] = useState({});
+  const [progressById, setProgressById]   = useState({});
 
   /* ── theme tokens ──────────────────────────────────────── */
-  const t = isDark ? {
-    card:       'rgba(255,255,255,0.04)',
-    cardBorder: 'rgba(255,255,255,0.08)',
-    text:       '#ffffff',
-    textMuted:  'rgba(255,255,255,0.5)',
-    textFaint:  'rgba(255,255,255,0.3)',
-    iconBg:     'rgba(255,255,255,0.06)',
-    divider:    'rgba(255,255,255,0.07)',
-    backColor:  'rgba(255,255,255,0.4)',
-    backHover:  '#ffffff',
-    mono:       'rgba(255,255,255,0.45)',
-  } : {
-    card:       '#ffffff',
-    cardBorder: 'rgba(0,0,0,0.08)',
-    text:       '#0f0f0f',
-    textMuted:  'rgba(0,0,0,0.5)',
-    textFaint:  'rgba(0,0,0,0.35)',
-    iconBg:     'rgba(0,0,0,0.05)',
-    divider:    'rgba(0,0,0,0.07)',
-    backColor:  'rgba(0,0,0,0.4)',
-    backHover:  '#0f0f0f',
-    mono:       'rgba(0,0,0,0.45)',
+  const t = {
+    card:       'var(--surface)',
+    cardBorder: 'var(--edge-subtle)',
+    text:       'var(--heading)',
+    textMuted:  'var(--body)',
+    textFaint:  'var(--caption)',
+    iconBg:     'var(--edge-subtle)',
+    divider:    'var(--edge-subtle)',
+    backColor:  'var(--faint)',
+    backHover:  'var(--heading)',
+    mono:       'var(--faint)',
   };
 
   /* ── data fetch ─────────────────────────────────────────── */
@@ -107,6 +101,25 @@ export default function LiveOrderTracking() {
         })
       );
       setDrawings(drawingsWithUrls);
+
+      // Load sub-step progress for read-only display
+      if (orderData.selected_processes?.length) {
+        const { data: procs } = await supabase
+          .from('manufacturing_processes')
+          .select('id, status_key')
+          .in('status_key', orderData.selected_processes);
+        if (procs?.length) {
+          const { data: steps } = await fetchSubStepsForProcesses(procs.map(p => p.id));
+          if (steps) {
+            const byKey = {};
+            procs.forEach(proc => { byKey[proc.status_key] = steps.filter(s => s.process_id === proc.id); });
+            setSubStepsByKey(byKey);
+          }
+        }
+        const { data: prog } = await fetchOrderStepProgress(orderData.id);
+        if (prog) setProgressById(Object.fromEntries(prog.map(p => [p.sub_step_id, p])));
+      }
+
       setError(null);
     } catch (err) {
       setError(err.message || 'Unable to load order data');
@@ -279,6 +292,8 @@ export default function LiveOrderTracking() {
             updates={updates}
             isWithdrawn={isWithdrawn}
             selectedProcesses={order.selected_processes}
+            subStepsByKey={subStepsByKey}
+            progressBySubStepId={progressById}
           />
         </motion.div>
 

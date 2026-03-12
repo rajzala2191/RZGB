@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Package, FileCheck, Zap, CheckCircle2, Hourglass,
   ShieldCheck, Truck, Clock, XCircle, Check, Cog,
+  ChevronDown, ListChecks,
 } from 'lucide-react';
 import { ACCENT } from '@/lib/theme';
 
@@ -70,9 +71,22 @@ export default function OrderTimeline({
   updates = [],
   compact = false,
   isWithdrawn = false,
-  selectedProcesses,   // array of status_key strings — e.g. ['CASTING', 'MACHINING']
+  selectedProcesses,      // array of status_key strings — e.g. ['CASTING', 'MACHINING']
+  editable = false,       // when true, sub-step checkboxes are interactive
+  subStepsByKey = {},     // { [processKey]: subStep[] }
+  progressBySubStepId = {},// { [subStepId]: { status, completed_at } }
+  onUpdateProgress,       // (subStepId, newStatus) => void
 }) {
   const scrollRef = useRef(null);
+  const [expandedStages, setExpandedStages] = useState(new Set());
+
+  const toggleStageExpand = (stageId) => {
+    setExpandedStages(prev => {
+      const next = new Set(prev);
+      next.has(stageId) ? next.delete(stageId) : next.add(stageId);
+      return next;
+    });
+  };
   const stages = buildStages(selectedProcesses);
 
   const t = {
@@ -325,6 +339,86 @@ export default function OrderTimeline({
                       </motion.div>
                     )}
                   </AnimatePresence>
+
+                  {/* Sub-step checklist toggle */}
+                  {subStepsByKey[stage.id]?.length > 0 && (() => {
+                    const steps = subStepsByKey[stage.id];
+                    const completedCount = steps.filter(s => progressBySubStepId[s.id]?.status === 'completed').length;
+                    const isExpanded = expandedStages.has(stage.id);
+                    return (
+                      <div className="mt-2">
+                        <button
+                          onClick={() => toggleStageExpand(stage.id)}
+                          className="flex items-center gap-2 text-xs font-semibold py-1"
+                          style={{ color: t.textMuted, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                          <ListChecks size={12} style={{ color: ACCENT }} />
+                          <span>{completedCount}/{steps.length} sub-steps</span>
+                          <div style={{ width: 48, height: 3, borderRadius: 999, background: 'var(--edge)', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${(completedCount / steps.length) * 100}%`, background: ACCENT, borderRadius: 999 }} />
+                          </div>
+                          <motion.span animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.15 }}>
+                            <ChevronDown size={12} style={{ color: t.textFaint }} />
+                          </motion.span>
+                        </button>
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="mt-2 space-y-1.5 overflow-hidden"
+                            >
+                              {steps.map(step => {
+                                const prog = progressBySubStepId[step.id];
+                                const isComplete = prog?.status === 'completed';
+                                return (
+                                  <div
+                                    key={step.id}
+                                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs"
+                                    style={{ background: t.noteBg, border: `1px solid ${t.noteBorder}`, opacity: isComplete ? 0.85 : 1 }}
+                                  >
+                                    {editable ? (
+                                      <button
+                                        onClick={() => onUpdateProgress?.(step.id, isComplete ? 'pending' : 'completed')}
+                                        style={{
+                                          width: 16, height: 16, borderRadius: 4, flexShrink: 0, border: `1.5px solid ${isComplete ? ACCENT : 'var(--edge-strong)'}`,
+                                          background: isComplete ? ACCENT : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                                        }}
+                                      >
+                                        {isComplete && <Check size={10} style={{ color: '#fff' }} strokeWidth={3} />}
+                                      </button>
+                                    ) : (
+                                      <div
+                                        style={{
+                                          width: 16, height: 16, borderRadius: 4, flexShrink: 0, border: `1.5px solid ${isComplete ? ACCENT : 'var(--edge-strong)'}`,
+                                          background: isComplete ? ACCENT : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        }}
+                                      >
+                                        {isComplete && <Check size={10} style={{ color: '#fff' }} strokeWidth={3} />}
+                                      </div>
+                                    )}
+                                    <span style={{ flex: 1, color: isComplete ? t.textMuted : t.text, textDecoration: isComplete ? 'line-through' : 'none' }}>
+                                      {step.name}
+                                    </span>
+                                    {step.is_required && !isComplete && (
+                                      <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 999, background: 'rgba(255,107,53,0.1)', color: ACCENT, border: '1px solid rgba(255,107,53,0.2)' }}>Required</span>
+                                    )}
+                                    {isComplete && prog?.completed_at && (
+                                      <span className="font-mono" style={{ color: t.textFaint, fontSize: 10 }}>
+                                        {new Date(prog.completed_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </motion.div>

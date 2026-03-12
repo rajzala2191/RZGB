@@ -10,18 +10,16 @@ import {
   Network,
   FolderOpen,
   Radio,
-  LifeBuoy,
-  Users,
   ChevronRight,
   Truck,
   Cog,
-  Shield,
   Gavel,
   FileText,
   Receipt,
   TrendingUp,
   GitBranch,
   Globe,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -32,22 +30,20 @@ import ThemeToggle from './ThemeToggle';
 import { ACCENT, ACCENT_GLOW, SIDEBAR, HEADER } from '@/lib/theme';
 
 const NAV_ITEMS = [
-  { path: '/control-centre',                    label: 'Dashboard',         icon: LayoutDashboard, exact: true },
-  { path: '/control-centre/sanitisation-gate',         label: 'Sanitisation Gate', icon: ShieldCheck },
-  { path: '/control-centre/manufacturing-processes',   label: 'Processes',         icon: Cog },
-  { path: '/control-centre/live-tracking',             label: 'Live Tracking',     icon: Radio },
-  { path: '/control-centre/supplier-pool',      label: 'Assign to Supplier',icon: Network },
-  { path: '/control-centre/bid-management',    label: 'Bid Management',    icon: Gavel },
-  { path: '/control-centre/purchase-orders',   label: 'Purchase Orders',   icon: FileText },
-  { path: '/control-centre/invoices',          label: 'Invoices',          icon: Receipt },
-  { path: '/control-centre/spend-analytics',   label: 'Spend Analytics',   icon: TrendingUp },
-  { path: '/control-centre/approval-workflows',label: 'Approvals',         icon: GitBranch },
-  { path: '/control-centre/supplier-discovery',label: 'Supplier Discovery', icon: Globe },
-  { path: '/control-centre/shipments',           label: 'Shipments',         icon: Truck },
-  { path: '/control-centre/document-review',    label: 'Document Review',   icon: FolderOpen },
-  { path: '/control-centre/users',              label: 'User Management',   icon: Users },
-  { path: '/control-centre/support',            label: 'Support',           icon: LifeBuoy },
-  { path: '/control-centre/account-security',  label: 'Account Security',  icon: Shield },
+  { path: '/control-centre',                          label: 'Dashboard',          icon: LayoutDashboard, exact: true },
+  { path: '/control-centre/sanitisation-gate',        label: 'Sanitisation Gate',  icon: ShieldCheck },
+  { path: '/control-centre/manufacturing-processes',  label: 'Processes',          icon: Cog },
+  { path: '/control-centre/live-tracking',            label: 'Live Tracking',      icon: Radio },
+  { path: '/control-centre/supplier-pool',            label: 'Assign to Supplier', icon: Network },
+  { path: '/control-centre/bid-management',           label: 'Bid Management',     icon: Gavel },
+  { path: '/control-centre/purchase-orders',          label: 'Purchase Orders',    icon: FileText },
+  { path: '/control-centre/invoices',                 label: 'Invoices',           icon: Receipt },
+  { path: '/control-centre/spend-analytics',          label: 'Spend Analytics',    icon: TrendingUp },
+  { path: '/control-centre/approval-workflows',       label: 'Approvals',          icon: GitBranch },
+  { path: '/control-centre/supplier-discovery',       label: 'Supplier Discovery', icon: Globe },
+  { path: '/control-centre/shipments',                label: 'Shipments',          icon: Truck },
+  { path: '/control-centre/document-review',          label: 'Document Review',    icon: FolderOpen },
+  { path: '/control-centre/settings',                 label: 'Settings',           icon: Settings },
 ];
 
 const ControlCentreLayout = ({ children }) => {
@@ -151,9 +147,9 @@ const ControlCentreLayout = ({ children }) => {
                   onClick={() => setSidebarOpen(false)}
                   className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
                   style={{
-                    background: isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
-                    color:      isActive ? '#e5e5e5' : sb.navInactive,
-                    border:     isActive ? '1px solid rgba(255,255,255,0.09)' : '1px solid transparent',
+                    background: isActive ? sb.navActiveBg : 'transparent',
+                    color:      isActive ? sb.navActiveText : sb.navInactive,
+                    border:     isActive ? `1px solid ${sb.navActiveBorder}` : '1px solid transparent',
                   }}
                   onMouseEnter={e => {
                     if (!isActive) {
@@ -171,13 +167,13 @@ const ControlCentreLayout = ({ children }) => {
                   <div className="flex items-center gap-3">
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: isActive ? 'rgba(255,255,255,0.07)' : sb.iconBg }}
+                      style={{ background: isActive ? sb.navActiveIconBg : sb.iconBg }}
                     >
-                      <item.icon size={15} style={{ color: isActive ? '#e5e5e5' : sb.iconColor }} />
+                      <item.icon size={15} style={{ color: isActive ? sb.navActiveIconColor : sb.iconColor }} />
                     </div>
                     <span>{item.label}</span>
                   </div>
-                  {isActive && <ChevronRight size={13} style={{ color: '#666666' }} />}
+                  {isActive && <ChevronRight size={13} style={{ color: sb.navActiveIconColor }} />}
                 </NavLink>
               );
             })}

@@ -11,7 +11,11 @@ import {
   Upload, Users, User, Building2,
   Inbox, Trash2, Download, Package, Layers, Hash,
   Ruler, Paintbrush, Calendar, AlertTriangle, X,
+  Pencil, Plus, ChevronUp, ChevronDown,
 } from 'lucide-react';
+import {
+  updateOrderProcesses, fetchActiveManufacturingProcesses, fetchProcessTemplates,
+} from '@/services/orderService';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const RECIPIENT_TYPES = {
@@ -88,6 +92,11 @@ export default function AdminOrderPreviewPage() {
   const [loading,          setLoading]          = useState(true);
   const [showDeleteConfirm,setShowDeleteConfirm]= useState(false);
   const [deleting,         setDeleting]         = useState(false);
+  const [showEditProcesses,setShowEditProcesses]= useState(false);
+  const [editProcessKeys,  setEditProcessKeys]  = useState([]);
+  const [allProcesses,     setAllProcesses]     = useState([]);
+  const [allTemplates,     setAllTemplates]     = useState([]);
+  const [processSaving,    setProcessSaving]    = useState(false);
   const [exporting,        setExporting]        = useState(false);
   const [exportUrl,        setExportUrl]        = useState(null);
   const [uploading,        setUploading]        = useState(false);
@@ -169,6 +178,42 @@ export default function AdminOrderPreviewPage() {
     } catch {
       setDeleting(false);
     }
+  };
+
+  const openEditProcesses = async () => {
+    setEditProcessKeys(order?.selected_processes || []);
+    if (!allProcesses.length) {
+      const [{ data: procs }, { data: tpls }] = await Promise.all([
+        fetchActiveManufacturingProcesses(),
+        fetchProcessTemplates(),
+      ]);
+      setAllProcesses(procs || []);
+      setAllTemplates(tpls || []);
+    }
+    setShowEditProcesses(true);
+  };
+
+  const handleSaveProcesses = async () => {
+    setProcessSaving(true);
+    const { error } = await updateOrderProcesses(order.id, editProcessKeys);
+    setProcessSaving(false);
+    if (error) {
+      toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Processes updated' });
+      setOrder(o => ({ ...o, selected_processes: editProcessKeys }));
+      setShowEditProcesses(false);
+    }
+  };
+
+  const moveEditKey = (idx, direction) => {
+    setEditProcessKeys(keys => {
+      const arr = [...keys];
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= arr.length) return arr;
+      [arr[idx], arr[swapIdx]] = [arr[swapIdx], arr[idx]];
+      return arr;
+    });
   };
 
   const handleUpload = async (e) => {
@@ -255,6 +300,77 @@ export default function AdminOrderPreviewPage() {
 
   return (
     <ControlCentreLayout>
+
+      {/* ── Edit Processes modal ───────────────────────────────────────── */}
+      {showEditProcesses && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowEditProcesses(false)}>
+          <div className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#232329] rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-base font-bold text-gray-900 dark:text-slate-100">Edit Processes</h2>
+              <button onClick={() => setShowEditProcesses(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300"><X size={18} /></button>
+            </div>
+
+            {/* Apply a template */}
+            {allTemplates.length > 0 && (
+              <div className="mb-5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-2">Apply Template</p>
+                <div className="flex flex-wrap gap-2">
+                  {allTemplates.map(tpl => (
+                    <button key={tpl.id} onClick={() => setEditProcessKeys(tpl.process_keys)}
+                      className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-orange-400 hover:text-orange-500 transition-colors">
+                      {tpl.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add process */}
+            <div className="mb-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-2">Add Process</p>
+              <div className="flex flex-wrap gap-2">
+                {allProcesses.filter(p => !editProcessKeys.includes(p.status_key)).map(p => (
+                  <button key={p.id} onClick={() => setEditProcessKeys(k => [...k, p.status_key])}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-orange-400 hover:text-orange-500 transition-colors">
+                    <Plus size={10} /> {p.name}
+                  </button>
+                ))}
+                {allProcesses.filter(p => !editProcessKeys.includes(p.status_key)).length === 0 && (
+                  <span className="text-xs text-slate-400 italic">All processes added</span>
+                )}
+              </div>
+            </div>
+
+            {/* Current ordered list */}
+            <div className="mb-5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-2">Pipeline Order</p>
+              {editProcessKeys.length === 0 ? (
+                <p className="text-xs text-slate-400 italic">No processes selected.</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {editProcessKeys.map((key, ki) => (
+                    <div key={key} className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-[#232329] border border-gray-200 dark:border-[#2f2f38] rounded-xl">
+                      <span className="text-xs text-gray-400 dark:text-slate-500 min-w-[18px]">{ki + 1}.</span>
+                      <code className="flex-1 text-xs font-bold text-orange-500">{key}</code>
+                      <button onClick={() => moveEditKey(ki, 'up')} disabled={ki === 0} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 disabled:opacity-30 p-0.5"><ChevronUp size={13} /></button>
+                      <button onClick={() => moveEditKey(ki, 'down')} disabled={ki === editProcessKeys.length - 1} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 disabled:opacity-30 p-0.5"><ChevronDown size={13} /></button>
+                      <button onClick={() => setEditProcessKeys(k => k.filter((_, i) => i !== ki))} className="text-red-400 hover:text-red-500 p-0.5"><X size={12} /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setShowEditProcesses(false)} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#232329] text-sm font-semibold text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-[#232329] transition-colors">Cancel</button>
+              <button onClick={handleSaveProcesses} disabled={processSaving || editProcessKeys.length === 0}
+                className="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+                {processSaving ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Delete confirmation modal ──────────────────────────────────── */}
       {showDeleteConfirm && (
@@ -671,8 +787,11 @@ export default function AdminOrderPreviewPage() {
 
             {/* Order timeline */}
             <div className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#232329] rounded-2xl overflow-hidden">
-              <div className="px-5 py-4 bg-gray-50 dark:bg-[#232329] border-b border-gray-200 dark:border-[#232329]">
+              <div className="px-5 py-4 bg-gray-50 dark:bg-[#232329] border-b border-gray-200 dark:border-[#232329] flex items-center justify-between">
                 <h2 className="text-sm font-bold text-gray-900 dark:text-slate-100">Order Timeline</h2>
+                <button onClick={openEditProcesses} className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
+                  <Pencil size={11} /> Edit Processes
+                </button>
               </div>
               <div className="p-5">
                 <OrderTimeline

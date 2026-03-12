@@ -56,8 +56,8 @@ function StatCard({ label, value, icon: Icon, accent, delay, isDark, sub, onClic
       onClick={onClick}
       className="rounded-2xl p-5 flex flex-col gap-4 cursor-pointer"
       style={{
-        background: isDark ? '#111111' : '#ffffff',
-        border: `1px solid ${isDark ? '#1f1f1f' : '#e5e5e5'}`,
+        background: 'var(--surface)',
+        border: `1px solid var(--edge)`,
         boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
       }}
     >
@@ -65,13 +65,13 @@ function StatCard({ label, value, icon: Icon, accent, delay, isDark, sub, onClic
         <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}18` }}>
           <Icon size={19} style={{ color: accent }} />
         </div>
-        <BarChart3 size={14} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} />
+        <BarChart3 size={14} style={{ color: 'var(--edge-strong)' }} />
       </div>
       <div>
-        <p className="text-3xl font-black tracking-tight" style={{ color: isDark ? '#fafafa' : '#0a0a0a' }}>
+        <p className="text-3xl font-black tracking-tight" style={{ color: 'var(--heading)' }}>
           <AnimatedNumber value={value} />
         </p>
-        <p className="text-sm font-medium mt-0.5" style={{ color: isDark ? '#71717a' : '#737373' }}>{label}</p>
+        <p className="text-sm font-medium mt-0.5" style={{ color: 'var(--body)' }}>{label}</p>
         {sub && <p className="text-xs mt-1 font-medium" style={{ color: accent }}>{sub}</p>}
       </div>
     </motion.div>
@@ -89,18 +89,18 @@ function OrderRow({ order, onClick, isDark, index }) {
       onClick={onClick}
       className="flex items-center justify-between px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-150 group"
       style={{ background: 'transparent' }}
-      onMouseEnter={e => e.currentTarget.style.background = isDark ? '#161616' : '#fafafa'}
+      onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-inset)'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: isDark ? '#1a1a1a' : '#f4f4f5' }}>
-          <Package size={16} style={{ color: '#FF6B35' }} />
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--surface-raised)' }}>
+          <Package size={16} style={{ color: 'var(--brand)' }} />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold truncate" style={{ color: isDark ? '#fafafa' : '#0a0a0a' }}>
+          <p className="text-sm font-semibold truncate" style={{ color: 'var(--heading)' }}>
             {order.public_name || order.part_name || 'Unnamed Order'}
           </p>
-          <p className="text-xs font-mono mt-0.5" style={{ color: isDark ? '#52525b' : '#a1a1aa' }}>
+          <p className="text-xs font-mono mt-0.5" style={{ color: 'var(--caption)' }}>
             {order.rz_job_id || order.id?.slice(0, 8)} · {new Date(order.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
           </p>
         </div>
@@ -110,7 +110,7 @@ function OrderRow({ order, onClick, isDark, index }) {
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
           {st.label}
         </span>
-        <ChevronRight size={15} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} className="group-hover:translate-x-0.5 transition-transform" />
+        <ChevronRight size={15} style={{ color: 'var(--edge-strong)' }} className="group-hover:translate-x-0.5 transition-transform" />
       </div>
     </motion.div>
   );
@@ -127,10 +127,10 @@ export default function SupplierDashboard() {
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
 
-  const card        = { bg: isDark ? '#111111' : '#ffffff', border: isDark ? '#1f1f1f' : '#e5e5e5' };
-  const textPrimary = isDark ? '#fafafa' : '#0a0a0a';
-  const textMuted   = isDark ? '#71717a' : '#737373';
-  const divider     = isDark ? '#1f1f1f' : '#f0f0f0';
+  const card        = { bg: 'var(--surface)', border: 'var(--edge)' };
+  const textPrimary = 'var(--heading)';
+  const textMuted   = 'var(--body)';
+  const divider     = 'var(--edge)';
 
   useEffect(() => {
     if (!currentUser) return;
@@ -188,7 +188,7 @@ export default function SupplierDashboard() {
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           className="w-10 h-10 rounded-full border-2 border-transparent"
-          style={{ borderTopColor: '#FF6B35', borderRightColor: 'rgba(255,107,53,0.3)' }}
+          style={{ borderTopColor: 'var(--brand)', borderRightColor: 'var(--brand-glow)' }}
         />
         <p className="text-sm font-medium" style={{ color: textMuted }}>Loading your dashboard…</p>
       </div>
@@ -205,7 +205,7 @@ export default function SupplierDashboard() {
           <p className="text-sm mb-5" style={{ color: textMuted }}>{error}</p>
           <button onClick={() => window.location.reload()}
             className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            style={{ background: '#FF6B35' }}>Retry</button>
+            style={{ background: 'var(--brand)' }}>Retry</button>
         </div>
       </div>
     </SupplierHubLayout>
@@ -224,8 +224,8 @@ export default function SupplierDashboard() {
       >
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles size={16} style={{ color: '#FF6B35' }} />
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#FF6B35' }}>
+            <Sparkles size={16} style={{ color: 'var(--brand)' }} />
+            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--brand)' }}>
               {greeting}
             </span>
           </div>
@@ -241,7 +241,7 @@ export default function SupplierDashboard() {
           whileTap={{ scale: 0.97 }}
           onClick={() => navigate('/supplier-hub/orders')}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white"
-          style={{ background: '#FF6B35' }}
+          style={{ background: 'var(--brand)' }}
         >
           View Orders <ArrowRight size={15} />
         </motion.button>
@@ -268,13 +268,13 @@ export default function SupplierDashboard() {
         >
           <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${divider}` }}>
             <div className="flex items-center gap-2">
-              <Clock size={16} style={{ color: '#FF6B35' }} />
+              <Clock size={16} style={{ color: 'var(--brand)' }} />
               <span className="text-sm font-bold" style={{ color: textPrimary }}>Recent Orders</span>
             </div>
             <button
               onClick={() => navigate('/supplier-hub/orders')}
               className="flex items-center gap-1 text-xs font-semibold transition-opacity hover:opacity-70"
-              style={{ color: '#FF6B35' }}
+              style={{ color: 'var(--brand)' }}
             >
               View all <ChevronRight size={13} />
             </button>
@@ -283,14 +283,14 @@ export default function SupplierDashboard() {
           <div className="p-3">
             {recentOrders.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 gap-3">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: isDark ? '#1a1a1a' : '#f4f4f5' }}>
-                  <Package size={22} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} />
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'var(--surface-raised)' }}>
+                  <Package size={22} style={{ color: 'var(--edge-strong)' }} />
                 </div>
                 <p className="text-sm font-medium" style={{ color: textMuted }}>No orders yet</p>
                 <button
                   onClick={() => navigate('/supplier-hub/orders')}
                   className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
-                  style={{ background: 'rgba(255,107,53,0.1)', color: '#FF6B35' }}
+                  style={{ background: 'var(--brand-glow)', color: 'var(--brand)' }}
                 >
                   Browse available jobs
                 </button>
@@ -329,7 +329,7 @@ export default function SupplierDashboard() {
                   onClick={() => navigate(action.path)}
                   className="w-full flex items-center justify-between px-3 py-3 rounded-xl text-left transition-all duration-150 group"
                   style={{ background: 'transparent' }}
-                  onMouseEnter={e => e.currentTarget.style.background = isDark ? '#161616' : '#fafafa'}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-inset)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
                   <div className="flex items-center gap-3">
@@ -338,7 +338,7 @@ export default function SupplierDashboard() {
                     </div>
                     <span className="text-sm font-medium" style={{ color: textPrimary }}>{action.label}</span>
                   </div>
-                  <ChevronRight size={14} style={{ color: isDark ? '#3f3f46' : '#d4d4d8' }} className="group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight size={14} style={{ color: 'var(--edge-strong)' }} className="group-hover:translate-x-0.5 transition-transform" />
                 </button>
               ))}
             </div>
@@ -369,7 +369,7 @@ export default function SupplierDashboard() {
                       <span className="text-xs font-medium" style={{ color: textMuted }}>{label}</span>
                       <span className="text-xs font-bold" style={{ color: textPrimary }}>{value}</span>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: isDark ? '#1f1f1f' : '#f0f0f0' }}>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--edge)' }}>
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${pct}%` }}
