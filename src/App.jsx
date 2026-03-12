@@ -60,6 +60,7 @@ import RFQTemplatesPage from '@/pages/RFQTemplatesPage';
 import AdminInvoicesPage from '@/pages/AdminInvoicesPage';
 import SpendAnalyticsPage from '@/pages/SpendAnalyticsPage';
 import ApprovalWorkflowsPage from '@/pages/ApprovalWorkflowsPage';
+import ContractManagementPage from '@/pages/ContractManagementPage';
 import SupplierDiscoveryPage from '@/pages/SupplierDiscoveryPage';
 
 // Client Pages
@@ -163,8 +164,10 @@ function App() {
                     <Route path="/control-centre/invoices" element={<ProtectedRoute requiredRole="admin"><AdminInvoicesPage /></ProtectedRoute>} />
                     <Route path="/control-centre/spend-analytics" element={<ProtectedRoute requiredRole="admin"><SpendAnalyticsPage /></ProtectedRoute>} />
                     <Route path="/control-centre/approval-workflows" element={<ProtectedRoute requiredRole="admin"><ApprovalWorkflowsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/contracts" element={<ProtectedRoute requiredRole="admin"><ContractManagementPage /></ProtectedRoute>} />
                     <Route path="/control-centre/supplier-discovery" element={<ProtectedRoute requiredRole="admin"><SupplierDiscoveryPage /></ProtectedRoute>} />
                     <Route path="/control-centre/supplier-scorecard" element={<ProtectedRoute requiredRole="admin"><SupplierScorecardPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-scorecard/:supplierId" element={<ProtectedRoute requiredRole="admin"><SupplierScorecardPage /></ProtectedRoute>} />
                     <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
                     <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
 

@@ -5,8 +5,9 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/lib/customSupabaseClient';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import { useToast } from '@/components/ui/use-toast';
-import { Save, Shield, Mail, Bell, Monitor, Loader2, MessageSquare, Users, LifeBuoy, ChevronRight, Palette, Webhook, X, Plus, CheckCircle2 } from 'lucide-react';
+import { Save, Shield, Mail, Bell, Monitor, Loader2, MessageSquare, Users, LifeBuoy, ChevronRight, Palette, Webhook, X, Plus, CheckCircle2, ChevronDown, ChevronUp, RefreshCw, AlertTriangle } from 'lucide-react';
 import { saveSlackWebhookUrl, saveSlackChannel } from '@/services/slackService';
+import { fetchDeliveriesForWebhook, retryDelivery, fetchAndFirePendingRetries } from '@/services/webhookService';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ACCENT, ACCENT_GLOW } from '@/lib/theme';
 
@@ -30,6 +31,11 @@ const SettingsPage = () => {
   const [webhooks, setWebhooks] = useState([]);
   const [webhookForm, setWebhookForm] = useState({ event_type: 'order.status_changed', endpoint_url: '', secret: '' });
   const [savingWebhook, setSavingWebhook] = useState(false);
+  const [expandedWebhook, setExpandedWebhook] = useState(null);
+  const [deliveries, setDeliveries] = useState({});
+  const [loadingDeliveries, setLoadingDeliveries] = useState({});
+  const [retryingDelivery, setRetryingDelivery] = useState({});
+  const [firingRetries, setFiringRetries] = useState(false);
 
   const [settings, setSettings] = useState({
     company_name: 'RZ Global Solutions',
@@ -136,6 +142,47 @@ const SettingsPage = () => {
   };
 
   // Webhook handlers
+  const loadDeliveries = async (webhookId) => {
+    setLoadingDeliveries(prev => ({ ...prev, [webhookId]: true }));
+    const { data } = await fetchDeliveriesForWebhook(webhookId, 8);
+    setDeliveries(prev => ({ ...prev, [webhookId]: data || [] }));
+    setLoadingDeliveries(prev => ({ ...prev, [webhookId]: false }));
+  };
+
+  const toggleExpand = (webhookId) => {
+    if (expandedWebhook === webhookId) {
+      setExpandedWebhook(null);
+    } else {
+      setExpandedWebhook(webhookId);
+      loadDeliveries(webhookId);
+    }
+  };
+
+  const handleRetryDelivery = async (deliveryId, webhookId) => {
+    setRetryingDelivery(prev => ({ ...prev, [deliveryId]: true }));
+    try {
+      await retryDelivery(deliveryId);
+      toast({ title: 'Retry queued', description: 'Delivery retry has been initiated.' });
+      await loadDeliveries(webhookId);
+    } catch (err) {
+      toast({ title: 'Retry failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setRetryingDelivery(prev => ({ ...prev, [deliveryId]: false }));
+    }
+  };
+
+  const handleFirePendingRetries = async () => {
+    setFiringRetries(true);
+    try {
+      const fired = await fetchAndFirePendingRetries();
+      toast({ title: 'Pending retries fired', description: `${fired} overdue deliver${fired === 1 ? 'y' : 'ies'} queued.` });
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setFiringRetries(false);
+    }
+  };
+
   const fetchWebhooks = async () => {
     const { data } = await supabase.from('webhooks').select('*').order('created_at', { ascending: false });
     setWebhooks(data || []);
@@ -417,7 +464,13 @@ const SettingsPage = () => {
                 >
                   <option value="order.status_changed">order.status_changed</option>
                   <option value="bid.awarded">bid.awarded</option>
+                  <option value="po.issued">po.issued</option>
                   <option value="invoice.created">invoice.created</option>
+                  <option value="invoice.approved">invoice.approved</option>
+                  <option value="invoice.paid">invoice.paid</option>
+                  <option value="contract.activated">contract.activated</option>
+                  <option value="contract.terminated">contract.terminated</option>
+                  <option value="contract.renewed">contract.renewed</option>
                 </select>
               </div>
               <div>
@@ -451,35 +504,124 @@ const SettingsPage = () => {
             </button>
           </div>
 
+          {/* Fire pending retries */}
+          <div className="flex justify-end mb-3">
+            <button
+              onClick={handleFirePendingRetries}
+              disabled={firingRetries}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+              style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)', color: 'var(--body)' }}
+            >
+              {firingRetries ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+              Fire pending retries
+            </button>
+          </div>
+
           {/* Webhook list */}
           {webhooks.length === 0 ? (
             <p className="text-sm text-center py-6" style={{ color: 'var(--caption)' }}>No webhooks registered yet.</p>
           ) : (
             <div className="space-y-2">
               {webhooks.map(wh => (
-                <div key={wh.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background: 'rgba(255,107,53,0.12)', color: 'var(--brand)' }}>{wh.event_type}</span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded ${wh.active ? 'bg-emerald-950/40 text-emerald-400' : 'bg-red-950/40 text-red-400'}`}>
-                        {wh.active ? 'Active' : 'Inactive'}
-                      </span>
+                <div key={wh.id} className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--edge)' }}>
+                  {/* Row */}
+                  <div className="flex items-center gap-3 p-3" style={{ background: 'var(--surface-raised)' }}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background: 'rgba(255,107,53,0.12)', color: 'var(--brand)' }}>{wh.event_type}</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded ${wh.active ? 'bg-emerald-950/40 text-emerald-400' : 'bg-red-950/40 text-red-400'}`}>
+                          {wh.active ? 'Active' : 'Inactive'}
+                        </span>
+                        {(wh.delivery_success_count > 0 || wh.delivery_failure_count > 0) && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'var(--surface)', color: 'var(--caption)' }}>
+                            ✓{wh.delivery_success_count || 0} ✗{wh.delivery_failure_count || 0}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs truncate" style={{ color: 'var(--body)' }}>{wh.endpoint_url}</p>
                     </div>
-                    <p className="text-xs truncate" style={{ color: 'var(--body)' }}>{wh.endpoint_url}</p>
+                    <button
+                      onClick={() => toggleExpand(wh.id)}
+                      className="text-xs px-2 py-1 rounded-lg font-medium transition-colors flex items-center gap-1"
+                      style={{ background: 'var(--surface)', border: '1px solid var(--edge)', color: 'var(--caption)' }}
+                    >
+                      {expandedWebhook === wh.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                      History
+                    </button>
+                    <button
+                      onClick={() => toggleWebhook(wh.id, !wh.active)}
+                      className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
+                      style={{ background: 'var(--surface)', border: '1px solid var(--edge)', color: 'var(--body)' }}
+                    >
+                      {wh.active ? 'Disable' : 'Enable'}
+                    </button>
+                    <button
+                      onClick={() => deleteWebhook(wh.id)}
+                      className="text-red-400 hover:text-red-500 transition-colors p-1"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => toggleWebhook(wh.id, !wh.active)}
-                    className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
-                    style={{ background: 'var(--surface)', border: '1px solid var(--edge)', color: 'var(--body)' }}
-                  >
-                    {wh.active ? 'Disable' : 'Enable'}
-                  </button>
-                  <button
-                    onClick={() => deleteWebhook(wh.id)}
-                    className="text-red-400 hover:text-red-500 transition-colors p-1"
-                  >
-                    <X size={14} />
-                  </button>
+
+                  {/* Delivery history panel */}
+                  {expandedWebhook === wh.id && (
+                    <div className="p-3 pt-0" style={{ background: 'var(--surface)' }}>
+                      <div className="pt-3" style={{ borderTop: '1px solid var(--edge)' }}>
+                        <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--caption)' }}>Recent Deliveries</p>
+                        {loadingDeliveries[wh.id] ? (
+                          <div className="flex justify-center py-4">
+                            <Loader2 size={16} className="animate-spin" style={{ color: 'var(--caption)' }} />
+                          </div>
+                        ) : !deliveries[wh.id]?.length ? (
+                          <p className="text-xs py-3 text-center" style={{ color: 'var(--caption)' }}>No deliveries yet.</p>
+                        ) : (
+                          <div className="space-y-1.5">
+                            {deliveries[wh.id].map(d => {
+                              const statusColor = d.status === 'success'
+                                ? 'text-emerald-400 bg-emerald-950/40'
+                                : d.status === 'dead_lettered'
+                                  ? 'text-red-400 bg-red-950/40'
+                                  : d.status === 'failed'
+                                    ? 'text-amber-400 bg-amber-950/40'
+                                    : 'text-slate-400 bg-slate-800/40';
+                              const canRetry = d.status === 'failed' || d.status === 'dead_lettered';
+                              return (
+                                <div key={d.id} className="flex items-center gap-2 px-2.5 py-2 rounded-lg" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}>
+                                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${statusColor}`}>{d.status}</span>
+                                  <span className="text-[10px] shrink-0" style={{ color: 'var(--caption)' }}>
+                                    {d.response_status ? `HTTP ${d.response_status}` : '—'}
+                                  </span>
+                                  <span className="text-[10px] shrink-0" style={{ color: 'var(--caption)' }}>
+                                    attempt {d.attempt_count}
+                                  </span>
+                                  {d.error_message && (
+                                    <span className="text-[10px] truncate flex-1 text-amber-400 flex items-center gap-1">
+                                      <AlertTriangle size={10} className="shrink-0" />
+                                      {d.error_message}
+                                    </span>
+                                  )}
+                                  <span className="text-[10px] ml-auto shrink-0" style={{ color: 'var(--caption)' }}>
+                                    {d.last_attempted_at ? new Date(d.last_attempted_at).toLocaleString() : new Date(d.created_at).toLocaleString()}
+                                  </span>
+                                  {canRetry && (
+                                    <button
+                                      onClick={() => handleRetryDelivery(d.id, wh.id)}
+                                      disabled={retryingDelivery[d.id]}
+                                      className="shrink-0 text-[10px] px-2 py-0.5 rounded font-medium transition-colors flex items-center gap-1"
+                                      style={{ background: 'rgba(255,107,53,0.12)', color: 'var(--brand)', border: '1px solid rgba(255,107,53,0.2)' }}
+                                    >
+                                      {retryingDelivery[d.id] ? <Loader2 size={10} className="animate-spin" /> : <RefreshCw size={10} />}
+                                      Retry
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

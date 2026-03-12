@@ -21,7 +21,6 @@ import { ACCENT, ACCENT_GLOW, SIDEBAR, HEADER } from '@/lib/theme';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import NotificationBell from './NotificationBell';
 import SearchBar from './SearchBar';
-import ThemeToggle from './ThemeToggle';
 
 const NAV_ITEMS = [
   { path: '/supplier-hub',                  label: 'Dashboard',       icon: LayoutDashboard, exact: true },
@@ -247,7 +246,6 @@ const SupplierHubLayout = ({ children }) => {
               }} />
             </div>
             <div className="flex items-center justify-end gap-2">
-              <ThemeToggle />
               <NotificationBell />
             </div>
           </header>

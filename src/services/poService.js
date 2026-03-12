@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { notifyPOIssued, notifyPOAcknowledged } from '@/services/slackService';
+import { dispatchWebhookEvent } from '@/services/webhookService';
 
 const now = () => new Date().toISOString();
 
@@ -14,6 +15,18 @@ export const createPurchaseOrder = async ({
   orderId, bidId, supplierId, lineItems, totalAmount, currency,
   paymentTerms, deliveryDate, notes, createdBy,
 }) => {
+  if (orderId) {
+    const { data: order, error: orderErr } = await supabaseAdmin
+      .from('orders')
+      .select('order_status')
+      .eq('id', orderId)
+      .maybeSingle();
+    if (orderErr) throw orderErr;
+    if (!order || order.order_status !== 'AWARDED') {
+      throw new Error('Purchase orders can only be created for AWARDED orders');
+    }
+  }
+
   const poNumber = generatePONumber();
   return supabaseAdmin
     .from('purchase_orders')
@@ -56,24 +69,54 @@ export const fetchPOsForSupplier = async (supplierId) =>
     .order('created_at', { ascending: false });
 
 export const issuePO = async (poId) => {
+  const { data: po, error: poCheckErr } = await supabaseAdmin
+    .from('purchase_orders')
+    .select('po_status')
+    .eq('id', poId)
+    .maybeSingle();
+  if (poCheckErr) throw poCheckErr;
+  if (!po || po.po_status !== 'draft') {
+    throw new Error('Purchase order is not in draft status');
+  }
+
+  const { data: pendingApproval } = await supabaseAdmin
+    .from('approval_requests')
+    .select('id')
+    .eq('entity_type', 'purchase_order')
+    .eq('entity_id', poId)
+    .in('status', ['pending', 'in_progress'])
+    .maybeSingle();
+  if (pendingApproval) {
+    throw new Error('Purchase order has a pending approval request that must be resolved first');
+  }
+
   const result = await supabaseAdmin
     .from('purchase_orders')
     .update({ po_status: 'issued', issued_at: now(), updated_at: now() })
     .eq('id', poId);
 
-  const { data: po } = await supabaseAdmin
+  const { data: poDetail } = await supabaseAdmin
     .from('purchase_orders')
     .select('po_number, total_amount, currency, order:order_id(rz_job_id), supplier:supplier_id(company_name)')
     .eq('id', poId)
     .maybeSingle();
 
-  if (po) {
+  if (poDetail) {
     notifyPOIssued({
-      poNumber: po.po_number,
-      rzJobId: po.order?.rz_job_id || '',
-      supplierName: po.supplier?.company_name || 'Supplier',
-      totalAmount: po.total_amount,
-      currency: po.currency,
+      poNumber: poDetail.po_number,
+      rzJobId: poDetail.order?.rz_job_id || '',
+      supplierName: poDetail.supplier?.company_name || 'Supplier',
+      totalAmount: poDetail.total_amount,
+      currency: poDetail.currency,
+    }).catch(() => {});
+
+    dispatchWebhookEvent('po.issued', {
+      poId,
+      poNumber: poDetail.po_number,
+      rzJobId: poDetail.order?.rz_job_id || '',
+      supplierName: poDetail.supplier?.company_name,
+      totalAmount: poDetail.total_amount,
+      currency: poDetail.currency,
     }).catch(() => {});
   }
 

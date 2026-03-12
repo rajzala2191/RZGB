@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { dispatchWebhookEvent } from '@/services/webhookService';
 
 const now = () => new Date().toISOString();
 
@@ -58,13 +59,47 @@ export const fetchInvoiceById = async (invoiceId) =>
     .maybeSingle();
 
 export const updateInvoiceStatus = async (invoiceId, status, reviewedBy) => {
+  if (status === 'paid') {
+    const { data: inv, error: invErr } = await supabaseAdmin
+      .from('invoices')
+      .select('invoice_status, total_amount, po_id')
+      .eq('id', invoiceId)
+      .maybeSingle();
+    if (invErr) throw invErr;
+    if (!inv || inv.invoice_status !== 'approved') {
+      throw new Error('Invoice must be approved before marking as paid');
+    }
+    if (inv.po_id) {
+      const { data: po, error: poErr } = await supabaseAdmin
+        .from('purchase_orders')
+        .select('total_amount')
+        .eq('id', inv.po_id)
+        .maybeSingle();
+      if (!poErr && po) {
+        const invoiceAmt = parseFloat(inv.total_amount);
+        const poAmt = parseFloat(po.total_amount);
+        if (Math.abs(invoiceAmt - poAmt) > poAmt * 0.05) {
+          throw new Error(
+            `3-way match failed: invoice total (${invoiceAmt}) differs from PO total (${poAmt}) by more than 5%`
+          );
+        }
+      }
+    }
+  }
+
   const update = { invoice_status: status, updated_at: now() };
   if (reviewedBy) {
     update.reviewed_by = reviewedBy;
     update.reviewed_at = now();
   }
   if (status === 'paid') update.paid_date = new Date().toISOString().split('T')[0];
-  return supabaseAdmin.from('invoices').update(update).eq('id', invoiceId);
+  const result = await supabaseAdmin.from('invoices').update(update).eq('id', invoiceId);
+
+  if (status === 'approved' || status === 'paid') {
+    dispatchWebhookEvent(`invoice.${status}`, { invoiceId, status, reviewedBy }).catch(() => {});
+  }
+
+  return result;
 };
 
 export const fetchOverdueInvoices = async () =>

@@ -105,9 +105,13 @@ describe('fetchMyPendingApprovals', () => {
 
 describe('makeDecision', () => {
   it('marks the request as rejected when decision is "rejected"', async () => {
-    // 1. Insert decision record
+    // 1. Guard: fetch request
+    mocks.enqueue({ data: { workflow_id: 'wf-1', current_step: 1, status: 'pending' }, error: null });
+    // 2. Guard: fetch step (no specific approver)
+    mocks.enqueue({ data: { approver_id: null }, error: null });
+    // 3. Insert decision record
     mocks.enqueue({ error: null });
-    // 2. Update request to rejected
+    // 4. Update request to rejected
     mocks.enqueue({ error: null });
 
     const result = await makeDecision({
@@ -127,16 +131,20 @@ describe('makeDecision', () => {
   });
 
   it('advances to the next step when decision is "approved" and more steps remain', async () => {
-    // 1. Insert decision record
+    // 1. Guard: fetch request
+    mocks.enqueue({ data: { workflow_id: 'wf-1', current_step: 1, status: 'pending' }, error: null });
+    // 2. Guard: fetch step (no specific approver)
+    mocks.enqueue({ data: { approver_id: null }, error: null });
+    // 3. Insert decision record
     mocks.enqueue({ error: null });
-    // 2. Fetch the request
+    // 4. Fetch the request (for approved-branch step advancement)
     mocks.enqueue({ data: { id: 'req-1', workflow_id: 'wf-1' }, error: null });
-    // 3. Fetch all steps for the workflow
+    // 5. Fetch all steps for the workflow
     mocks.enqueue({
       data: [{ step_order: 1 }, { step_order: 2 }, { step_order: 3 }],
       error: null,
     });
-    // 4. Update request to next step
+    // 6. Update request to next step
     mocks.enqueue({ error: null });
 
     const result = await makeDecision({
@@ -155,13 +163,17 @@ describe('makeDecision', () => {
   });
 
   it('marks the request as fully approved when it is the last step', async () => {
-    // 1. Insert decision record
+    // 1. Guard: fetch request
+    mocks.enqueue({ data: { workflow_id: 'wf-1', current_step: 1, status: 'pending' }, error: null });
+    // 2. Guard: fetch step (no specific approver)
+    mocks.enqueue({ data: { approver_id: null }, error: null });
+    // 3. Insert decision record
     mocks.enqueue({ error: null });
-    // 2. Fetch the request
+    // 4. Fetch the request (for approved-branch step advancement)
     mocks.enqueue({ data: { id: 'req-1', workflow_id: 'wf-1' }, error: null });
-    // 3. Fetch all steps — only one step exists
+    // 5. Fetch all steps — only one step exists
     mocks.enqueue({ data: [{ step_order: 1 }], error: null });
-    // 4. Update request to approved
+    // 6. Update request to approved
     mocks.enqueue({ error: null });
 
     const result = await makeDecision({
@@ -179,10 +191,65 @@ describe('makeDecision', () => {
   });
 
   it('throws when the decision record insert fails', async () => {
+    mocks.enqueue({ data: { workflow_id: 'wf-1', current_step: 1, status: 'pending' }, error: null }); // request guard
+    mocks.enqueue({ data: { approver_id: null }, error: null });                                        // step guard
     mocks.enqueue({ error: new Error('Insert failed') });
 
     await expect(
       makeDecision({ requestId: 'req-1', stepOrder: 1, decidedBy: 'admin-1', decision: 'rejected' }),
     ).rejects.toThrow('Insert failed');
+  });
+
+  it('throws when the approval request is not found', async () => {
+    mocks.enqueue({ data: null, error: null }); // request not found
+
+    await expect(
+      makeDecision({ requestId: 'req-missing', stepOrder: 1, decidedBy: 'admin-1', decision: 'approved' }),
+    ).rejects.toThrow('Approval request not found');
+  });
+
+  it('throws when the request is already approved', async () => {
+    mocks.enqueue({ data: { workflow_id: 'wf-1', current_step: 1, status: 'approved' }, error: null });
+
+    await expect(
+      makeDecision({ requestId: 'req-1', stepOrder: 1, decidedBy: 'admin-1', decision: 'approved' }),
+    ).rejects.toThrow('already approved');
+  });
+
+  it('throws when the request is already rejected', async () => {
+    mocks.enqueue({ data: { workflow_id: 'wf-1', current_step: 1, status: 'rejected' }, error: null });
+
+    await expect(
+      makeDecision({ requestId: 'req-1', stepOrder: 1, decidedBy: 'admin-1', decision: 'rejected' }),
+    ).rejects.toThrow('already rejected');
+  });
+
+  it('throws when stepOrder does not match the current step', async () => {
+    mocks.enqueue({ data: { workflow_id: 'wf-1', current_step: 2, status: 'in_progress' }, error: null });
+
+    await expect(
+      makeDecision({ requestId: 'req-1', stepOrder: 1, decidedBy: 'admin-1', decision: 'approved' }),
+    ).rejects.toThrow('current step is 2');
+  });
+
+  it('throws when the caller is not the authorized approver for the step', async () => {
+    mocks.enqueue({ data: { workflow_id: 'wf-1', current_step: 1, status: 'pending' }, error: null });
+    mocks.enqueue({ data: { approver_id: 'correct-approver' }, error: null }); // step has a specific approver
+
+    await expect(
+      makeDecision({ requestId: 'req-1', stepOrder: 1, decidedBy: 'wrong-user', decision: 'approved' }),
+    ).rejects.toThrow('not the authorized approver');
+  });
+
+  it('allows any user to decide when the step has no specific approver assigned', async () => {
+    mocks.enqueue({ data: { workflow_id: 'wf-1', current_step: 1, status: 'pending' }, error: null }); // request guard
+    mocks.enqueue({ data: { approver_id: null }, error: null });                                        // step has no assigned approver
+    mocks.enqueue({ error: null });                                                                      // insert decision
+    mocks.enqueue({ error: null });                                                                      // update request rejected
+
+    const result = await makeDecision({
+      requestId: 'req-1', stepOrder: 1, decidedBy: 'any-admin', decision: 'rejected',
+    });
+    expect(result).toEqual({ success: true });
   });
 });

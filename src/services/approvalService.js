@@ -84,6 +84,31 @@ export const fetchMyPendingApprovals = async (userId) => {
 };
 
 export const makeDecision = async ({ requestId, stepOrder, decidedBy, decision, comments, delegatedTo }) => {
+  const { data: request, error: reqErr } = await supabaseAdmin
+    .from('approval_requests')
+    .select('workflow_id, current_step, status')
+    .eq('id', requestId)
+    .maybeSingle();
+  if (reqErr) throw reqErr;
+  if (!request) throw new Error('Approval request not found');
+  if (request.status === 'approved' || request.status === 'rejected') {
+    throw new Error(`Approval request is already ${request.status}`);
+  }
+  if (request.current_step !== stepOrder) {
+    throw new Error(`Cannot act on step ${stepOrder}; current step is ${request.current_step}`);
+  }
+
+  const { data: step, error: stepErr } = await supabaseAdmin
+    .from('approval_steps')
+    .select('approver_id')
+    .eq('workflow_id', request.workflow_id)
+    .eq('step_order', stepOrder)
+    .maybeSingle();
+  if (stepErr) throw stepErr;
+  if (step?.approver_id && step.approver_id !== decidedBy) {
+    throw new Error('User is not the authorized approver for this step');
+  }
+
   const { error: decErr } = await supabaseAdmin
     .from('approval_decisions')
     .insert([{ request_id: requestId, step_order: stepOrder, decided_by: decidedBy, decision, comments, delegated_to: delegatedTo || null }]);

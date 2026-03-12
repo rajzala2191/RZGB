@@ -18,6 +18,7 @@ import {
   Receipt,
   TrendingUp,
   GitBranch,
+  FileSignature,
   Globe,
   Settings,
   BarChart2,
@@ -27,7 +28,6 @@ import { useTheme } from '@/contexts/ThemeContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import NotificationBell from './NotificationBell';
 import SearchBar from './SearchBar';
-import ThemeToggle from './ThemeToggle';
 import { ACCENT, ACCENT_GLOW, SIDEBAR, HEADER } from '@/lib/theme';
 
 const NAV_ITEMS = [
@@ -41,6 +41,7 @@ const NAV_ITEMS = [
   { path: '/control-centre/invoices',                 label: 'Invoices',           icon: Receipt },
   { path: '/control-centre/spend-analytics',          label: 'Spend Analytics',    icon: TrendingUp },
   { path: '/control-centre/approval-workflows',       label: 'Approvals',          icon: GitBranch },
+  { path: '/control-centre/contracts',               label: 'Contracts',          icon: FileSignature },
   { path: '/control-centre/supplier-discovery',       label: 'Supplier Discovery', icon: Globe },
   { path: '/control-centre/shipments',                label: 'Shipments',          icon: Truck },
   { path: '/control-centre/document-review',          label: 'Document Review',    icon: FolderOpen },
@@ -260,7 +261,6 @@ const ControlCentreLayout = ({ children }) => {
               }} />
             </div>
             <div className="flex items-center justify-end gap-2">
-              <ThemeToggle />
               <NotificationBell />
             </div>
           </header>
