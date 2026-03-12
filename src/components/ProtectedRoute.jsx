@@ -54,7 +54,10 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
   }
 
   if (userRole === 'admin' && mfaVerified === false) {
-    return <Navigate to="/settings?mfa=required" state={{ from: location }} replace />;
+    const isSettingsPath = location.pathname.startsWith('/control-centre/settings');
+    if (!isSettingsPath) {
+      return <Navigate to="/control-centre/settings?mfa=required" state={{ from: location }} replace />;
+    }
   }
 
   if (allowedRoles.length > 0) {

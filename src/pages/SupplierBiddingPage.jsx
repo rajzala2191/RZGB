@@ -8,7 +8,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { format } from 'date-fns';
 import {
   Search, Gavel, Package, Layers, Hash, Calendar,
-  Clock, ChevronRight, CheckCircle2, XCircle, Timer, Loader2,
+  Clock, ChevronRight, CheckCircle2, XCircle, Timer, Loader2, AlertTriangle,
 } from 'lucide-react';
 
 export default function SupplierBiddingPage() {
@@ -21,17 +21,41 @@ export default function SupplierBiddingPage() {
   const [tab, setTab] = useState('open');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [onboardingStatus, setOnboardingStatus] = useState('approved');
+  const [profileCompletionPct, setProfileCompletionPct] = useState(100);
 
   useEffect(() => { if (currentUser) loadData(); }, [currentUser]);
 
   const loadData = async () => {
     setLoading(true);
-    const [ordersRes, bidsRes] = await Promise.all([
+    const [ordersRes, bidsRes, profileRes] = await Promise.all([
       fetchOpenOrdersForSupplier(currentUser.id),
       fetchBidsBySupplier(currentUser.id),
+      supabase
+        .from('profiles')
+        .select('onboarding_status, company_name, contact_person, phone, address, specialization, capabilities, certifications, bio, company_size')
+        .eq('id', currentUser.id)
+        .maybeSingle(),
     ]);
     if (ordersRes.data) setOpenOrders(ordersRes.data);
     if (bidsRes.data) setMyBids(bidsRes.data);
+    if (profileRes.data) {
+      const profile = profileRes.data;
+      const completionFields = [
+        profile.company_name,
+        profile.contact_person,
+        profile.phone,
+        profile.address,
+        profile.specialization,
+        profile.capabilities,
+        profile.certifications,
+        profile.bio,
+        profile.company_size,
+      ];
+      const completionPct = Math.round((completionFields.filter(Boolean).length / completionFields.length) * 100);
+      setProfileCompletionPct(completionPct);
+      setOnboardingStatus(profile.onboarding_status ?? 'approved');
+    }
     setLoading(false);
   };
 
@@ -64,6 +88,23 @@ export default function SupplierBiddingPage() {
   };
 
   const bidOrderIds = new Set(myBids.map(b => b.order_id));
+  const canBid = onboardingStatus === 'approved' && profileCompletionPct === 100;
+
+  const handleStartBid = (order) => {
+    if (!canBid) {
+      const reasons = [];
+      if (onboardingStatus !== 'approved') reasons.push('complete supplier onboarding approval');
+      if (profileCompletionPct < 100) reasons.push(`complete your profile (currently ${profileCompletionPct}%)`);
+      toast({
+        title: 'Bidding Locked',
+        description: `You must ${reasons.join(' and ')} before submitting bids.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
 
   const availableOrders = openOrders.filter(o => !bidOrderIds.has(o.id));
   const filteredOpen = availableOrders.filter(o =>
@@ -134,6 +175,16 @@ export default function SupplierBiddingPage() {
           />
         </div>
 
+        {!canBid && (
+          <div className="flex items-start gap-2 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 px-3.5 py-3">
+            <AlertTriangle size={16} className="mt-0.5 text-amber-600 dark:text-amber-400 shrink-0" />
+            <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-300">
+              Bidding is locked until onboarding is approved and your profile reaches 100%.
+              {' '}Current profile completion: <span className="font-bold">{profileCompletionPct}%</span>.
+            </p>
+          </div>
+        )}
+
         {loading ? (
           <div className="py-20 text-center text-gray-400 dark:text-slate-500 text-sm">Loading…</div>
         ) : tab === 'open' ? (
@@ -168,7 +219,7 @@ export default function SupplierBiddingPage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => { setSelectedOrder(order); setIsModalOpen(true); }}
+                    onClick={() => handleStartBid(order)}
                     disabled={isExpired(order.bid_deadline)}
                     className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-orange-600 hover:bg-orange-500 text-white transition-colors flex-shrink-0 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
