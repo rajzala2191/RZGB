@@ -58,7 +58,7 @@ function StatCard({ label, value, icon: Icon, accent, delay, isDark, sub }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay, ease: 'easeOut' }}
       whileHover={{ y: -3, transition: { duration: 0.15 } }}
-      className="rounded-2xl p-5 flex flex-col gap-4 cursor-default glass-surface"
+      className="rounded-2xl p-5 flex flex-col gap-4 cursor-default"
       style={{
         background:  'var(--surface)',
         border:      `1px solid var(--edge)`,
@@ -238,7 +238,7 @@ export default function ClientDashboardPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.15 }}
-          className="xl:col-span-2 rounded-2xl glass-surface"
+          className="xl:col-span-2 rounded-2xl overflow-hidden"
           style={{ background: card.bg, border: `1px solid ${card.border}`, boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
         >
           {/* Card header */}
@@ -294,7 +294,7 @@ export default function ClientDashboardPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.22 }}
-            className="rounded-2xl glass-surface"
+            className="rounded-2xl overflow-hidden"
             style={{ background: card.bg, border: `1px solid ${card.border}`, boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
           >
             <div className="px-5 py-4" style={{ borderBottom: `1px solid ${divider}` }}>
@@ -326,7 +326,7 @@ export default function ClientDashboardPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.28 }}
-            className="rounded-2xl glass-surface"
+            className="rounded-2xl overflow-hidden"
             style={{ background: card.bg, border: `1px solid ${card.border}`, boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
           >
             <div className="px-5 py-4" style={{ borderBottom: `1px solid ${divider}` }}>

@@ -22,7 +22,7 @@ export const ThemeProvider = ({ children }) => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
     } catch { /* private browsing */ }
-    return 'system';
+    return 'light';
   });
 
   const [systemDark, setSystemDark] = useState(getSystemPrefersDark);
