@@ -64,7 +64,8 @@ import ApprovalWorkflowsPage from '@/pages/ApprovalWorkflowsPage';
 import ContractManagementPage from '@/pages/ContractManagementPage';
 import SupplierDiscoveryPage from '@/pages/SupplierDiscoveryPage';
 
-// Platform Admin Pages
+// Platform Admin
+import PlatformAdminLayout from '@/components/PlatformAdminLayout';
 import PlatformDashboardPage from '@/pages/platform/PlatformDashboardPage';
 import PlatformWorkspacesPage from '@/pages/platform/PlatformWorkspacesPage';
 import PlatformUsersPage from '@/pages/platform/PlatformUsersPage';
