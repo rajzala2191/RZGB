@@ -14,6 +14,10 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+// Guard: service role key is optional (not needed on landing/marketing deployments).
+// Falls back to anon key so the module loads without throwing.
+export const supabaseAdmin = createClient(
+  supabaseUrl,
+  supabaseServiceRoleKey || import.meta.env.VITE_SUPABASE_ANON_KEY,
+  { auth: { persistSession: false, autoRefreshToken: false } }
+);
