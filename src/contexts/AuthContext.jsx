@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   const [adminScope, setAdminScope] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const isSuperAdmin = userRole === 'admin' && adminScope === 'platform';
+  const isSuperAdmin = userRole === 'super_admin' || (userRole === 'admin' && adminScope === 'platform');
   const isCustomerAdmin = userRole === 'admin' && adminScope === 'workspace';
 
   const canAccessWorkspace = useCallback((resourceWorkspaceId) => {

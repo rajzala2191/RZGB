@@ -66,7 +66,8 @@ export default function LoginContainer() {
   useEffect(() => {
     if (showForgotPassword) return;
     if (currentUser && userRole) {
-      if (userRole === 'admin') navigate('/control-centre', { replace: true });
+      if (userRole === 'super_admin') navigate('/platform-admin', { replace: true });
+      else if (userRole === 'admin') navigate('/control-centre', { replace: true });
       else if (userRole === 'client') navigate('/client-dashboard', { replace: true });
       else if (userRole === 'supplier') navigate('/supplier-hub', { replace: true });
       else navigate('/', { replace: true });

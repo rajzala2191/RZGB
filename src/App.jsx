@@ -11,7 +11,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import DemoBanner from '@/components/DemoBanner';
 import DemoAccessGate from '@/components/DemoAccessGate';
-import RootRedirect from '@/pages/RootRedirect';
+import HomeOrRedirect from '@/pages/HomeOrRedirect';
 import LoginPage from '@/pages/LoginPage';
 
 // Landing & Demo
@@ -126,8 +126,8 @@ function App() {
                   {/* DemoBanner sits outside Routes so it shows on all production pages */}
                   <DemoBanner />
                   <Routes>
-                    {/* Root & Auth */}
-                    <Route path="/" element={<RootRedirect />} />
+                    {/* Root shows landing immediately; logged-in users redirect in background */}
+                    <Route path="/" element={<HomeOrRedirect />} />
                     <Route path="/landing" element={<LandingPage />} />
                     <Route path="/how-it-works" element={<HowItWorksPage />} />
                     <Route path="/pricing" element={<PricingPage />} />

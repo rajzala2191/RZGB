@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
   }, [currentUser, userRole, skipOnboardingCheck]);
 
   useEffect(() => {
-    if (!currentUser || userRole !== 'admin') return;
+    if (!currentUser || (userRole !== 'admin' && userRole !== 'super_admin')) return;
     if (localStorage.getItem('rzgb-demo-session')) { setMfaVerified(true); return; }
     setMfaLoading(true);
     supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data }) => {
@@ -53,10 +53,13 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (userRole === 'admin' && mfaVerified === false) {
-    const isSettingsPath = location.pathname.startsWith('/control-centre/settings');
+  if ((userRole === 'admin' || userRole === 'super_admin') && mfaVerified === false) {
+    const isSettingsPath = userRole === 'super_admin'
+      ? location.pathname.startsWith('/platform-admin/settings')
+      : location.pathname.startsWith('/control-centre/settings');
     if (!isSettingsPath) {
-      return <Navigate to="/control-centre/settings?mfa=required" state={{ from: location }} replace />;
+      const settingsPath = userRole === 'super_admin' ? '/platform-admin/settings?mfa=required' : '/control-centre/settings?mfa=required';
+      return <Navigate to={settingsPath} state={{ from: location }} replace />;
     }
   }
 

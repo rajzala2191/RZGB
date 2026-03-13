@@ -49,7 +49,7 @@ export default function PlatformUsersPage() {
   });
 
   const roleBadge = (role, scope) => {
-    if (role === 'admin' && scope === 'platform') return { label: 'SUPER ADMIN', cls: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400' };
+    if (role === 'super_admin' || (role === 'admin' && scope === 'platform')) return { label: 'SUPER ADMIN', cls: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400' };
     if (role === 'admin') return { label: 'CUSTOMER ADMIN', cls: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400' };
     if (role === 'client') return { label: 'CLIENT', cls: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400' };
     if (role === 'supplier') return { label: 'SUPPLIER', cls: 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400' };
@@ -73,7 +73,8 @@ export default function PlatformUsersPage() {
           <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
             className="bg-gray-50 dark:bg-[#232329] border border-gray-200 dark:border-[#2e2e35] rounded-xl px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100">
             <option value="all">All Roles</option>
-            <option value="admin">Admin</option>
+            <option value="super_admin">Super Admin</option>
+            <option value="admin">Customer Admin</option>
             <option value="client">Client</option>
             <option value="supplier">Supplier</option>
           </select>

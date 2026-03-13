@@ -13,8 +13,11 @@ const RootRedirect = () => {
         navigate('/landing');
       } else {
         switch (userRole) {
+          case 'super_admin':
+            navigate('/platform-admin');
+            break;
           case 'admin':
-            navigate(isSuperAdmin ? '/platform-admin' : '/control-centre');
+            navigate('/control-centre');
             break;
           case 'client':
             navigate('/client-dashboard');
