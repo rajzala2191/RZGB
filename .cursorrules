@@ -1,0 +1,30 @@
+# RZGB Project — Cursor Rules
+
+## Stack
+- Frontend: HTML/CSS/JS (Bootstrapmade template)
+- Backend: Node.js on Hostinger
+- Database: Supabase
+- Deploy: GitHub push → Hostinger auto-deploy
+
+## Project URLs
+- Main site: rzglobalsolutions.co.uk
+- Portal: portal.rzglobalsolutions.co.uk
+
+## User Roles
+- Client: submits orders, tracks progress
+- RZ Global (admin): manages full workflow
+- Supplier: receives jobs, updates stage progress
+
+## Order Workflow Stages
+Quote → Casting/Forging → Machining → QC → Packaging → Delivery
+
+## Code Style
+- Vanilla JS preferred unless otherwise specified
+- Keep HTML/CSS/JS in separate files
+- Use Supabase client for all DB calls
+- No frameworks unless already in use
+
+## Last Claude Session
+**What was done:**
+**What's next:**
+**Files changed:**
