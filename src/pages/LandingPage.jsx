@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
   ArrowRight, Shield, Zap, Users, BarChart3, FileCheck, CheckCircle2,
-  GitBranch, Globe, Star,
-  Eye, Building2, Factory, Wrench, Truck, Award, Package,
+  GitBranch, Globe, Star, Play,
+  Eye, Building2, Factory, Wrench, Truck, Award, Package, Upload, ScanLine,
 } from 'lucide-react';
 import PublicNav from '@/components/PublicNav';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -457,143 +457,356 @@ const staggerContainer = {
 };
 
 // ─── HeroSection ──────────────────────────────────────────────────────────────
+const PORTAL_TABS = [
+  {
+    id: 'client',
+    label: 'Client Portal',
+    icon: Building2,
+    color: BRAND,
+    headline: 'Submit orders, track every stage',
+    steps: [
+      { icon: Upload,    text: 'Upload technical drawings (PDF / DWG)' },
+      { icon: ScanLine,  text: 'AI sanitises & removes identifiers instantly' },
+      { icon: Eye,       text: 'Watch live progress through 9 pipeline stages' },
+    ],
+    preview: () => (
+      <div className="space-y-3">
+        <div className="rounded-xl p-4 border-2 border-dashed text-center" style={{ borderColor: `${BRAND}35` }}>
+          <Upload className="w-8 h-8 mx-auto mb-1.5" style={{ color: BRAND, opacity: 0.5 }} />
+          <p className="text-xs font-medium" style={{ color: 'var(--body)' }}>Drop drawings here · PDF / DWG</p>
+        </div>
+        {[
+          { label: 'Valve Body Casting', status: 'Casting Stage', statusColor: '#10b981', progress: 55 },
+          { label: 'Pump Housing',        status: 'QC Check',     statusColor: '#f59e0b', progress: 78 },
+        ].map((o) => (
+          <div key={o.label} className="rounded-lg p-3" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold" style={{ color: 'var(--heading)' }}>{o.label}</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${o.statusColor}18`, color: o.statusColor }}>{o.status}</span>
+            </div>
+            <div className="h-1.5 rounded-full" style={{ background: 'var(--edge)' }}>
+              <div className="h-1.5 rounded-full transition-all" style={{ width: `${o.progress}%`, background: o.statusColor }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    id: 'admin',
+    label: 'Control Centre',
+    icon: Shield,
+    color: '#3b82f6',
+    headline: 'Manage the entire supply chain',
+    steps: [
+      { icon: ScanLine,   text: 'Review AI-sanitised drawings before release' },
+      { icon: BarChart3,  text: 'Compare bids across your supplier pool' },
+      { icon: Award,      text: 'Award jobs and monitor milestone progress' },
+    ],
+    preview: () => (
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: 'Open RFQs',   value: '12', color: '#3b82f6' },
+            { label: 'Active Jobs', value: '34', color: '#10b981' },
+            { label: 'Pending QC',  value: '5',  color: '#f59e0b' },
+          ].map((s) => (
+            <div key={s.label} className="rounded-lg p-2.5 text-center" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
+              <p className="text-lg font-black" style={{ color: s.color }}>{s.value}</p>
+              <p className="text-[10px]" style={{ color: 'var(--caption)' }}>{s.label}</p>
+            </div>
+          ))}
+        </div>
+        {[
+          { job: 'RZ-JOB-10041', part: 'Impeller · Bronze LG2', bids: 4, top: '£8,200' },
+          { job: 'RZ-JOB-10039', part: 'Bearing Housing · Steel', bids: 6, top: '£3,400' },
+        ].map((r) => (
+          <div key={r.job} className="flex items-center justify-between rounded-lg px-3 py-2.5" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
+            <div>
+              <p className="text-xs font-bold" style={{ color: 'var(--heading)' }}>{r.job}</p>
+              <p className="text-[10px]" style={{ color: 'var(--caption)' }}>{r.part}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs font-black" style={{ color: '#3b82f6' }}>{r.bids} bids</p>
+              <p className="text-[10px]" style={{ color: 'var(--caption)' }}>Top {r.top}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    id: 'supplier',
+    label: 'Supplier Hub',
+    icon: Factory,
+    color: '#8b5cf6',
+    headline: 'Browse jobs, bid, and deliver',
+    steps: [
+      { icon: Eye,       text: 'View open RFQs with sanitised drawings' },
+      { icon: FileCheck, text: 'Submit competitive bids with pricing & lead time' },
+      { icon: Truck,     text: 'Update milestones and upload QC documents' },
+    ],
+    preview: () => (
+      <div className="space-y-3">
+        {[
+          { job: 'Valve Body Casting', mat: 'Bronze LG2 · 60 pcs', deadline: '3 days', prize: '~£9k' },
+          { job: 'Pump Impeller',       mat: 'Duplex SS · 12 pcs',  deadline: '5 days', prize: '~£4k' },
+          { job: 'Bearing Housing',     mat: 'EN24 Steel · 25 pcs', deadline: '7 days', prize: '~£3.4k' },
+        ].map((j) => (
+          <div key={j.job} className="rounded-lg p-3" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold truncate" style={{ color: 'var(--heading)' }}>{j.job}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: 'var(--caption)' }}>{j.mat}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[10px] font-semibold" style={{ color: '#8b5cf6' }}>{j.prize}</p>
+                <p className="text-[10px]" style={{ color: 'var(--caption)' }}>{j.deadline} left</p>
+              </div>
+            </div>
+            <div className="mt-2 flex justify-end">
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: '#8b5cf6' }}>Place Bid</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+];
+
 function HeroSection() {
   const { isDark } = useTheme();
-  const heroContainer = { hidden: {}, visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } } };
-  const heroItem      = { hidden: { opacity: 0, y: 32 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } } };
+  const [activeTab, setActiveTab] = useState(0);
+
+  // Auto-cycle tabs
+  useEffect(() => {
+    const t = setInterval(() => setActiveTab((i) => (i + 1) % PORTAL_TABS.length), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  const tab = PORTAL_TABS[activeTab];
+  const heroContainer = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } } };
+  const heroItem      = { hidden: { opacity: 0, y: 28 }, visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } } };
 
   return (
-    <section className="relative min-h-screen flex items-center pt-16 pb-12 px-4 overflow-hidden" style={{ background: 'var(--app-bg)' }}>
+    <section className="relative flex flex-col items-center pt-24 pb-0 px-4 overflow-hidden" style={{ background: 'var(--app-bg)', minHeight: '100svh' }}>
       <GridDotsBackground />
       <GradientBlobs variant="hero" />
 
-      {/* SVG arcs */}
-      <svg className="absolute bottom-[10%] left-0 w-full h-40 pointer-events-none opacity-20" viewBox="0 0 1200 100" fill="none" preserveAspectRatio="none">
-        <motion.path d="M0 80 Q300 20 600 60 T1200 40" stroke={BRAND} strokeWidth="1.5" strokeLinecap="round"
-          initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 1.8, delay: 0.5 }} />
-        <motion.path d="M0 90 Q400 50 800 70 T1200 55" stroke="#3b82f6" strokeWidth="1" strokeLinecap="round"
-          initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 2.0, delay: 0.9 }} />
-        <motion.path d="M0 60 Q200 95 600 45 T1200 65" stroke="#8b5cf6" strokeWidth="0.8" strokeLinecap="round" strokeDasharray="6 4"
-          initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 0.6 }} transition={{ duration: 2.2, delay: 1.2 }} />
-      </svg>
+      {/* Orbital rings */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        {[520, 720, 920].map((size, i) => (
+          <motion.div key={size}
+            animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
+            transition={{ duration: 60 + i * 20, repeat: Infinity, ease: 'linear' }}
+            className="absolute rounded-full border"
+            style={{
+              width: size, height: size,
+              borderColor: isDark ? `rgba(255,107,53,${0.04 - i * 0.01})` : `rgba(255,107,53,${0.06 - i * 0.015})`,
+            }}
+          />
+        ))}
+      </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      {/* ── Text block (centered) ── */}
+      <motion.div variants={heroContainer} initial="hidden" animate="visible"
+        className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto pt-8">
 
-        {/* LEFT: Text column */}
-        <motion.div variants={heroContainer} initial="hidden" animate="visible" className="flex flex-col">
-          {/* Badge */}
-          <motion.div variants={heroItem} className="inline-flex items-center gap-2 self-start rounded-full px-4 py-2 mb-6 text-xs font-bold"
-            style={{ background: 'rgba(255,107,53,0.1)', border: `1px solid rgba(255,107,53,0.25)`, color: '#FF6B35' }}>
-            <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-            AI-Powered Manufacturing Procurement
+        {/* Eyebrow badge */}
+        <motion.div variants={heroItem}
+          className="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-7 text-xs font-bold backdrop-blur-sm"
+          style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.28)', color: BRAND }}>
+          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+          Manufacturing Procurement Intelligence
+          <ArrowRight className="w-3 h-3 opacity-70" />
+        </motion.div>
+
+        {/* Headline */}
+        <motion.h1 variants={heroItem}
+          className="text-5xl sm:text-6xl lg:text-7xl xl:text-[82px] font-black leading-[1.02] tracking-tight mb-6"
+          style={{ color: 'var(--heading)' }}>
+          Procurement,{' '}
+          <span className="relative inline-block">
+            <span style={gradientText(`${BRAND} 0%, #f97316 45%, #8b5cf6 100%`)}>reimagined</span>
+            <motion.svg initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ delay: 1.0, duration: 0.8 }}
+              className="absolute -bottom-2 left-0 w-full" height="10" viewBox="0 0 400 10" fill="none">
+              <motion.path d="M0 7 Q100 1 200 6 Q300 11 400 5" stroke={BRAND} strokeWidth="3" strokeLinecap="round" fill="none" />
+            </motion.svg>
+          </span>
+          <br />for manufacturers
+        </motion.h1>
+
+        {/* Subtitle */}
+        <motion.p variants={heroItem}
+          className="text-lg sm:text-xl leading-relaxed mb-9 max-w-2xl"
+          style={{ color: 'var(--body)' }}>
+          One intelligent platform that connects clients, admins, and suppliers —
+          with{' '}
+          <span className="font-semibold" style={{ color: 'var(--heading)' }}>AI drawing sanitisation</span>,{' '}
+          <span className="font-semibold" style={{ color: 'var(--heading)' }}>competitive bidding</span>,
+          and{' '}
+          <span className="font-semibold" style={{ color: 'var(--heading)' }}>live pipeline tracking</span>{' '}
+          built in.
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div variants={heroItem} className="flex flex-col sm:flex-row items-center gap-3 mb-10">
+          <motion.div whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.97 }}>
+            <Link to="/request-demo"
+              className="flex items-center gap-2 text-white text-sm font-bold px-7 py-3.5 rounded-xl"
+              style={{ background: `linear-gradient(135deg, ${BRAND}, #f97316)`, boxShadow: `0 8px 28px rgba(255,107,53,0.4)` }}>
+              Request demo access <ArrowRight className="w-4 h-4" />
+            </Link>
           </motion.div>
-
-          {/* Headline */}
-          <motion.h1 variants={heroItem} className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.04] tracking-tight mb-6" style={{ color: 'var(--heading)' }}>
-            The smarter way to{' '}
-            <span className="relative inline-block">
-              <span style={gradientText(`${BRAND} 0%, #f97316 100%`)}>source parts</span>
-              <motion.svg initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ delay: 0.9, duration: 0.7 }}
-                className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 300 8" fill="none">
-                <motion.path d="M0 6 Q75 1 150 5 Q225 9 300 4" stroke={BRAND} strokeWidth="2.5" strokeLinecap="round" fill="none" />
-              </motion.svg>
-            </span>{' '}globally
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p variants={heroItem} className="text-base sm:text-lg leading-relaxed mb-8 max-w-lg" style={{ color: 'var(--body)' }}>
-            One platform connecting clients, admins, and suppliers across the entire manufacturing lifecycle —
-            from order intake to final delivery, with built-in IP protection.
-          </motion.p>
-
-          {/* CTA row */}
-          <motion.div variants={heroItem} className="flex flex-col sm:flex-row flex-wrap gap-3 mb-8">
-            {[
-              { label: 'Client Demo',   color: BRAND,     icon: Building2, shadow: BRAND },
-              { label: 'Admin Demo',    color: '#3b82f6', icon: Shield,    shadow: '#3b82f6' },
-              { label: 'Supplier Demo', color: '#8b5cf6', icon: Factory,   shadow: '#8b5cf6' },
-            ].map((btn) => (
-              <motion.div key={btn.label} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
-                <Link to="/request-demo"
-                  className="flex items-center justify-center gap-2 text-white text-sm font-bold px-5 py-3 rounded-xl transition-shadow"
-                  style={{ background: btn.color, boxShadow: `0 6px 20px ${btn.shadow}35` }}>
-                  <btn.icon className="w-4 h-4" /> {btn.label}
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Trust badges */}
-          <motion.div variants={heroItem} className="flex items-center gap-4 flex-wrap">
-            {['IP Protected', 'AI Powered', 'Live Tracking', 'SOC-2 Ready'].map((badge, i) => (
-              <React.Fragment key={badge}>
-                <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: 'var(--body)' }}>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                  {badge}
-                </span>
-                {i < 3 && <span className="text-xs" style={{ color: 'var(--edge-strong)' }}>·</span>}
-              </React.Fragment>
-            ))}
+          <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
+            <Link to="/how-it-works"
+              className="flex items-center gap-2 text-sm font-bold px-7 py-3.5 rounded-xl backdrop-blur-sm transition-all"
+              style={{ ...glassCard(isDark), color: 'var(--heading)' }}>
+              <Play className="w-4 h-4" style={{ color: BRAND }} /> See how it works
+            </Link>
           </motion.div>
         </motion.div>
 
-        {/* RIGHT: Floating card cluster */}
-        <motion.div
-          initial={{ opacity: 0, x: 60, scale: 0.95 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="relative hidden lg:block"
-        >
-          {/* Primary glass card */}
-          <div className="relative rounded-2xl p-6 backdrop-blur-xl" style={{
-            ...glassCard(isDark),
-            boxShadow: '0 25px 60px rgba(0,0,0,0.35)',
-          }}>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-xs font-medium" style={{ color: 'var(--body)' }}>RZ-JOB-10033 · Valve Body Casting</p>
-                <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--heading)' }}>Bronze LG2 · 60 pieces</p>
-              </div>
-              <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981', border: '1px solid rgba(16,185,129,0.25)' }}>
-                Casting Stage
+        {/* Trust strip */}
+        <motion.div variants={heroItem} className="flex items-center gap-5 flex-wrap justify-center mb-14">
+          {[
+            { icon: Shield,       label: 'IP Protected',  color: '#3b82f6' },
+            { icon: Zap,          label: 'AI Powered',    color: BRAND },
+            { icon: Eye,          label: 'Live Tracking', color: '#10b981' },
+            { icon: CheckCircle2, label: 'SOC-2 Ready',   color: '#8b5cf6' },
+          ].map(({ icon: Icon, label, color }, i) => (
+            <React.Fragment key={label}>
+              <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--body)' }}>
+                <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
+                {label}
               </span>
-            </div>
-            <MiniPipeline activeIdx={4} />
-            <div className="mt-4 pt-4 flex items-center justify-between text-xs" style={{ borderTop: '1px solid var(--edge)', color: 'var(--body)' }}>
-              <span>Sheffield Forge · Awarded</span>
-              <span className="font-semibold" style={{ color: '#10b981' }}>£9,100</span>
+              {i < 3 && <span className="text-xs opacity-30" style={{ color: 'var(--body)' }}>·</span>}
+            </React.Fragment>
+          ))}
+        </motion.div>
+      </motion.div>
+
+      {/* ── Platform showcase card ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 48 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="relative z-10 w-full max-w-5xl mx-auto"
+      >
+        {/* Glow under card */}
+        <div className="absolute -inset-x-8 top-8 h-40 rounded-3xl pointer-events-none blur-3xl opacity-20"
+          style={{ background: `linear-gradient(90deg, ${tab.color}, transparent, #8b5cf6)` }} />
+
+        <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl"
+          style={{
+            ...glassCard(isDark),
+            boxShadow: isDark ? `0 0 0 1px rgba(255,255,255,0.06), 0 32px 64px rgba(0,0,0,0.5)` : `0 0 0 1px rgba(0,0,0,0.06), 0 32px 64px rgba(0,0,0,0.12)`,
+          }}>
+
+          {/* Window chrome */}
+          <div className="flex items-center gap-1.5 px-4 py-3 border-b" style={{ borderColor: 'var(--edge)' }}>
+            {['#ff5f57','#febc2e','#28c840'].map((c) => (
+              <div key={c} className="w-3 h-3 rounded-full" style={{ background: c }} />
+            ))}
+            <div className="flex-1 mx-4">
+              <div className="max-w-[200px] mx-auto h-5 rounded-md text-[10px] font-medium flex items-center justify-center px-3"
+                style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)', color: 'var(--caption)' }}>
+                zaproc.io/portal
+              </div>
             </div>
           </div>
 
-          {/* Floating badge: top-right */}
-          <motion.div animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }}
-            className="absolute -top-4 -right-6 backdrop-blur-md rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-semibold"
-            style={{ ...glassCard(isDark), color: 'var(--heading)' }}>
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" /> Live Tracking
-          </motion.div>
+          {/* Tab bar */}
+          <div className="flex items-center gap-1 px-4 py-3 border-b" style={{ borderColor: 'var(--edge)', background: isDark ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0.015)' }}>
+            {PORTAL_TABS.map((t, i) => (
+              <button key={t.id} onClick={() => setActiveTab(i)}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all"
+                style={activeTab === i
+                  ? { background: t.color, color: '#fff', boxShadow: `0 2px 12px ${t.color}40` }
+                  : { color: 'var(--body)', background: 'transparent' }}>
+                <t.icon className="w-3.5 h-3.5" />
+                {t.label}
+              </button>
+            ))}
+            {/* active indicator dot */}
+            <div className="ml-auto flex items-center gap-1.5 text-[10px] font-semibold" style={{ color: tab.color }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: tab.color }} />
+              Live demo
+            </div>
+          </div>
 
-          {/* Floating badge: bottom-left */}
-          <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 3.8, ease: 'easeInOut', delay: 0.5 }}
-            className="absolute -bottom-4 -left-6 backdrop-blur-md rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-semibold text-blue-400"
-            style={{ ...glassCard(isDark) }}>
-            <Shield className="w-3.5 h-3.5" /> IP Protected
-          </motion.div>
+          {/* Content: steps left + preview right */}
+          <AnimatePresence mode="wait">
+            <motion.div key={tab.id}
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
+              className="grid md:grid-cols-2 gap-0">
 
-          {/* Floating badge: mid-left */}
-          <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 2.9, ease: 'easeInOut', delay: 1 }}
-            className="absolute top-8 -left-8 backdrop-blur-md rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-semibold"
-            style={{ ...glassCard(isDark), color: '#8b5cf6' }}>
-            <BarChart3 className="w-3.5 h-3.5" /> 3 Bids Received
-          </motion.div>
+              {/* Left — portal description */}
+              <div className="p-6 md:p-8 border-r" style={{ borderColor: 'var(--edge)' }}>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ background: `${tab.color}18`, border: `1px solid ${tab.color}25` }}>
+                    <tab.icon className="w-5 h-5" style={{ color: tab.color }} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: tab.color }}>{tab.label}</p>
+                    <p className="text-sm font-black mt-0.5" style={{ color: 'var(--heading)' }}>{tab.headline}</p>
+                  </div>
+                </div>
+                <ul className="space-y-3.5">
+                  {tab.steps.map(({ icon: Icon, text }, j) => (
+                    <motion.li key={j}
+                      initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: j * 0.07 + 0.1 }}
+                      className="flex items-start gap-3">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                        style={{ background: `${tab.color}12`, border: `1px solid ${tab.color}20` }}>
+                        <Icon className="w-3.5 h-3.5" style={{ color: tab.color }} />
+                      </div>
+                      <span className="text-sm leading-snug" style={{ color: 'var(--body)' }}>{text}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+                <div className="mt-7">
+                  <Link to="/request-demo"
+                    className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg text-white"
+                    style={{ background: tab.color, boxShadow: `0 4px 14px ${tab.color}35` }}>
+                    Try {tab.label} <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
 
-          {/* Connector SVG lines */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-10" fill="none">
-            <line x1="85%" y1="5%" x2="70%" y2="20%" stroke={BRAND} strokeWidth="1" strokeDasharray="4 4" />
-            <line x1="5%" y1="80%" x2="20%" y2="65%" stroke="#3b82f6" strokeWidth="1" strokeDasharray="4 4" />
-            <line x1="2%" y1="30%" x2="20%" y2="40%" stroke="#8b5cf6" strokeWidth="1" strokeDasharray="4 4" />
-          </svg>
+              {/* Right — live preview */}
+              <div className="p-6 md:p-8">
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--caption)' }}>
+                  Live preview
+                </p>
+                <tab.preview />
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Progress bar */}
+          <div className="h-0.5" style={{ background: 'var(--edge)' }}>
+            <motion.div key={`prog-${activeTab}`}
+              className="h-full"
+              initial={{ width: '0%' }} animate={{ width: '100%' }}
+              transition={{ duration: 4, ease: 'linear' }}
+              style={{ background: tab.color }} />
+          </div>
+        </div>
+
+        {/* Scroll cue */}
+        <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+          className="flex flex-col items-center gap-1 mt-8 mb-4 opacity-40">
+          <div className="w-5 h-8 rounded-full border-2 flex items-start justify-center pt-1.5" style={{ borderColor: 'var(--body)' }}>
+            <div className="w-1 h-2 rounded-full" style={{ background: 'var(--body)' }} />
+          </div>
+          <span className="text-[10px] font-medium" style={{ color: 'var(--body)' }}>Scroll to explore</span>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
