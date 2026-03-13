@@ -73,7 +73,20 @@ export default function RZGBLandingPage() {
 
   useEffect(() => {
     document.title = 'RZ Global Solutions | Global Supply of Component Parts & Precision Castings';
-    return () => { document.title = 'Zaproc | Manufacturing Procurement Platform'; };
+
+    // Swap favicon to RZGB logo
+    const prevFavicon = document.querySelector("link[rel~='icon']");
+    const prevHref = prevFavicon?.href;
+    const link = prevFavicon || document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/jpeg';
+    link.href = '/rz-global-favicon.jpg';
+    if (!prevFavicon) document.head.appendChild(link);
+
+    return () => {
+      document.title = 'Zaproc | Manufacturing Procurement Platform';
+      if (link) { link.rel = 'icon'; link.type = 'image/x-icon'; link.href = prevHref || '/favicon.ico'; }
+    };
   }, []);
 
   return (
