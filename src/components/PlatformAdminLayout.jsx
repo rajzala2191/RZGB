@@ -13,6 +13,9 @@ import {
   Activity,
   Settings,
   Mail,
+  ScrollText,
+  Lock,
+  Bell,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { SIDEBAR, HEADER } from '@/lib/theme';
@@ -29,23 +32,31 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: 'Platform',
+    label: 'Tenants',
     items: [
-      { path: '/platform-admin/workspaces', label: 'Workspaces', icon: Building2 },
-      { path: '/platform-admin/users', label: 'All Users', icon: Users },
+      { path: '/platform-admin/workspaces',   label: 'Workspaces', icon: Building2 },
+      { path: '/platform-admin/users',        label: 'All Users',  icon: Users     },
     ],
   },
   {
-    label: 'Demos & requests',
+    label: 'Pipeline',
     items: [
-      { path: '/platform-admin/demo-requests', label: 'Demo requests', icon: Mail },
+      { path: '/platform-admin/demo-requests', label: 'Demo Requests', icon: Mail },
     ],
   },
   {
-    label: 'Activity & settings',
+    label: 'Monitoring',
     items: [
-      { path: '/platform-admin/activity', label: 'Activity', icon: Activity },
-      { path: '/platform-admin/settings', label: 'Settings', icon: Settings },
+      { path: '/platform-admin/audit-log', label: 'Audit Log', icon: ScrollText },
+      { path: '/platform-admin/activity',  label: 'Activity',  icon: Activity   },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { path: '/platform-admin/security',      label: 'Security',      icon: Lock     },
+      { path: '/platform-admin/notifications', label: 'Notifications', icon: Bell     },
+      { path: '/platform-admin/settings',      label: 'Configuration', icon: Settings },
     ],
   },
 ];
@@ -70,6 +81,7 @@ function PlatformAdminLayout() {
         className="flex overflow-hidden font-sans"
         style={{ background: 'var(--app-bg)', height: '100vh' }}
       >
+        {/* Mobile overlay */}
         <AnimatePresence>
           {sidebarOpen && (
             <motion.div
@@ -78,11 +90,12 @@ function PlatformAdminLayout() {
               exit={{ opacity: 0 }}
               onClick={() => setSidebarOpen(false)}
               className="fixed inset-0 z-40 lg:hidden"
-              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' }}
+              style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
             />
           )}
         </AnimatePresence>
 
+        {/* ── Sidebar ─────────────────────────────────────────── */}
         <aside
           className={`
             fixed inset-y-0 left-0 z-50 w-72 flex flex-col
@@ -91,17 +104,14 @@ function PlatformAdminLayout() {
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           `}
           style={{
-            background: sb.bg,
+            background:  sb.bg,
             borderRight: `1px solid ${sb.border}`,
           }}
         >
-          <div
-            style={{
-              height: 3,
-              background: 'linear-gradient(90deg, var(--brand, #ef4444), #f97316, transparent)',
-              flexShrink: 0,
-            }}
-          />
+          {/* Authority bar — 2px solid top accent */}
+          <div style={{ height: 2, background: 'var(--edge-strong)', flexShrink: 0 }} />
+
+          {/* Brand */}
           <div
             className="flex items-center justify-between px-5 py-4 shrink-0"
             style={{ borderBottom: `1px solid ${sb.border}` }}
@@ -110,19 +120,19 @@ function PlatformAdminLayout() {
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                 style={{
-                  background: 'var(--sidebar-nav-active-bg)',
-                  border: '1px solid var(--sidebar-nav-active-border)',
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--edge)',
                 }}
               >
-                <Shield size={20} style={{ color: 'var(--brand, #ef4444)' }} />
+                <Shield size={18} style={{ color: 'var(--heading)' }} />
               </div>
               <div>
                 <p style={{ color: sb.nameColor }} className="font-bold text-sm leading-none tracking-tight">
                   Zaproc
                 </p>
                 <p
-                  className="text-[10px] font-semibold tracking-[0.12em] uppercase mt-1"
-                  style={{ color: 'var(--brand, #ef4444)' }}
+                  className="text-[10px] font-bold tracking-[0.14em] uppercase mt-1"
+                  style={{ color: sb.labelColor }}
                 >
                   Platform Admin
                 </p>
@@ -131,18 +141,20 @@ function PlatformAdminLayout() {
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-lg hover:bg-black/10"
+              className="lg:hidden p-2 rounded-lg"
+              style={{ color: sb.iconColor }}
               aria-label="Close menu"
             >
-              <X size={18} style={{ color: sb.iconColor }} />
+              <X size={18} />
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4">
+          {/* Nav */}
+          <nav className="flex-1 overflow-y-auto overflow-x-hidden py-3">
             {NAV_GROUPS.map((group) => (
-              <div key={group.label} className="px-4 pb-3">
+              <div key={group.label} className="px-3 pb-4">
                 <p
-                  className="text-[10px] font-bold uppercase tracking-[0.14em] px-3 mb-2"
+                  className="text-[10px] font-bold uppercase tracking-[0.14em] px-3 mb-1.5"
                   style={{ color: sb.labelColor }}
                 >
                   {group.label}
@@ -158,31 +170,37 @@ function PlatformAdminLayout() {
                         end={item.exact}
                         className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
                         style={{
-                          background: active ? sb.navActiveBg : 'transparent',
-                          color: active ? sb.navActiveText : sb.navInactive,
-                          border: active ? `1px solid ${sb.navActiveBorder}` : '1px solid transparent',
+                          background: active ? sb.navActiveBg    : 'transparent',
+                          color:      active ? sb.navActiveText  : sb.navInactive,
+                          border:     active ? `1px solid ${sb.navActiveBorder}` : '1px solid transparent',
+                        }}
+                        onMouseEnter={e => {
+                          if (!active) {
+                            e.currentTarget.style.background = sb.navHoverBg;
+                            e.currentTarget.style.color = sb.navHoverText;
+                          }
+                        }}
+                        onMouseLeave={e => {
+                          if (!active) {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = sb.navInactive;
+                          }
                         }}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                            style={{
-                              background: active ? sb.navActiveIconBg : sb.iconBg,
-                            }}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ background: active ? sb.navActiveIconBg : sb.iconBg }}
                           >
                             <item.icon
-                              size={16}
+                              size={14}
                               style={{ color: active ? sb.navActiveIconColor : sb.iconColor }}
                             />
                           </div>
                           <span className="truncate">{item.label}</span>
                         </div>
                         {active && (
-                          <ChevronRight
-                            size={14}
-                            className="shrink-0"
-                            style={{ color: sb.navActiveIconColor }}
-                          />
+                          <ChevronRight size={13} className="shrink-0" style={{ color: sb.navActiveIconColor }} />
                         )}
                       </NavLink>
                     );
@@ -192,8 +210,9 @@ function PlatformAdminLayout() {
             ))}
           </nav>
 
+          {/* User section */}
           <div
-            className="px-3 pb-4 pt-3 space-y-2.5 shrink-0"
+            className="px-3 pb-4 pt-3 space-y-2 shrink-0"
             style={{ borderTop: `1px solid ${sb.border}` }}
           >
             <div
@@ -201,9 +220,10 @@ function PlatformAdminLayout() {
               style={{ background: sb.cardBg, border: `1px solid ${sb.cardBorder}` }}
             >
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0"
                 style={{
-                  background: 'linear-gradient(135deg, var(--brand, #ef4444) 0%, #f97316 100%)',
+                  background: 'var(--brand)',
+                  color: 'var(--app-bg)',
                 }}
               >
                 SA
@@ -220,52 +240,57 @@ function PlatformAdminLayout() {
             <button
               type="button"
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all duration-150"
               style={{
                 background: sb.btnBg,
-                color: sb.btnColor,
-                border: `1px solid ${sb.btnBorder}`,
+                color:      sb.btnColor,
+                border:     `1px solid ${sb.btnBorder}`,
               }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.06)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.15)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = sb.btnColor; e.currentTarget.style.background = sb.btnBg; e.currentTarget.style.borderColor = sb.btnBorder; }}
             >
-              <LogOut size={14} /> Sign out
+              <LogOut size={13} /> Sign out
             </button>
           </div>
         </aside>
 
+        {/* Main */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden lg:ml-72">
           <header
-            className="flex items-center gap-2 sm:gap-6 px-4 sm:px-8 py-3 border-b shrink-0"
+            className="flex items-center gap-3 px-4 sm:px-8 py-3 shrink-0"
             style={{
-              background: HEADER.bg,
-              backdropFilter: 'blur(12px)',
-              borderBottom: `1px solid ${HEADER.border}`,
+              background:     HEADER.bg,
+              backdropFilter: 'blur(8px)',
+              borderBottom:   `1px solid ${HEADER.border}`,
             }}
           >
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden flex items-center justify-center p-2.5 rounded-xl"
+              className="lg:hidden flex items-center justify-center p-2 rounded-xl"
               style={{
                 background: HEADER.btnBg,
-                border: `1px solid ${HEADER.btnBorder}`,
-                color: HEADER.btnColor,
+                border:     `1px solid ${HEADER.btnBorder}`,
+                color:      HEADER.btnColor,
               }}
               aria-label="Open menu"
             >
-              <Menu size={20} />
+              <Menu size={18} />
             </button>
-            <div className="flex-1 flex items-center gap-3">
+
+            <div className="flex-1 flex items-center">
               <span
-                className="text-xs font-bold px-2.5 py-1 rounded-full border"
+                className="text-[10px] font-bold tracking-[0.14em] uppercase px-2.5 py-1 rounded-full border"
                 style={{
-                  color: 'var(--brand, #ef4444)',
-                  background: 'rgba(239,68,68,0.08)',
-                  borderColor: 'rgba(239,68,68,0.25)',
+                  color:       'var(--caption)',
+                  borderColor: 'var(--edge)',
+                  background:  'var(--surface-raised)',
                 }}
               >
-                PLATFORM ADMIN
+                Platform Admin
               </span>
             </div>
+
             <div className="flex items-center gap-2">
               <ThemeToggle />
             </div>
@@ -276,7 +301,7 @@ function PlatformAdminLayout() {
               key={location.pathname}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
               className="p-6 lg:p-8 max-w-7xl mx-auto w-full"
             >
               <Outlet />
@@ -286,6 +311,6 @@ function PlatformAdminLayout() {
       </div>
     </ErrorBoundary>
   );
-};
+}
 
 export default PlatformAdminLayout;

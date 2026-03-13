@@ -73,6 +73,9 @@ import PlatformUsersPage from '@/pages/platform/PlatformUsersPage';
 import PlatformDemoRequestsPage from '@/pages/platform/PlatformDemoRequestsPage';
 import PlatformActivityPage from '@/pages/platform/PlatformActivityPage';
 import PlatformSettingsPage from '@/pages/platform/PlatformSettingsPage';
+import PlatformAuditLogPage from '@/pages/platform/PlatformAuditLogPage';
+import PlatformSecurityPage from '@/pages/platform/PlatformSecurityPage';
+import PlatformNotificationsPage from '@/pages/platform/PlatformNotificationsPage';
 
 // Public Pages
 import PricingPage from '@/pages/PricingPage';
@@ -161,6 +164,9 @@ function App() {
                       <Route path="demo-requests" element={<PlatformDemoRequestsPage />} />
                       <Route path="activity" element={<PlatformActivityPage />} />
                       <Route path="settings" element={<PlatformSettingsPage />} />
+                      <Route path="audit-log" element={<PlatformAuditLogPage />} />
+                      <Route path="security" element={<PlatformSecurityPage />} />
+                      <Route path="notifications" element={<PlatformNotificationsPage />} />
                     </Route>
 
                     {/* --- ADMIN ROUTES (super_admin + customer_admin) --- */}
