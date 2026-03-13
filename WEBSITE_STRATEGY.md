@@ -3,112 +3,53 @@
 > **Product name confirmed: Zaproc**
 > All references to "the software product" or "[productname]" below now refer to **Zaproc**.
 
-## What the Site Currently Says
+## Current Site Status
 
+### `zaproc.co.uk` — LIVE ✓
+- Headline: *"Procurement, reimagined for manufacturers"*
+- Subheadline: *"One intelligent platform that connects clients, admins, and suppliers — with AI drawing sanitisation, competitive bidding, and live pipeline tracking built in."*
+- Primary CTAs: **"Request demo access"** / **"See how it works"**
+- Trust signals: IP Protected · AI Powered · Live Tracking · SOC-2 Ready
+- App portal hosted at: `zaproc.io/portal`
+
+### `rzglobalsolutions.co.uk` — Still shows components supplier content
 From public search index (`rzglobalsolutions.co.uk/sectors`):
-
 > "Precision-engineered components for the automotive, machinery, construction,
 > energy, and agriculture sectors"
 
 Primary CTA: **"Request a Free Quote"**
 Contact: `info@rzglobalsolutions.co.uk` / `+44 7436676209`
 
-**That is a components supplier website. Not a software company website.**
+**The Zaproc product site is live. The company site still needs updating to reference Zaproc.**
 
 ---
 
-## The Core Problem — Brand Identity Mismatch
-
-A potential software customer who Googles the company, lands on the site, and
-reads it thinks RZ Global Solutions makes metal parts. A potential investor
-sees a small engineering broker. Neither understands that the company is
-building a procurement intelligence platform.
-
-The website must answer three questions in under 10 seconds:
-1. What do you do?
-2. Who is it for?
-3. What do I do next?
-
-Currently it answers none of those for a software buyer.
+## Remaining Changes — Prioritised
 
 ---
 
-## Changes Required — Prioritised
+### Priority 1 — Update `rzglobalsolutions.co.uk` to reference Zaproc (1 hour)
 
-### Priority 1 — Rewrite the Homepage Headline (1 hour)
+The company site still describes a components supplier. Add a clear section:
+- "We build **Zaproc** — manufacturing procurement intelligence software"
+- Link prominently to `zaproc.co.uk`
+- Keep sourcing services content but secondary to the software
 
-**Current (implied):** "We supply precision-engineered components"
+### Priority 2 — Fix Google Indexing on both sites (1 hour)
 
-**What it needs to say:**
-```
-Introducing Zaproc — manufacturing procurement intelligence
-by RZ Global Solutions.
+`zaproc.co.uk` is live but not yet indexed. Fix immediately:
+- Submit `zaproc.co.uk` sitemap via Google Search Console
+- Check `robots.txt` on both domains is not blocking Googlebot
+- Add `<title>` and `<meta description>` to every Zaproc page
+- `zaproc.co.uk` homepage title: `Manufacturing Procurement Software | Zaproc`
 
-Stop managing suppliers over email and spreadsheets.
-[Request a Demo]  [See How It Works]
-```
+### Priority 3 — Separation is already done (COMPLETE ✓)
 
-The headline must speak to the buyer of the software, not describe internal
-capabilities. Lead with their problem, not company services.
-
----
-
-### Priority 2 — Add a Product Page (1 day)
-
-The procurement platform does not appear anywhere on the site. It needs its
-own page containing:
-
-- What it does in plain English (3 bullet points max)
-- Who it is for: manufacturing procurement teams at 20–200 person companies
-- A screenshot or short screen recording of the actual app
-- Pricing tiers or a "Book a Demo" CTA
-
-Until this exists the website actively works against the software business —
-prospects researching the product find a components company instead.
-
----
-
-### Priority 3 — Replace the Primary CTA (30 minutes)
-
-"Request a Free Quote" is a manufacturing supplier CTA. For a software company:
-
-- **"Book a Demo"** — highest intent, best for B2B SaaS
-- **"Start Free Trial"** — if self-serve onboarding exists
-- **"See It In Action"** — links to a Loom/video walkthrough if no demo system yet
-
-Keep "request a quote" only within the components/sourcing section if that
-service still runs alongside the software.
-
----
-
-### Priority 4 — Fix Google Indexing (1 hour)
-
-Only one page (`/sectors`) is indexed. The company has essentially zero organic
-presence for the software category.
-
-Immediate fixes:
-- Check `robots.txt` is not accidentally blocking Googlebot
-- Submit a sitemap via Google Search Console
-- Add descriptive `<title>` and `<meta description>` to every page
-- Homepage title should be: `Manufacturing Procurement Software | RZ Global Solutions`
-
----
-
-### Priority 5 — Separate the Two Business Lines (half day)
-
-If both services run in parallel (sourcing/supplying parts AND the software),
-visitors must understand this immediately. Two clean options:
-
-**Option A — Two sections on homepage**
-- "For buyers who need components sourced" → existing services
-- "For procurement teams managing their own suppliers" → the software
-
-**Option B — Two separate sites** *(recommended long-term)*
-- `rzglobalsolutions.co.uk` — company overview and sourcing services
+Two separate sites now exist:
+- `rzglobalsolutions.co.uk` — company and sourcing services
 - `zaproc.co.uk` — the Zaproc software product
 
-Option B matches the OpenAI/ChatGPT separation model and is the cleaner
-long-term move. See `MASTER_PLAN.md` for the full branding reference.
+Remaining task: update `rzglobalsolutions.co.uk` to link to Zaproc (Priority 1).
 
 ---
 
@@ -140,19 +81,16 @@ No social proof is visible anywhere on the site. Add:
 
 ## Summary Table
 
-| Priority | Change                                          | Effort    |
-|----------|-------------------------------------------------|-----------|
-| 1        | Rewrite homepage headline — lead with software  | 1 hour    |
-| 2        | Add product page with screenshots + demo CTA    | 1 day     |
-| 3        | Swap primary CTA to "Book a Demo"               | 30 mins   |
-| 4        | Fix Google indexing (Search Console + sitemap)  | 1 hour    |
-| 5        | Separate components vs software business lines  | Half day  |
-| 6        | Add About page with founder story               | 2 hours   |
-| 7        | Add trust signals (quotes, logos, team)         | Ongoing   |
-| 8        | Launch `zaproc.co.uk` + `zaproc.in` product sites | Strategic |
-
-Priorities 1–3 take a few hours and immediately stop the website from
-actively undermining the software business. Do those first.
+| Priority | Change                                               | Status     | Effort    |
+|----------|------------------------------------------------------|------------|-----------|
+| ✓        | Separate product site (`zaproc.co.uk`)               | DONE       | —         |
+| ✓        | Strong headline, CTAs, trust signals on Zaproc site  | DONE       | —         |
+| ✓        | Register `zaproc.co.uk` + `zaproc.in`                | DONE       | —         |
+| 1        | Update `rzglobalsolutions.co.uk` to reference Zaproc | Pending    | 1 hour    |
+| 2        | Submit `zaproc.co.uk` to Google Search Console       | Pending    | 1 hour    |
+| 3        | Add About page with founder story (on Zaproc site)   | Pending    | 2 hours   |
+| 4        | Add trust signals — customer quotes, logos           | Pending    | Ongoing   |
+| 5        | Add `zaproc.in` as India-specific landing page       | Pending    | Strategic |
 
 ---
 
