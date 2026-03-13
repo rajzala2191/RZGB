@@ -15,8 +15,9 @@ export default function PlatformDemoRequestsPage() {
     setLoading(true);
     try {
       const data = await fetchDemoRequests();
-      setRequests(data || []);
+      setRequests(Array.isArray(data) ? data : []);
     } catch (e) {
+      setRequests([]);
       toast({ title: 'Error', description: e?.message || 'Failed to load demo requests', variant: 'destructive' });
     } finally {
       setLoading(false);

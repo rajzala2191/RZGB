@@ -42,7 +42,9 @@ Deno.serve(async (req) => {
       .eq('id', caller.id)
       .single();
 
-    const isSuperAdmin = profile?.role === 'admin' && profile?.admin_scope === 'platform';
+    const isSuperAdmin =
+      profile?.role === 'super_admin' ||
+      (profile?.role === 'admin' && profile?.admin_scope === 'platform');
     if (!isSuperAdmin) {
       return new Response(JSON.stringify({ error: 'Super admin only' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
