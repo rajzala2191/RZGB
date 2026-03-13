@@ -37,6 +37,7 @@ export async function fetchDemoRequests() {
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const getFunctionsUrl = () => {
   if (!SUPABASE_URL) throw new Error('Supabase URL not configured. Set VITE_SUPABASE_URL in .env.');
   return `${SUPABASE_URL}/functions/v1`;
@@ -55,6 +56,7 @@ export async function approveDemoRequest(requestId) {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${session.access_token}`,
+      ...(SUPABASE_ANON_KEY && { 'apikey': SUPABASE_ANON_KEY }),
     },
     body: JSON.stringify({ request_id: requestId }),
   });

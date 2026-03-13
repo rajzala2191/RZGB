@@ -24,11 +24,12 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
-    const supabaseUser = createClient(url, anonKey, {
+    const supabaseAuth = createClient(url, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user: caller }, error: userError } = await supabaseUser.auth.getUser(token);
-    if (userError || !caller) {
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    const userId = claimsData?.claims?.sub;
+    if (claimsError || !userId) {
       return new Response(JSON.stringify({ error: 'Invalid or expired session' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 401,
@@ -39,7 +40,7 @@ Deno.serve(async (req) => {
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('role, admin_scope')
-      .eq('id', caller.id)
+      .eq('id', userId)
       .single();
 
     const isSuperAdmin =
@@ -86,7 +87,7 @@ Deno.serve(async (req) => {
         status: 'approved',
         token: demoToken,
         approved_at: new Date().toISOString(),
-        approved_by: caller.id,
+        approved_by: userId,
       })
       .eq('id', request_id);
 
