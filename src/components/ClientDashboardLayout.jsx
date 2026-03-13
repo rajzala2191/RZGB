@@ -75,8 +75,10 @@ export default function ClientDashboardLayout({ children }) {
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
           style={{
-            background:  sb.bg,
-            borderRight: `1px solid ${sb.border}`,
+            background:           sb.bg,
+            borderRight:          `1px solid ${sb.border}`,
+            backdropFilter:       'blur(28px) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(28px) saturate(1.4)',
           }}
         >
           {/* ── Logo / Brand ─────────────────────────────────────── */}
@@ -235,9 +237,10 @@ export default function ClientDashboardLayout({ children }) {
           <header
             className="flex items-center gap-2 sm:gap-6 px-2 sm:px-8 py-2 sm:py-4 border-b border-gray-200 shadow-sm"
             style={{
-              background:     'var(--header-bg)',
-              backdropFilter: 'blur(12px)',
-              borderBottom:   `1px solid var(--header-border)`,
+              background:           'var(--header-bg)',
+              backdropFilter:       'blur(20px) saturate(1.6)',
+              WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+              borderBottom:         `1px solid var(--header-border)`,
             }}
           >
             <div className="flex items-center">

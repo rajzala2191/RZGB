@@ -13,200 +13,223 @@
 
 :root {
     /* ── Brand ─────────────────────────────────────────────── */
-    --brand: #FF6B35;
+    --brand:       #FF6B35;
     --brand-hover: #f97316;
-    --brand-glow: rgba(255,107,53,0.18);
+    --brand-glow:  rgba(255,107,53,0.20);
 
-    /* ── App surfaces ──────────────────────────────────────── */
-    --app-bg: #0f0f0f;
-    --surface: #181818;
-    --surface-raised: #212121;
-    --surface-inset: #0f0f0f;
-    --surface-overlay: rgba(0,0,0,0.6);
+    /* ── App background — layered navy gradient ────────────── */
+    --app-bg: linear-gradient(
+        150deg,
+        #050814 0%,
+        #080f1f 35%,
+        #0d1a2e 70%,
+        #060c18 100%
+    );
+
+    /* ── Glass surfaces ─────────────────────────────────────── */
+    --surface:         rgba(255,255,255,0.055);
+    --surface-raised:  rgba(255,255,255,0.085);
+    --surface-inset:   rgba(255,255,255,0.030);
+    --surface-overlay: rgba(0,0,0,0.55);
 
     /* ── Text ──────────────────────────────────────────────── */
-    --heading: #e5e5e5;
-    --body: #737373;
-    --caption: #525252;
-    --faint: rgba(255,255,255,0.2);
+    --heading: #eef2f7;
+    --body:    rgba(180,196,218,0.75);
+    --caption: rgba(140,162,192,0.60);
+    --faint:   rgba(255,255,255,0.18);
 
     /* ── Borders & dividers ────────────────────────────────── */
-    --edge: #262626;
-    --edge-strong: #333333;
+    --edge:        rgba(255,255,255,0.10);
+    --edge-strong: rgba(255,255,255,0.16);
     --edge-subtle: rgba(255,255,255,0.06);
 
     /* ── Sidebar shell ─────────────────────────────────────── */
-    --sidebar-bg: #111111;
-    --sidebar-border: rgba(255,255,255,0.06);
-    --sidebar-label: #444444;
-    --sidebar-nav-text: #555555;
-    --sidebar-nav-hover-bg: rgba(255,255,255,0.05);
-    --sidebar-nav-hover-text: #e5e5e5;
-    --sidebar-nav-active-bg: rgba(255,255,255,0.06);
-    --sidebar-nav-active-border: rgba(255,255,255,0.09);
-    --sidebar-nav-active-text: #e5e5e5;
-    --sidebar-nav-active-icon-bg: rgba(255,255,255,0.07);
-    --sidebar-nav-active-icon-color: #e5e5e5;
-    --sidebar-icon-bg: rgba(255,255,255,0.05);
-    --sidebar-icon-color: #555555;
-    --sidebar-card-bg: rgba(255,255,255,0.04);
-    --sidebar-card-border: rgba(255,255,255,0.07);
-    --sidebar-name: #e5e5e5;
-    --sidebar-email: #525252;
-    --sidebar-btn-bg: rgba(255,255,255,0.05);
-    --sidebar-btn-border: rgba(255,255,255,0.08);
-    --sidebar-btn-color: #555555;
-    --sidebar-btn-hover-bg: rgba(255,255,255,0.09);
-    --sidebar-btn-hover-color: #e5e5e5;
-    --sidebar-mobile-bg: #111111;
+    --sidebar-bg:                    rgba(8,15,31,0.72);
+    --sidebar-border:                rgba(255,255,255,0.09);
+    --sidebar-label:                 rgba(140,162,192,0.55);
+    --sidebar-nav-text:              rgba(140,162,192,0.55);
+    --sidebar-nav-hover-bg:          rgba(255,255,255,0.07);
+    --sidebar-nav-hover-text:        #eef2f7;
+    --sidebar-nav-active-bg:         rgba(255,107,53,0.10);
+    --sidebar-nav-active-border:     rgba(255,107,53,0.22);
+    --sidebar-nav-active-text:       #eef2f7;
+    --sidebar-nav-active-icon-bg:    rgba(255,107,53,0.16);
+    --sidebar-nav-active-icon-color: #FF6B35;
+    --sidebar-icon-bg:               rgba(255,255,255,0.06);
+    --sidebar-icon-color:            rgba(140,162,192,0.55);
+    --sidebar-card-bg:               rgba(255,255,255,0.05);
+    --sidebar-card-border:           rgba(255,255,255,0.09);
+    --sidebar-name:                  #eef2f7;
+    --sidebar-email:                 rgba(140,162,192,0.50);
+    --sidebar-btn-bg:                rgba(255,255,255,0.05);
+    --sidebar-btn-border:            rgba(255,255,255,0.09);
+    --sidebar-btn-color:             rgba(140,162,192,0.60);
+    --sidebar-btn-hover-bg:          rgba(255,255,255,0.10);
+    --sidebar-btn-hover-color:       #eef2f7;
+    --sidebar-mobile-bg:             rgba(6,12,24,0.92);
 
-    /* ── Header bar ────────────────────────────────────────── */
-    --header-bg: rgba(15,15,15,0.92);
-    --header-border: rgba(255,255,255,0.07);
-    --header-btn-bg: #1a1a1a;
-    --header-btn-border: rgba(255,255,255,0.1);
-    --header-btn-color: #e5e5e5;
+    /* ── Header bar — stronger glass ───────────────────────── */
+    --header-bg:         rgba(5,8,20,0.78);
+    --header-border:     rgba(255,255,255,0.09);
+    --header-btn-bg:     rgba(255,255,255,0.07);
+    --header-btn-border: rgba(255,255,255,0.12);
+    --header-btn-color:  #eef2f7;
 
     /* ── Toast / popover chrome ─────────────────────────────── */
-    --toast-bg: #181818;
-    --toast-border: rgba(255,255,255,0.08);
-    --toast-title: #e5e5e5;
-    --toast-desc: rgba(200,200,200,0.6);
-    --toast-close-bg: rgba(255,255,255,0.06);
-    --toast-close-color: #555555;
-    --toast-close-hover: #e5e5e5;
-    --toast-close-hover-bg: rgba(255,255,255,0.11);
+    --toast-bg:            rgba(10,16,32,0.88);
+    --toast-border:        rgba(255,255,255,0.11);
+    --toast-title:         #eef2f7;
+    --toast-desc:          rgba(180,196,218,0.70);
+    --toast-close-bg:      rgba(255,255,255,0.06);
+    --toast-close-color:   rgba(140,162,192,0.55);
+    --toast-close-hover:   #eef2f7;
+    --toast-close-hover-bg: rgba(255,255,255,0.12);
 
     /* ── shadcn / Tailwind primitives (HSL channels) ───────── */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 96.1%;
-    --card: 222.2 47.4% 11.2%;
-    --card-foreground: 210 40% 96.1%;
-    --popover: 222.2 47.4% 11.2%;
-    --popover-foreground: 210 40% 96.1%;
-    --primary: 24.6 95% 53.1%;
+    --background:         222 47% 5%;
+    --foreground:         210 40% 94%;
+    --card:               220 40% 8%;
+    --card-foreground:    210 40% 94%;
+    --popover:            220 40% 8%;
+    --popover-foreground: 210 40% 94%;
+    --primary:            24.6 95% 53.1%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 96.1%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 96.1%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 96.1%;
-    --border: 215.3 25% 26.7%;
-    --input: 215.3 25% 26.7%;
-    --ring: 24.6 95% 53.1%;
-    --radius: 0.5rem;
+    --secondary:          220 30% 14%;
+    --secondary-foreground: 210 40% 94%;
+    --muted:              220 30% 14%;
+    --muted-foreground:   215 20% 55%;
+    --accent:             220 30% 14%;
+    --accent-foreground:  210 40% 94%;
+    --destructive:        0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 94%;
+    --border:             220 25% 20%;
+    --input:              220 25% 20%;
+    --ring:               24.6 95% 53.1%;
+    --radius:             0.625rem;
 }
 
 :root.light {
     /* ── Brand ─────────────────────────────────────────────── */
-    --brand: #FF6B35;
+    --brand:       #FF6B35;
     --brand-hover: #ea580c;
-    --brand-glow: rgba(255,107,53,0.18);
+    --brand-glow:  rgba(255,107,53,0.16);
 
-    /* ── App surfaces ──────────────────────────────────────── */
-    --app-bg: #f0f0f2;
-    --surface: #ffffff;
-    --surface-raised: #f4f4f5;
-    --surface-inset: #fafafa;
-    --surface-overlay: rgba(0,0,0,0.6);
+    /* ── App background — warm frosted field ───────────────── */
+    --app-bg: linear-gradient(
+        150deg,
+        #e8ecf4 0%,
+        #eef1f8 40%,
+        #f0eef6 75%,
+        #e9ecf5 100%
+    );
+
+    /* ── Glass surfaces — white-tinted frosted glass ────────── */
+    --surface:         rgba(255,255,255,0.72);
+    --surface-raised:  rgba(255,255,255,0.88);
+    --surface-inset:   rgba(255,255,255,0.50);
+    --surface-overlay: rgba(0,0,0,0.45);
 
     /* ── Text ──────────────────────────────────────────────── */
-    --heading: #0a0a0a;
-    --body: #71717a;
-    --caption: #a1a1aa;
-    --faint: rgba(0,0,0,0.28);
+    --heading: #0d1117;
+    --body:    rgba(30,40,60,0.65);
+    --caption: rgba(30,40,60,0.45);
+    --faint:   rgba(0,0,0,0.18);
 
     /* ── Borders & dividers ────────────────────────────────── */
-    --edge: #e5e5e5;
-    --edge-strong: #d4d4d8;
-    --edge-subtle: rgba(0,0,0,0.09);
+    --edge:        rgba(0,0,0,0.10);
+    --edge-strong: rgba(0,0,0,0.16);
+    --edge-subtle: rgba(0,0,0,0.06);
 
     /* ── Sidebar shell ─────────────────────────────────────── */
-    --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-    --sidebar-border: rgba(0,0,0,0.09);
-    --sidebar-label: rgba(0,0,0,0.28);
-    --sidebar-nav-text: rgba(0,0,0,0.45);
-    --sidebar-nav-hover-bg: rgba(0,0,0,0.05);
-    --sidebar-nav-hover-text: rgba(0,0,0,0.8);
-    --sidebar-nav-active-bg: rgba(0,0,0,0.07);
-    --sidebar-nav-active-border: rgba(0,0,0,0.11);
-    --sidebar-nav-active-text: #0f0f0f;
-    --sidebar-nav-active-icon-bg: rgba(0,0,0,0.09);
-    --sidebar-nav-active-icon-color: #0f0f0f;
-    --sidebar-icon-bg: rgba(0,0,0,0.05);
-    --sidebar-icon-color: rgba(0,0,0,0.35);
-    --sidebar-card-bg: rgba(0,0,0,0.04);
-    --sidebar-card-border: rgba(0,0,0,0.08);
-    --sidebar-name: #0f0f0f;
-    --sidebar-email: rgba(0,0,0,0.38);
-    --sidebar-btn-bg: rgba(0,0,0,0.05);
-    --sidebar-btn-border: rgba(0,0,0,0.09);
-    --sidebar-btn-color: rgba(0,0,0,0.4);
-    --sidebar-btn-hover-bg: rgba(0,0,0,0.09);
-    --sidebar-btn-hover-color: #0f0f0f;
-    --sidebar-mobile-bg: #ffffff;
+    --sidebar-bg:                    rgba(255,255,255,0.68);
+    --sidebar-border:                rgba(0,0,0,0.10);
+    --sidebar-label:                 rgba(30,40,60,0.40);
+    --sidebar-nav-text:              rgba(30,40,60,0.45);
+    --sidebar-nav-hover-bg:          rgba(0,0,0,0.05);
+    --sidebar-nav-hover-text:        #0d1117;
+    --sidebar-nav-active-bg:         rgba(255,107,53,0.09);
+    --sidebar-nav-active-border:     rgba(255,107,53,0.22);
+    --sidebar-nav-active-text:       #0d1117;
+    --sidebar-nav-active-icon-bg:    rgba(255,107,53,0.14);
+    --sidebar-nav-active-icon-color: #e05a24;
+    --sidebar-icon-bg:               rgba(0,0,0,0.06);
+    --sidebar-icon-color:            rgba(30,40,60,0.40);
+    --sidebar-card-bg:               rgba(255,255,255,0.60);
+    --sidebar-card-border:           rgba(0,0,0,0.09);
+    --sidebar-name:                  #0d1117;
+    --sidebar-email:                 rgba(30,40,60,0.45);
+    --sidebar-btn-bg:                rgba(0,0,0,0.05);
+    --sidebar-btn-border:            rgba(0,0,0,0.10);
+    --sidebar-btn-color:             rgba(30,40,60,0.50);
+    --sidebar-btn-hover-bg:          rgba(0,0,0,0.09);
+    --sidebar-btn-hover-color:       #0d1117;
+    --sidebar-mobile-bg:             rgba(240,242,248,0.95);
 
-    /* ── Header bar ────────────────────────────────────────── */
-    --header-bg: rgba(255,255,255,0.9);
-    --header-border: rgba(0,0,0,0.08);
-    --header-btn-bg: #ffffff;
-    --header-btn-border: rgba(0,0,0,0.1);
-    --header-btn-color: #000000;
+    /* ── Header bar ─────────────────────────────────────────── */
+    --header-bg:         rgba(255,255,255,0.80);
+    --header-border:     rgba(0,0,0,0.09);
+    --header-btn-bg:     rgba(255,255,255,0.85);
+    --header-btn-border: rgba(0,0,0,0.11);
+    --header-btn-color:  #0d1117;
 
     /* ── Toast / popover chrome ─────────────────────────────── */
-    --toast-bg: #ffffff;
-    --toast-border: rgba(0,0,0,0.09);
-    --toast-title: #0f0f0f;
-    --toast-desc: rgba(0,0,0,0.45);
-    --toast-close-bg: rgba(0,0,0,0.05);
-    --toast-close-color: rgba(0,0,0,0.35);
-    --toast-close-hover: #0f0f0f;
-    --toast-close-hover-bg: rgba(0,0,0,0.1);
+    --toast-bg:            rgba(255,255,255,0.92);
+    --toast-border:        rgba(0,0,0,0.09);
+    --toast-title:         #0d1117;
+    --toast-desc:          rgba(30,40,60,0.55);
+    --toast-close-bg:      rgba(0,0,0,0.05);
+    --toast-close-color:   rgba(30,40,60,0.40);
+    --toast-close-hover:   #0d1117;
+    --toast-close-hover-bg: rgba(0,0,0,0.10);
 
     /* ── shadcn / Tailwind primitives (HSL channels) ───────── */
-    --background: 240 6.7% 94.5%;
-    --foreground: 0 0% 5.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 5.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5.9%;
-    --primary: 17.6 100% 60.2%;
+    --background:         220 20% 94%;
+    --foreground:         220 25% 7%;
+    --card:               0 0% 100%;
+    --card-foreground:    220 25% 7%;
+    --popover:            0 0% 100%;
+    --popover-foreground: 220 25% 7%;
+    --primary:            17.6 100% 60.2%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 4.8% 92%;
-    --secondary-foreground: 0 0% 5.9%;
-    --muted: 240 4.8% 95.1%;
-    --muted-foreground: 0 0% 47.1%;
-    --accent: 240 4.8% 92%;
-    --accent-foreground: 0 0% 5.9%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary:          220 15% 92%;
+    --secondary-foreground: 220 25% 7%;
+    --muted:              220 15% 95%;
+    --muted-foreground:   220 10% 42%;
+    --accent:             220 15% 92%;
+    --accent-foreground:  220 25% 7%;
+    --destructive:        0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 5.9% 87.1%;
-    --input: 240 5.9% 87.1%;
-    --ring: 17.6 100% 60.2%;
-    --radius: 0.5rem;
+    --border:             220 15% 87%;
+    --input:              220 15% 87%;
+    --ring:               17.6 100% 60.2%;
+    --radius:             0.625rem;
 }
 
 html {
     transition: background-color 300ms ease, color 300ms ease;
     color-scheme: dark;
-    background-color: #0f0f0f;
+    /* Fallback before gradient renders */
+    background-color: #050814;
 }
 
 html.light {
     color-scheme: light;
-    background-color: #ffffff;
+    background-color: #e8ecf4;
 }
 
 body {
-    background: #0f0f0f;
-    color: #e5e5e5;
+    background: var(--app-bg);
+    /* Fixed attachment keeps gradient static behind glass while content scrolls */
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--heading);
     font-family: 'DM Sans', sans-serif;
-    transition: background-color 300ms ease, color 300ms ease, background-image 300ms ease;
-    /* Prevent horizontal scroll on iOS */
+    transition: background-color 300ms ease, color 300ms ease;
     overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', 'DM Sans', sans-serif;
 }
 
 /* Fix iOS Safari 100vh bug — min-h-screen uses dvh where supported */
@@ -217,8 +240,45 @@ body {
 }
 
 html.light body {
-    background: #f0f0f2;
-    color: #0f0f0f;
+    background: var(--app-bg);
+    background-attachment: fixed;
+    color: var(--heading);
+}
+
+/* ============================================================
+   GLASS UTILITY CLASSES — Glassmorphism system
+   Apply to surfaces that should render as frosted glass.
+   The viewport-fixed gradient on body provides the backdrop.
+   ============================================================ */
+
+/* Standard cards, panels, stat blocks */
+.glass-surface {
+    backdrop-filter: blur(18px) saturate(1.5);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+}
+
+/* Modals, dropdowns, elevated popovers */
+.glass-raised {
+    backdrop-filter: blur(24px) saturate(1.7);
+    -webkit-backdrop-filter: blur(24px) saturate(1.7);
+}
+
+/* Sidebar — strong blur, more structural feel */
+.glass-sidebar {
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
+}
+
+/* Header strip */
+.glass-header {
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+}
+
+/* Subtle — row hovers, inline chips */
+.glass-inset {
+    backdrop-filter: blur(10px) saturate(1.3);
+    -webkit-backdrop-filter: blur(10px) saturate(1.3);
 }
 
 /* ============================================================
@@ -354,8 +414,8 @@ html.light .placeholder-slate-500::placeholder { color: rgba(0,0,0,0.3) !importa
 html.light input:not([type="checkbox"]):not([type="radio"]),
 html.light select,
 html.light textarea {
-    background-color: #ffffff !important;
-    color: #0f0f0f !important;
+    background-color: rgba(255,255,255,0.85) !important;
+    color: #0d1117 !important;
     border-color: rgba(0,0,0,0.12) !important;
 }
 html.light input:disabled,
@@ -367,12 +427,14 @@ html.light textarea:disabled {
 
 /* ── Sidebar & layout shells ───────────────────────────────── */
 html.light aside {
-    background-color: #ffffff !important;
-    border-color: rgba(0,0,0,0.09) !important;
+    /* Let CSS variable handle glass sidebar in light mode */
+    background: var(--sidebar-bg) !important;
+    background-color: unset !important;
+    border-color: var(--sidebar-border) !important;
 }
 html.light aside .border-b,
 html.light aside .border-t {
-    border-color: rgba(0,0,0,0.09) !important;
+    border-color: var(--sidebar-border) !important;
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────── */
@@ -380,9 +442,9 @@ html.light .scrollbar-thumb-slate-800 { scrollbar-color: rgba(0,0,0,0.15) transp
 html.light ::-webkit-scrollbar-thumb  { background-color: rgba(0,0,0,0.15); }
 
 /* ── Shadows ───────────────────────────────────────────────── */
-html.light .shadow-xl   { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.07), 0 8px 10px -6px rgba(0,0,0,0.04) !important; }
-html.light .shadow-2xl  { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1) !important; }
-html.light .shadow-lg   { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04) !important; }
+html.light .shadow-xl   { box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06) !important; }
+html.light .shadow-2xl  { box-shadow: 0 16px 48px rgba(0,0,0,0.14) !important; }
+html.light .shadow-lg   { box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05) !important; }
 
 /* ── Login page ────────────────────────────────────────────── */
 html.light .min-h-screen.bg-black     { background-color: #f0f0f2 !important; }

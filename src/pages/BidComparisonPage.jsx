@@ -1,150 +1,20 @@
-<<<<<<< HEAD
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/customSupabaseClient';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { Award, DollarSign, Clock, Shield } from 'lucide-react';
-import ControlCentreLayout from '@/components/ControlCentreLayout';
-=======
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
-import { fetchBidsForOrder, awardBid, updateBidStatus } from '@/services/bidService';
+import { fetchBidsForOrder, awardBid } from '@/services/bidService';
 import { fetchOrderById } from '@/services/orderService';
 import { createNotification } from '@/lib/createNotification';
 import { createAuditLog } from '@/lib/auditLogger';
 import { format } from 'date-fns';
 import {
-  Gavel, Trophy, XCircle, ArrowLeft, Clock, DollarSign,
-  Star, Building2, FileText, ChevronDown, ChevronUp, Loader2, CheckCircle2,
+  Gavel, Trophy, ArrowLeft, Clock, DollarSign,
+  Building2, FileText, ChevronDown, ChevronUp, Loader2, CheckCircle2,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
->>>>>>> f2b56e8ef31c7e44cb81ed10e0035c92980644a1
 
-<<<<<<< HEAD
-export default function BidComparisonPage() {
-  const { orderId } = useParams();
-  const navigate = useNavigate();
-  const { currentUser } = useAuth();
-  const { toast } = useToast();
-  const [order, setOrder] = useState(null);
-  const [bids, setBids] = useState([]);
-  const [selectedBidId, setSelectedBidId] = useState(null);
-
-  useEffect(() => {
-    fetchData();
-  }, [orderId]);
-
-  const fetchData = async () => {
-    const { data: ord } = await supabase.from('orders').select('*').eq('id', orderId).single();
-    if (ord) setOrder(ord);
-
-    const { data: bds } = await supabase.from('bid_submissions').select('*, supplier:supplier_id(company_name, email)').eq('tender_id', orderId);
-    if (bds) setBids(bds);
-  };
-
-  const handleAward = async () => {
-    if (!selectedBidId) {
-      toast({ title: 'Error', description: 'Please select a bid.', variant: 'destructive' });
-      return;
-    }
-
-    try {
-      const selectedBid = bids.find(b => b.id === selectedBidId);
-
-      await supabase.from('orders').update({
-        order_status: 'AWARDED',
-        supplier_id: selectedBid.supplier_id,
-        buy_price: selectedBid.unit_price,
-        rz_job_id: `RZ-JOB-${Math.floor(Math.random() * 100000)}`
-      }).eq('id', orderId);
-
-      // Update winning bid status
-      await supabase.from('bid_submissions').update({ status: 'accepted' }).eq('id', selectedBidId);
-
-      // Update losing bid statuses
-      const losingBidIds = bids.filter(b => b.id !== selectedBidId).map(b => b.id);
-      if (losingBidIds.length > 0) {
-        await supabase.from('bid_submissions').update({ status: 'rejected' }).in('id', losingBidIds);
-      }
-
-      toast({ title: 'Success', description: 'Contract awarded successfully.' });
-      navigate('/control-centre/bid-management');
-    } catch (err) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
-    }
-  };
-
-  if (!order) return <ControlCentreLayout><div className="p-8 text-slate-300">Loading...</div></ControlCentreLayout>;
-
-  return (
-    <ControlCentreLayout>
-      <div className="max-w-6xl mx-auto py-8 space-y-8">
-        <h1 className="text-3xl font-bold text-slate-100">Compare Bids: <span className="text-cyan-400">{order.ghost_public_name}</span></h1>
-        
-        <div className="bg-[#0f172a] p-6 rounded-lg shadow-xl border border-slate-800 grid grid-cols-3 gap-6">
-          <div className="flex flex-col items-center p-4 bg-[#1e293b] rounded-lg border border-slate-700">
-            <DollarSign className="text-cyan-500 mb-2" size={24} />
-            <span className="text-slate-400 text-sm">Target Price</span>
-            <span className="text-xl font-bold text-slate-100">${order.target_sell_price}</span>
-          </div>
-          <div className="flex flex-col items-center p-4 bg-[#1e293b] rounded-lg border border-slate-700">
-            <Shield className="text-amber-500 mb-2" size={24} />
-            <span className="text-slate-400 text-sm">Quantity</span>
-            <span className="text-xl font-bold text-slate-100">{order.quantity}</span>
-          </div>
-          <div className="flex flex-col items-center p-4 bg-[#1e293b] rounded-lg border border-slate-700">
-            <Clock className="text-emerald-500 mb-2" size={24} />
-            <span className="text-slate-400 text-sm">Bids Received</span>
-            <span className="text-xl font-bold text-slate-100">{bids.length}</span>
-          </div>
-        </div>
-
-        <div className="bg-[#0f172a] rounded-lg shadow-xl border border-slate-800 overflow-hidden">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#1e293b] border-b border-slate-800 text-slate-300">
-              <tr>
-                <th className="p-4 w-16">Select</th>
-                <th className="p-4">Supplier</th>
-                <th className="p-4">Quote Price</th>
-                <th className="p-4">Lead Time</th>
-                <th className="p-4">Notes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-200">
-              {bids.map(bid => (
-                <tr key={bid.id} className={`hover:bg-slate-800/50 transition-colors ${selectedBidId === bid.id ? 'bg-cyan-900/20' : ''}`}>
-                  <td className="p-4">
-                    <input type="radio" name="bidSelection" checked={selectedBidId === bid.id} onChange={() => setSelectedBidId(bid.id)} className="h-5 w-5 rounded-full border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500 cursor-pointer" />
-                  </td>
-                  <td className="p-4 font-semibold text-slate-100">{bid.supplier?.company_name || bid.supplier?.email || 'Unknown'}</td>
-                  <td className={`p-4 font-bold ${parseFloat(bid.unit_price) <= parseFloat(order.target_sell_price) ? 'text-green-400' : 'text-amber-400'}`}>
-                    ${bid.unit_price}
-                  </td>
-                  <td className="p-4">{bid.lead_time_days} days</td>
-                  <td className="p-4 text-slate-400 text-xs max-w-xs truncate">{bid.notes || 'N/A'}</td>
-                </tr>
-              ))}
-              {bids.length === 0 && (
-                <tr><td colSpan="5" className="p-8 text-center text-slate-500">No bids received yet.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <Button onClick={handleAward} size="lg" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-6 text-lg shadow-lg shadow-emerald-900/20" disabled={bids.length === 0 || !selectedBidId}>
-          <Award className="mr-2" size={24} /> AWARD CONTRACT
-        </Button>
-      </div>
-    </ControlCentreLayout>
-  );
-}
-=======
 const WEIGHT_PRICE = 0.5;
 const WEIGHT_LEAD = 0.3;
 const WEIGHT_NOTES = 0.2;
@@ -178,7 +48,7 @@ export default function BidComparisonPage() {
   const [loading, setLoading] = useState(true);
   const [awarding, setAwarding] = useState(null);
   const [expandedBid, setExpandedBid] = useState(null);
-  const [awardLetterBid, setAwardLetterBid] = useState(null); // bid pending confirmation in modal
+  const [awardLetterBid, setAwardLetterBid] = useState(null);
 
   useEffect(() => { loadData(); }, [orderId]);
 
@@ -381,6 +251,7 @@ export default function BidComparisonPage() {
           </>
         )}
       </div>
+
       {/* Award Letter confirmation modal */}
       <Dialog open={!!awardLetterBid} onOpenChange={open => { if (!open) setAwardLetterBid(null); }}>
         <DialogContent className="sm:max-w-md rounded-2xl bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#232329] shadow-xl">
@@ -438,5 +309,3 @@ export default function BidComparisonPage() {
     </ControlCentreLayout>
   );
 }
-
->>>>>>> f2b56e8ef31c7e44cb81ed10e0035c92980644a1
