@@ -22,3 +22,20 @@ From the project root: `npx supabase db push` (after `supabase link`).
 ---
 
 **Note:** The migration uses `is_super_admin()` from `20260314000000_workspace_tenancy.sql`. If you get "function is_super_admin() does not exist", run that migration first.
+
+---
+
+## Demo approval email (Resend)
+
+When you **Approve & send link**, the `approve-demo-request` Edge Function sends the demo link by email via [Resend](https://resend.com). If the requester does not receive the email:
+
+1. **Set Edge Function secrets** in Supabase Dashboard:
+   - **Project** → **Edge Functions** → **approve-demo-request** → **Secrets** (or **Settings**).
+   - Add:
+     - `RESEND_API_KEY` — your [Resend API key](https://resend.com/api-keys).
+     - (Optional) `RESEND_FROM` — sender address, e.g. `RZ Global Solutions <noreply@yourdomain.com>`. Default is `RZ Global Solutions <noreply@rzglobalsolutions.co.uk>`.
+2. In Resend, **verify the sending domain** for the address you use in `RESEND_FROM`.
+3. Redeploy the function after changing secrets:  
+   `npx supabase functions deploy approve-demo-request`
+
+If the key is missing, the UI will show **Approved (email not sent)** with the reason after you approve a request.

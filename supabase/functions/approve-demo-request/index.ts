@@ -27,9 +27,8 @@ Deno.serve(async (req) => {
     const supabaseAuth = createClient(url, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
-    const userId = claimsData?.claims?.sub;
-    if (claimsError || !userId) {
+    const { data: { user: caller }, error: userError } = await supabaseAuth.auth.getUser(token);
+    if (userError || !caller) {
       return new Response(JSON.stringify({ error: 'Invalid or expired session' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 401,
@@ -40,7 +39,7 @@ Deno.serve(async (req) => {
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('role, admin_scope')
-      .eq('id', userId)
+      .eq('id', caller.id)
       .single();
 
     const isSuperAdmin =
@@ -87,7 +86,7 @@ Deno.serve(async (req) => {
         status: 'approved',
         token: demoToken,
         approved_at: new Date().toISOString(),
-        approved_by: userId,
+        approved_by: caller.id,
       })
       .eq('id', request_id);
 
@@ -96,6 +95,23 @@ Deno.serve(async (req) => {
     const siteUrl = Deno.env.get('SITE_URL') || Deno.env.get('REFERER') || 'https://www.portal.rzglobalsolutions.com';
     const demoLink = `${siteUrl.replace(/\/$/, '')}/demo?token=${demoToken}`;
 
+    let emailHtml: string;
+    try {
+      const templatePath = new URL('./demo-approved.html', import.meta.url);
+      emailHtml = await Deno.readTextFile(templatePath);
+      emailHtml = emailHtml.replace(/\{\{DEMO_LINK\}\}/g, demoLink);
+    } catch {
+      emailHtml = `
+        <p>Your request for demo access has been approved.</p>
+        <p>Click the link below to open the demo. The demo resets to default on every refresh.</p>
+        <p><a href="${demoLink}" style="color:#FF6B35;font-weight:bold;">Open demo</a></p>
+        <p>Or copy this link: ${demoLink}</p>
+        <p>— RZ Global Solutions</p>
+      `;
+    }
+
+    let emailSent = false;
+    let emailError: string | null = null;
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (resendKey) {
       const emailRes = await fetch('https://api.resend.com/emails', {
@@ -108,25 +124,24 @@ Deno.serve(async (req) => {
           from: Deno.env.get('RESEND_FROM') || 'RZ Global Solutions <noreply@rzglobalsolutions.co.uk>',
           to: [row.email],
           subject: 'Your demo access is ready',
-          html: `
-            <p>Your request for demo access has been approved.</p>
-            <p>Click the link below to open the demo. The demo resets to default on every refresh.</p>
-            <p><a href="${demoLink}" style="color:#FF6B35;font-weight:bold;">Open demo</a></p>
-            <p>Or copy this link: ${demoLink}</p>
-            <p>— RZ Global Solutions</p>
-          `,
+          html: emailHtml,
         }),
       });
-      if (!emailRes.ok) {
+      if (emailRes.ok) {
+        emailSent = true;
+      } else {
         const errBody = await emailRes.text();
         console.error('Resend error:', errBody);
+        emailError = errBody || `HTTP ${emailRes.status}`;
       }
+    } else {
+      emailError = 'RESEND_API_KEY not set. Add it in Supabase Dashboard → Edge Functions → approve-demo-request → Secrets.';
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({ success: true, email_sent: emailSent, email_error: emailError ?? undefined }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+    );
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -29,8 +29,17 @@ export default function PlatformDemoRequestsPage() {
   const handleApprove = async (id) => {
     setApprovingId(id);
     try {
-      await approveDemoRequest(id);
-      toast({ title: 'Approved', description: 'Demo access email has been sent to the requester.' });
+      const result = await approveDemoRequest(id);
+      if (result?.email_sent) {
+        toast({ title: 'Approved', description: 'Demo access email has been sent to the requester.' });
+      } else {
+        const reason = result?.email_error || 'Email not configured (RESEND_API_KEY).';
+        toast({
+          title: 'Approved (email not sent)',
+          description: reason,
+          variant: 'destructive',
+        });
+      }
       load();
     } catch (e) {
       const hint = getNetworkErrorHint(e?.message);
