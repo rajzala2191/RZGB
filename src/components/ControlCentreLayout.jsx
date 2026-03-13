@@ -109,12 +109,9 @@ const ControlCentreLayout = ({ children }) => {
                 style={{ background: 'rgba(148,163,184,0.07)', border: '1px solid rgba(148,163,184,0.1)' }}
               >
                 <img
-                  src={isDark
-                    ? "https://horizons-cdn.hostinger.com/23dd5419-ae91-4a08-9a43-379efd2912c4/572f4264785907121da08b9cd8e3daf2.png"
-                    : "/zaproc-logo-192.png"
-                  }
-                  alt="RZ"
-                  className="h-5 w-auto object-contain"
+                  src="/zaproc-logo-192.png"
+                  alt="Zaproc"
+                  className="h-6 w-6 object-contain rounded"
                 />
               </div>
               <div>

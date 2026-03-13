@@ -75,7 +75,6 @@ export default function PublicNav({ activePage }) {
               src="/zaproc-logo-192.png"
               alt="Zaproc"
               className="h-8 w-8 object-contain rounded-lg transition-all"
-              style={isDark ? { filter: 'brightness(0) invert(1)', opacity: 0.9 } : {}}
             />
             <div className="hidden sm:flex flex-col leading-none gap-0.5">
               <span className="text-base font-black tracking-tight transition-colors" style={{ color: 'var(--heading)' }}>
