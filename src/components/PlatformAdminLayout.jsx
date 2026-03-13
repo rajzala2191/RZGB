@@ -232,7 +232,7 @@ function PlatformAdminLayout() {
           </div>
         </aside>
 
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden lg:ml-72">
           <header
             className="flex items-center gap-2 sm:gap-6 px-4 sm:px-8 py-3 border-b shrink-0"
             style={{

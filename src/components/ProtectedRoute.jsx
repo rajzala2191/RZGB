@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
   }, [currentUser, userRole, skipOnboardingCheck]);
 
   useEffect(() => {
-    if (!currentUser || (userRole !== 'admin' && userRole !== 'super_admin')) return;
+    if (!currentUser || userRole !== 'admin') return;
     if (localStorage.getItem('rzgb-demo-session')) { setMfaVerified(true); return; }
     setMfaLoading(true);
     supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data }) => {
@@ -38,7 +38,8 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
     });
   }, [currentUser, userRole]);
 
-  if (loading || (currentUser && !userRole) || onboardingLoading || mfaLoading) {
+  const mfaApplies = userRole === 'admin';
+  if (loading || (currentUser && !userRole) || onboardingLoading || (mfaApplies && mfaLoading)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="flex flex-col items-center gap-4">
@@ -53,13 +54,11 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if ((userRole === 'admin' || userRole === 'super_admin') && mfaVerified === false) {
-    const isSettingsPath = userRole === 'super_admin'
-      ? location.pathname.startsWith('/platform-admin/settings')
-      : location.pathname.startsWith('/control-centre/settings');
+  // Require MFA only for customer admins (control-centre); super_admin can use platform-admin without MFA
+  if (userRole === 'admin' && mfaVerified === false) {
+    const isSettingsPath = location.pathname.startsWith('/control-centre/settings');
     if (!isSettingsPath) {
-      const settingsPath = userRole === 'super_admin' ? '/platform-admin/settings?mfa=required' : '/control-centre/settings?mfa=required';
-      return <Navigate to={settingsPath} state={{ from: location }} replace />;
+      return <Navigate to="/control-centre/settings?mfa=required" state={{ from: location }} replace />;
     }
   }
 
