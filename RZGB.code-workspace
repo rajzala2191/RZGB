@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "RZGB",
+			"path": "."
+		}
+	],
+	"settings": {
+		"remote.autoForwardPorts": true,
+		"remote.portsAttributes": {
+			"3000": {
+				"label": "Vite dev server (RZGB app)",
+				"onAutoForward": "notify"
+			}
+		}
+	}
+}

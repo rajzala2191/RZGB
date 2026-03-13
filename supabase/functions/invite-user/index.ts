@@ -31,12 +31,21 @@ Deno.serve(async (req)=>{
     });
     if (authError) throw authError;
     const userId = authData.user.id;
-    // Update profile
-    await supabaseAdmin.from('profiles').update({
-      role: role,
-      company_name: company_name,
-      is_verified: true
-    }).eq('id', userId);
+    const defaultWorkspaceId = '00000000-0000-0000-0000-000000000001';
+    // Upsert profile so it exists for login (invite does not trigger DB profile creation in all setups)
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .upsert(
+        {
+          id: userId,
+          role,
+          company_name: company_name ?? null,
+          workspace_id: defaultWorkspaceId,
+          is_verified: true,
+        },
+        { onConflict: 'id' }
+      );
+    if (profileError) throw new Error(`Profile setup failed: ${profileError.message}`);
     return new Response(JSON.stringify({
       success: true,
       user_id: userId

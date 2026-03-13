@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
   const [workspaceId, setWorkspaceId] = useState(null);
   const [adminScope, setAdminScope] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileError, setProfileError] = useState(null);
 
   const isSuperAdmin = userRole === 'super_admin' || (userRole === 'admin' && adminScope === 'platform');
   const isCustomerAdmin = userRole === 'admin' && adminScope === 'workspace';
@@ -37,6 +38,8 @@ export const AuthProvider = ({ children }) => {
     setWorkspaceId(null);
     setAdminScope(null);
   }, []);
+
+  const clearProfileError = useCallback(() => setProfileError(null), []);
 
   const logActivity = async (userId, action, status, details) => {
     try {
@@ -92,6 +95,7 @@ export const AuthProvider = ({ children }) => {
             setCurrentUser(session.user);
             const profileOk = await fetchUserProfile(session.user.id);
             if (!profileOk) {
+              setProfileError('Your account is not fully set up. Please contact your administrator.');
               await signOut();
               setCurrentUser(null);
               clearProfileState();
@@ -118,6 +122,7 @@ export const AuthProvider = ({ children }) => {
           setCurrentUser(session.user);
           const profileOk = await fetchUserProfile(session.user.id);
           if (!profileOk && event !== 'SIGNED_OUT') {
+            setProfileError('Your account is not fully set up. Please contact your administrator.');
             await signOut();
             setCurrentUser(null);
             clearProfileState();
@@ -138,6 +143,7 @@ export const AuthProvider = ({ children }) => {
   }, [clearProfileState, fetchUserProfile]);
 
   const login = async (email, password) => {
+    setProfileError(null);
     try {
       const { data, error } = await signInWithPassword({
         email,
@@ -158,6 +164,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      setProfileError(null);
       await signOut();
       setCurrentUser(null);
       clearProfileState();
@@ -178,6 +185,8 @@ export const AuthProvider = ({ children }) => {
     isCustomerAdmin,
     canAccessWorkspace,
     loading,
+    profileError,
+    clearProfileError,
     login,
     logout,
     refreshProfile: async () => {

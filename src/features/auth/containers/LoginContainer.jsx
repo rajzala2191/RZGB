@@ -15,7 +15,7 @@ const OTP_LENGTH = Number(import.meta.env.VITE_EMAIL_OTP_LENGTH || 6);
 export default function LoginContainer() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, currentUser, userRole } = useAuth();
+  const { login, currentUser, userRole, profileError, clearProfileError } = useAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState('');
@@ -66,18 +66,23 @@ export default function LoginContainer() {
   useEffect(() => {
     if (showForgotPassword) return;
     if (currentUser && userRole) {
+      toast({
+        title: 'Welcome Back',
+        description: 'Successfully logged in to RZ Portal.',
+      });
       if (userRole === 'super_admin') navigate('/platform-admin', { replace: true });
       else if (userRole === 'admin') navigate('/control-centre', { replace: true });
       else if (userRole === 'client') navigate('/client-dashboard', { replace: true });
       else if (userRole === 'supplier') navigate('/supplier-hub', { replace: true });
       else navigate('/', { replace: true });
     }
-  }, [currentUser, userRole, navigate, showForgotPassword]);
+  }, [currentUser, userRole, navigate, showForgotPassword, toast]);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    clearProfileError();
 
     try {
       const { error: loginError } = await login(email, password);
@@ -89,12 +94,8 @@ export default function LoginContainer() {
           description: loginError.message || 'Please check your credentials and try again.',
           variant: 'destructive',
         });
-      } else {
-        toast({
-          title: 'Welcome Back',
-          description: 'Successfully logged in to RZ Portal.',
-        });
       }
+      // Success toast is shown in useEffect when currentUser + userRole are set (redirect ready)
     } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {
@@ -217,6 +218,7 @@ export default function LoginContainer() {
       password={password}
       loading={loading}
       error={error}
+      profileError={profileError}
       showForgotPassword={showForgotPassword}
       onEmailChange={(e) => setEmail(e.target.value)}
       onPasswordChange={(e) => setPassword(e.target.value)}

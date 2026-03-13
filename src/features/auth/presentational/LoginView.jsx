@@ -21,6 +21,7 @@ export default function LoginView({
   password,
   loading,
   error,
+  profileError,
   showForgotPassword,
   onEmailChange,
   onPasswordChange,
@@ -242,7 +243,7 @@ export default function LoginView({
 
                   {/* Error */}
                   <AnimatePresence>
-                    {error && (
+                    {(profileError || error) && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
@@ -256,7 +257,7 @@ export default function LoginView({
                         role="alert"
                       >
                         <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
-                        <span>{error}</span>
+                        <span>{profileError || error}</span>
                       </motion.div>
                     )}
                   </AnimatePresence>
