@@ -149,7 +149,7 @@ No social proof is visible anywhere on the site. Add:
 | 5        | Separate components vs software business lines  | Half day  |
 | 6        | Add About page with founder story               | 2 hours   |
 | 7        | Add trust signals (quotes, logos, team)         | Ongoing   |
-| 8        | Launch `zaproc.com` as separate product domain  | Strategic |
+| 8        | Launch `zaproc.co.uk` + `zaproc.in` product sites | Strategic |
 
 Priorities 1–3 take a few hours and immediately stop the website from
 actively undermining the software business. Do those first.

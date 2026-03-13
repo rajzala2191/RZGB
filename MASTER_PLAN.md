@@ -248,7 +248,8 @@ Each phase is self-contained. We tackle them in order — no phase depends on a 
 |---|---|
 | Company | RZ Global Solutions |
 | Product | **Zaproc** |
-| Product domain | `zaproc.co.uk` |
+| Product domain (UK) | `zaproc.co.uk` |
+| Product domain (India) | `zaproc.in` |
 | Company domain | `rzglobalsolutions.co.uk` |
 | Product tagline | *"Manufacturing procurement intelligence"* |
 | Internal repo | RZGB (codename, keep as-is) |
