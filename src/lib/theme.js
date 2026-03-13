@@ -11,8 +11,8 @@
  * index.css — instead of hunting through dozens of files.
  */
 
-export const ACCENT      = '#FF6B35';
-export const ACCENT_GLOW = 'rgba(255,107,53,0.18)';
+export const ACCENT      = 'var(--brand)';
+export const ACCENT_GLOW = 'var(--brand-glow)';
 
 /**
  * Sidebar token object consumed by ControlCentreLayout,

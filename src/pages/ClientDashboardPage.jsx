@@ -39,10 +39,10 @@ const STATUS = {
   SANITIZED:           { label: 'Sanitised',      color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)', dot: '#8b5cf6' },
   OPEN_FOR_BIDDING:    { label: 'Open to Bid',    color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', dot: '#3b82f6' },
   BID_RECEIVED:        { label: 'Bid Received',   color: '#06b6d4', bg: 'rgba(6,182,212,0.1)',  dot: '#06b6d4' },
-  AWARDED:             { label: 'Awarded',         color: '#FF6B35', bg: 'rgba(255,107,53,0.1)', dot: '#FF6B35' },
-  MATERIAL:            { label: 'Material',        color: '#FF6B35', bg: 'rgba(255,107,53,0.1)', dot: '#FF6B35' },
-  CASTING:             { label: 'Casting',         color: '#FF6B35', bg: 'rgba(255,107,53,0.1)', dot: '#FF6B35' },
-  MACHINING:           { label: 'Machining',       color: '#FF6B35', bg: 'rgba(255,107,53,0.1)', dot: '#FF6B35' },
+  AWARDED:             { label: 'Awarded',         color: '#0f172a', bg: 'rgba(15,23,42,0.08)',  dot: '#0f172a' },
+  MATERIAL:            { label: 'Material',        color: '#0f172a', bg: 'rgba(15,23,42,0.08)',  dot: '#0f172a' },
+  CASTING:             { label: 'Casting',         color: '#0f172a', bg: 'rgba(15,23,42,0.08)',  dot: '#0f172a' },
+  MACHINING:           { label: 'Machining',       color: '#0f172a', bg: 'rgba(15,23,42,0.08)',  dot: '#0f172a' },
   QC:                  { label: 'QC',              color: '#a855f7', bg: 'rgba(168,85,247,0.1)', dot: '#a855f7' },
   DISPATCH:            { label: 'Dispatch',        color: '#10b981', bg: 'rgba(16,185,129,0.1)', dot: '#10b981' },
   DELIVERED:           { label: 'Delivered',       color: '#22c55e', bg: 'rgba(34,197,94,0.1)',  dot: '#22c55e' },
@@ -202,7 +202,7 @@ export default function ClientDashboardPage() {
         <div>
           <h1 className="text-2xl font-black tracking-tight leading-none" style={{ color: textPrimary }}>
             Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},{' '}
-            <span style={{ color: 'var(--brand)' }}>{userCompanyName || 'Partner'}</span>
+            <span style={{ color: 'var(--heading)' }}>{userCompanyName || 'Partner'}</span>
           </h1>
           <p className="mt-1.5 text-sm" style={{ color: textMuted }}>
             Here's an overview of your manufacturing pipeline.
@@ -213,7 +213,7 @@ export default function ClientDashboardPage() {
           whileTap={{ scale: 0.97 }}
           onClick={() => navigate('/client-dashboard/create-order')}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shrink-0"
-          style={{ background: 'linear-gradient(135deg, var(--brand), #f97316)', boxShadow: '0 4px 14px rgba(255,107,53,0.35)' }}
+          style={{ background: 'var(--brand)', color: 'var(--app-bg)', boxShadow: '0 2px 8px var(--brand-glow)' }}
         >
           <Sparkles size={15} />
           Create New Order
@@ -222,7 +222,7 @@ export default function ClientDashboardPage() {
 
       {/* ── Stats ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Total Orders"   value={totalOrders}     icon={Layers}      accent="var(--brand)" delay={0}    isDark={isDark} />
+        <StatCard label="Total Orders"   value={totalOrders}     icon={Layers}      accent="var(--heading)" delay={0}    isDark={isDark} />
         <StatCard label="In Progress"    value={activeOrders}    icon={TrendingUp}  accent="#3b82f6" delay={0.06} isDark={isDark} />
         <StatCard label="Delivered"      value={completedOrders} icon={CheckCircle} accent="#22c55e" delay={0.12} isDark={isDark} />
         <StatCard label="Pending Review" value={pendingReview}   icon={Clock}       accent="#f59e0b" delay={0.18} isDark={isDark}
@@ -252,7 +252,7 @@ export default function ClientDashboardPage() {
             <button
               onClick={() => navigate('/client-dashboard/orders')}
               className="flex items-center gap-1 text-xs font-semibold transition-opacity hover:opacity-70"
-              style={{ color: 'var(--brand)' }}
+              style={{ color: 'var(--heading)' }}
             >
               View all <ArrowRight size={13} />
             </button>
@@ -277,7 +277,7 @@ export default function ClientDashboardPage() {
                 <button
                   onClick={() => navigate('/client-dashboard/create-order')}
                   className="text-xs font-semibold transition-opacity hover:opacity-70"
-                  style={{ color: 'var(--brand)' }}
+                  style={{ color: 'var(--heading)' }}
                 >
                   Create your first order →
                 </button>
@@ -336,7 +336,7 @@ export default function ClientDashboardPage() {
               {totalOrders === 0 ? (
                 <p className="text-xs text-center py-4" style={{ color: textMuted }}>No data yet.</p>
               ) : [
-                { label: 'In Production',   count: orders.filter(o => ['MATERIAL','CASTING','MACHINING','QC'].includes(o.order_status)).length, color: '#FF6B35' },
+                { label: 'In Production',   count: orders.filter(o => ['MATERIAL','CASTING','MACHINING','QC'].includes(o.order_status)).length, color: '#475569' },
                 { label: 'Awaiting Dispatch', count: orders.filter(o => o.order_status === 'DISPATCH').length, color: '#3b82f6' },
                 { label: 'Delivered',        count: completedOrders, color: '#22c55e' },
                 { label: 'Under Review',     count: pendingReview,   color: '#f59e0b' },

@@ -14,9 +14,9 @@
 /* ── DARK MODE (default / :root) ─────────────────────────────── */
 :root {
     /* ── Brand ─────────────────────────────────────────────── */
-    --brand:       #FF6B35;
-    --brand-hover: #ea580c;
-    --brand-glow:  rgba(255,107,53,0.18);
+    --brand:       #f1f5f9;
+    --brand-hover: #ffffff;
+    --brand-glow:  rgba(241,245,249,0.12);
 
     /* ── App surfaces ──────────────────────────────────────── */
     --app-bg:          #0f172a;
@@ -43,11 +43,11 @@
     --sidebar-nav-text:              #64748b;
     --sidebar-nav-hover-bg:          rgba(255,255,255,0.05);
     --sidebar-nav-hover-text:        #f1f5f9;
-    --sidebar-nav-active-bg:         rgba(255,107,53,0.10);
-    --sidebar-nav-active-border:     rgba(255,107,53,0.22);
+    --sidebar-nav-active-bg:         rgba(255,255,255,0.08);
+    --sidebar-nav-active-border:     rgba(255,255,255,0.14);
     --sidebar-nav-active-text:       #f1f5f9;
-    --sidebar-nav-active-icon-bg:    rgba(255,107,53,0.16);
-    --sidebar-nav-active-icon-color: #FF6B35;
+    --sidebar-nav-active-icon-bg:    rgba(255,255,255,0.12);
+    --sidebar-nav-active-icon-color: #f1f5f9;
     --sidebar-icon-bg:               rgba(255,255,255,0.06);
     --sidebar-icon-color:            #64748b;
     --sidebar-card-bg:               #1e293b;
@@ -104,9 +104,9 @@
 /* ── LIGHT MODE (:root.light) ────────────────────────────────── */
 :root.light {
     /* ── Brand ─────────────────────────────────────────────── */
-    --brand:       #FF6B35;
-    --brand-hover: #ea580c;
-    --brand-glow:  rgba(255,107,53,0.12);
+    --brand:       #0f172a;
+    --brand-hover: #1e293b;
+    --brand-glow:  rgba(15,23,42,0.10);
 
     /* ── App surfaces ──────────────────────────────────────── */
     --app-bg:          #f8fafc;
@@ -133,11 +133,11 @@
     --sidebar-nav-text:              #64748b;
     --sidebar-nav-hover-bg:          #f1f5f9;
     --sidebar-nav-hover-text:        #0f172a;
-    --sidebar-nav-active-bg:         rgba(255,107,53,0.08);
-    --sidebar-nav-active-border:     rgba(255,107,53,0.20);
+    --sidebar-nav-active-bg:         #f1f5f9;
+    --sidebar-nav-active-border:     #e2e8f0;
     --sidebar-nav-active-text:       #0f172a;
-    --sidebar-nav-active-icon-bg:    rgba(255,107,53,0.12);
-    --sidebar-nav-active-icon-color: #ea580c;
+    --sidebar-nav-active-icon-bg:    #e2e8f0;
+    --sidebar-nav-active-icon-color: #0f172a;
     --sidebar-icon-bg:               #f1f5f9;
     --sidebar-icon-color:            #94a3b8;
     --sidebar-card-bg:               #f8fafc;
@@ -392,20 +392,20 @@ html.light .min-h-screen.bg-black     { background-color: #f8fafc !important; }
 /* ── Gradient cards ────────────────────────────────────────── */
 html.light .bg-gradient-to-br.from-gray-900 { background: #ffffff !important; }
 
-/* ── Orange accent ─────────────────────────────────────────── */
-html.light .text-orange-400   { color: #ea580c !important; }
-html.light .text-orange-500   { color: #ea580c !important; }
+/* ── Semantic accent colors — keep status colors readable ───── */
+html.light .text-orange-400   { color: #64748b !important; }
+html.light .text-orange-500   { color: #475569 !important; }
 html.light .text-emerald-400  { color: #059669 !important; }
 html.light .text-blue-400     { color: #2563eb !important; }
 
 /* Accent borders */
-html.light .border-orange-500\/20  { border-color: rgba(234,88,12,0.2) !important; }
-html.light .border-orange-500\/40  { border-color: rgba(234,88,12,0.4) !important; }
+html.light .border-orange-500\/20  { border-color: rgba(100,116,139,0.2) !important; }
+html.light .border-orange-500\/40  { border-color: rgba(100,116,139,0.4) !important; }
 html.light .border-blue-500\/20    { border-color: rgba(37,99,235,0.2) !important; }
 html.light .border-blue-500\/40    { border-color: rgba(37,99,235,0.4) !important; }
 
 /* ── Active nav items ──────────────────────────────────────── */
-html.light .bg-orange-500\/10   { background-color: rgba(234,88,12,0.08) !important; }
+html.light .bg-orange-500\/10   { background-color: rgba(15,23,42,0.06) !important; }
 html.light .bg-blue-500\/10     { background-color: rgba(37,99,235,0.06)  !important; }
 html.light .bg-emerald-500\/10  { background-color: rgba(5,150,105,0.06)  !important; }
 

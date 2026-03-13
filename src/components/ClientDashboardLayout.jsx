@@ -114,9 +114,9 @@ export default function ClientDashboardLayout({ children }) {
               onClick={() => setSidebarOpen(false)}
               className="flex items-center justify-center gap-2.5 w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
               style={{
-                background: isCreateOrderActive ? ACCENT : 'rgba(255,107,53,0.08)',
-                color: isCreateOrderActive ? '#fff' : ACCENT,
-                border: `1px solid ${isCreateOrderActive ? ACCENT : 'rgba(255,107,53,0.18)'}`,
+                background: isCreateOrderActive ? 'var(--brand)' : 'var(--surface-raised)',
+                color: isCreateOrderActive ? 'var(--app-bg)' : 'var(--heading)',
+                border: `1px solid ${isCreateOrderActive ? 'var(--brand)' : 'var(--edge)'}`,
               }}
             >
               <Zap size={15} />
