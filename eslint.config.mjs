@@ -4,7 +4,7 @@ import importPlugin from 'eslint-plugin-import';
 import globals from 'globals';
 
 export default [
-	{ ignores: ['node_modules/**', 'dist/**', 'build/**', 'vite.config.js'] },
+	{ ignores: ['node_modules/**', 'dist/**', 'build/**', 'vite.config.js', 'canva-connect-api-starter-kit/**'] },
 	{
 		files: ['**/*.js', '**/*.jsx'],
 		plugins: { react, 'react-hooks': reactHooks, import: importPlugin },
@@ -50,4 +50,5 @@ export default [
 		},
 	},
 	{ files: ['tools/**/*.js', 'tailwind.config.js'], languageOptions: { globals: globals.node } },
+	{ files: ['scripts/**/*.js', 'vitest.config.js'], languageOptions: { globals: globals.node } },
 ];

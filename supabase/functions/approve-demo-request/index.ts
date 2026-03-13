@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
 
     if (updateErr) throw updateErr;
 
-    const siteUrl = Deno.env.get('SITE_URL') || Deno.env.get('REFERER') || 'https://www.portal.rzglobalsolutions.com';
+    const siteUrl = Deno.env.get('SITE_URL') || Deno.env.get('REFERER') || 'https://portal.zaproc.co.uk';
     const demoLink = `${siteUrl.replace(/\/$/, '')}/demo?token=${demoToken}`;
 
     let emailHtml: string;
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: Deno.env.get('RESEND_FROM') || 'RZ Global Solutions <noreply@rzglobalsolutions.co.uk>',
+          from: Deno.env.get('RESEND_FROM') || 'Zaproc <noreply@zaproc.co.uk>',
           to: [row.email],
           subject: 'Your demo access is ready',
           html: emailHtml,

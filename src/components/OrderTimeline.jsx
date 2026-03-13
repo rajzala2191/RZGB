@@ -79,6 +79,14 @@ export default function OrderTimeline({
 }) {
   const scrollRef = useRef(null);
   const [expandedStages, setExpandedStages] = useState(new Set());
+  const stages = buildStages(selectedProcesses);
+
+  /* scroll active node into view — must run before any conditional return (rules of hooks) */
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const active = scrollRef.current.querySelector('[data-active="true"]');
+    if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [currentStatus]);
 
   const toggleStageExpand = (stageId) => {
     setExpandedStages(prev => {
@@ -87,7 +95,6 @@ export default function OrderTimeline({
       return next;
     });
   };
-  const stages = buildStages(selectedProcesses);
 
   const t = {
     card:           'var(--surface)',
@@ -141,13 +148,6 @@ export default function OrderTimeline({
   });
 
   const pct = currentIndex < 0 ? 0 : Math.round(((currentIndex + 1) / stages.length) * 100);
-
-  /* scroll active node into view */
-  useEffect(() => {
-    if (!scrollRef.current) return;
-    const active = scrollRef.current.querySelector('[data-active="true"]');
-    if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }, [currentStatus]);
 
   return (
     <div className="space-y-6">

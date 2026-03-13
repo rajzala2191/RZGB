@@ -5,13 +5,13 @@
 
 ## What the Site Currently Says
 
-From public search index (`rzglobalsolutions.co.uk/sectors`):
+From public search index (`zaproc.co.uk/sectors`):
 
 > "Precision-engineered components for the automotive, machinery, construction,
 > energy, and agriculture sectors"
 
 Primary CTA: **"Request a Free Quote"**
-Contact: `info@rzglobalsolutions.co.uk` / `+44 7436676209`
+Contact: `info@zaproc.co.uk` / `+44 7436676209`
 
 **That is a components supplier website. Not a software company website.**
 
@@ -104,7 +104,7 @@ visitors must understand this immediately. Two clean options:
 - "For procurement teams managing their own suppliers" → the software
 
 **Option B — Two separate sites** *(recommended long-term)*
-- `rzglobalsolutions.co.uk` — company overview and sourcing services
+- `zaproc.co.uk` — company overview and sourcing services
 - `zaproc.com` (or `zaproc.io`) — the Zaproc software product
 
 Option B matches the OpenAI/ChatGPT separation model and is the cleaner

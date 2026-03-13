@@ -53,13 +53,13 @@ If the user exists in **Auth → Users** and SMTP (e.g. Resend) is set correctly
 When recovery emails are not arriving, an **admin** can set a temporary password for a user from the app:
 
 1. Log in as an admin → **Control Centre → User Management**.
-2. Open the user (e.g. **admin@rzglobalsolutions.co.uk**) in the detail drawer.
+2. Open the user (e.g. **admin@zaproc.co.uk**) in the detail drawer.
 3. Click **Set password**, enter a new password (min 8 characters) and confirm, then submit.
 4. Share the new password with the user securely (e.g. in person or over a secure channel). They can log in and change it later from **Settings** if needed.
 
 This uses the **admin-set-password** Edge Function (admin-only) and does not send any email.
 
-### Only admin locked out (e.g. admin@rzglobalsolutions.co.uk)
+### Only admin locked out (e.g. admin@zaproc.co.uk)
 
 If the **only** admin cannot receive the recovery email and cannot log in, they cannot use “Set password” in the app (that requires being logged in as an admin). Use this workaround:
 
@@ -67,7 +67,7 @@ If the **only** admin cannot receive the recovery email and cannot log in, they 
 2. **Invite a second user** (e.g. a colleague or your personal email): use **Invite user**, enter the email, send. That user will get an invite email to set their password.
 3. **Make the new user an admin:** go to **Table Editor** → **profiles** → find the new user (match by the new user’s `id` from Auth → Users, or by email if `profiles` has it). Set that row’s **role** to **admin**.
 4. **Log in as the new admin** (they set their password from the invite email, then sign in to the portal).
-5. In the app go to **Control Centre** → **User Management** → open the original admin (e.g. admin@rzglobalsolutions.co.uk) → **Set password** and set a new password.
+5. In the app go to **Control Centre** → **User Management** → open the original admin (e.g. admin@zaproc.co.uk) → **Set password** and set a new password.
 6. Share the new password with the original admin securely. They can log in again and change it in **Settings** if needed.
 7. Optionally deactivate or remove the temporary second admin from **User Management** if you no longer need them.
 

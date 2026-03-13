@@ -33,7 +33,7 @@ When you **Approve & send link**, the `approve-demo-request` Edge Function sends
    - **Project** → **Edge Functions** → **approve-demo-request** → **Secrets** (or **Settings**).
    - Add:
      - `RESEND_API_KEY` — your [Resend API key](https://resend.com/api-keys).
-     - (Optional) `RESEND_FROM` — sender address, e.g. `RZ Global Solutions <noreply@yourdomain.com>`. Default is `RZ Global Solutions <noreply@rzglobalsolutions.co.uk>`.
+     - (Optional) `RESEND_FROM` — sender address, e.g. `RZ Global Solutions <noreply@yourdomain.com>`. Default is `Zaproc <noreply@zaproc.co.uk>`.
 2. In Resend, **verify the sending domain** for the address you use in `RESEND_FROM`.
 3. Redeploy the function after changing secrets:  
    `npx supabase functions deploy approve-demo-request`

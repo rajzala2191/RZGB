@@ -20,8 +20,8 @@ export const DEMO_SUPPLIERS = [
 ];
 
 export const DEMO_ADMINS = [
-  { id: 'da-001', name: 'Alex Morgan', company: 'RZ Global Solutions', email: 'alex@rzglobalsolutions.co.uk', initials: 'AM', role: 'admin' },
-  { id: 'da-002', name: 'Jordan Clarke', company: 'RZ Global Solutions', email: 'jordan@rzglobalsolutions.co.uk', initials: 'JC', role: 'admin' },
+  { id: 'da-001', name: 'Alex Morgan', company: 'RZ Global Solutions', email: 'alex@zaproc.co.uk', initials: 'AM', role: 'admin' },
+  { id: 'da-002', name: 'Jordan Clarke', company: 'RZ Global Solutions', email: 'jordan@zaproc.co.uk', initials: 'JC', role: 'admin' },
 ];
 
 export const ORDER_STATUSES = [

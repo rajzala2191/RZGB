@@ -26,6 +26,17 @@ export default function PlatformDemoRequestsPage() {
 
   useEffect(() => { load(); }, []);
 
+  const formatEmailError = (raw) => {
+    if (!raw || typeof raw !== 'string') return raw || 'Email not configured (RESEND_API_KEY).';
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed?.message) return parsed.message;
+    } catch {
+      /* not JSON, use as-is */
+    }
+    return raw;
+  };
+
   const handleApprove = async (id) => {
     setApprovingId(id);
     try {
@@ -33,7 +44,7 @@ export default function PlatformDemoRequestsPage() {
       if (result?.email_sent) {
         toast({ title: 'Approved', description: 'Demo access email has been sent to the requester.' });
       } else {
-        const reason = result?.email_error || 'Email not configured (RESEND_API_KEY).';
+        const reason = formatEmailError(result?.email_error) || 'Email not configured (RESEND_API_KEY).';
         toast({
           title: 'Approved (email not sent)',
           description: reason,

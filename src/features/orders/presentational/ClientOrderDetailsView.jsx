@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import DocumentPreview from '@/components/DocumentPreview';
 import OrderTimeline from '@/components/OrderTimeline';
+import OrderMessageThread from '@/components/OrderMessageThread';
 import { FormSection, DisplayField } from '@/components/ui/FormSection';
 import { supabase } from '@/lib/customSupabaseClient';
 import JSZip from 'jszip';
