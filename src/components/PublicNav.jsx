@@ -15,11 +15,23 @@ const NAV_LINKS = [
 export default function PublicNav({ activePage }) {
   const { isDark } = useTheme();
   const [scrolled,  setScrolled]  = useState(false);
+  const [hidden,    setHidden]    = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      // Hide when scrolling down past 80px, show when scrolling up
+      if (y > 80) {
+        setHidden(y > lastY);
+      } else {
+        setHidden(false);
+      }
+      lastY = y;
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -52,13 +64,16 @@ export default function PublicNav({ activePage }) {
     : '1px solid transparent';
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+    <motion.nav
+      animate={{ y: hidden ? -80 : 0 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed top-0 left-0 right-0 z-50"
       style={{
         background:   navBg,
         backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
         borderBottom: navBorder,
         boxShadow:    scrolled ? '0 1px 0 0 rgba(255,107,53,0.06)' : 'none',
+        transition: 'background 0.3s, border-color 0.3s, box-shadow 0.3s',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -76,14 +91,24 @@ export default function PublicNav({ activePage }) {
               alt="Zaproc"
               className="h-8 w-8 object-contain rounded-lg transition-all"
             />
-            <div className="hidden sm:flex flex-col leading-none gap-0.5">
-              <span className="text-base font-black tracking-tight transition-colors" style={{ color: 'var(--heading)' }}>
-                Zaproc
-              </span>
-              <span className="text-[10px] font-medium transition-colors" style={{ color: 'var(--caption)' }}>
-                by RZ Global Solutions
-              </span>
-            </div>
+            <AnimatePresence>
+            {!scrolled && (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.25 }}
+                className="hidden sm:flex flex-col leading-none gap-0.5 overflow-hidden"
+              >
+                <span className="text-base font-black tracking-tight transition-colors whitespace-nowrap" style={{ color: 'var(--heading)' }}>
+                  Zaproc
+                </span>
+                <span className="text-[10px] font-medium transition-colors whitespace-nowrap" style={{ color: 'var(--caption)' }}>
+                  by RZ Global Solutions
+                </span>
+              </motion.div>
+            )}
+            </AnimatePresence>
           </Link>
         </motion.div>
 
@@ -206,6 +231,6 @@ export default function PublicNav({ activePage }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </motion.nav>
   );
 }
