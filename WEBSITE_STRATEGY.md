@@ -105,7 +105,7 @@ visitors must understand this immediately. Two clean options:
 
 **Option B — Two separate sites** *(recommended long-term)*
 - `rzglobalsolutions.co.uk` — company overview and sourcing services
-- `zaproc.com` (or `zaproc.io`) — the Zaproc software product
+- `zaproc.co.uk` — the Zaproc software product
 
 Option B matches the OpenAI/ChatGPT separation model and is the cleaner
 long-term move. See `MASTER_PLAN.md` for the full branding reference.
