@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import PlatformAdminLayout from '@/components/PlatformAdminLayout';
 import {
   fetchAllWorkspaces, createWorkspace, updateWorkspaceStatus,
   fetchWorkspaceStats,
@@ -82,8 +81,7 @@ export default function PlatformWorkspacesPage() {
   };
 
   return (
-    <PlatformAdminLayout>
-      <div className="max-w-6xl mx-auto space-y-5 pb-10">
+    <div className="max-w-6xl mx-auto space-y-5 pb-10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Platform</p>
@@ -188,6 +186,5 @@ export default function PlatformWorkspacesPage() {
           </div>
         )}
       </div>
-    </PlatformAdminLayout>
   );
 }

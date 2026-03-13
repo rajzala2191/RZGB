@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import PlatformAdminLayout from '@/components/PlatformAdminLayout';
 import { fetchDemoRequests, approveDemoRequest, rejectDemoRequest } from '@/services/demoRequestService';
 import { format } from 'date-fns';
 import { Mail, CheckCircle2, XCircle, Loader2, Send } from 'lucide-react';
@@ -57,8 +56,7 @@ export default function PlatformDemoRequestsPage() {
   const rejected = requests.filter((r) => r.status === 'rejected');
 
   return (
-    <PlatformAdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Demo access</p>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-slate-100">Demo requests</h1>
@@ -148,6 +146,5 @@ export default function PlatformDemoRequestsPage() {
           </>
         )}
       </div>
-    </PlatformAdminLayout>
   );
 }

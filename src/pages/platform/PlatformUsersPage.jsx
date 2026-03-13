@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import PlatformAdminLayout from '@/components/PlatformAdminLayout';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { setUserAdminScope } from '@/services/workspaceService';
 import { format } from 'date-fns';
@@ -58,8 +57,7 @@ export default function PlatformUsersPage() {
   };
 
   return (
-    <PlatformAdminLayout>
-      <div className="max-w-6xl mx-auto space-y-5 pb-10">
+    <div className="max-w-6xl mx-auto space-y-5 pb-10">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Platform</p>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-slate-100">All Users</h1>
@@ -142,6 +140,5 @@ export default function PlatformUsersPage() {
           </div>
         )}
       </div>
-    </PlatformAdminLayout>
   );
 }

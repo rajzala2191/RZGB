@@ -151,12 +151,14 @@ function App() {
                     <Route path="/create-password" element={<CreatePasswordPage />} />
 
                     {/* --- PLATFORM ADMIN ROUTES (super_admin only) --- */}
-                    <Route path="/platform-admin" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformDashboardPage /></ProtectedRoute>} />
-                    <Route path="/platform-admin/workspaces" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformWorkspacesPage /></ProtectedRoute>} />
-                    <Route path="/platform-admin/users" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformUsersPage /></ProtectedRoute>} />
-                    <Route path="/platform-admin/demo-requests" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformDemoRequestsPage /></ProtectedRoute>} />
-                    <Route path="/platform-admin/activity" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformActivityPage /></ProtectedRoute>} />
-                    <Route path="/platform-admin/settings" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformSettingsPage /></ProtectedRoute>} />
+                    <Route path="/platform-admin" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformAdminLayout /></ProtectedRoute>}>
+                      <Route index element={<PlatformDashboardPage />} />
+                      <Route path="workspaces" element={<PlatformWorkspacesPage />} />
+                      <Route path="users" element={<PlatformUsersPage />} />
+                      <Route path="demo-requests" element={<PlatformDemoRequestsPage />} />
+                      <Route path="activity" element={<PlatformActivityPage />} />
+                      <Route path="settings" element={<PlatformSettingsPage />} />
+                    </Route>
 
                     {/* --- ADMIN ROUTES (super_admin + customer_admin) --- */}
                     <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />

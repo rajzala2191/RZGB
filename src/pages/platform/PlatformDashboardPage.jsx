@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import PlatformAdminLayout from '@/components/PlatformAdminLayout';
 import { fetchAllWorkspaces, fetchAllPlatformStats } from '@/services/workspaceService';
 import { fetchDemoRequests } from '@/services/demoRequestService';
 import { Building2, Users, ShoppingCart, Activity, Loader2, ChevronRight, Mail } from 'lucide-react';
@@ -46,15 +45,12 @@ export default function PlatformDashboardPage() {
 
   if (loading) {
     return (
-      <PlatformAdminLayout>
-        <div className="flex items-center justify-center py-32"><Loader2 className="animate-spin text-red-500" size={32} /></div>
-      </PlatformAdminLayout>
+      <div className="flex items-center justify-center py-32"><Loader2 className="animate-spin text-red-500" size={32} /></div>
     );
   }
 
   return (
-    <PlatformAdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Platform Overview</p>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-slate-100">Platform Dashboard</h1>
@@ -136,6 +132,5 @@ export default function PlatformDashboardPage() {
           </div>
         </div>
       </div>
-    </PlatformAdminLayout>
   );
 }

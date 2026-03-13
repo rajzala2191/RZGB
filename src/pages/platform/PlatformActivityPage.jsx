@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import PlatformAdminLayout from '@/components/PlatformAdminLayout';
 import { fetchDemoRequests } from '@/services/demoRequestService';
 import { fetchAllWorkspaces } from '@/services/workspaceService';
 import { format } from 'date-fns';
@@ -51,17 +50,14 @@ export default function PlatformActivityPage() {
 
   if (loading) {
     return (
-      <PlatformAdminLayout>
-        <div className="flex items-center justify-center py-32">
-          <Loader2 className="w-8 h-8 animate-spin text-red-500" />
-        </div>
-      </PlatformAdminLayout>
+      <div className="flex items-center justify-center py-32">
+        <Loader2 className="w-8 h-8 animate-spin text-red-500" />
+      </div>
     );
   }
 
   return (
-    <PlatformAdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Platform</p>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-slate-100">Activity</h1>
@@ -92,6 +88,5 @@ export default function PlatformActivityPage() {
           )}
         </div>
       </div>
-    </PlatformAdminLayout>
   );
 }

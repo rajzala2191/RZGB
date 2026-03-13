@@ -1,10 +1,8 @@
-import PlatformAdminLayout from '@/components/PlatformAdminLayout';
 import { Settings, ExternalLink } from 'lucide-react';
 
 export default function PlatformSettingsPage() {
   return (
-    <PlatformAdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Platform</p>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-slate-100">Settings</h1>
@@ -31,6 +29,5 @@ export default function PlatformSettingsPage() {
           </a>
         </div>
       </div>
-    </PlatformAdminLayout>
   );
 }
