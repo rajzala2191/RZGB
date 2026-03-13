@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import DomainGuard from '@/components/DomainGuard';
 import DemoBanner from '@/components/DemoBanner';
 import DemoAccessGate from '@/components/DemoAccessGate';
 import HomeOrRedirect from '@/pages/HomeOrRedirect';
@@ -126,6 +127,7 @@ function App() {
                   <ScrollToTop />
                   {/* DemoBanner sits outside Routes so it shows on all production pages */}
                   <DemoBanner />
+                  <DomainGuard>
                   <Routes>
                     {/* Root shows landing immediately; logged-in users redirect in background */}
                     <Route path="/" element={<HomeOrRedirect />} />
@@ -231,6 +233,7 @@ function App() {
                     <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
                   </Routes>
+                  </DomainGuard>
                   <Toaster />
                 </ClientProvider>
               </SupplierProvider>

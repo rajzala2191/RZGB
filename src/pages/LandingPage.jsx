@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { isLandingDomain, getPortalUrl } from '@/lib/portalConfig';
 import {
   ArrowRight, Shield, Zap, Users, BarChart3, FileCheck, CheckCircle2,
   GitBranch, Globe, Star, Play,
@@ -653,18 +654,34 @@ function HeroSection() {
         {/* CTAs */}
         <motion.div variants={heroItem} className="flex flex-col sm:flex-row items-center gap-3 mb-10">
           <motion.div whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.97 }}>
-            <Link to="/request-demo"
-              className="flex items-center gap-2 text-white text-sm font-bold px-7 py-3.5 rounded-xl"
-              style={{ background: `linear-gradient(135deg, ${BRAND}, #f97316)`, boxShadow: `0 8px 28px rgba(255,107,53,0.4)` }}>
-              Request demo access <ArrowRight className="w-4 h-4" />
-            </Link>
+            {isLandingDomain() ? (
+              <a href={getPortalUrl('/request-demo')}
+                className="flex items-center gap-2 text-white text-sm font-bold px-7 py-3.5 rounded-xl"
+                style={{ background: `linear-gradient(135deg, ${BRAND}, #f97316)`, boxShadow: `0 8px 28px rgba(255,107,53,0.4)` }}>
+                Request demo access <ArrowRight className="w-4 h-4" />
+              </a>
+            ) : (
+              <Link to="/request-demo"
+                className="flex items-center gap-2 text-white text-sm font-bold px-7 py-3.5 rounded-xl"
+                style={{ background: `linear-gradient(135deg, ${BRAND}, #f97316)`, boxShadow: `0 8px 28px rgba(255,107,53,0.4)` }}>
+                Request demo access <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
           </motion.div>
           <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
-            <Link to="/how-it-works"
-              className="flex items-center gap-2 text-sm font-bold px-7 py-3.5 rounded-xl backdrop-blur-sm transition-all"
-              style={{ ...glassCard(isDark), color: 'var(--heading)' }}>
-              <Play className="w-4 h-4" style={{ color: BRAND }} /> See how it works
-            </Link>
+            {isLandingDomain() ? (
+              <a href={getPortalUrl('/how-it-works')}
+                className="flex items-center gap-2 text-sm font-bold px-7 py-3.5 rounded-xl backdrop-blur-sm transition-all"
+                style={{ ...glassCard(isDark), color: 'var(--heading)' }}>
+                <Play className="w-4 h-4" style={{ color: BRAND }} /> See how it works
+              </a>
+            ) : (
+              <Link to="/how-it-works"
+                className="flex items-center gap-2 text-sm font-bold px-7 py-3.5 rounded-xl backdrop-blur-sm transition-all"
+                style={{ ...glassCard(isDark), color: 'var(--heading)' }}>
+                <Play className="w-4 h-4" style={{ color: BRAND }} /> See how it works
+              </Link>
+            )}
           </motion.div>
         </motion.div>
 
@@ -770,11 +787,19 @@ function HeroSection() {
                   ))}
                 </ul>
                 <div className="mt-7">
-                  <Link to="/request-demo"
-                    className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg text-white"
-                    style={{ background: tab.color, boxShadow: `0 4px 14px ${tab.color}35` }}>
-                    Try {tab.label} <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                  {isLandingDomain() ? (
+                    <a href={getPortalUrl('/request-demo')}
+                      className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg text-white"
+                      style={{ background: tab.color, boxShadow: `0 4px 14px ${tab.color}35` }}>
+                      Try {tab.label} <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <Link to="/request-demo"
+                      className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg text-white"
+                      style={{ background: tab.color, boxShadow: `0 4px 14px ${tab.color}35` }}>
+                      Try {tab.label} <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  )}
                 </div>
               </div>
 
@@ -995,10 +1020,17 @@ function RoleTabsSection() {
               </div>
               <div className="mt-8">
                 <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
-                  <Link to={role.path} className="inline-flex items-center gap-2 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all"
-                    style={{ background: role.color, boxShadow: `0 4px 20px ${role.color}45` }}>
-                    Try {role.label} <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  {isLandingDomain() ? (
+                    <a href={getPortalUrl(role.path)} className="inline-flex items-center gap-2 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all"
+                      style={{ background: role.color, boxShadow: `0 4px 20px ${role.color}45` }}>
+                      Try {role.label} <ArrowRight className="w-4 h-4" />
+                    </a>
+                  ) : (
+                    <Link to={role.path} className="inline-flex items-center gap-2 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all"
+                      style={{ background: role.color, boxShadow: `0 4px 20px ${role.color}45` }}>
+                      Try {role.label} <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  )}
                 </motion.div>
               </div>
             </div>
@@ -1289,20 +1321,34 @@ function CTASection() {
               { label: 'Supplier Demo', color: '#8b5cf6', icon: Factory },
             ].map((btn) => (
               <motion.div key={btn.label} whileHover={{ scale: 1.04, y: -3 }} whileTap={{ scale: 0.97 }}>
-                <Link to="/request-demo"
-                  className="flex items-center justify-center gap-2.5 text-white text-sm font-bold px-8 py-4 rounded-xl"
-                  style={{ background: btn.color, boxShadow: `0 8px 30px ${btn.color}40` }}>
-                  <btn.icon className="w-4 h-4" /> {btn.label}
-                </Link>
+                {isLandingDomain() ? (
+                  <a href={getPortalUrl('/request-demo')}
+                    className="flex items-center justify-center gap-2.5 text-white text-sm font-bold px-8 py-4 rounded-xl"
+                    style={{ background: btn.color, boxShadow: `0 8px 30px ${btn.color}40` }}>
+                    <btn.icon className="w-4 h-4" /> {btn.label}
+                  </a>
+                ) : (
+                  <Link to="/request-demo"
+                    className="flex items-center justify-center gap-2.5 text-white text-sm font-bold px-8 py-4 rounded-xl"
+                    style={{ background: btn.color, boxShadow: `0 8px 30px ${btn.color}40` }}>
+                    <btn.icon className="w-4 h-4" /> {btn.label}
+                  </Link>
+                )}
               </motion.div>
             ))}
           </motion.div>
 
           <p className="text-xs mt-8" style={{ color: 'var(--caption)' }}>5 sample clients · 5 sample suppliers · Orders across all 11 stages</p>
           <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-4">
-            <Link to="/pricing" className="text-sm font-semibold underline underline-offset-2 transition-colors" style={{ color: BRAND }}>
-              View pricing
-            </Link>
+            {isLandingDomain() ? (
+              <a href={getPortalUrl('/pricing')} className="text-sm font-semibold underline underline-offset-2 transition-colors" style={{ color: BRAND }}>
+                View pricing
+              </a>
+            ) : (
+              <Link to="/pricing" className="text-sm font-semibold underline underline-offset-2 transition-colors" style={{ color: BRAND }}>
+                View pricing
+              </Link>
+            )}
             {' '}<span style={{ color: 'var(--body)' }}>· Starter, Growth &amp; Enterprise plans</span>
           </motion.p>
         </motion.div>
@@ -1372,9 +1418,15 @@ function LandingFooter() {
               <ul className="space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <Link to={link.to} className="text-xs transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>
-                      {link.label}
-                    </Link>
+                    {isLandingDomain() ? (
+                      <a href={getPortalUrl(link.to)} className="text-xs transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link to={link.to} className="text-xs transition-colors hover:opacity-80" style={{ color: 'var(--body)' }}>
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

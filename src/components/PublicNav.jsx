@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Menu, X } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeContext';
+import { isLandingDomain, getPortalUrl } from '@/lib/portalConfig';
 
 const NAV_LINKS = [
   { label: 'Features',     href: '/landing',       section: 'features',  key: 'landing'      },
@@ -41,6 +42,10 @@ export default function PublicNav({ activePage }) {
     if (link.section && activePage === 'landing') {
       const el = document.getElementById(link.section);
       if (el) { el.scrollIntoView({ behavior: 'smooth' }); return; }
+    }
+    if (isLandingDomain()) {
+      window.location.href = getPortalUrl(link.section ? `${link.href}#${link.section}` : link.href);
+      return;
     }
     if (link.section) {
       navigate(`${link.href}#${link.section}`);
@@ -143,25 +148,50 @@ export default function PublicNav({ activePage }) {
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
-          <Link
-            to="/login"
-            className="hidden sm:block text-sm font-medium transition-colors px-3 py-2"
-            style={{ color: 'var(--body)' }}
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/request-demo"
-            className="flex items-center gap-1.5 text-white text-sm font-bold px-4 py-2 rounded-lg transition-all active:scale-[0.97]"
-            style={{
-              background: '#FF6B35',
-              boxShadow: '0 2px 12px rgba(255,107,53,0.35)',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#f97316'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,107,53,0.45)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#FF6B35'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(255,107,53,0.35)'; }}
-          >
-            Request Demo <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          {isLandingDomain() ? (
+            <a
+              href={getPortalUrl('/login')}
+              className="hidden sm:block text-sm font-medium transition-colors px-3 py-2"
+              style={{ color: 'var(--body)' }}
+            >
+              Sign In
+            </a>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden sm:block text-sm font-medium transition-colors px-3 py-2"
+              style={{ color: 'var(--body)' }}
+            >
+              Sign In
+            </Link>
+          )}
+          {isLandingDomain() ? (
+            <a
+              href={getPortalUrl('/request-demo')}
+              className="flex items-center gap-1.5 text-white text-sm font-bold px-4 py-2 rounded-lg transition-all active:scale-[0.97]"
+              style={{
+                background: '#FF6B35',
+                boxShadow: '0 2px 12px rgba(255,107,53,0.35)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#f97316'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,107,53,0.45)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#FF6B35'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(255,107,53,0.35)'; }}
+            >
+              Request Demo <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+          ) : (
+            <Link
+              to="/request-demo"
+              className="flex items-center gap-1.5 text-white text-sm font-bold px-4 py-2 rounded-lg transition-all active:scale-[0.97]"
+              style={{
+                background: '#FF6B35',
+                boxShadow: '0 2px 12px rgba(255,107,53,0.35)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#f97316'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,107,53,0.45)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#FF6B35'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(255,107,53,0.35)'; }}
+            >
+              Request Demo <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          )}
 
           {/* Mobile hamburger */}
           <button
@@ -210,22 +240,45 @@ export default function PublicNav({ activePage }) {
                 </button>
               ))}
               <div style={{ borderTop: '1px solid var(--edge)', paddingTop: '0.5rem', marginTop: '0.5rem' }}>
-                <Link
-                  to="/login"
-                  className="flex w-full py-2.5 px-2 text-sm font-medium"
-                  style={{ color: 'var(--body)' }}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/request-demo"
-                  className="flex items-center justify-center gap-2 w-full mt-2 py-3 text-sm font-bold text-white rounded-xl"
-                  style={{ background: '#FF6B35' }}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Request Demo <ArrowRight className="w-4 h-4" />
-                </Link>
+                {isLandingDomain() ? (
+                  <>
+                    <a
+                      href={getPortalUrl('/login')}
+                      className="flex w-full py-2.5 px-2 text-sm font-medium"
+                      style={{ color: 'var(--body)' }}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Sign In
+                    </a>
+                    <a
+                      href={getPortalUrl('/request-demo')}
+                      className="flex items-center justify-center gap-2 w-full mt-2 py-3 text-sm font-bold text-white rounded-xl"
+                      style={{ background: '#FF6B35' }}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Request Demo <ArrowRight className="w-4 h-4" />
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="flex w-full py-2.5 px-2 text-sm font-medium"
+                      style={{ color: 'var(--body)' }}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/request-demo"
+                      className="flex items-center justify-center gap-2 w-full mt-2 py-3 text-sm font-bold text-white rounded-xl"
+                      style={{ background: '#FF6B35' }}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Request Demo <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
