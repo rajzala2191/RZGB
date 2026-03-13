@@ -33,8 +33,8 @@ export default function LoginView({
   return (
     <>
       <Helmet>
-        <title>Login - RZ Global Solutions</title>
-        <meta name="description" content="Access your RZ Global Solutions account." />
+        <title>Login — Zaproc</title>
+        <meta name="description" content="Sign in to your Zaproc account." />
       </Helmet>
 
       <div
@@ -67,8 +67,8 @@ export default function LoginView({
           {/* Top: Logo + brand */}
           <div className="relative z-10">
             <img
-              src="/light-logo.png"
-              alt="RZ Global Solutions"
+              src="/zaproc-logo-192.png"
+              alt="Zaproc"
               className="h-14 object-contain mb-8"
             />
             <h2 className="text-3xl font-bold text-white leading-tight mb-3">
@@ -134,8 +134,8 @@ export default function LoginView({
               <ArrowLeft size={16} /> Back to Home
             </Link>
             <img
-              src="/light-logo.png"
-              alt="RZ Global Solutions"
+              src="/zaproc-logo-192.png"
+              alt="Zaproc"
               className="h-8 object-contain absolute left-1/2 -translate-x-1/2 lg:hidden"
             />
             <div className="hidden lg:block flex-1" />
@@ -159,7 +159,7 @@ export default function LoginView({
                   Welcome back
                 </h1>
                 <p className="text-sm" style={{ color: 'var(--body)' }}>
-                  Sign in to your RZ Global Solutions account
+                  Sign in to your Zaproc account
                 </p>
               </div>
 
@@ -338,7 +338,7 @@ export default function LoginView({
               >
                 <Zap size={12} style={{ color: 'var(--caption)' }} />
                 <p className="text-xs" style={{ color: 'var(--caption)' }}>
-                  Secured by RZ Global &nbsp;·&nbsp; &copy; {new Date().getFullYear()} All rights reserved.
+                  Zaproc by RZ Global Solutions &nbsp;·&nbsp; &copy; {new Date().getFullYear()} All rights reserved.
                 </p>
               </motion.div>
             </motion.div>

@@ -70,19 +70,21 @@ export default function PublicNav({ activePage }) {
           transition={{ duration: 0.4 }}
           className="flex items-center gap-3"
         >
-          <Link to="/landing" className="flex items-center gap-3">
+          <Link to="/landing" className="flex items-center gap-2.5">
             <img
-              src="/light-logo.png"
-              alt="RZ Global"
-              className="h-8 object-contain transition-all"
+              src="/zaproc-logo-192.png"
+              alt="Zaproc"
+              className="h-8 w-8 object-contain rounded-lg transition-all"
               style={isDark ? { filter: 'brightness(0) invert(1)', opacity: 0.9 } : {}}
             />
-            <span
-              className="text-sm font-bold hidden sm:block transition-colors"
-              style={{ color: 'var(--heading)' }}
-            >
-              RZ Global Solutions
-            </span>
+            <div className="hidden sm:flex flex-col leading-none gap-0.5">
+              <span className="text-base font-black tracking-tight transition-colors" style={{ color: 'var(--heading)' }}>
+                Zaproc
+              </span>
+              <span className="text-[10px] font-medium transition-colors" style={{ color: 'var(--caption)' }}>
+                by RZ Global Solutions
+              </span>
+            </div>
           </Link>
         </motion.div>
 

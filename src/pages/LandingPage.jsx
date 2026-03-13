@@ -1140,7 +1140,7 @@ function LandingFooter() {
           {/* Brand column */}
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <img src="/light-logo.png" alt="RZ Global" className="h-8 object-contain"
+              <img src="/zaproc-logo-192.png" alt="Zaproc" className="h-8 object-contain"
                 style={isDark ? { filter: 'brightness(0) invert(1)', opacity: 0.85 } : {}} />
             </div>
             <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--body)' }}>

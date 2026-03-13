@@ -1,15 +1,38 @@
 {
-  "name": "RZ Global Portal",
-  "short_name": "RZ Portal",
-  "start_url": ".",
+  "name": "Zaproc",
+  "short_name": "Zaproc",
+  "description": "Manufacturing procurement intelligence by RZ Global Solutions",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0d1a26",
+  "background_color": "#0f0f0f",
+  "theme_color": "#FF6B35",
   "icons": [
     {
-      "src": "flat-icon-180.png",
-      "sizes": "180x180",
-      "type": "image/png"
+      "src": "/favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "16x16 32x32"
+    },
+    {
+      "src": "/zaproc-logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/zaproc-logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/icon-192-maskable.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ]
 }

@@ -111,14 +111,14 @@ const ControlCentreLayout = ({ children }) => {
                 <img
                   src={isDark
                     ? "https://horizons-cdn.hostinger.com/23dd5419-ae91-4a08-9a43-379efd2912c4/572f4264785907121da08b9cd8e3daf2.png"
-                    : "/light-logo.png"
+                    : "/zaproc-logo-192.png"
                   }
                   alt="RZ"
                   className="h-5 w-auto object-contain"
                 />
               </div>
               <div>
-                <p style={{ color: sb.nameColor }} className="font-bold text-sm leading-none tracking-tight">RZ Global</p>
+                <p style={{ color: sb.nameColor }} className="font-bold text-sm leading-none tracking-tight">Zaproc</p>
                 <p
                   className="text-[10px] font-semibold tracking-[0.12em] uppercase mt-1"
                   style={{ color: 'var(--sidebar-label)' }}
