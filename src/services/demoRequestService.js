@@ -37,16 +37,20 @@ export async function fetchDemoRequests() {
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
-const getFunctionsUrl = () => `${SUPABASE_URL}/functions/v1`;
+const getFunctionsUrl = () => {
+  if (!SUPABASE_URL) throw new Error('Supabase URL not configured. Set VITE_SUPABASE_URL in .env.');
+  return `${SUPABASE_URL}/functions/v1`;
+};
 
 /**
  * Approve a demo request. Calls Edge Function which updates DB and sends email.
  * Requires authenticated user with role super_admin.
  */
 export async function approveDemoRequest(requestId) {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) throw new Error('Not authenticated');
-  const res = await fetch(`${getFunctionsUrl()}/approve-demo-request`, {
+  const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
+  if (sessionError || !session?.access_token) throw new Error('Not authenticated');
+  const url = `${getFunctionsUrl()}/approve-demo-request`;
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -57,6 +61,16 @@ export async function approveDemoRequest(requestId) {
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.error || body.message || 'Failed to approve');
   return body;
+}
+
+/** Human-readable hint when approve/reject fails with a network error */
+export function getNetworkErrorHint(fetchErrorMessage) {
+  if (!fetchErrorMessage || typeof fetchErrorMessage !== 'string') return null;
+  const lower = fetchErrorMessage.toLowerCase();
+  if (lower.includes('failed to fetch') || lower.includes('network') || lower.includes('load')) {
+    return 'Network error. Check that VITE_SUPABASE_URL is set, the approve-demo-request Edge Function is deployed, and your connection is stable.';
+  }
+  return null;
 }
 
 /**

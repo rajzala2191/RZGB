@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { fetchDemoRequests, approveDemoRequest, rejectDemoRequest } from '@/services/demoRequestService';
+import { fetchDemoRequests, approveDemoRequest, rejectDemoRequest, getNetworkErrorHint } from '@/services/demoRequestService';
 import { format } from 'date-fns';
 import { Mail, CheckCircle2, XCircle, Loader2, Send } from 'lucide-react';
 
@@ -33,7 +33,9 @@ export default function PlatformDemoRequestsPage() {
       toast({ title: 'Approved', description: 'Demo access email has been sent to the requester.' });
       load();
     } catch (e) {
-      toast({ title: 'Error', description: e?.message || 'Failed to approve', variant: 'destructive' });
+      const hint = getNetworkErrorHint(e?.message);
+      const description = hint || e?.message || 'Failed to approve';
+      toast({ title: 'Error', description, variant: 'destructive' });
     } finally {
       setApprovingId(null);
     }
@@ -46,7 +48,9 @@ export default function PlatformDemoRequestsPage() {
       toast({ title: 'Rejected', description: 'Demo request has been rejected.' });
       load();
     } catch (e) {
-      toast({ title: 'Error', description: e?.message || 'Failed to reject', variant: 'destructive' });
+      const hint = getNetworkErrorHint(e?.message);
+      const description = hint || e?.message || 'Failed to reject';
+      toast({ title: 'Error', description, variant: 'destructive' });
     } finally {
       setRejectingId(null);
     }
