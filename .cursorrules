@@ -1,30 +1,56 @@
 # RZGB Project — Cursor Rules
+# Full context is in .ai-context.md — read it first before making any changes.
+
+## Two Brands, One Codebase
+- **Zaproc** (zaproc.co.uk) — SaaS procurement platform for manufacturing
+- **RZ Global Solutions** (rzglobalsolutions.co.uk) — bespoke component supply broker
+- Domain detected at runtime in `src/lib/portalConfig.js` via `window.location.hostname`
 
 ## Stack
-- Frontend: HTML/CSS/JS (Bootstrapmade template)
-- Backend: Node.js on Hostinger
-- Database: Supabase
-- Deploy: GitHub push → Hostinger auto-deploy
+- React 18 + Vite (JSX only — no TypeScript)
+- Tailwind CSS (no CSS modules, no inline styles)
+- Radix UI + shadcn components in `src/components/ui/`
+- Lucide React for icons
+- Framer Motion for animations
+- Supabase for auth + database (RLS enabled, workspace_id scoped)
+- React Router v6
 
-## Project URLs
-- Main site: rzglobalsolutions.co.uk
-- Portal: portal.rzglobalsolutions.co.uk
+## Import Alias
+- `@/` = `src/` — always use this, never relative `../../`
 
-## User Roles
-- Client: submits orders, tracks progress
-- RZ Global (admin): manages full workflow
-- Supplier: receives jobs, updates stage progress
+## Key Files
+- `src/lib/portalConfig.js` — domain routing logic (isRZGBDomain, isLandingDomain, getPortalUrl)
+- `src/App.jsx` — all routes and providers
+- `src/contexts/AuthContext.jsx` — useAuth() hook
+- `src/pages/HomeOrRedirect.jsx` — picks landing page by domain
+- `src/pages/RZGBLandingPage.jsx` — rzglobalsolutions.co.uk landing
+- `src/pages/LandingPage.jsx` — zaproc.co.uk landing
+- `src/components/DomainGuard.jsx` — redirects non-root paths on landing domains
+- `public/.htaccess` — SPA routing on Hostinger Apache (do not delete)
 
-## Order Workflow Stages
-Quote → Casting/Forging → Machining → QC → Packaging → Delivery
+## Auth Roles
+super_admin > customer_admin > client > supplier
+All DB queries must be scoped by workspace_id.
 
-## Code Style
-- Vanilla JS preferred unless otherwise specified
-- Keep HTML/CSS/JS in separate files
-- Use Supabase client for all DB calls
-- No frameworks unless already in use
+## Styling
+- Light theme default, dark via ThemeContext toggle
+- RZGB: slate + orange-500 accent, glassmorphism (backdrop-blur, bg-white/10, border-white/20)
+- Zaproc: sky blue + slate, clean minimal
+- Fonts: Inter (headings) + DM Sans (body) — loaded in index.html
 
-## Last Claude Session
-**What was done:**
-**What's next:**
-**Files changed:**
+## Git / Deploy
+- `main` is protected — PRs only, Build + Lint checks must pass
+- Hostinger auto-deploys both sites from `main`
+- `.env` is gitignored — set VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY in Hostinger dashboard
+
+## Do Not
+- No TypeScript, no CSS files, no styled-components
+- No react-icons (use lucide-react)
+- No window.location.href for internal nav (use React Router)
+- No new Supabase clients (use src/lib/supabase.js or supabaseAdmin.js)
+- No console.log in production code
+- Never commit .env or service role keys
+
+## Last Session — 2026-03-14
+**Done:** Created RZGBLandingPage, multi-domain routing (isRZGBDomain), DomainGuard RZGB support, GitHub Actions CI, branch protection setup, fixed blank screen (missing Hostinger env vars)
+**Next:** Redesign RZGBLandingPage (glassmorphism, light theme), fix tab title + favicon for RZGB domain, smooth scroll, real photography
