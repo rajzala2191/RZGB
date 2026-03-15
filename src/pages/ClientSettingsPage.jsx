@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, LifeBuoy, ChevronRight, Palette, Shield } from 'lucide-react';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
+import PlanUsageBanner from '@/components/PlanUsageBanner';
 import AccountSecuritySection from '@/components/AccountSecuritySection';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ACCENT, ACCENT_GLOW, SURFACE } from '@/lib/theme';
@@ -33,6 +34,8 @@ export default function ClientSettingsPage() {
       </Helmet>
 
       <div className="max-w-3xl mx-auto space-y-8 pb-20">
+
+        <PlanUsageBanner />
 
         {/* Header */}
         <div>

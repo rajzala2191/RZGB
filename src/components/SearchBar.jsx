@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, X, Package, Building2, FileText } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
 
-export default function SearchBar({ onResultSelect }) {
+export default function SearchBar({ onResultSelect, variant = 'default' }) {
+  const isPill = variant === 'pill';
   const [query, setQuery] = useState('');
   const [results, setResults] = useState({ orders: [], suppliers: [], documents: [] });
   const [open, setOpen] = useState(false);
@@ -82,13 +83,13 @@ export default function SearchBar({ onResultSelect }) {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-md mx-auto">
-      <div className="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 shadow-sm w-full">
-        <Search size={16} className="text-slate-400 mr-2 shrink-0" />
+    <div ref={containerRef} className={`relative w-full ${isPill ? 'max-w-xl' : 'max-w-md'} mx-auto`}>
+      <div className={`flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 w-full ${isPill ? 'rounded-full py-3 px-5' : 'rounded-lg px-3 py-2 shadow-sm'}`}>
+        <Search size={isPill ? 20 : 16} className={`text-slate-400 shrink-0 ${isPill ? 'mr-3' : 'mr-2'}`} />
         <input
           type="text"
-          className="flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 min-w-0"
-          placeholder="Search orders, suppliers, documents..."
+          className={`flex-1 bg-transparent outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400 min-w-0 ${isPill ? 'text-base' : 'text-sm'}`}
+          placeholder={isPill ? 'Search…' : 'Search orders, suppliers, documents...'}
           value={query}
           onChange={handleChange}
           onFocus={() => query && setOpen(true)}
@@ -103,7 +104,7 @@ export default function SearchBar({ onResultSelect }) {
       </div>
 
       {open && query.length > 0 && (
-        <div className="absolute left-0 top-full mt-1.5 w-full min-w-[300px] max-h-96 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-[300]">
+        <div className={`absolute left-0 top-full mt-1.5 w-full min-w-[300px] max-h-96 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 z-[300] ${isPill ? 'rounded-xl shadow-sm' : 'rounded-xl shadow-xl'}`}>
           {/* Orders */}
           <div className="px-3 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <Package size={10} /> Orders

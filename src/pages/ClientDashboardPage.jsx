@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
+import PlanUsageBanner from '@/components/PlanUsageBanner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useClientOrders } from '@/contexts/ClientContext';
@@ -191,6 +192,8 @@ export default function ClientDashboardPage() {
   return (
     <ClientDashboardLayout>
       <Helmet><title>Dashboard — Client Portal</title></Helmet>
+
+      <PlanUsageBanner />
 
       {/* ── Greeting ── */}
       <motion.div

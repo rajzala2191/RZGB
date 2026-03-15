@@ -5,28 +5,15 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { Loader2 } from 'lucide-react';
 
 const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingCheck = false }) => {
-  const { currentUser, userRole, isSuperAdmin, isCustomerAdmin, adminScope, loading } = useAuth();
+  const {
+    currentUser, userRole, isSuperAdmin, isCustomerAdmin, adminScope,
+    workspaceStatus, onboardingStatus, loading,
+  } = useAuth();
   const location = useLocation();
-  const [onboardingStatus, setOnboardingStatus] = useState(null);
-  const [onboardingLoading, setOnboardingLoading] = useState(false);
   const [mfaVerified, setMfaVerified] = useState(null);
   const [mfaLoading, setMfaLoading] = useState(false);
 
   const allowedRoles = requiredRoles || (requiredRole ? [requiredRole] : []);
-
-  useEffect(() => {
-    if (!currentUser || userRole !== 'supplier' || skipOnboardingCheck) return;
-    setOnboardingLoading(true);
-    supabase
-      .from('profiles')
-      .select('onboarding_status')
-      .eq('id', currentUser.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        setOnboardingStatus(data?.onboarding_status ?? 'approved');
-        setOnboardingLoading(false);
-      });
-  }, [currentUser, userRole, skipOnboardingCheck]);
 
   useEffect(() => {
     if (!currentUser || userRole !== 'admin') return;
@@ -39,7 +26,7 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
   }, [currentUser, userRole]);
 
   const mfaApplies = userRole === 'admin';
-  if (loading || (currentUser && !userRole) || onboardingLoading || (mfaApplies && mfaLoading)) {
+  if (loading || (currentUser && !userRole) || (mfaApplies && mfaLoading)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="flex flex-col items-center gap-4">
@@ -91,9 +78,23 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
     }
   }
 
+  // Gate suppliers who haven't completed their onboarding
   if (userRole === 'supplier' && !skipOnboardingCheck && onboardingStatus && onboardingStatus !== 'approved') {
     if (location.pathname !== '/supplier-hub/onboarding') {
       return <Navigate to="/supplier-hub/onboarding" replace />;
+    }
+  }
+
+  // Gate pending workspace admins: must complete onboarding before accessing the app
+  if (userRole === 'admin' && workspaceStatus === 'pending') {
+    if (onboardingStatus === 'not_started' || onboardingStatus === null) {
+      if (location.pathname !== '/onboarding') {
+        return <Navigate to="/onboarding" replace />;
+      }
+    } else if (onboardingStatus === 'completed') {
+      if (location.pathname !== '/pending-approval') {
+        return <Navigate to="/pending-approval" replace />;
+      }
     }
   }
 

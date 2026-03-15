@@ -29,6 +29,20 @@ export const fetchProfileByUserId = async (userId) =>
     .eq('id', userId)
     .maybeSingle();
 
+export const fetchProfileExtras = async (userId) =>
+  supabase
+    .from('profiles')
+    .select('onboarding_status')
+    .eq('id', userId)
+    .maybeSingle();
+
+export const fetchWorkspaceStatus = async (workspaceId) =>
+  supabase
+    .from('workspaces')
+    .select('status')
+    .eq('id', workspaceId)
+    .maybeSingle();
+
 export const logActivity = async ({ userId, action, status, details }) =>
   supabase.from('activity_logs').insert({
     user_id: userId,
@@ -37,3 +51,17 @@ export const logActivity = async ({ userId, action, status, details }) =>
     details,
     ip_address: 'client-side',
   });
+
+export const signUpWithEmail = ({ email, password, fullName }) =>
+  supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name: fullName } },
+  });
+
+export const signInWithGoogle = () =>
+  supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${window.location.origin}/oauth-completion` },
+  });
+

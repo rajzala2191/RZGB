@@ -5,6 +5,7 @@ import { ArrowRight, Menu, X } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeContext';
 import { isLandingDomain, getPortalUrl } from '@/lib/portalConfig';
+import VrocureLogo from '@/components/VrocureLogo';
 
 const NAV_LINKS = [
   { label: 'Features',     href: '/landing',       section: 'features',  key: 'landing'      },
@@ -91,11 +92,9 @@ export default function PublicNav({ activePage }) {
           className="flex items-center gap-3"
         >
           <Link to="/landing" className="flex items-center gap-2.5">
-            <img
-              src="/zaproc-logo-192.png"
-              alt="Zaproc"
-              className="h-8 w-8 object-contain rounded-lg transition-all"
-            />
+            <div className="w-8 h-8 flex items-center justify-center text-slate-900 dark:text-white shrink-0">
+              <VrocureLogo size={28} />
+            </div>
             <AnimatePresence>
             {!scrolled && (
               <motion.div
@@ -106,7 +105,7 @@ export default function PublicNav({ activePage }) {
                 className="hidden sm:flex flex-col leading-none gap-0.5 overflow-hidden"
               >
                 <span className="text-base font-black tracking-tight transition-colors whitespace-nowrap" style={{ color: 'var(--heading)' }}>
-                  Zaproc
+                  Vrocure
                 </span>
                 <span className="text-[10px] font-medium transition-colors whitespace-nowrap" style={{ color: 'var(--caption)' }}>
                   by RZ Global Solutions

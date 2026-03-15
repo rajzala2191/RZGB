@@ -16,6 +16,7 @@ import {
   ScrollText,
   Lock,
   Bell,
+  UserCheck,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { SIDEBAR, HEADER } from '@/lib/theme';
@@ -42,6 +43,7 @@ const NAV_GROUPS = [
     label: 'Pipeline',
     items: [
       { path: '/platform-admin/demo-requests', label: 'Demo Requests', icon: Mail },
+      { path: '/platform-admin/join-requests', label: 'Join Requests', icon: UserCheck },
     ],
   },
   {

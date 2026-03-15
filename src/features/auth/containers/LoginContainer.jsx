@@ -15,7 +15,7 @@ const OTP_LENGTH = Number(import.meta.env.VITE_EMAIL_OTP_LENGTH || 6);
 export default function LoginContainer() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, currentUser, userRole, profileError, clearProfileError } = useAuth();
+  const { login, signInWithGoogle, currentUser, userRole, profileError, clearProfileError } = useAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState('');
@@ -230,6 +230,7 @@ export default function LoginContainer() {
       onCloseForgotPassword={() => {
         setShowForgotPassword(false);
       }}
+      onGoogleSignIn={async () => { setError(''); const { error: e } = await signInWithGoogle(); if (e) setError(e.message); }}
       forgotPasswordProps={{
         step,
         email: forgotEmail,

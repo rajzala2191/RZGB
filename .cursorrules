@@ -51,6 +51,29 @@ All DB queries must be scoped by workspace_id.
 - No console.log in production code
 - Never commit .env or service role keys
 
-## Last Session — 2026-03-14
-**Done:** Created RZGBLandingPage, multi-domain routing (isRZGBDomain), DomainGuard RZGB support, GitHub Actions CI, branch protection setup, fixed blank screen (missing Hostinger env vars)
-**Next:** Redesign RZGBLandingPage (glassmorphism, light theme), fix tab title + favicon for RZGB domain, smooth scroll, real photography
+## Critical Auth Safety Rules (DO NOT VIOLATE)
+- `fetchProfileByUserId` in `authService.js` selects EXACTLY these 7 columns: `role, company_name, logo_url, is_demo, status, workspace_id, admin_scope` — **NEVER add columns or joins** — adding `onboarding_status` caused silent login failure (column may not exist on all DB instances)
+- `onboarding_status` and `workspaceStatus` are loaded SEPARATELY via `fetchProfileExtras` + `fetchWorkspaceStatus` in an isolated `useEffect` in `AuthContext.jsx` — decoupled from login flow
+- Supabase PostgREST embedded selects (joins) are unreliable for this schema — always use separate queries
+- `fetchUserProfile` returns `'ok'|'missing'|'error'` string — `handleMissingProfile` only called on `'missing'`, never `'error'`
+
+## Joinlist / Self-Signup System (Added 2026-03-15)
+- New self-signup flow: Signup → Login → `/onboarding` (5-step wizard) → `/pending-approval` → super-admin approves → workspace active
+- Workspace `status`: `pending` (new signup) → `active` (approved) | `archived` (rejected)
+- Profile `onboarding_status`: `not_started` → `completed` (wizard done) → `approved` / `rejected`
+- DB migration `supabase/migrations/20260319000000_joinlist.sql` **MUST be run in Supabase SQL Editor**
+- `ProtectedRoute` gates pending admins: `workspaceStatus === 'pending'` → redirect `/onboarding` or `/pending-approval`
+- Platform admin can approve/reject from `/platform-admin/join-requests` (`PlatformJoinlistPage`)
+
+## Joinlist Key Files
+- `src/features/onboarding/OnboardingWizard.jsx` — 5-step self-signup wizard
+- `src/features/onboarding/OnboardingDetailsPanel.jsx` — read-only admin preview of onboarding data
+- `src/pages/OnboardingPage.jsx` — route wrapper for wizard
+- `src/pages/PendingApprovalPage.jsx` — waiting screen after wizard submit
+- `src/pages/platform/PlatformJoinlistPage.jsx` — admin approve/reject UI
+- `src/services/workspaceService.js` — saveOnboardingData, completeOnboarding, fetchPendingWorkspaces, approveWorkspace, rejectWorkspace
+
+## Last Session — 2026-03-15
+**Done:** Freemium plan system, self-service signup (/signup, /oauth-completion, Google OAuth), joinlist + 5-step onboarding wizard, PendingApprovalPage, PlatformJoinlistPage, AuthContext hardened (fetchUserProfile returns ok/missing/error, workspaceStatus+onboardingStatus in isolated useEffect), ProtectedRoute pending gating
+**⚠️ Login reliability**: final fix reverted fetchProfileByUserId to exact original 7 columns + isolated useEffect for extras — build passes but was not browser-verified before handover
+**Next:** Run joinlist DB migration in Supabase SQL Editor, configure Google OAuth, verify login works, test full joinlist flow end-to-end

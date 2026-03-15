@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import PublicNav from '@/components/PublicNav';
 import { useTheme } from '@/contexts/ThemeContext';
+import VrocureLogo from '@/components/VrocureLogo';
 
 // ─── Shared design tokens ──────────────────────────────────────────────────────
 const BRAND = '#FF6B35';
@@ -471,22 +472,22 @@ const PORTAL_TABS = [
       { icon: Eye,       text: 'Watch live progress through 9 pipeline stages' },
     ],
     preview: () => (
-      <div className="space-y-3">
-        <div className="rounded-xl p-4 border-2 border-dashed text-center" style={{ borderColor: `${BRAND}35` }}>
-          <Upload className="w-8 h-8 mx-auto mb-1.5" style={{ color: BRAND, opacity: 0.5 }} />
-          <p className="text-xs font-medium" style={{ color: 'var(--body)' }}>Drop drawings here · PDF / DWG</p>
+      <div className="space-y-2 flex-1 min-h-0">
+        <div className="rounded-lg p-2.5 border-2 border-dashed text-center flex-shrink-0" style={{ borderColor: `${BRAND}35` }}>
+          <Upload className="w-6 h-6 mx-auto mb-1" style={{ color: BRAND, opacity: 0.5 }} />
+          <p className="text-[10px] font-medium" style={{ color: 'var(--body)' }}>Drop drawings · PDF / DWG</p>
         </div>
         {[
-          { label: 'Valve Body Casting', status: 'Casting Stage', statusColor: '#10b981', progress: 55 },
-          { label: 'Pump Housing',        status: 'QC Check',     statusColor: '#f59e0b', progress: 78 },
+          { label: 'Valve Body Casting', status: 'Casting', statusColor: '#10b981', progress: 55 },
+          { label: 'Pump Housing', status: 'QC Check', statusColor: '#f59e0b', progress: 78 },
         ].map((o) => (
-          <div key={o.label} className="rounded-lg p-3" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold" style={{ color: 'var(--heading)' }}>{o.label}</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${o.statusColor}18`, color: o.statusColor }}>{o.status}</span>
+          <div key={o.label} className="rounded-lg p-2.5 flex-shrink-0" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-semibold truncate" style={{ color: 'var(--heading)' }}>{o.label}</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold shrink-0" style={{ background: `${o.statusColor}18`, color: o.statusColor }}>{o.status}</span>
             </div>
-            <div className="h-1.5 rounded-full" style={{ background: 'var(--edge)' }}>
-              <div className="h-1.5 rounded-full transition-all" style={{ width: `${o.progress}%`, background: o.statusColor }} />
+            <div className="h-1 rounded-full" style={{ background: 'var(--edge)' }}>
+              <div className="h-1 rounded-full transition-all" style={{ width: `${o.progress}%`, background: o.statusColor }} />
             </div>
           </div>
         ))}
@@ -505,16 +506,16 @@ const PORTAL_TABS = [
       { icon: Award,      text: 'Award jobs and monitor milestone progress' },
     ],
     preview: () => (
-      <div className="space-y-3">
-        <div className="grid grid-cols-3 gap-2">
+      <div className="space-y-2 flex-1 min-h-0 flex flex-col">
+        <div className="grid grid-cols-3 gap-1.5 flex-shrink-0">
           {[
-            { label: 'Open RFQs',   value: '12', color: '#3b82f6' },
+            { label: 'Open RFQs', value: '12', color: '#3b82f6' },
             { label: 'Active Jobs', value: '34', color: '#10b981' },
-            { label: 'Pending QC',  value: '5',  color: '#f59e0b' },
+            { label: 'Pending QC', value: '5', color: '#f59e0b' },
           ].map((s) => (
-            <div key={s.label} className="rounded-lg p-2.5 text-center" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
-              <p className="text-lg font-black" style={{ color: s.color }}>{s.value}</p>
-              <p className="text-[10px]" style={{ color: 'var(--caption)' }}>{s.label}</p>
+            <div key={s.label} className="rounded-lg p-2 text-center" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
+              <p className="text-base font-black" style={{ color: s.color }}>{s.value}</p>
+              <p className="text-[9px]" style={{ color: 'var(--caption)' }}>{s.label}</p>
             </div>
           ))}
         </div>
@@ -522,14 +523,14 @@ const PORTAL_TABS = [
           { job: 'RZ-JOB-10041', part: 'Impeller · Bronze LG2', bids: 4, top: '£8,200' },
           { job: 'RZ-JOB-10039', part: 'Bearing Housing · Steel', bids: 6, top: '£3,400' },
         ].map((r) => (
-          <div key={r.job} className="flex items-center justify-between rounded-lg px-3 py-2.5" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
-            <div>
-              <p className="text-xs font-bold" style={{ color: 'var(--heading)' }}>{r.job}</p>
-              <p className="text-[10px]" style={{ color: 'var(--caption)' }}>{r.part}</p>
+          <div key={r.job} className="flex items-center justify-between rounded-lg px-2.5 py-2 flex-shrink-0" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold truncate" style={{ color: 'var(--heading)' }}>{r.job}</p>
+              <p className="text-[9px] truncate" style={{ color: 'var(--caption)' }}>{r.part}</p>
             </div>
-            <div className="text-right">
-              <p className="text-xs font-black" style={{ color: '#3b82f6' }}>{r.bids} bids</p>
-              <p className="text-[10px]" style={{ color: 'var(--caption)' }}>Top {r.top}</p>
+            <div className="text-right shrink-0">
+              <p className="text-[11px] font-black" style={{ color: '#3b82f6' }}>{r.bids} bids</p>
+              <p className="text-[9px]" style={{ color: 'var(--caption)' }}>Top {r.top}</p>
             </div>
           </div>
         ))}
@@ -548,25 +549,24 @@ const PORTAL_TABS = [
       { icon: Truck,     text: 'Update milestones and upload QC documents' },
     ],
     preview: () => (
-      <div className="space-y-3">
+      <div className="space-y-2 flex-1 min-h-0 flex flex-col">
         {[
           { job: 'Valve Body Casting', mat: 'Bronze LG2 · 60 pcs', deadline: '3 days', prize: '~£9k' },
-          { job: 'Pump Impeller',       mat: 'Duplex SS · 12 pcs',  deadline: '5 days', prize: '~£4k' },
-          { job: 'Bearing Housing',     mat: 'EN24 Steel · 25 pcs', deadline: '7 days', prize: '~£3.4k' },
+          { job: 'Pump Impeller', mat: 'Duplex SS · 12 pcs', deadline: '5 days', prize: '~£4k' },
         ].map((j) => (
-          <div key={j.job} className="rounded-lg p-3" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
+          <div key={j.job} className="rounded-lg p-2.5 flex-shrink-0" style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)' }}>
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold truncate" style={{ color: 'var(--heading)' }}>{j.job}</p>
-                <p className="text-[10px] mt-0.5" style={{ color: 'var(--caption)' }}>{j.mat}</p>
+                <p className="text-[11px] font-bold truncate" style={{ color: 'var(--heading)' }}>{j.job}</p>
+                <p className="text-[9px] truncate" style={{ color: 'var(--caption)' }}>{j.mat}</p>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-[10px] font-semibold" style={{ color: '#8b5cf6' }}>{j.prize}</p>
-                <p className="text-[10px]" style={{ color: 'var(--caption)' }}>{j.deadline} left</p>
+                <p className="text-[9px] font-semibold" style={{ color: '#8b5cf6' }}>{j.prize}</p>
+                <p className="text-[9px]" style={{ color: 'var(--caption)' }}>{j.deadline} left</p>
               </div>
             </div>
-            <div className="mt-2 flex justify-end">
-              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: '#8b5cf6' }}>Place Bid</span>
+            <div className="mt-1.5 flex justify-end">
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: '#8b5cf6' }}>Place Bid</span>
             </div>
           </div>
         ))}
@@ -715,27 +715,27 @@ function HeroSection() {
         <div className="absolute -inset-x-8 top-8 h-40 rounded-3xl pointer-events-none blur-3xl opacity-20"
           style={{ background: `linear-gradient(90deg, ${tab.color}, transparent, #8b5cf6)` }} />
 
-        <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl"
+        <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl flex flex-col h-[50vh] min-h-[400px] max-h-[480px]"
           style={{
             ...glassCard(isDark),
             boxShadow: isDark ? `0 0 0 1px rgba(255,255,255,0.06), 0 32px 64px rgba(0,0,0,0.5)` : `0 0 0 1px rgba(0,0,0,0.06), 0 32px 64px rgba(0,0,0,0.12)`,
           }}>
 
           {/* Window chrome */}
-          <div className="flex items-center gap-1.5 px-4 py-3 border-b" style={{ borderColor: 'var(--edge)' }}>
+          <div className="flex items-center gap-1.5 px-4 py-3 border-b flex-shrink-0" style={{ borderColor: 'var(--edge)' }}>
             {['#ff5f57','#febc2e','#28c840'].map((c) => (
               <div key={c} className="w-3 h-3 rounded-full" style={{ background: c }} />
             ))}
             <div className="flex-1 mx-4">
               <div className="max-w-[200px] mx-auto h-5 rounded-md text-[10px] font-medium flex items-center justify-center px-3"
                 style={{ background: 'var(--surface-inset)', border: '1px solid var(--edge)', color: 'var(--caption)' }}>
-                zaproc.io/portal
+                vrocure.io/portal
               </div>
             </div>
           </div>
 
           {/* Tab bar */}
-          <div className="flex items-center gap-1 px-4 py-3 border-b" style={{ borderColor: 'var(--edge)', background: isDark ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0.015)' }}>
+          <div className="flex items-center gap-1 px-4 py-3 border-b flex-shrink-0" style={{ borderColor: 'var(--edge)', background: isDark ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0.015)' }}>
             {PORTAL_TABS.map((t, i) => (
               <button key={t.id} onClick={() => setActiveTab(i)}
                 className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all"
@@ -753,68 +753,72 @@ function HeroSection() {
             </div>
           </div>
 
-          {/* Content: steps left + preview right */}
+          {/* Content: steps left + preview right — fixed height, content fits */}
+          <div className="flex-1 min-h-0 overflow-hidden overflow-x-hidden flex">
           <AnimatePresence mode="wait">
             <motion.div key={tab.id}
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
-              className="grid md:grid-cols-2 gap-0">
+              className="grid md:grid-cols-2 gap-0 flex-1 min-w-0">
 
               {/* Left — portal description */}
-              <div className="p-6 md:p-8 border-r" style={{ borderColor: 'var(--edge)' }}>
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              <div className="p-5 md:p-6 border-r flex flex-col min-w-0" style={{ borderColor: 'var(--edge)' }}>
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ background: `${tab.color}18`, border: `1px solid ${tab.color}25` }}>
-                    <tab.icon className="w-5 h-5" style={{ color: tab.color }} />
+                    <tab.icon className="w-4 h-4" style={{ color: tab.color }} />
                   </div>
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: tab.color }}>{tab.label}</p>
-                    <p className="text-sm font-black mt-0.5" style={{ color: 'var(--heading)' }}>{tab.headline}</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tab.color }}>{tab.label}</p>
+                    <p className="text-xs font-black truncate" style={{ color: 'var(--heading)' }}>{tab.headline}</p>
                   </div>
                 </div>
-                <ul className="space-y-3.5">
+                <ul className="space-y-2">
                   {tab.steps.map(({ icon: Icon, text }, j) => (
                     <motion.li key={j}
                       initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: j * 0.07 + 0.1 }}
-                      className="flex items-start gap-3">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                      className="flex items-start gap-2">
+                      <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5"
                         style={{ background: `${tab.color}12`, border: `1px solid ${tab.color}20` }}>
-                        <Icon className="w-3.5 h-3.5" style={{ color: tab.color }} />
+                        <Icon className="w-3 h-3" style={{ color: tab.color }} />
                       </div>
-                      <span className="text-sm leading-snug" style={{ color: 'var(--body)' }}>{text}</span>
+                      <span className="text-xs leading-snug" style={{ color: 'var(--body)' }}>{text}</span>
                     </motion.li>
                   ))}
                 </ul>
-                <div className="mt-7">
+                <div className="mt-4">
                   {isLandingDomain() ? (
                     <a href={getPortalUrl('/request-demo')}
-                      className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg text-white"
+                      className="inline-flex items-center gap-2 text-[11px] font-bold px-3.5 py-2 rounded-lg text-white"
                       style={{ background: tab.color, boxShadow: `0 4px 14px ${tab.color}35` }}>
-                      Try {tab.label} <ArrowRight className="w-3.5 h-3.5" />
+                      Try {tab.label} <ArrowRight className="w-3 h-3" />
                     </a>
                   ) : (
                     <Link to="/request-demo"
-                      className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg text-white"
+                      className="inline-flex items-center gap-2 text-[11px] font-bold px-3.5 py-2 rounded-lg text-white"
                       style={{ background: tab.color, boxShadow: `0 4px 14px ${tab.color}35` }}>
-                      Try {tab.label} <ArrowRight className="w-3.5 h-3.5" />
+                      Try {tab.label} <ArrowRight className="w-3 h-3" />
                     </Link>
                   )}
                 </div>
               </div>
 
               {/* Right — live preview */}
-              <div className="p-6 md:p-8">
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--caption)' }}>
+              <div className="p-5 md:p-6 flex flex-col min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--caption)' }}>
                   Live preview
                 </p>
-                <tab.preview />
+                <div className="flex-1 min-h-0 flex flex-col">
+                  <tab.preview />
+                </div>
               </div>
             </motion.div>
           </AnimatePresence>
+          </div>
 
           {/* Progress bar */}
-          <div className="h-0.5" style={{ background: 'var(--edge)' }}>
+          <div className="h-0.5 flex-shrink-0" style={{ background: 'var(--edge)' }}>
             <motion.div key={`prog-${activeTab}`}
               className="h-full"
               initial={{ width: '0%' }} animate={{ width: '100%' }}
@@ -989,36 +993,37 @@ function RoleTabsSection() {
           </div>
         </div>
 
-        {/* Tab content */}
+        {/* Tab content — fixed height, content fits */}
+        <div className="max-h-[55vh] min-h-[320px] overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div key={active}
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="grid md:grid-cols-2 gap-6 md:gap-10 items-start"
+            className="grid md:grid-cols-2 gap-6 md:gap-8 items-start"
           >
             {/* Steps column */}
             <div>
-              <p className="text-base mb-6 leading-relaxed" style={{ color: 'var(--body)' }}>{role.description}</p>
-              <div className="relative space-y-5">
+              <p className="text-sm mb-4 leading-relaxed" style={{ color: 'var(--body)' }}>{role.description}</p>
+              <div className="relative space-y-3">
                 {/* Vertical connector SVG */}
                 <svg className="absolute left-4 top-0 w-0.5 pointer-events-none" style={{ height: '100%', stroke: `${role.color}25`, strokeDasharray: '4 4' }}>
                   <line x1="0" y1="0" x2="0" y2="100%" strokeWidth="1" />
                 </svg>
                 {role.steps.map((step, i) => (
-                  <motion.div key={i} className="flex gap-4 relative z-10"
+                  <motion.div key={i} className="flex gap-3 relative z-10"
                     initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}>
-                    <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold shadow-lg"
+                    <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-lg"
                       style={{ background: role.color, boxShadow: `0 4px 12px ${role.color}40` }}>
                       {i + 1}
                     </div>
                     <div className="pt-0.5">
-                      <p className="text-sm font-bold mb-1" style={{ color: 'var(--heading)' }}>{step.title}</p>
-                      <p className="text-sm leading-relaxed" style={{ color: 'var(--body)' }}>{step.body}</p>
+                      <p className="text-xs font-bold mb-0.5" style={{ color: 'var(--heading)' }}>{step.title}</p>
+                      <p className="text-xs leading-relaxed" style={{ color: 'var(--body)' }}>{step.body}</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
-              <div className="mt-8">
+              <div className="mt-5">
                 <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
                   {isLandingDomain() ? (
                     <a href={getPortalUrl(role.path)} className="inline-flex items-center gap-2 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all"
@@ -1040,7 +1045,7 @@ function RoleTabsSection() {
               className="rounded-2xl overflow-hidden shadow-xl backdrop-blur-sm"
               style={{ ...glassCard(isDark), borderTop: `4px solid ${role.color}` }}>
               {/* Colored header */}
-              <div className="px-4 py-2.5 flex items-center gap-2"
+              <div className="px-3 py-2 flex items-center gap-2"
                 style={{ background: `linear-gradient(to right, ${role.color}12, transparent)`, borderBottom: '1px solid var(--edge)' }}>
                 <role.icon className="w-4 h-4" style={{ color: role.color }} />
                 <span className="text-xs font-bold" style={{ color: role.color }}>{role.label}</span>
@@ -1050,32 +1055,32 @@ function RoleTabsSection() {
                 </span>
               </div>
               <div className="flex">
-                <div className="w-14 flex flex-col items-center py-4 gap-3 border-r" style={{ background: 'var(--surface-raised)', borderColor: 'var(--edge)' }}>
+                <div className="w-12 flex flex-col items-center py-3 gap-2 border-r" style={{ background: 'var(--surface-raised)', borderColor: 'var(--edge)' }}>
                   {[BarChart3, Package, FileCheck, Users].map((Icon, j) => (
-                    <div key={j} className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    <div key={j} className="w-7 h-7 rounded-lg flex items-center justify-center"
                       style={j === 0 ? { background: role.color, color: '#fff' } : { color: 'var(--body)' }}>
-                      <Icon className="w-4 h-4" />
+                      <Icon className="w-3.5 h-3.5" />
                     </div>
                   ))}
                 </div>
-                <div className="flex-1 p-4 min-h-[220px]">
-                  <div className="space-y-2 mb-4">
-                    {[80, 60, 70, 50].map((w, j) => <div key={j} className="h-2 rounded-full" style={{ width: `${w}%`, background: 'var(--edge-strong)' }} />)}
+                <div className="flex-1 p-3 min-h-[180px]">
+                  <div className="space-y-1.5 mb-3">
+                    {[80, 60, 70, 50].map((w, j) => <div key={j} className="h-1.5 rounded-full" style={{ width: `${w}%`, background: 'var(--edge-strong)' }} />)}
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-1.5">
                     {['12', '4', '8'].map((n, j) => (
-                      <div key={j} className="rounded-lg p-2 text-center" style={{ background: 'var(--surface-raised)' }}>
-                        <p className="text-base font-black" style={{ color: 'var(--heading)' }}>{n}</p>
-                        <div className="h-1.5 rounded-full mt-1 w-10 mx-auto" style={{ background: 'var(--edge-strong)' }} />
+                      <div key={j} className="rounded-lg p-1.5 text-center" style={{ background: 'var(--surface-raised)' }}>
+                        <p className="text-sm font-black" style={{ color: 'var(--heading)' }}>{n}</p>
+                        <div className="h-1 rounded-full mt-0.5 w-8 mx-auto" style={{ background: 'var(--edge-strong)' }} />
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3 space-y-1.5">
+                  <div className="mt-2 space-y-1">
                     {[1, 2, 3].map((j) => (
-                      <div key={j} className="flex items-center gap-2 rounded-lg p-2" style={{ background: 'var(--surface-inset)' }}>
+                      <div key={j} className="flex items-center gap-1.5 rounded-lg p-1.5" style={{ background: 'var(--surface-inset)' }}>
                         <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: role.color }} />
-                        <div className="h-1.5 rounded-full flex-1" style={{ background: 'var(--edge-strong)' }} />
-                        <div className="h-4 w-12 rounded-full" style={{ background: 'var(--edge-strong)' }} />
+                        <div className="h-1 rounded-full flex-1" style={{ background: 'var(--edge-strong)' }} />
+                        <div className="h-3 w-10 rounded-full" style={{ background: 'var(--edge-strong)' }} />
                       </div>
                     ))}
                   </div>
@@ -1084,6 +1089,7 @@ function RoleTabsSection() {
             </motion.div>
           </motion.div>
         </AnimatePresence>
+        </div>
       </div>
     </section>
   );
@@ -1398,9 +1404,11 @@ function LandingFooter() {
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           {/* Brand column */}
           <div className="col-span-2 sm:col-span-1">
-            <div className="flex items-center gap-3 mb-4">
-              <img src="/zaproc-logo-192.png" alt="Zaproc" className="h-8 object-contain"
-                style={isDark ? { filter: 'brightness(0) invert(1)', opacity: 0.85 } : {}} />
+            <div className="flex items-center gap-2 mb-4">
+              <div className={isDark ? 'text-white' : 'text-slate-900'}>
+                <VrocureLogo size={32} />
+              </div>
+              <span className="text-base font-black tracking-tight" style={{ color: 'var(--heading)' }}>Vrocure</span>
             </div>
             <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--body)' }}>
               B2B manufacturing procurement platform for global industry. Three portals, one system.
@@ -1441,7 +1449,7 @@ function LandingFooter() {
           </p>
           <div className="flex items-center gap-4">
             <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: `${BRAND}10`, color: BRAND, border: `1px solid ${BRAND}20` }}>
-              Zaproc Platform
+              Vrocure Platform
             </span>
           </div>
         </div>

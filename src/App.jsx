@@ -18,6 +18,7 @@ import LoginPage from '@/pages/LoginPage';
 
 // Landing & Demo
 import LandingPage from '@/pages/LandingPage';
+import VrocureLogos from '../logo.jsx';
 import HowItWorksPage from '@/pages/HowItWorksPage';
 import DemoEntryPage from '@/pages/demo/DemoEntryPage';
 import { DemoProvider } from '@/contexts/DemoContext';
@@ -77,11 +78,17 @@ import PlatformSettingsPage from '@/pages/platform/PlatformSettingsPage';
 import PlatformAuditLogPage from '@/pages/platform/PlatformAuditLogPage';
 import PlatformSecurityPage from '@/pages/platform/PlatformSecurityPage';
 import PlatformNotificationsPage from '@/pages/platform/PlatformNotificationsPage';
+import PlatformJoinlistPage from '@/pages/platform/PlatformJoinlistPage';
 
 // Public Pages
 import PricingPage from '@/pages/PricingPage';
 import RoadmapPage from '@/pages/RoadmapPage';
 import RequestDemoPage from '@/pages/RequestDemoPage';
+import ThemeDemoPage from '@/pages/ThemeDemoPage';
+import SignupPage from '@/pages/SignupPage';
+import OAuthCompletionPage from '@/pages/OAuthCompletionPage';
+import OnboardingPage from '@/pages/OnboardingPage';
+import PendingApprovalPage from '@/pages/PendingApprovalPage';
 
 // Client Pages
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
@@ -140,8 +147,14 @@ function App() {
                     <Route path="/how-it-works" element={<HowItWorksPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/roadmap" element={<RoadmapPage />} />
+                    <Route path="/theme-demo" element={<ThemeDemoPage />} />
+                    <Route path="/logo" element={<VrocureLogos />} />
                     <Route path="/request-demo" element={<RequestDemoPage />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/oauth-completion" element={<OAuthCompletionPage />} />
+                    <Route path="/onboarding" element={<OnboardingPage />} />
+                    <Route path="/pending-approval" element={<PendingApprovalPage />} />
 
                     {/* Demo routes — access only with approved token; in-memory context resets on refresh */}
                     <Route path="/demo" element={<DemoAccessGate><DemoProvider><Outlet /></DemoProvider></DemoAccessGate>}>
@@ -169,6 +182,7 @@ function App() {
                       <Route path="audit-log" element={<PlatformAuditLogPage />} />
                       <Route path="security" element={<PlatformSecurityPage />} />
                       <Route path="notifications" element={<PlatformNotificationsPage />} />
+                      <Route path="join-requests" element={<PlatformJoinlistPage />} />
                     </Route>
 
                     {/* --- ADMIN ROUTES (super_admin + customer_admin) --- */}

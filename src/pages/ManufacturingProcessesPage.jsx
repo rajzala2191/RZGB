@@ -331,12 +331,12 @@ export default function ManufacturingProcessesPage() {
             </div>
           </div>
           {activeTab === 'processes' && (
-            <button onClick={() => setShowProcessModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 7, background: `linear-gradient(135deg, ${ACCENT}, #c2410c)`, color: '#fff', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+            <button onClick={() => setShowProcessModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'var(--brand)', color: 'var(--app-bg)', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
               <Plus size={15} /> Add Process
             </button>
           )}
           {activeTab === 'templates' && (
-            <button onClick={() => openTemplateModal()} style={{ display: 'flex', alignItems: 'center', gap: 7, background: `linear-gradient(135deg, ${ACCENT}, #c2410c)`, color: '#fff', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+            <button onClick={() => openTemplateModal()} style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'var(--brand)', color: 'var(--app-bg)', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
               <Plus size={15} /> New Template
             </button>
           )}
@@ -355,7 +355,7 @@ export default function ManufacturingProcessesPage() {
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '7px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
                 background: activeTab === tab.key ? ACCENT : 'transparent',
-                color: activeTab === tab.key ? '#fff' : t.sec,
+                color: activeTab === tab.key ? 'var(--app-bg)' : t.sec,
                 transition: 'all 0.15s',
               }}
             >
@@ -511,7 +511,7 @@ export default function ManufacturingProcessesPage() {
                                     </label>
                                     <div style={{ display: 'flex', gap: 8 }}>
                                       <button onClick={() => { setShowSubStepFormFor(null); setEditingSubStep(null); setSubStepForm(EMPTY_SUBSTEP_FORM); }} style={{ flex: 1, padding: '7px 0', borderRadius: 7, border: `1px solid ${t.border}`, background: 'none', color: t.sec, fontSize: 12, cursor: 'pointer' }}>Cancel</button>
-                                      <button onClick={() => handleAddSubStep(proc.id)} disabled={savingSubStep} style={{ flex: 1, padding: '7px 0', borderRadius: 7, border: 'none', background: ACCENT, color: '#fff', fontSize: 12, fontWeight: 700, cursor: savingSubStep ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                      <button onClick={() => handleAddSubStep(proc.id)} disabled={savingSubStep} style={{ flex: 1, padding: '7px 0', borderRadius: 7, border: 'none', background: 'var(--brand)', color: 'var(--app-bg)', fontSize: 12, fontWeight: 700, cursor: savingSubStep ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                                         {savingSubStep ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
                                         {editingSubStep ? 'Update' : 'Add'}
                                       </button>
@@ -612,7 +612,7 @@ export default function ManufacturingProcessesPage() {
                   </div>
                   <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
                     <button onClick={() => setShowProcessModal(false)} style={{ flex: 1, padding: '10px 0', borderRadius: 9, border: `1px solid ${t.border}`, background: 'none', color: t.sec, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                    <button onClick={handleAddProcess} disabled={saving} style={{ flex: 1, padding: '10px 0', borderRadius: 9, border: 'none', background: `linear-gradient(135deg, ${ACCENT}, #c2410c)`, color: '#fff', fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+                    <button onClick={handleAddProcess} disabled={saving} style={{ flex: 1, padding: '10px 0', borderRadius: 9, border: 'none', background: 'var(--brand)', color: 'var(--app-bg)', fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
                       {saving ? <><Loader2 size={14} className="animate-spin" /> Adding…</> : 'Add Process'}
                     </button>
                   </div>
@@ -680,7 +680,7 @@ export default function ManufacturingProcessesPage() {
 
                   <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
                     <button onClick={() => setShowTemplateModal(false)} style={{ flex: 1, padding: '10px 0', borderRadius: 9, border: `1px solid ${t.border}`, background: 'none', color: t.sec, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                    <button onClick={handleSaveTemplate} disabled={savingTemplate} style={{ flex: 1, padding: '10px 0', borderRadius: 9, border: 'none', background: `linear-gradient(135deg, ${ACCENT}, #c2410c)`, color: '#fff', fontSize: 13, fontWeight: 700, cursor: savingTemplate ? 'not-allowed' : 'pointer', opacity: savingTemplate ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+                    <button onClick={handleSaveTemplate} disabled={savingTemplate} style={{ flex: 1, padding: '10px 0', borderRadius: 9, border: 'none', background: 'var(--brand)', color: 'var(--app-bg)', fontSize: 13, fontWeight: 700, cursor: savingTemplate ? 'not-allowed' : 'pointer', opacity: savingTemplate ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
                       {savingTemplate ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : editingTemplate ? 'Update Template' : 'Create Template'}
                     </button>
                   </div>

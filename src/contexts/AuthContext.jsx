@@ -1,12 +1,17 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import {
   fetchProfileByUserId,
+  fetchProfileExtras,
+  fetchWorkspaceStatus,
   getSession,
   logActivity as logAuthActivity,
   onAuthStateChange,
   signInWithPassword,
   signOut,
+  signUpWithEmail,
+  signInWithGoogle as signInWithGoogleService,
 } from '@/services/authService';
+import { createSignupWorkspaceAndProfile } from '@/services/workspaceService';
 
 const AuthContext = createContext(undefined);
 export { AuthContext };
@@ -19,8 +24,12 @@ export const AuthProvider = ({ children }) => {
   const [isDemo, setIsDemo] = useState(false);
   const [workspaceId, setWorkspaceId] = useState(null);
   const [adminScope, setAdminScope] = useState(null);
+  const [workspaceStatus, setWorkspaceStatus] = useState(null);
+  const [onboardingStatus, setOnboardingStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileError, setProfileError] = useState(null);
+  const [needsOAuthCompletion, setNeedsOAuthCompletion] = useState(false);
+  const [oauthUser, setOauthUser] = useState(null);
 
   const isSuperAdmin = userRole === 'super_admin' || (userRole === 'admin' && adminScope === 'platform');
   const isCustomerAdmin = userRole === 'admin' && adminScope === 'workspace';
@@ -37,6 +46,8 @@ export const AuthProvider = ({ children }) => {
     setIsDemo(false);
     setWorkspaceId(null);
     setAdminScope(null);
+    setWorkspaceStatus(null);
+    setOnboardingStatus(null);
   }, []);
 
   const clearProfileError = useCallback(() => setProfileError(null), []);
@@ -50,7 +61,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Helper to fetch profile data. Fail closed if missing/invalid.
+  // Returns 'ok' | 'missing' | 'error'
+  // 'ok'      — profile loaded successfully
+  // 'missing' — authenticated but no profile row / no role (invitation not completed)
+  // 'error'   — transient DB / network failure; do NOT sign the user out
   const fetchUserProfile = useCallback(async (userId) => {
     try {
       const { data, error } = await fetchProfileByUserId(userId);
@@ -58,13 +72,13 @@ export const AuthProvider = ({ children }) => {
       if (error) {
         console.error('AuthContext: Error fetching user profile:', error.message);
         clearProfileState();
-        return false;
+        return 'error';
       }
 
       if (!data?.role) {
         console.error('AuthContext: Missing profile or role for user:', userId);
         clearProfileState();
-        return false;
+        return 'missing';
       }
 
       setUserRole(data.role);
@@ -73,12 +87,29 @@ export const AuthProvider = ({ children }) => {
       setIsDemo(Boolean(data.is_demo));
       setWorkspaceId(data.workspace_id || null);
       setAdminScope(data.admin_scope || 'workspace');
-      return true;
+
+      return 'ok';
     } catch (error) {
       console.error('AuthContext: Unexpected error fetching profile:', error);
       clearProfileState();
-      return false;
+      return 'error';
     }
+  }, [clearProfileState]);
+
+  // Only called when profile is genuinely absent (not on transient errors).
+  // Google OAuth new users are held for profile completion; email users are signed out.
+  const handleMissingProfile = useCallback(async (user) => {
+    const provider = user.app_metadata?.provider;
+    const isOAuth = provider === 'google';
+    if (isOAuth) {
+      setNeedsOAuthCompletion(true);
+      setOauthUser(user);
+      return;
+    }
+    setProfileError('Your account isn\'t fully set up yet. Please contact your workspace administrator or reach out to support.');
+    await signOut();
+    setCurrentUser(null);
+    clearProfileState();
   }, [clearProfileState]);
 
   useEffect(() => {
@@ -87,19 +118,17 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       try {
         const { data: { session }, error } = await getSession();
-        
+
         if (error) throw error;
 
         if (mounted) {
           if (session?.user) {
             setCurrentUser(session.user);
-            const profileOk = await fetchUserProfile(session.user.id);
-            if (!profileOk) {
-              setProfileError('Your account is not fully set up. Please contact your administrator.');
-              await signOut();
-              setCurrentUser(null);
-              clearProfileState();
+            const profileResult = await fetchUserProfile(session.user.id);
+            if (profileResult === 'missing') {
+              await handleMissingProfile(session.user);
             }
+            // 'error': transient failure — user stays logged in, profile state is cleared
           } else {
             setCurrentUser(null);
             clearProfileState();
@@ -120,16 +149,16 @@ export const AuthProvider = ({ children }) => {
 
         if (session?.user) {
           setCurrentUser(session.user);
-          const profileOk = await fetchUserProfile(session.user.id);
-          if (!profileOk && event !== 'SIGNED_OUT') {
-            setProfileError('Your account is not fully set up. Please contact your administrator.');
-            await signOut();
-            setCurrentUser(null);
-            clearProfileState();
+          const profileResult = await fetchUserProfile(session.user.id);
+          if (profileResult === 'missing' && event !== 'SIGNED_OUT') {
+            await handleMissingProfile(session.user);
           }
+          // 'error': transient failure — don't sign out, let the user retry
         } else {
           setCurrentUser(null);
           clearProfileState();
+          setNeedsOAuthCompletion(false);
+          setOauthUser(null);
         }
 
         setLoading(false);
@@ -140,21 +169,45 @@ export const AuthProvider = ({ children }) => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [clearProfileState, fetchUserProfile]);
+  }, [clearProfileState, fetchUserProfile, handleMissingProfile]);
+
+  // Workspace status + onboarding status loaded separately so they never block login.
+  // Both depend on currentUser being set; workspaceId may be null for super_admin.
+  useEffect(() => {
+    if (!currentUser) {
+      setWorkspaceStatus(null);
+      setOnboardingStatus(null);
+      return;
+    }
+    let cancelled = false;
+
+    if (workspaceId) {
+      fetchWorkspaceStatus(workspaceId).then(({ data }) => {
+        if (!cancelled) setWorkspaceStatus(data?.status || null);
+      }).catch(() => {
+        if (!cancelled) setWorkspaceStatus(null);
+      });
+    } else {
+      setWorkspaceStatus(null);
+    }
+
+    fetchProfileExtras(currentUser.id).then(({ data }) => {
+      if (!cancelled) setOnboardingStatus(data?.onboarding_status || null);
+    }).catch(() => {
+      if (!cancelled) setOnboardingStatus(null);
+    });
+
+    return () => { cancelled = true; };
+  }, [currentUser, workspaceId]);
 
   const login = async (email, password) => {
     setProfileError(null);
     try {
-      const { data, error } = await signInWithPassword({
-        email,
-        password,
-      });
-
+      const { data, error } = await signInWithPassword({ email, password });
       if (error) {
         console.error('AuthContext: Login failed:', error.message);
         throw error;
       }
-
       await logActivity(data.user.id, 'Login', 'Success', 'User logged in');
       return { data, error: null };
     } catch (error) {
@@ -173,6 +226,43 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signUp = async ({ email, password, fullName, businessName, phone, website }) => {
+    setProfileError(null);
+    try {
+      const { data, error } = await signUpWithEmail({ email, password, fullName });
+      if (error) throw error;
+
+      if (data.user) {
+        const { error: provErr } = await createSignupWorkspaceAndProfile({
+          userId: data.user.id,
+          email,
+          fullName,
+          businessName,
+          phone,
+          website,
+        });
+        if (provErr) throw provErr;
+      }
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await signInWithGoogleService();
+      return { error: error || null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const clearOAuthCompletion = () => {
+    setNeedsOAuthCompletion(false);
+    setOauthUser(null);
+  };
+
   const value = {
     currentUser,
     userRole,
@@ -184,16 +274,23 @@ export const AuthProvider = ({ children }) => {
     isSuperAdmin,
     isCustomerAdmin,
     canAccessWorkspace,
+    workspaceStatus,
+    onboardingStatus,
     loading,
     profileError,
     clearProfileError,
+    needsOAuthCompletion,
+    oauthUser,
+    clearOAuthCompletion,
     login,
     logout,
+    signUp,
+    signInWithGoogle,
     refreshProfile: async () => {
       if (currentUser) {
         await fetchUserProfile(currentUser.id);
       }
-    }
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
