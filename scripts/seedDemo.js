@@ -52,12 +52,12 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
 
 // ── User definitions ──────────────────────────────────────────────────────────
 // ⚠ Change SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD before running.
-const SUPER_ADMIN_EMAIL    = 'admin@zaproc.co.uk';
+const SUPER_ADMIN_EMAIL    = 'admin@vrocure.co.uk';
 const SUPER_ADMIN_PASSWORD = 'RZAdmin2024!';
 
 const USERS = [
   {
-    email:    'demo.client@zaproc.co.uk',
+    email:    'demo.client@vrocure.co.uk',
     password: 'RZDemo2024!',
     role:     'client',
     is_demo:  true,
@@ -65,7 +65,7 @@ const USERS = [
     name:     'James Thornton (Demo)',
   },
   {
-    email:    'demo.admin@zaproc.co.uk',
+    email:    'demo.admin@vrocure.co.uk',
     password: 'RZDemo2024!',
     role:     'admin',
     is_demo:  true,
@@ -73,7 +73,7 @@ const USERS = [
     name:     'Alex Morgan (Demo)',
   },
   {
-    email:    'demo.supplier@zaproc.co.uk',
+    email:    'demo.supplier@vrocure.co.uk',
     password: 'RZDemo2024!',
     role:     'supplier',
     is_demo:  true,
@@ -241,9 +241,9 @@ async function run() {
 
   console.log('\n✅ Seed complete!\n');
   console.log('Demo credentials:');
-  console.log('  Client:   demo.client@zaproc.co.uk   /  RZDemo2024!');
-  console.log('  Admin:    demo.admin@zaproc.co.uk    /  RZDemo2024!');
-  console.log('  Supplier: demo.supplier@zaproc.co.uk /  RZDemo2024!');
+  console.log('  Client:   demo.client@vrocure.co.uk   /  RZDemo2024!');
+  console.log('  Admin:    demo.admin@vrocure.co.uk    /  RZDemo2024!');
+  console.log('  Supplier: demo.supplier@vrocure.co.uk /  RZDemo2024!');
   console.log(`  Super Admin: ${SUPER_ADMIN_EMAIL} / ${SUPER_ADMIN_PASSWORD}\n`);
 }
 

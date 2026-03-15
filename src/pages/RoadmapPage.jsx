@@ -238,7 +238,7 @@ export default function RoadmapPage() {
               {' '}one phase at a time
             </h1>
             <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--body)' }}>
-              Zaproc's roadmap from core procurement to AI-powered agentic workflows. Every phase ships real value.
+              Vrocure's roadmap from core procurement to AI-powered agentic workflows. Every phase ships real value.
             </p>
           </motion.div>
         </div>

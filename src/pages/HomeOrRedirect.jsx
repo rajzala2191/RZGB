@@ -8,7 +8,7 @@ import RZGBLandingPage from '@/pages/RZGBLandingPage';
 /**
  * Renders the appropriate landing page at "/".
  * - rzglobalsolutions.co.uk → RZGBLandingPage
- * - zaproc.co.uk / portal → LandingPage
+ * - vrocure.co.uk / portal → LandingPage
  * Logged-in users are redirected to their dashboard in the background.
  */
 export default function HomeOrRedirect() {

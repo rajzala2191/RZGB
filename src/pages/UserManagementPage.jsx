@@ -36,7 +36,7 @@ const StatCard = ({ icon: Icon, label, value, color }) => (
   </motion.div>
 );
 
-const DEMO_ADMIN_EMAIL = 'demo.admin@zaproc.co.uk';
+const DEMO_ADMIN_EMAIL = 'demo.admin@vrocure.co.uk';
 
 const UserManagementPage = () => {
   const { currentUser, isDemo } = useAuth();

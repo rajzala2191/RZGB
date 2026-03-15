@@ -95,24 +95,24 @@ function loadToggles() {
 
 /* ─── Email template preview ─────────────────────────────── */
 const EMAIL_PREVIEW = `
-Subject: Your Zaproc access is ready 🎉
+Subject: Your Vrocure access is ready 🎉
 
 Hi [First Name],
 
-Great news — your demo access to Zaproc has been approved.
+Great news — your demo access to Vrocure has been approved.
 
 Platform: [Company Name]
 Login:    [email]
 Password: (set at first login)
 
 What's next:
-  1. Log in at app.zaproc.com
+  1. Log in at portal.vrocure.co.uk
   2. Create your first order
   3. Invite your team members
 
 If you have any questions, reply to this email.
 
-— The Zaproc Team
+— The Vrocure Team
 `.trim();
 
 /* ─── Main component ────────────────────────────────────── */

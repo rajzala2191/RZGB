@@ -1,0 +1,8 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <g transform="translate(510, 140) scale(1.8)">
+    <path d="M6 35 L30 35 L30 65 L54 65 L54 35 L78 35 L78 65 L94 65" stroke="#FF6B35" stroke-width="16" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  </g>
+  <text x="600" y="420" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="800" fill="#ffffff">Vrocure</text>
+  <text x="600" y="475" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="500" fill="#94a3b8">Global procurement platform</text>
+</svg>

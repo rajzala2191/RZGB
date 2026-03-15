@@ -1,6 +1,6 @@
-# Zaproc — Master Implementation Plan
+# Vrocure — Master Implementation Plan
 
-> **Zaproc** is the product name. **RZ Global Solutions** is the company that builds it.
+> **Vrocure** is the product name. **RZ Global Solutions** is the company that builds it.
 
 Each phase is self-contained. We tackle them in order — no phase depends on a later one. Within each phase, steps are numbered and sequenced.
 
@@ -247,9 +247,9 @@ Each phase is self-contained. We tackle them in order — no phase depends on a 
 | Layer | Name |
 |---|---|
 | Company | RZ Global Solutions |
-| Product | **Zaproc** |
-| Product domain | `zaproc.com` / `zaproc.io` / `zaproc.co.uk` |
-| Company domain | `zaproc.co.uk` |
+| Product | **Vrocure** |
+| Product domain | `vrocure.co.uk` |
+| Company domain | `vrocure.co.uk` |
 | Product tagline | *"Manufacturing procurement intelligence"* |
 | Internal repo | RZGB (codename, keep as-is) |
 

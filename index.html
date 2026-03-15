@@ -4,6 +4,9 @@
 		<meta charset="UTF-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="alternate icon" type="image/x-icon" href="/favicon.ico" />
+		<!-- Theme-reactive iOS app icon: light/dark use prefers-color-scheme -->
+		<link rel="apple-touch-icon" sizes="180x180" href="/logos/apple-touch-icon-light.svg" media="(prefers-color-scheme: light)" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/logos/apple-touch-icon-dark.svg" media="(prefers-color-scheme: dark)" />
 		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,6 +15,12 @@
 		<meta name="description" content="Vrocure — Global procurement platform by RZ Global Solutions" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Vrocure | Global Procurement Platform</title>
+		<!-- Social: use absolute URL in production so og:image resolves -->
+		<meta property="og:image" content="/logos/og-image.svg" />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:image" content="/logos/og-image.svg" />
 		<!-- Never cache this file -->
 		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 		<meta http-equiv="Pragma" content="no-cache" />

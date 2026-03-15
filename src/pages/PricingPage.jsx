@@ -409,7 +409,7 @@ export default function PricingPage() {
                   </ul>
 
                   {plan.id === 'enterprise' ? (
-                    <a href="mailto:sales@zaproc.co.uk?subject=Zaproc%20Enterprise%20plan%20inquiry"
+                    <a href="mailto:sales@vrocure.co.uk?subject=Vrocure%20Enterprise%20plan%20inquiry"
                       className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98] flex items-center justify-center gap-1"
                       style={{ background: planColor, boxShadow: `0 4px 16px ${planColor}35` }}>
                       {plan.cta} <ArrowRight size={14} />
@@ -511,7 +511,7 @@ export default function PricingPage() {
                 </button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.02 }}>
-                <a href="mailto:sales@zaproc.co.uk"
+                <a href="mailto:sales@vrocure.co.uk"
                   className="px-8 py-3 rounded-xl text-sm font-bold transition-all"
                   style={{ background: 'var(--surface-raised)', color: 'var(--heading)', border: '1px solid var(--edge)' }}>
                   Talk to Sales

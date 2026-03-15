@@ -27,7 +27,7 @@ Deno.serve(async (req)=>{
 
     // Invite user (creates user in auth.users and sends invite email)
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: 'https://portal.zaproc.co.uk/create-password'
+      redirectTo: 'https://portal.vrocure.co.uk/create-password'
     });
     if (authError) throw authError;
     const userId = authData.user.id;

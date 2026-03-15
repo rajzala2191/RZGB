@@ -185,7 +185,7 @@ export default function UpgradeModal({ open, onClose, limitType = 'orders', feat
                   <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: '#8b5cf6' }}>Enterprise</p>
                   <p className="text-sm mb-3" style={{ color: 'var(--body)' }}>Unlimited users, unlimited orders, dedicated support.</p>
                   <a
-                    href="mailto:sales@zaproc.co.uk?subject=Enterprise%20plan%20inquiry"
+                    href="mailto:sales@vrocure.co.uk?subject=Enterprise%20plan%20inquiry"
                     onClick={onClose}
                     className="flex items-center gap-1 text-xs font-bold"
                     style={{ color: '#8b5cf6' }}

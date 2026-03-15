@@ -11,9 +11,9 @@ import { ACCENT } from '@/lib/theme';
 import { FlaskConical, Loader2, X, ChevronRight, LogOut } from 'lucide-react';
 
 const DEMO_ROLES = [
-  { key: 'client',   label: 'Client Portal',  icon: '🧑‍💼', email: 'demo.client@zaproc.co.uk',   dash: '/client-dashboard' },
-  { key: 'admin',    label: 'Control Centre', icon: '🛡️',  email: 'demo.admin@zaproc.co.uk',    dash: '/control-centre' },
-  { key: 'supplier', label: 'Supplier Hub',   icon: '🏭',  email: 'demo.supplier@zaproc.co.uk', dash: '/supplier-hub' },
+  { key: 'client',   label: 'Client Portal',  icon: '🧑‍💼', email: 'demo.client@vrocure.co.uk',   dash: '/client-dashboard' },
+  { key: 'admin',    label: 'Control Centre', icon: '🛡️',  email: 'demo.admin@vrocure.co.uk',    dash: '/control-centre' },
+  { key: 'supplier', label: 'Supplier Hub',   icon: '🏭',  email: 'demo.supplier@vrocure.co.uk', dash: '/supplier-hub' },
 ];
 const DEMO_PASSWORD = 'RZDemo2024!';
 

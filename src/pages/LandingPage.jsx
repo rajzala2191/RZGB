@@ -8,6 +8,7 @@ import {
   Eye, Building2, Factory, Wrench, Truck, Award, Package, Upload, ScanLine,
 } from 'lucide-react';
 import PublicNav from '@/components/PublicNav';
+import SocialLinks from '@/components/SocialLinks';
 import { useTheme } from '@/contexts/ThemeContext';
 import VrocureLogo from '@/components/VrocureLogo';
 
@@ -1413,10 +1414,11 @@ function LandingFooter() {
             <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--body)' }}>
               B2B manufacturing procurement platform for global industry. Three portals, one system.
             </p>
-            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--caption)' }}>
+            <div className="flex items-center gap-2 text-xs mb-3" style={{ color: 'var(--caption)' }}>
               <Globe className="w-3.5 h-3.5" style={{ color: BRAND }} />
               Global Platform · UK Based
             </div>
+            <SocialLinks iconSize={18} className="[&_a]:text-[var(--body)] [&_a:hover]:text-[var(--brand)]" />
           </div>
 
           {/* Link columns */}

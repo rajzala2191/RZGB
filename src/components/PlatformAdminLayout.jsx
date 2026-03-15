@@ -130,7 +130,7 @@ function PlatformAdminLayout() {
               </div>
               <div>
                 <p style={{ color: sb.nameColor }} className="font-bold text-sm leading-none tracking-tight">
-                  Zaproc
+                  Vrocure
                 </p>
                 <p
                   className="text-[10px] font-bold tracking-[0.14em] uppercase mt-1"

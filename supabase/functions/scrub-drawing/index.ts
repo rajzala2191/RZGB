@@ -265,7 +265,7 @@ Be generous with bounding box sizes — it is better to redact slightly more are
           opacity: 0.65,
         });
 
-        page.drawText('RZ Global Solutions  |  www.zaproc.co.uk  |  Sanitised Document', {
+        page.drawText('RZ Global Solutions  |  www.vrocure.co.uk  |  Sanitised Document', {
           x: rzBadgeX + rzBadgeWidth + 8,
           y: footerY + 4,
           size: 7,

@@ -36,6 +36,9 @@ const SettingsPage = () => {
   // 2FA enrollment state
   const [enrolling2FA, setEnrolling2FA] = useState(false);
   const [totpData, setTotpData] = useState(null); // { qr_code, secret, factorId }
+  const [totpVerifyCode, setTotpVerifyCode] = useState('');
+  const [totpVerifying, setTotpVerifying] = useState(false);
+  const [totpVerifyError, setTotpVerifyError] = useState('');
 
   // Webhook state
   const [webhooks, setWebhooks] = useState([]);
@@ -179,18 +182,53 @@ const SettingsPage = () => {
 
   // 2FA handler
   const handle2FAToggle = async (enable) => {
-    if (!enable) { handleChange('mfa_enabled', false); setTotpData(null); return; }
+    if (!enable) {
+      handleChange('mfa_enabled', false);
+      setTotpData(null);
+      setTotpVerifyCode('');
+      setTotpVerifyError('');
+      return;
+    }
     setEnrolling2FA(true);
+    setTotpVerifyError('');
     try {
       const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
       if (error) throw error;
       setTotpData({ qr_code: data.totp.qr_code, secret: data.totp.secret, factorId: data.id });
       handleChange('mfa_enabled', true);
-      toast({ title: '2FA Setup', description: 'Scan the QR code with your authenticator app.' });
+      toast({ title: '2FA Setup', description: 'Scan the QR code, then enter the 6-digit code below.' });
     } catch (err) {
       toast({ title: '2FA Error', description: err.message, variant: 'destructive' });
     } finally {
       setEnrolling2FA(false);
+    }
+  };
+
+  const handle2FAVerify = async (e) => {
+    e?.preventDefault();
+    const code = totpVerifyCode.replace(/\D/g, '').slice(0, 6);
+    if (!totpData?.factorId || code.length !== 6) {
+      setTotpVerifyError('Please enter the 6-digit code from your authenticator app.');
+      return;
+    }
+    setTotpVerifyError('');
+    setTotpVerifying(true);
+    try {
+      const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: totpData.factorId });
+      if (challengeError) throw challengeError;
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: totpData.factorId,
+        challengeId: challengeData.id,
+        code,
+      });
+      if (verifyError) throw verifyError;
+      setTotpData(null);
+      setTotpVerifyCode('');
+      toast({ title: '2FA enabled', description: 'Your authenticator app is now linked. You will need it to sign in.' });
+    } catch (err) {
+      setTotpVerifyError(err.message || 'Invalid code. Check the number and try again.');
+    } finally {
+      setTotpVerifying(false);
     }
   };
 
@@ -523,21 +561,63 @@ const SettingsPage = () => {
                   </button>
                 </div>
                 {totpData && (
-                  <div className="p-4 rounded-lg border" style={{ background: 'var(--surface-raised)', border: '1px solid var(--edge)' }}>
-                    <p className="text-xs font-semibold mb-3" style={{ color: 'var(--heading)' }}>Scan this QR code with your authenticator app (e.g. Google Authenticator):</p>
+                  <div className="p-5 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900/50 dark:border-slate-700 space-y-5">
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Step 1 — Scan with your app</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Use Google Authenticator, Authy, or any TOTP app. Scan the QR code or enter the secret manually.</p>
                     {totpData.qr_code && (
-                      <img src={totpData.qr_code} alt="TOTP QR Code" className="w-40 h-40 mx-auto rounded-lg bg-white p-1 mb-3" />
+                      <div className="flex justify-center">
+                        <img src={totpData.qr_code} alt="TOTP QR Code" className="w-44 h-44 rounded-xl bg-white p-2 border border-slate-200 dark:border-slate-600 shadow-sm" />
+                      </div>
                     )}
-                    <p className="text-xs text-center" style={{ color: 'var(--body)' }}>
-                      Or enter the secret manually: <span className="font-mono font-bold" style={{ color: 'var(--brand)' }}>{totpData.secret}</span>
-                    </p>
-                    <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg bg-emerald-950/30 border border-emerald-800/40">
-                      <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
-                      <p className="text-xs text-emerald-400">2FA enrollment initiated. Verify with a code from your app to complete setup.</p>
+                    <div className="rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-3 py-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Manual entry secret</p>
+                      <p className="font-mono text-sm font-medium text-slate-800 dark:text-slate-200 break-all">{totpData.secret}</p>
                     </div>
-                    <button onClick={() => setTotpData(null)} className="mt-2 text-xs" style={{ color: 'var(--body)' }}>
-                      Dismiss
-                    </button>
+
+                    <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
+                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Step 2 — Enter verification code</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Enter the 6-digit code shown in your authenticator app to finish setup.</p>
+                      <form onSubmit={handle2FAVerify} className="flex flex-col sm:flex-row gap-3 items-start">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          maxLength={8}
+                          placeholder="000000"
+                          value={totpVerifyCode}
+                          onChange={(e) => {
+                            const v = e.target.value.replace(/\D/g, '').slice(0, 6);
+                            setTotpVerifyCode(v);
+                            setTotpVerifyError('');
+                          }}
+                          className="w-full sm:w-36 h-11 px-4 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-center text-lg font-mono tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        />
+                        <button
+                          type="submit"
+                          disabled={totpVerifying || totpVerifyCode.replace(/\D/g, '').length !== 6}
+                          className="h-11 px-5 rounded-xl bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:pointer-events-none text-white font-semibold text-sm flex items-center gap-2 shrink-0"
+                        >
+                          {totpVerifying ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                          {totpVerifying ? 'Verifying…' : 'Verify & enable'}
+                        </button>
+                      </form>
+                      {totpVerifyError && (
+                        <p className="mt-2 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5" role="alert">
+                          <AlertTriangle size={12} className="shrink-0" />
+                          {totpVerifyError}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => { setTotpData(null); setTotpVerifyCode(''); setTotpVerifyError(''); }}
+                        className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+                      >
+                        Cancel setup
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

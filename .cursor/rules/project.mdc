@@ -12,7 +12,7 @@ Read `.ai-context.md` in the root before doing anything. It has the full session
 ## Project Identity
 
 Two brands, one codebase:
-- **Zaproc** (`zaproc.co.uk`) — SaaS procurement platform
+- **Vrocure** (`vrocure.co.uk`) — SaaS procurement platform
 - **RZ Global Solutions** (`rzglobalsolutions.co.uk`) — manufacturing broker
 
 Domain routing is done at **runtime** in `src/lib/portalConfig.js` via `window.location.hostname`. Never use build-time env vars for domain switching.
@@ -52,11 +52,11 @@ Domain routing is done at **runtime** in `src/lib/portalConfig.js` via `window.l
 
 ## Domain Routing Rules
 
-- `isLandingDomain()` → zaproc.co.uk
+- `isLandingDomain()` → vrocure.co.uk
 - `isRZGBDomain()` → rzglobalsolutions.co.uk
 - `isAnyLandingDomain()` → either landing domain
 - `getPortalUrl(path)` → builds correct URL for portal links from landing domains
-- `DomainGuard` wraps the entire router — redirects non-root paths on landing domains to `portal.zaproc.co.uk`
+- `DomainGuard` wraps the entire router — redirects non-root paths on landing domains to `portal.vrocure.co.uk`
 - `HomeOrRedirect` at `"/"` — picks which landing page to show based on domain
 
 ---
@@ -66,7 +66,7 @@ Domain routing is done at **runtime** in `src/lib/portalConfig.js` via `window.l
 - Light theme is default — dark mode via ThemeContext only if user toggled
 - Glassmorphism on RZGB: `backdrop-blur`, `bg-white/10`, `border border-white/20`
 - RZGB color palette: slate (`slate-900`, `slate-700`) + orange accent (`orange-500`, `orange-400`)
-- Zaproc color palette: sky blue + slate (monochrome professional)
+- Vrocure color palette: sky blue + slate (monochrome professional)
 - Font: Inter (headings) + DM Sans (body) — already loaded in `index.html`
 - Never hardcode colors as hex — use Tailwind classes
 
@@ -84,7 +84,7 @@ Domain routing is done at **runtime** in `src/lib/portalConfig.js` via `window.l
 ## Deployment
 
 - Hostinger auto-deploys from `main` branch
-- Both sites (zaproc + rzglobalsolutions) deploy from the same repo
+- Both sites (vrocure + rzglobalsolutions) deploy from the same repo
 - Build: `npm run build` → `dist/`
 - Env vars (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) must be set in Hostinger dashboard — they are NOT in git
 - `.htaccess` in `public/` handles SPA routing on Apache — do not delete it

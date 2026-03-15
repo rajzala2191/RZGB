@@ -3,8 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { isLandingDomain, isRZGBDomain, getPortalUrl } from '@/lib/portalConfig';
 
 /**
- * When the app is on a landing domain (zaproc.co.uk or rzglobalsolutions.co.uk),
- * only "/" is valid. Any other path redirects to the portal (portal.zaproc.co.uk).
+ * When the app is on a landing domain (vrocure.co.uk or rzglobalsolutions.co.uk),
+ * only "/" is valid. Any other path redirects to the portal (portal.vrocure.co.uk).
  */
 export default function DomainGuard({ children }) {
   const { pathname, search, hash } = useLocation();

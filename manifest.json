@@ -1,6 +1,6 @@
 {
-  "name": "Zaproc",
-  "short_name": "Zaproc",
+  "name": "Vrocure",
+  "short_name": "Vrocure",
   "description": "Manufacturing procurement intelligence by RZ Global Solutions",
   "start_url": "/",
   "display": "standalone",
@@ -13,12 +13,12 @@
       "sizes": "16x16 32x32"
     },
     {
-      "src": "/zaproc-logo-192.png",
+      "src": "/icon-192-maskable.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/zaproc-logo.png",
+      "src": "/icon-512-maskable.png",
       "type": "image/png",
       "sizes": "512x512"
     },
