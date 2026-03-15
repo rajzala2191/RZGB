@@ -12,6 +12,7 @@ import {
   signInWithGoogle as signInWithGoogleService,
 } from '@/services/authService';
 import { createSignupWorkspaceAndProfile } from '@/services/workspaceService';
+import { getLandingUrl, isPortalDomain } from '@/lib/portalConfig';
 
 const AuthContext = createContext(undefined);
 export { AuthContext };
@@ -223,6 +224,9 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(null);
       clearProfileState();
       await signOut({ scope: 'global' });
+      if (isPortalDomain()) {
+        window.location.href = getLandingUrl('/');
+      }
     } catch (error) {
       console.error('AuthContext: Error logging out:', error.message);
     }

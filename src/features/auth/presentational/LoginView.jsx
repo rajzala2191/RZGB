@@ -8,6 +8,7 @@ import ForgotPasswordModalView from '@/features/auth/presentational/ForgotPasswo
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeContext';
 import { ACCENT, ACCENT_GLOW } from '@/lib/theme';
+import { getLandingUrl } from '@/lib/portalConfig';
 
 const BRAND = '#FF6B35';
 
@@ -197,13 +198,13 @@ export default function LoginView({
         <div className="flex-1 flex flex-col">
           {/* Top bar */}
           <div className="relative flex items-center justify-between px-6 py-4">
-            <Link
-              to="/landing"
+            <a
+              href={getLandingUrl('/')}
               className="flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
               style={{ color: 'var(--body)' }}
             >
               <ArrowLeft size={16} /> Back to Home
-            </Link>
+            </a>
             {/* Mobile logo */}
             <div className={`absolute left-1/2 -translate-x-1/2 lg:hidden ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <VrocureLogo size={32} />

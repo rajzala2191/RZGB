@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDemoContext } from '@/contexts/DemoContext';
+import { getLandingUrl } from '@/lib/portalConfig';
 import ClientDashboardLayout from '@/components/ClientDashboardLayout';
 import { ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, Package, Layers, MapPin, Settings2, Lock, X } from 'lucide-react';
 
@@ -37,7 +38,7 @@ function LimitReachedModal({ onClose }) {
             Back
           </button>
           <button
-            onClick={() => navigate('/landing')}
+            onClick={() => { window.location.href = getLandingUrl('/'); }}
             className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition-colors"
           >
             Exit Demo

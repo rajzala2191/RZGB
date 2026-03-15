@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, ArrowRight, CheckCircle2, Loader2, Building2, Shield, Factory } from 'lucide-react';
 import PublicNav from '@/components/PublicNav';
+import { getLandingUrl } from '@/lib/portalConfig';
 import { useTheme } from '@/contexts/ThemeContext';
 import { submitDemoRequest } from '@/services/demoRequestService';
 
@@ -176,7 +177,7 @@ export default function RequestDemoPage() {
             )}
 
             <p className="text-xs mt-6 text-center" style={{ color: 'var(--caption)' }}>
-              <Link to="/landing" className="underline hover:opacity-80">Back to home</Link>
+              <a href={getLandingUrl('/')} className="underline hover:opacity-80">Back to home</a>
               {' · '}
               <Link to="/login" className="underline hover:opacity-80">Sign in</Link>
             </p>

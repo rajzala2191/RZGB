@@ -48,4 +48,22 @@ export function getPortalHref(path) {
   return getPortalUrl(path);
 }
 
-export { PORTAL_ORIGIN, LANDING_HOST, RZGB_HOST };
+/** Base URL for the Vrocure landing site (www.vrocure.co.uk). */
+const LANDING_ORIGIN = (import.meta.env.VITE_LANDING_ORIGIN || `https://www.${LANDING_HOST}`).replace(/\/$/, '');
+
+/**
+ * Returns the full URL for the landing site. Use when redirecting from the portal
+ * (e.g. after logout or "Back to home") so the browser goes to the landing domain, not portal.
+ */
+export function getLandingUrl(path) {
+  const p = path && path.startsWith('/') ? path : `/${path || ''}`;
+  return `${LANDING_ORIGIN}${p}`;
+}
+
+/** True when served on the portal subdomain (e.g. portal.vrocure.co.uk). */
+export function isPortalDomain() {
+  const host = getHostname();
+  return host === 'portal.vrocure.co.uk' || host.startsWith('portal.');
+}
+
+export { PORTAL_ORIGIN, LANDING_ORIGIN, LANDING_HOST, RZGB_HOST };

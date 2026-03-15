@@ -65,9 +65,9 @@ export default function DemoBanner() {
 
   async function handleExit() {
     setOpen(false);
-    await logout();
     localStorage.removeItem('rzgb-demo-session');
-    navigate('/landing');
+    await logout();
+    // logout() redirects to landing domain when on portal; no navigate needed
   }
 
   return (

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/customSupabaseClient';
+import { getSession } from '@/services/authService';
 import { createSignupWorkspaceAndProfile } from '@/services/workspaceService';
 import OAuthCompletionView from '@/features/auth/presentational/OAuthCompletionView';
 
@@ -15,6 +17,12 @@ export default function OAuthCompletionContainer() {
   const [website, setWebsite] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Refresh session on mount so token stays valid while user fills the form (avoids "Session expired" on submit)
+  useEffect(() => {
+    if (!needsOAuthCompletion) return;
+    supabase.auth.refreshSession().catch(() => {});
+  }, [needsOAuthCompletion]);
 
   // If user already has a complete profile (e.g. landed here by mistake), redirect to correct destination
   useEffect(() => {
@@ -42,10 +50,19 @@ export default function OAuthCompletionContainer() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) {
+    // Use in-memory user, or recover from Supabase session (avoids "Session expired" when state was cleared)
+    let effectiveUser = oauthUser || currentUser;
+    if (!effectiveUser) {
+      const { data: { session } } = await getSession();
+      effectiveUser = session?.user ?? null;
+    }
+    if (!effectiveUser) {
       setError('Session expired. Please sign in again.');
       return;
     }
+    const effectiveName = effectiveUser.user_metadata?.full_name || effectiveUser.user_metadata?.name || '';
+    const effectiveEmail = effectiveUser.email || '';
+
     setLoading(true);
     setError('');
     try {
@@ -54,9 +71,9 @@ export default function OAuthCompletionContainer() {
         ? (raw.match(/^https?:\/\//i) ? raw : `https://${raw}`)
         : undefined;
       const { error: provErr } = await createSignupWorkspaceAndProfile({
-        userId: user.id,
-        email,
-        fullName: name,
+        userId: effectiveUser.id,
+        email: effectiveEmail,
+        fullName: effectiveName,
         businessName: businessName.trim(),
         phone: phone.trim(),
         website: websiteValue,

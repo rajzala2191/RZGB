@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Building2, Shield, Factory, ArrowRight, FlaskConical, CheckCircle2, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
 import ThemeToggle from '@/components/ThemeToggle';
+import { getLandingUrl } from '@/lib/portalConfig';
 
 const PORTALS = [
   {
@@ -150,7 +151,7 @@ export default function DemoEntryPage() {
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-10 text-center">
         <p className="text-xs mb-2" style={{ color: 'var(--caption)' }}>You can switch between portals at any time using the demo bar at the top.</p>
-        <Link to="/landing" className="text-xs underline hover:opacity-80" style={{ color: 'var(--body)' }}>← Back to product overview</Link>
+        <a href={getLandingUrl('/')} className="text-xs underline hover:opacity-80" style={{ color: 'var(--body)' }}>← Back to product overview</a>
       </motion.div>
     </div>
   );
