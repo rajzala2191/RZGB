@@ -5,3 +5,13 @@ coverage
 .env.seed
 .env.local
 .env.*.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Root-level design artifacts
+logo.jsx
+rz_global_solutions_logo.jpg

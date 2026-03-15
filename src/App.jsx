@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Route, Routes, BrowserRouter as Router, Outlet } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
@@ -15,115 +15,125 @@ import DemoBanner from '@/components/DemoBanner';
 import DemoAccessGate from '@/components/DemoAccessGate';
 import HomeOrRedirect from '@/pages/HomeOrRedirect';
 import LoginPage from '@/pages/LoginPage';
-
-// Landing & Demo
 import LandingPage from '@/pages/LandingPage';
-import VrocureLogos from '@/components/VrocureLogo';
-import HowItWorksPage from '@/pages/HowItWorksPage';
-import DemoEntryPage from '@/pages/demo/DemoEntryPage';
 import { DemoProvider } from '@/contexts/DemoContext';
-import DemoClientCreateOrder from '@/pages/demo/client/DemoClientCreateOrder';
-import DemoClientOrderDetail from '@/pages/demo/client/DemoClientOrderDetail';
-import DemoAdminPipeline from '@/pages/demo/admin/DemoAdminPipeline';
-import DemoSupplierDashboard from '@/pages/demo/supplier/DemoSupplierDashboard';
-import DemoSupplierJobs from '@/pages/demo/supplier/DemoSupplierJobs';
-import DemoSupplierJobDetail from '@/pages/demo/supplier/DemoSupplierJobDetail';
-
-import ResetPasswordPage from '@/pages/ResetPasswordPage';
-import SetPasswordPage from '@/pages/SetPasswordPage';
-import CreatePasswordPage from '@/pages/CreatePasswordPage';
-
-// Admin Pages
-import ControlCentrePage from '@/pages/ControlCentrePage';
-import UserManagementPage from '@/pages/UserManagementPage';
-import SystemAnalyticsPage from '@/pages/SystemAnalyticsPage';
-import ActivityLogsPage from '@/pages/ActivityLogsPage';
-import SettingsPage from '@/pages/SettingsPage';
-import CommunicationsPage from '@/pages/CommunicationsPage';
-import ReportsPage from '@/pages/ReportsPage';
-import LinkageDashboard from '@/pages/LinkageDashboard';
-import SanitisationEngine from '@/pages/SanitisationEngine';
-import AuditVault from '@/pages/AuditVault';
-import NCRManagementPage from '@/pages/NCRManagementPage';
-import IntakeGatePage from '@/pages/IntakeGatePage';
-import SupplierManagementPage from '@/pages/SupplierManagementPage';
-import SanitisationGatePage from '@/pages/SanitisationGatePage';
-import SanitisationReviewPage from '@/pages/SanitisationReviewPage';
-import SupplierPoolPage from '@/pages/SupplierPoolPage';
-import AdminDocumentReview from '@/pages/AdminDocumentReview';
-import AdminShipmentsPage from '@/pages/AdminShipmentsPage';
-import AdminLiveTracking from '@/pages/AdminLiveTracking';
-import AdminOrderPreviewPage from '@/pages/AdminOrderPreviewPage';
-import ManufacturingProcessesPage from '@/pages/ManufacturingProcessesPage';
-import AdminAccountSecurityPage from '@/pages/AdminAccountSecurityPage';
-import BidManagementPage from '@/pages/BidManagementPage';
-import BidComparisonPage from '@/pages/BidComparisonPage';
-import PurchaseOrdersPage from '@/pages/PurchaseOrdersPage';
-import RFQQandAPage from '@/pages/RFQQandAPage';
-import RFQTemplatesPage from '@/pages/RFQTemplatesPage';
-import AdminInvoicesPage from '@/pages/AdminInvoicesPage';
-import SpendAnalyticsPage from '@/pages/SpendAnalyticsPage';
-import ApprovalWorkflowsPage from '@/pages/ApprovalWorkflowsPage';
-import ContractManagementPage from '@/pages/ContractManagementPage';
-import SupplierDiscoveryPage from '@/pages/SupplierDiscoveryPage';
-
-// Platform Admin
-import PlatformAdminLayout from '@/components/PlatformAdminLayout';
-import PlatformDashboardPage from '@/pages/platform/PlatformDashboardPage';
-import PlatformWorkspacesPage from '@/pages/platform/PlatformWorkspacesPage';
-import PlatformUsersPage from '@/pages/platform/PlatformUsersPage';
-import PlatformDemoRequestsPage from '@/pages/platform/PlatformDemoRequestsPage';
-import PlatformActivityPage from '@/pages/platform/PlatformActivityPage';
-import PlatformSettingsPage from '@/pages/platform/PlatformSettingsPage';
-import PlatformAuditLogPage from '@/pages/platform/PlatformAuditLogPage';
-import PlatformSecurityPage from '@/pages/platform/PlatformSecurityPage';
-import PlatformNotificationsPage from '@/pages/platform/PlatformNotificationsPage';
-import PlatformJoinlistPage from '@/pages/platform/PlatformJoinlistPage';
-
-// Public Pages
-import PricingPage from '@/pages/PricingPage';
-import RoadmapPage from '@/pages/RoadmapPage';
-import RequestDemoPage from '@/pages/RequestDemoPage';
-import ThemeDemoPage from '@/pages/ThemeDemoPage';
-import SignupPage from '@/pages/SignupPage';
-import OAuthCompletionPage from '@/pages/OAuthCompletionPage';
-import OnboardingPage from '@/pages/OnboardingPage';
-import PendingApprovalPage from '@/pages/PendingApprovalPage';
-
-// Client Pages
-import ClientDashboardPage from '@/pages/ClientDashboardPage';
-import NCRVisibilityPage from '@/pages/NCRVisibilityPage';
-import ShippingTrackingPage from '@/pages/ShippingTrackingPage';
-import OrdersOverviewPage from '@/pages/OrdersOverviewPage';
-import ClientDocumentLibraryPage from '@/pages/ClientDocumentLibraryPage';
-import ClientSupportPage from '@/pages/ClientSupportPage';
-import ClientOrderCreationPage from '@/pages/ClientOrderCreationPage';
-import ClientOrderDetailsPage from '@/pages/ClientOrderDetailsPage';
-import LiveOrderTracking from '@/pages/LiveOrderTracking';
-
-// Supplier Pages
-import SupplierDashboard from '@/pages/SupplierDashboard';
-import JobDetailsPage from '@/pages/JobDetailsPage';
-import NCRReportingPage from '@/pages/NCRReportingPage';
-import SupplierDocumentsPortal from '@/pages/SupplierDocumentsPortal';
-import SupplierOrderManager from '@/pages/SupplierOrderManager';
-import SupplierSupportPage from '@/pages/SupplierSupportPage';
-import SupplierProfilePage from '@/pages/SupplierProfilePage';
-import SupplierBiddingPage from '@/pages/SupplierBiddingPage';
-import SupplierPurchaseOrdersPage from '@/pages/SupplierPurchaseOrdersPage';
-import SupplierInvoicesPage from '@/pages/SupplierInvoicesPage';
-import ClientProfilePage from '@/pages/ClientProfilePage';
-import ClientSettingsPage from '@/pages/ClientSettingsPage';
-import SupplierSettingsPage from '@/pages/SupplierSettingsPage';
-import SupplierCapabilitiesPage from '@/pages/SupplierCapabilitiesPage';
-import SupplierScorecardPage from '@/pages/SupplierScorecardPage';
-import SupplierOnboardingPage from '@/pages/SupplierOnboardingPage';
-import TicketDetailPage from '@/pages/TicketDetailPage';
-import AdminSupportPage from '@/pages/AdminSupportPage';
-import AdminTicketDetailPage from '@/pages/AdminTicketDetailPage';
-
 import { Toaster } from '@/components/ui/toaster';
 import { useVersionCheck } from '@/hooks/useVersionCheck';
+
+// ── Lazy-loaded pages ─────────────────────────────────────────────────────────
+// Auth / onboarding (light pages, eager-ish but infrequent)
+const SignupPage           = lazy(() => import('@/pages/SignupPage'));
+const OAuthCompletionPage  = lazy(() => import('@/pages/OAuthCompletionPage'));
+const OnboardingPage       = lazy(() => import('@/pages/OnboardingPage'));
+const PendingApprovalPage  = lazy(() => import('@/pages/PendingApprovalPage'));
+const ResetPasswordPage    = lazy(() => import('@/pages/ResetPasswordPage'));
+const SetPasswordPage      = lazy(() => import('@/pages/SetPasswordPage'));
+const CreatePasswordPage   = lazy(() => import('@/pages/CreatePasswordPage'));
+
+// Public / marketing
+const HowItWorksPage   = lazy(() => import('@/pages/HowItWorksPage'));
+const PricingPage      = lazy(() => import('@/pages/PricingPage'));
+const RoadmapPage      = lazy(() => import('@/pages/RoadmapPage'));
+const RequestDemoPage  = lazy(() => import('@/pages/RequestDemoPage'));
+const ThemeDemoPage    = lazy(() => import('@/pages/ThemeDemoPage'));
+const VrocureLogos     = lazy(() => import('@/components/VrocureLogo'));
+
+// Demo
+const DemoEntryPage          = lazy(() => import('@/pages/demo/DemoEntryPage'));
+const DemoClientCreateOrder  = lazy(() => import('@/pages/demo/client/DemoClientCreateOrder'));
+const DemoClientOrderDetail  = lazy(() => import('@/pages/demo/client/DemoClientOrderDetail'));
+const DemoAdminPipeline      = lazy(() => import('@/pages/demo/admin/DemoAdminPipeline'));
+const DemoSupplierDashboard  = lazy(() => import('@/pages/demo/supplier/DemoSupplierDashboard'));
+const DemoSupplierJobs       = lazy(() => import('@/pages/demo/supplier/DemoSupplierJobs'));
+const DemoSupplierJobDetail  = lazy(() => import('@/pages/demo/supplier/DemoSupplierJobDetail'));
+
+// Platform admin
+const PlatformAdminLayout        = lazy(() => import('@/components/PlatformAdminLayout'));
+const PlatformDashboardPage      = lazy(() => import('@/pages/platform/PlatformDashboardPage'));
+const PlatformWorkspacesPage     = lazy(() => import('@/pages/platform/PlatformWorkspacesPage'));
+const PlatformUsersPage          = lazy(() => import('@/pages/platform/PlatformUsersPage'));
+const PlatformDemoRequestsPage   = lazy(() => import('@/pages/platform/PlatformDemoRequestsPage'));
+const PlatformActivityPage       = lazy(() => import('@/pages/platform/PlatformActivityPage'));
+const PlatformSettingsPage       = lazy(() => import('@/pages/platform/PlatformSettingsPage'));
+const PlatformAuditLogPage       = lazy(() => import('@/pages/platform/PlatformAuditLogPage'));
+const PlatformSecurityPage       = lazy(() => import('@/pages/platform/PlatformSecurityPage'));
+const PlatformNotificationsPage  = lazy(() => import('@/pages/platform/PlatformNotificationsPage'));
+const PlatformJoinlistPage       = lazy(() => import('@/pages/platform/PlatformJoinlistPage'));
+
+// Admin (control centre)
+const ControlCentrePage        = lazy(() => import('@/pages/ControlCentrePage'));
+const UserManagementPage       = lazy(() => import('@/pages/UserManagementPage'));
+const SystemAnalyticsPage      = lazy(() => import('@/pages/SystemAnalyticsPage'));
+const ActivityLogsPage         = lazy(() => import('@/pages/ActivityLogsPage'));
+const SettingsPage             = lazy(() => import('@/pages/SettingsPage'));
+const CommunicationsPage       = lazy(() => import('@/pages/CommunicationsPage'));
+const ReportsPage              = lazy(() => import('@/pages/ReportsPage'));
+const LinkageDashboard         = lazy(() => import('@/pages/LinkageDashboard'));
+const SanitisationEngine       = lazy(() => import('@/pages/SanitisationEngine'));
+const AuditVault               = lazy(() => import('@/pages/AuditVault'));
+const NCRManagementPage        = lazy(() => import('@/pages/NCRManagementPage'));
+const IntakeGatePage           = lazy(() => import('@/pages/IntakeGatePage'));
+const SupplierManagementPage   = lazy(() => import('@/pages/SupplierManagementPage'));
+const SanitisationGatePage     = lazy(() => import('@/pages/SanitisationGatePage'));
+const SanitisationReviewPage   = lazy(() => import('@/pages/SanitisationReviewPage'));
+const SupplierPoolPage         = lazy(() => import('@/pages/SupplierPoolPage'));
+const AdminDocumentReview      = lazy(() => import('@/pages/AdminDocumentReview'));
+const AdminShipmentsPage       = lazy(() => import('@/pages/AdminShipmentsPage'));
+const AdminLiveTracking        = lazy(() => import('@/pages/AdminLiveTracking'));
+const AdminOrderPreviewPage    = lazy(() => import('@/pages/AdminOrderPreviewPage'));
+const ManufacturingProcessesPage = lazy(() => import('@/pages/ManufacturingProcessesPage'));
+const AdminAccountSecurityPage = lazy(() => import('@/pages/AdminAccountSecurityPage'));
+const BidManagementPage        = lazy(() => import('@/pages/BidManagementPage'));
+const BidComparisonPage        = lazy(() => import('@/pages/BidComparisonPage'));
+const PurchaseOrdersPage       = lazy(() => import('@/pages/PurchaseOrdersPage'));
+const RFQQandAPage             = lazy(() => import('@/pages/RFQQandAPage'));
+const RFQTemplatesPage         = lazy(() => import('@/pages/RFQTemplatesPage'));
+const AdminInvoicesPage        = lazy(() => import('@/pages/AdminInvoicesPage'));
+const SpendAnalyticsPage       = lazy(() => import('@/pages/SpendAnalyticsPage'));
+const ApprovalWorkflowsPage    = lazy(() => import('@/pages/ApprovalWorkflowsPage'));
+const ContractManagementPage   = lazy(() => import('@/pages/ContractManagementPage'));
+const SupplierDiscoveryPage    = lazy(() => import('@/pages/SupplierDiscoveryPage'));
+const SupplierScorecardPage    = lazy(() => import('@/pages/SupplierScorecardPage'));
+const AdminSupportPage         = lazy(() => import('@/pages/AdminSupportPage'));
+const AdminTicketDetailPage    = lazy(() => import('@/pages/AdminTicketDetailPage'));
+
+// Client
+const ClientDashboardPage       = lazy(() => import('@/pages/ClientDashboardPage'));
+const NCRVisibilityPage         = lazy(() => import('@/pages/NCRVisibilityPage'));
+const ShippingTrackingPage      = lazy(() => import('@/pages/ShippingTrackingPage'));
+const OrdersOverviewPage        = lazy(() => import('@/pages/OrdersOverviewPage'));
+const ClientDocumentLibraryPage = lazy(() => import('@/pages/ClientDocumentLibraryPage'));
+const ClientSupportPage         = lazy(() => import('@/pages/ClientSupportPage'));
+const ClientOrderCreationPage   = lazy(() => import('@/pages/ClientOrderCreationPage'));
+const ClientOrderDetailsPage    = lazy(() => import('@/pages/ClientOrderDetailsPage'));
+const LiveOrderTracking         = lazy(() => import('@/pages/LiveOrderTracking'));
+const ClientProfilePage         = lazy(() => import('@/pages/ClientProfilePage'));
+const ClientSettingsPage        = lazy(() => import('@/pages/ClientSettingsPage'));
+const TicketDetailPage          = lazy(() => import('@/pages/TicketDetailPage'));
+
+// Supplier
+const SupplierDashboard         = lazy(() => import('@/pages/SupplierDashboard'));
+const JobDetailsPage            = lazy(() => import('@/pages/JobDetailsPage'));
+const NCRReportingPage          = lazy(() => import('@/pages/NCRReportingPage'));
+const SupplierDocumentsPortal   = lazy(() => import('@/pages/SupplierDocumentsPortal'));
+const SupplierOrderManager      = lazy(() => import('@/pages/SupplierOrderManager'));
+const SupplierSupportPage       = lazy(() => import('@/pages/SupplierSupportPage'));
+const SupplierProfilePage       = lazy(() => import('@/pages/SupplierProfilePage'));
+const SupplierBiddingPage       = lazy(() => import('@/pages/SupplierBiddingPage'));
+const SupplierPurchaseOrdersPage = lazy(() => import('@/pages/SupplierPurchaseOrdersPage'));
+const SupplierInvoicesPage      = lazy(() => import('@/pages/SupplierInvoicesPage'));
+const SupplierSettingsPage      = lazy(() => import('@/pages/SupplierSettingsPage'));
+const SupplierCapabilitiesPage  = lazy(() => import('@/pages/SupplierCapabilitiesPage'));
+const SupplierOnboardingPage    = lazy(() => import('@/pages/SupplierOnboardingPage'));
+
+// ── Loading fallback ──────────────────────────────────────────────────────────
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0a0a0a]">
+      <div className="w-8 h-8 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function App() {
   useVersionCheck();
@@ -137,11 +147,10 @@ function App() {
               <SupplierProvider>
                 <ClientProvider>
                   <ScrollToTop />
-                  {/* DemoBanner sits outside Routes so it shows on all production pages */}
                   <DemoBanner />
                   <DomainGuard>
+                  <Suspense fallback={<PageLoader />}>
                   <Routes>
-                    {/* Root shows landing immediately; logged-in users redirect in background */}
                     <Route path="/" element={<HomeOrRedirect />} />
                     <Route path="/landing" element={<LandingPage />} />
                     <Route path="/how-it-works" element={<HowItWorksPage />} />
@@ -155,8 +164,11 @@ function App() {
                     <Route path="/oauth-completion" element={<OAuthCompletionPage />} />
                     <Route path="/onboarding" element={<OnboardingPage />} />
                     <Route path="/pending-approval" element={<PendingApprovalPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/set-password" element={<SetPasswordPage />} />
+                    <Route path="/create-password" element={<CreatePasswordPage />} />
 
-                    {/* Demo routes — access only with approved token; in-memory context resets on refresh */}
+                    {/* Demo routes */}
                     <Route path="/demo" element={<DemoAccessGate><DemoProvider><Outlet /></DemoProvider></DemoAccessGate>}>
                       <Route index element={<DemoEntryPage />} />
                       <Route path="client/create-order" element={<DemoClientCreateOrder />} />
@@ -167,11 +179,7 @@ function App() {
                       <Route path="supplier/job/:id" element={<DemoSupplierJobDetail />} />
                     </Route>
 
-                    <Route path="/reset-password" element={<ResetPasswordPage />} />
-                    <Route path="/set-password" element={<SetPasswordPage />} />
-                    <Route path="/create-password" element={<CreatePasswordPage />} />
-
-                    {/* --- PLATFORM ADMIN ROUTES (super_admin only) --- */}
+                    {/* Platform admin */}
                     <Route path="/platform-admin" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformAdminLayout /></ProtectedRoute>}>
                       <Route index element={<PlatformDashboardPage />} />
                       <Route path="workspaces" element={<PlatformWorkspacesPage />} />
@@ -185,7 +193,7 @@ function App() {
                       <Route path="join-requests" element={<PlatformJoinlistPage />} />
                     </Route>
 
-                    {/* --- ADMIN ROUTES (super_admin + customer_admin) --- */}
+                    {/* Admin (control centre) */}
                     <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />
                     <Route path="/control-centre/intake-gate" element={<ProtectedRoute requiredRole="admin"><IntakeGatePage /></ProtectedRoute>} />
                     <Route path="/control-centre/sanitisation-gate" element={<ProtectedRoute requiredRole="admin"><SanitisationGatePage /></ProtectedRoute>} />
@@ -223,7 +231,7 @@ function App() {
                     <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
                     <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
 
-                    {/* --- CLIENT ROUTES --- */}
+                    {/* Client */}
                     <Route path="/client-dashboard" element={<ProtectedRoute requiredRole="client"><ClientDashboardPage /></ProtectedRoute>} />
                     <Route path="/client-dashboard/create-order" element={<ProtectedRoute requiredRole="client"><ClientOrderCreationPage /></ProtectedRoute>} />
                     <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><OrdersOverviewPage /></ProtectedRoute>} />
@@ -237,7 +245,7 @@ function App() {
                     <Route path="/client-dashboard/support" element={<ProtectedRoute requiredRole="client"><ClientSupportPage /></ProtectedRoute>} />
                     <Route path="/client-dashboard/support/:ticketId" element={<ProtectedRoute requiredRole="client"><TicketDetailPage /></ProtectedRoute>} />
 
-                    {/* --- SUPPLIER ROUTES --- */}
+                    {/* Supplier */}
                     <Route path="/supplier-hub" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
                     <Route path="/supplier-hub/dashboard" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
                     <Route path="/supplier-hub/orders" element={<ProtectedRoute requiredRole="supplier"><SupplierOrderManager /></ProtectedRoute>} />
@@ -255,6 +263,7 @@ function App() {
                     <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
                     <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
                   </Routes>
+                  </Suspense>
                   </DomainGuard>
                   <Toaster />
                 </ClientProvider>
