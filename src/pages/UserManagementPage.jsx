@@ -11,6 +11,7 @@ import {
   Users, Shield, User, Truck, Plus, Search,
   Loader2, UserCheck, Clock, AlertCircle, Lock
 } from 'lucide-react';
+import { useUpgradeGate } from '@/hooks/useUpgradeGate';
 
 const FILTER_TABS = [
   { key: 'all',      label: 'All',       icon: Users  },
@@ -40,6 +41,7 @@ const DEMO_ADMIN_EMAIL = 'demo.admin@zaproc.co.uk';
 const UserManagementPage = () => {
   const { currentUser, isDemo } = useAuth();
   const isDemoAdmin = isDemo || currentUser?.email === DEMO_ADMIN_EMAIL;
+  const { guard, upgradeModal } = useUpgradeGate();
   const [users, setUsers]               = useState([]);
   const [orderCounts, setOrderCounts]   = useState({});
   const [loading, setLoading]           = useState(true);
@@ -145,12 +147,13 @@ const UserManagementPage = () => {
             <p className="text-slate-500 text-sm mt-1">Manage access, roles, and permissions across the portal.</p>
           </div>
           <button
-            onClick={() => isDemoAdmin ? setShowDemoBlock(true) : setShowInvite(true)}
+            onClick={() => isDemoAdmin ? setShowDemoBlock(true) : guard('users', () => setShowInvite(true))}
             className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-orange-900/20 shrink-0"
           >
             {isDemoAdmin ? <Lock size={16} /> : <Plus size={16} />}
             Invite User
           </button>
+          {upgradeModal}
         </div>
 
         {/* Stats row */}

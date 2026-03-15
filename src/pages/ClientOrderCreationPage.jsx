@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUpgradeGate } from '@/hooks/useUpgradeGate';
+import { incrementOrderUsage } from '@/services/subscriptionService';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -156,10 +158,11 @@ function SummaryRow({ label, value }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ClientOrderCreationPage() {
-  const { currentUser } = useAuth();
+  const { currentUser, workspaceId } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { guard, upgradeModal } = useUpgradeGate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -278,6 +281,7 @@ export default function ClientOrderCreationPage() {
   // ── Submit ──────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!validateStep1()) { setStep(1); return; }
+    await guard('orders', async () => {
     setLoading(true);
     try {
       // 1. Insert order row
@@ -335,6 +339,7 @@ export default function ClientOrderCreationPage() {
         });
       }
 
+      if (workspaceId) await incrementOrderUsage(workspaceId);
       toast({ title: 'Order Submitted', description: 'Your order is now pending admin review.' });
       navigate(`/client-dashboard/orders/${order.id}/tracking`);
     } catch (err) {
@@ -342,11 +347,13 @@ export default function ClientOrderCreationPage() {
     } finally {
       setLoading(false);
     }
+    }); // end guard
   };
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <ClientDashboardLayout>
+      {upgradeModal}
       <div className="max-w-3xl mx-auto py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-black text-slate-100 mb-1">Create New Order</h1>

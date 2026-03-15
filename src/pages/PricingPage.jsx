@@ -4,16 +4,79 @@ import { motion } from 'framer-motion';
 import {
   Check, X, Zap, Shield, Building2, ArrowRight,
   Users, FileText, BarChart2, GitBranch, Globe,
-  Lock, Download, Webhook, Crown, ArrowLeft,
+  Lock, Download, Webhook, Crown, ArrowLeft, Gift,
 } from 'lucide-react';
 import PublicNav from '@/components/PublicNav';
 import { useTheme } from '@/contexts/ThemeContext';
 
 const BRAND = '#FF6B35';
 
-const PLAN_COLORS = { orange: BRAND, blue: '#3b82f6', purple: '#8b5cf6' };
+const PLAN_COLORS = { gray: '#6b7280', orange: BRAND, blue: '#3b82f6', purple: '#8b5cf6' };
 
 const PLANS = [
+  {
+    id: 'free',
+    name: 'Free',
+    tagline: 'Get started at no cost',
+    price: 0,
+    period: '/mo',
+    cta: 'Get Started Free',
+    accent: 'gray',
+    icon: Gift,
+    highlights: ['Up to 2 users', '5 orders/month', 'Core procurement workflow'],
+    features: {
+      'Procurement Core': {
+        'RFQ creation & intake': true,
+        'Supplier assignment': true,
+        'Order lifecycle tracking': true,
+        'Document management': true,
+        'AI drawing sanitisation': false,
+        'Competitive bidding engine': false,
+        'Multi-lot RFQ': false,
+        'RFQ templates': false,
+      },
+      'Purchase Orders': {
+        'PO creation & PDF export': true,
+        'PO issue & acknowledge': true,
+        'PO amendments': false,
+        'Blanket/framework POs': false,
+      },
+      'Finance': {
+        'Invoice submission': true,
+        'Invoice approve/reject': true,
+        'Payment milestones': false,
+        'Spend analytics': false,
+        'Credit notes': false,
+      },
+      'Governance': {
+        'Basic role controls': true,
+        'Activity logs': false,
+        'Approval workflows': false,
+        'Threshold-based approvals': false,
+        'Audit trail export': false,
+        'MFA enforcement': false,
+        'SSO/SAML': false,
+      },
+      'Sourcing': {
+        'Supplier profiles': true,
+        'Supplier scorecard': false,
+        'Supplier discovery': false,
+        'Capability matching': false,
+      },
+      'Integrations': {
+        'Email notifications': true,
+        'Slack notifications': false,
+        'Webhook/API access': false,
+        'ERP connectors': false,
+      },
+      'Support': {
+        'In-app support tickets': true,
+        'Email support': false,
+        'Priority support': false,
+        'Dedicated CSM': false,
+      },
+    },
+  },
   {
     id: 'starter',
     name: 'Starter',
@@ -208,6 +271,7 @@ const PLANS = [
 ];
 
 const ACCENT_MAP = {
+  gray:   { bg: 'bg-gray-500',   hover: 'hover:bg-gray-400',   light: 'bg-gray-50 dark:bg-gray-900/30',     border: 'border-gray-200 dark:border-gray-700',     text: 'text-gray-600 dark:text-gray-400' },
   orange: { bg: 'bg-orange-600', hover: 'hover:bg-orange-500', light: 'bg-orange-50 dark:bg-orange-950/30', border: 'border-orange-200 dark:border-orange-800', text: 'text-orange-600 dark:text-orange-400' },
   blue:   { bg: 'bg-blue-600',   hover: 'hover:bg-blue-500',   light: 'bg-blue-50 dark:bg-blue-950/30',     border: 'border-blue-200 dark:border-blue-800',     text: 'text-blue-600 dark:text-blue-400' },
   purple: { bg: 'bg-purple-600', hover: 'hover:bg-purple-500', light: 'bg-purple-50 dark:bg-purple-950/30', border: 'border-purple-200 dark:border-purple-800', text: 'text-purple-600 dark:text-purple-400' },
@@ -273,7 +337,7 @@ export default function PricingPage() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             {PLANS.map((plan, i) => {
               const planColor = PLAN_COLORS[plan.accent];
               const a = ACCENT_MAP[plan.accent];
@@ -317,7 +381,12 @@ export default function PricingPage() {
                   </div>
 
                   <div className="mb-6">
-                    {displayPrice !== null ? (
+                    {plan.id === 'free' ? (
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-black" style={{ color: 'var(--heading)' }}>Free</span>
+                        <span className="text-sm" style={{ color: 'var(--caption)' }}>forever</span>
+                      </div>
+                    ) : displayPrice !== null ? (
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-black" style={{ color: 'var(--heading)' }}>${displayPrice.toLocaleString()}</span>
                         <span className="text-sm" style={{ color: 'var(--caption)' }}>{plan.period}</span>
@@ -392,7 +461,7 @@ export default function PricingPage() {
                     return (
                       <React.Fragment key={cat}>
                         <tr style={{ background: 'var(--surface-raised)' }}>
-                          <td colSpan={4} className="p-3 pl-4">
+                          <td colSpan={5} className="p-3 pl-4">
                             <span className="text-xs font-bold uppercase flex items-center gap-2" style={{ color: 'var(--body)' }}>
                               <CatIcon size={12} /> {cat}
                             </span>

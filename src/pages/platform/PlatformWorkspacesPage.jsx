@@ -6,15 +6,27 @@ import {
   fetchAllWorkspaces, createWorkspace, updateWorkspaceStatus,
   fetchWorkspaceStats,
 } from '@/services/workspaceService';
+import { upgradeWorkspacePlan } from '@/services/subscriptionService';
+import { useAuth } from '@/contexts/AuthContext';
+import { PLAN_ORDER, PLAN_LABELS } from '@/lib/planLimits';
 import { format } from 'date-fns';
 import {
   Building2, Plus, X, Search, Users, ShoppingCart, FileText,
-  Receipt, Pause, Play, Archive, ChevronDown, ChevronUp, Loader2,
+  Receipt, Pause, Play, Archive, ChevronDown, ChevronUp, Loader2, Zap,
 } from 'lucide-react';
+
+const PLAN_BADGE_STYLE = {
+  free:       'bg-gray-100 dark:bg-gray-800 text-gray-500 border-gray-300 dark:border-gray-600',
+  starter:    'bg-orange-50 dark:bg-orange-950/30 text-orange-600 border-orange-200 dark:border-orange-800',
+  growth:     'bg-blue-50 dark:bg-blue-950/30 text-blue-600 border-blue-200 dark:border-blue-800',
+  enterprise: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 border-purple-200 dark:border-purple-800',
+};
 
 export default function PlatformWorkspacesPage() {
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   const [workspaces, setWorkspaces] = useState([]);
+  const [upgradingId, setUpgradingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreate, setShowCreate] = useState(false);
@@ -57,6 +69,25 @@ export default function PlatformWorkspacesPage() {
       loadData();
     } catch (err) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+  };
+
+  const handleUpgradePlan = async (ws, plan) => {
+    setUpgradingId(ws.id);
+    try {
+      const { error } = await upgradeWorkspacePlan({
+        workspaceId: ws.id,
+        plan,
+        changedBy: currentUser?.id,
+        note: `Manual upgrade by platform admin`,
+      });
+      if (error) throw error;
+      toast({ title: 'Plan Updated', description: `${ws.name} → ${PLAN_LABELS[plan]}` });
+      loadData();
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setUpgradingId(null);
     }
   };
 
@@ -134,6 +165,9 @@ export default function PlatformWorkspacesPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-bold text-gray-900 dark:text-slate-100">{ws.name}</span>
                         <span className={`text-xs px-2 py-0.5 rounded-full font-bold border ${statusStyles[ws.status]}`}>{ws.status.toUpperCase()}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold border ${PLAN_BADGE_STYLE[ws.plan ?? 'free']}`}>
+                          {PLAN_LABELS[ws.plan ?? 'free']}
+                        </span>
                       </div>
                       <p className="text-xs text-gray-400">{ws.slug} | Created {format(new Date(ws.created_at), 'dd MMM yyyy')}</p>
                     </div>
@@ -159,7 +193,7 @@ export default function PlatformWorkspacesPage() {
                     </div>
                   </div>
                   {expandedId === ws.id && (
-                    <div className="border-t border-gray-100 dark:border-[#232329] p-4 bg-gray-50/50 dark:bg-[#131316]">
+                    <div className="border-t border-gray-100 dark:border-[#232329] p-4 bg-gray-50/50 dark:bg-[#131316] space-y-4">
                       {stats ? (
                         <div className="grid grid-cols-4 gap-3">
                           {[
@@ -178,6 +212,26 @@ export default function PlatformWorkspacesPage() {
                       ) : (
                         <p className="text-xs text-gray-400">Loading stats…</p>
                       )}
+                      {/* Plan upgrade controls */}
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500 dark:text-slate-400">
+                          <Zap size={12} /> Change Plan:
+                        </div>
+                        {PLAN_ORDER.map(p => (
+                          <button
+                            key={p}
+                            disabled={ws.plan === p || upgradingId === ws.id}
+                            onClick={() => handleUpgradePlan(ws, p)}
+                            className={`text-xs px-3 py-1 rounded-lg font-bold border transition-all disabled:opacity-40 disabled:cursor-default ${
+                              ws.plan === p
+                                ? PLAN_BADGE_STYLE[p] + ' cursor-default'
+                                : 'bg-white dark:bg-[#18181b] border-gray-200 dark:border-[#232329] text-gray-600 dark:text-slate-300 hover:border-red-400 hover:text-red-500'
+                            }`}
+                          >
+                            {upgradingId === ws.id && ws.plan !== p ? '…' : PLAN_LABELS[p]}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

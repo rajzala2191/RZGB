@@ -5,7 +5,9 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/lib/customSupabaseClient';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
 import { useToast } from '@/components/ui/use-toast';
-import { Save, Shield, Mail, Bell, Monitor, Loader2, MessageSquare, Users, LifeBuoy, ChevronRight, Palette, Webhook, X, Plus, CheckCircle2, ChevronDown, ChevronUp, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Save, Shield, Mail, Bell, Monitor, Loader2, MessageSquare, Users, LifeBuoy, ChevronRight, Palette, Webhook, X, Plus, CheckCircle2, ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Zap, Crown, ArrowRight } from 'lucide-react';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { PLAN_LABELS, PLAN_ORDER, getPlanLimits } from '@/lib/planLimits';
 import { saveSlackWebhookUrl, saveSlackChannel } from '@/services/slackService';
 import { fetchDeliveriesForWebhook, retryDelivery, fetchAndFirePendingRetries } from '@/services/webhookService';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -17,9 +19,12 @@ const QUICK_LINKS = [
   { icon: LifeBuoy,label: 'Support',          desc: 'View and respond to client & supplier tickets',    path: '/control-centre/support' },
 ];
 
+const PLAN_ACCENT = { free: '#6b7280', starter: '#FF6B35', growth: '#3b82f6', enterprise: '#8b5cf6' };
+
 const SettingsPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { plan, planStatus, monthlyOrders, userCount, limits } = useSubscription();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -240,6 +245,79 @@ const SettingsPage = () => {
       </Helmet>
 
       <div className="max-w-4xl mx-auto space-y-6 pb-20">
+
+        {/* ── Subscription Plan ─────────────────────────────────────────── */}
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--caption)' }}>
+            Subscription
+          </p>
+          <div className="rounded-2xl p-5 sm:p-6" style={{ background: 'var(--surface)', border: '1px solid var(--edge)' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${PLAN_ACCENT[plan] ?? '#6b7280'}18`, border: `1px solid ${PLAN_ACCENT[plan] ?? '#6b7280'}30` }}>
+                  {plan === 'enterprise' ? <Crown size={20} style={{ color: PLAN_ACCENT[plan] }} /> : <Zap size={20} style={{ color: PLAN_ACCENT[plan] }} />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-lg" style={{ color: 'var(--heading)' }}>{PLAN_LABELS[plan] ?? plan} Plan</span>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: planStatus === 'active' ? '#d1fae5' : '#fee2e2', color: planStatus === 'active' ? '#065f46' : '#991b1b' }}>
+                      {planStatus}
+                    </span>
+                  </div>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--body)' }}>
+                    {limits.maxOrdersPerMonth === Infinity ? 'Unlimited orders' : `${monthlyOrders} / ${limits.maxOrdersPerMonth} orders this month`}
+                    {' · '}
+                    {limits.maxUsers === Infinity ? 'Unlimited users' : `${userCount} / ${limits.maxUsers} users`}
+                  </p>
+                </div>
+              </div>
+              {plan !== 'enterprise' && (
+                <button
+                  onClick={() => navigate('/pricing')}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white flex-shrink-0 transition-all active:scale-[0.98]"
+                  style={{ background: PLAN_ACCENT[plan] ?? '#FF6B35' }}>
+                  Upgrade <ArrowRight size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Usage bars */}
+            {limits.maxOrdersPerMonth !== Infinity && (
+              <div className="mt-4 space-y-2.5">
+                {/* Orders bar */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--caption)' }}>
+                    <span>Orders this month</span>
+                    <span>{monthlyOrders} / {limits.maxOrdersPerMonth}</span>
+                  </div>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--edge-strong)' }}>
+                    <div className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(100, (monthlyOrders / limits.maxOrdersPerMonth) * 100)}%`,
+                        background: monthlyOrders >= limits.maxOrdersPerMonth ? '#ef4444' : PLAN_ACCENT[plan],
+                      }} />
+                  </div>
+                </div>
+                {/* Users bar */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--caption)' }}>
+                    <span>Users</span>
+                    <span>{userCount} / {limits.maxUsers}</span>
+                  </div>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--edge-strong)' }}>
+                    <div className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(100, (userCount / limits.maxUsers) * 100)}%`,
+                        background: userCount >= limits.maxUsers ? '#ef4444' : PLAN_ACCENT[plan],
+                      }} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Quick-access: moved nav items */}
         <div>

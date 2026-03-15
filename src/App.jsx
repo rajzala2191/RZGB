@@ -2,6 +2,7 @@
 import React from 'react';
 import { Route, Routes, BrowserRouter as Router, Outlet } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import { AdminProvider } from '@/contexts/AdminContext';
 import { SupplierProvider } from '@/contexts/SupplierContext';
 import { ClientProvider } from '@/contexts/ClientContext';
@@ -124,6 +125,7 @@ function App() {
       <ThemeProvider>
         <Router>
           <AuthProvider>
+            <SubscriptionProvider>
             <AdminProvider>
               <SupplierProvider>
                 <ClientProvider>
@@ -244,6 +246,7 @@ function App() {
                 </ClientProvider>
               </SupplierProvider>
             </AdminProvider>
+            </SubscriptionProvider>
           </AuthProvider>
         </Router>
       </ThemeProvider>
