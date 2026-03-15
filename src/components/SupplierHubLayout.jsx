@@ -15,6 +15,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { PORTAL_LABELS } from '@/lib/portalDirects';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import NotificationBell from './NotificationBell';
 import SearchBar from './SearchBar';
@@ -65,10 +66,13 @@ const SupplierHubLayout = ({ children }) => {
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
         >
-          <div className="flex items-center justify-center py-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
+          <div className="flex flex-col items-center justify-center py-4 border-b border-slate-200 dark:border-slate-800 shrink-0 gap-1">
             <div className="w-10 h-10 flex items-center justify-center text-slate-900 dark:text-white">
               <VrocureLogo size={28} />
             </div>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 hidden lg:block" title={PORTAL_LABELS.SUPPLIER}>
+              {PORTAL_LABELS.SUPPLIER}
+            </span>
           </div>
 
           <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4 flex flex-col items-center gap-1 min-w-0">

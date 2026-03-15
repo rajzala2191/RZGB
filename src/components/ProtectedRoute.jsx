@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
+import { PORTAL_PATHS } from '@/lib/portalDirects';
 import { Loader2 } from 'lucide-react';
 
 const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingCheck = false }) => {
@@ -27,8 +28,8 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
   }, [currentUser, userRole]);
 
   const mfaApplies = userRole === 'admin';
-  // Admin with workspace must wait for workspaceStatus/onboardingStatus before gating (prevents race → control-centre buffering)
-  const adminAwaitingWorkspaceStatus = userRole === 'admin' && workspaceId && workspaceStatus === null;
+  // Admin with workspace must wait for workspaceStatus before gating (prevents race → control-centre buffering)
+  const adminAwaitingWorkspaceStatus = userRole === 'admin' && workspaceId && (workspaceStatus == null);
   if (loading || (currentUser && !userRole) || (mfaApplies && mfaLoading) || adminAwaitingWorkspaceStatus) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
@@ -63,24 +64,24 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
 
     if (isPlatformRoute) {
       if (!isSuperAdmin) {
-        if (userRole === 'admin') return <Navigate to="/control-centre" replace />;
-        if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
-        if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
+        if (userRole === 'admin') return <Navigate to={PORTAL_PATHS.WORKSPACE} replace />;
+        if (userRole === 'client') return <Navigate to={PORTAL_PATHS.CLIENT} replace />;
+        if (userRole === 'supplier') return <Navigate to={PORTAL_PATHS.SUPPLIER} replace />;
         return <Navigate to="/login" replace />;
       }
     } else if (isAdminRoute) {
       if (userRole !== 'admin') {
-        if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
-        if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
+        if (userRole === 'client') return <Navigate to={PORTAL_PATHS.CLIENT} replace />;
+        if (userRole === 'supplier') return <Navigate to={PORTAL_PATHS.SUPPLIER} replace />;
         return <Navigate to="/login" replace />;
       }
     } else {
       const hasRole = allowedRoles.includes(userRole);
       const superAdminBypass = isSuperAdmin;
       if (!hasRole && !superAdminBypass) {
-        if (userRole === 'admin') return <Navigate to="/control-centre" replace />;
-        if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
-        if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
+        if (userRole === 'admin') return <Navigate to={PORTAL_PATHS.WORKSPACE} replace />;
+        if (userRole === 'client') return <Navigate to={PORTAL_PATHS.CLIENT} replace />;
+        if (userRole === 'supplier') return <Navigate to={PORTAL_PATHS.SUPPLIER} replace />;
         return <Navigate to="/login" replace />;
       }
     }
@@ -95,7 +96,7 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
 
   // Gate pending workspace admins: must complete onboarding before accessing the app
   if (userRole === 'admin' && workspaceStatus === 'pending') {
-    if (onboardingStatus === 'not_started' || onboardingStatus === null) {
+    if (onboardingStatus == null || onboardingStatus === 'not_started') {
       if (location.pathname !== '/onboarding') {
         return <Navigate to="/onboarding" replace />;
       }

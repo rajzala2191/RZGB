@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { getDefaultRouteForUser } from '@/lib/portalDirects';
 import {
   resetPasswordForEmail,
   signOut,
@@ -15,7 +16,7 @@ const OTP_LENGTH = Number(import.meta.env.VITE_EMAIL_OTP_LENGTH || 6);
 export default function LoginContainer() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, signInWithGoogle, currentUser, userRole, profileError, clearProfileError } = useAuth();
+  const { login, signInWithGoogle, currentUser, userRole, workspaceStatus, onboardingStatus, profileError, clearProfileError } = useAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState('');
@@ -67,16 +68,13 @@ export default function LoginContainer() {
     if (showForgotPassword) return;
     if (currentUser && userRole) {
       toast({
-        title: 'Welcome Back',
-        description: 'Successfully logged in to RZ Portal.',
+        title: 'Welcome back',
+        description: 'Taking you to your portal.',
       });
-      if (userRole === 'super_admin') navigate('/platform-admin', { replace: true });
-      else if (userRole === 'admin') navigate('/control-centre', { replace: true });
-      else if (userRole === 'client') navigate('/client-dashboard', { replace: true });
-      else if (userRole === 'supplier') navigate('/supplier-hub', { replace: true });
-      else navigate('/', { replace: true });
+      const path = getDefaultRouteForUser(userRole, workspaceStatus, onboardingStatus);
+      navigate(path || '/', { replace: true });
     }
-  }, [currentUser, userRole, navigate, showForgotPassword, toast]);
+  }, [currentUser, userRole, workspaceStatus, onboardingStatus, navigate, showForgotPassword, toast]);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();

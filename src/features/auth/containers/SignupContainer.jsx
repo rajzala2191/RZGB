@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { getDefaultRouteForUser } from '@/lib/portalDirects';
 import SignupView from '@/features/auth/presentational/SignupView';
 
 export default function SignupContainer() {
   const navigate = useNavigate();
-  const { signUp, signInWithGoogle, currentUser, userRole } = useAuth();
+  const { signUp, signInWithGoogle, currentUser, userRole, workspaceStatus, onboardingStatus } = useAuth();
   const { toast } = useToast();
 
   const [fullName, setFullName] = useState('');
@@ -18,18 +19,13 @@ export default function SignupContainer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Redirect already-logged-in users to their dashboard
+  // Redirect already-logged-in users to the correct portal (respects workspace/onboarding)
   useEffect(() => {
-    if (currentUser && userRole) {
-      if (userRole === 'super_admin' || (userRole === 'admin')) {
-        navigate('/control-centre', { replace: true });
-      } else if (userRole === 'client') {
-        navigate('/client-dashboard', { replace: true });
-      } else if (userRole === 'supplier') {
-        navigate('/supplier-hub', { replace: true });
-      }
-    }
-  }, [currentUser, userRole, navigate]);
+    if (!currentUser || !userRole) return;
+    if (userRole === 'admin' && workspaceStatus == null) return;
+    const path = getDefaultRouteForUser(userRole, workspaceStatus, onboardingStatus);
+    if (path && path !== '/login') navigate(path, { replace: true });
+  }, [currentUser, userRole, workspaceStatus, onboardingStatus, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
