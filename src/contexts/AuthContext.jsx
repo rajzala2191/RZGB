@@ -98,11 +98,12 @@ export const AuthProvider = ({ children }) => {
   }, [clearProfileState]);
 
   // Only called when profile is genuinely absent (not on transient errors).
-  // Google OAuth new users are held for profile completion; email users are signed out.
+  // Google OAuth users (signed up or linked with Google) get the company-details completion form; others are signed out.
   const handleMissingProfile = useCallback(async (user) => {
     const provider = user.app_metadata?.provider;
-    const isOAuth = provider === 'google';
-    if (isOAuth) {
+    const providers = user.app_metadata?.providers;
+    const hasGoogle = provider === 'google' || (Array.isArray(providers) && providers.includes('google'));
+    if (hasGoogle) {
       setNeedsOAuthCompletion(true);
       setOauthUser(user);
       return;
