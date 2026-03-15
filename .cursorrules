@@ -1,10 +1,11 @@
 # RZGB Project — Cursor Rules
 # Full context is in .ai-context.md — read it first before making any changes.
 
-## Two Brands, One Codebase
-- **Zaproc** (zaproc.co.uk) — SaaS procurement platform for manufacturing
+## Three Domains, One Codebase
+- **Vrocure** (vrocure.co.uk / portal.vrocure.co.uk) — SaaS procurement platform (formerly Zaproc)
 - **RZ Global Solutions** (rzglobalsolutions.co.uk) — bespoke component supply broker
 - Domain detected at runtime in `src/lib/portalConfig.js` via `window.location.hostname`
+- `www.vrocure.co.uk` → Vrocure landing, `portal.vrocure.co.uk` → full app, `www.rzglobalsolutions.co.uk` → RZGB landing
 
 ## Stack
 - React 18 + Vite (JSX only — no TypeScript)
@@ -24,7 +25,7 @@
 - `src/contexts/AuthContext.jsx` — useAuth() hook
 - `src/pages/HomeOrRedirect.jsx` — picks landing page by domain
 - `src/pages/RZGBLandingPage.jsx` — rzglobalsolutions.co.uk landing
-- `src/pages/LandingPage.jsx` — zaproc.co.uk landing
+- `src/pages/LandingPage.jsx` — vrocure.co.uk landing
 - `src/components/DomainGuard.jsx` — redirects non-root paths on landing domains
 - `public/.htaccess` — SPA routing on Hostinger Apache (do not delete)
 
@@ -40,8 +41,9 @@ All DB queries must be scoped by workspace_id.
 
 ## Git / Deploy
 - `main` is protected — PRs only, Build + Lint checks must pass
-- Hostinger auto-deploys both sites from `main`
-- `.env` is gitignored — set VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY in Hostinger dashboard
+- Hostinger auto-deploys all three sites from `main`
+- `.env` is gitignored — set all VITE_* vars in each Hostinger site dashboard (see .env.example)
+- All three sites use identical env vars — VITE_PORTAL_ORIGIN, VITE_LANDING_DOMAIN, VITE_RZGB_DOMAIN
 
 ## Do Not
 - No TypeScript, no CSS files, no styled-components
@@ -74,6 +76,5 @@ All DB queries must be scoped by workspace_id.
 - `src/services/workspaceService.js` — saveOnboardingData, completeOnboarding, fetchPendingWorkspaces, approveWorkspace, rejectWorkspace
 
 ## Last Session — 2026-03-15
-**Done:** Freemium plan system, self-service signup (/signup, /oauth-completion, Google OAuth), joinlist + 5-step onboarding wizard, PendingApprovalPage, PlatformJoinlistPage, AuthContext hardened (fetchUserProfile returns ok/missing/error, workspaceStatus+onboardingStatus in isolated useEffect), ProtectedRoute pending gating
-**⚠️ Login reliability**: final fix reverted fetchProfileByUserId to exact original 7 columns + isolated useEffect for extras — build passes but was not browser-verified before handover
-**Next:** Run joinlist DB migration in Supabase SQL Editor, configure Google OAuth, verify login works, test full joinlist flow end-to-end
+**Done:** Three-domain deployment (vrocure.co.uk/portal.vrocure.co.uk/rzglobalsolutions.co.uk), Google OAuth Supabase Site URL fixed, repo cleaned (10 dead files deleted, canva submodule removed), React.lazy() code splitting (bundle 3,270kB→709kB), build fix for missing logo.jsx
+**Next:** Run joinlist DB migration in Supabase SQL Editor, verify Google OAuth full flow on portal.vrocure.co.uk, test full joinlist flow end-to-end
