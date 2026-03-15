@@ -15,6 +15,9 @@ export const SubscriptionProvider = ({ children }) => {
   const [plan, setPlan] = useState('free');
   const [planStatus, setPlanStatus] = useState('active');
   const [planExpiresAt, setPlanExpiresAt] = useState(null);
+  const [stripeCustomerId, setStripeCustomerId] = useState(null);
+  const [stripeSubscriptionId, setStripeSubscriptionId] = useState(null);
+  const [stripeSubscriptionStatus, setStripeSubscriptionStatus] = useState(null);
   const [monthlyOrders, setMonthlyOrders] = useState(0);
   const [userCount, setUserCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -38,6 +41,9 @@ export const SubscriptionProvider = ({ children }) => {
         setPlan(planRes.data.plan ?? 'free');
         setPlanStatus(planRes.data.plan_status ?? 'active');
         setPlanExpiresAt(planRes.data.plan_expires_at ?? null);
+        setStripeCustomerId(planRes.data.stripe_customer_id ?? null);
+        setStripeSubscriptionId(planRes.data.stripe_subscription_id ?? null);
+        setStripeSubscriptionStatus(planRes.data.stripe_subscription_status ?? null);
       }
       setMonthlyOrders(ordersRes.data ?? 0);
       setUserCount(usersRes.data ?? 0);
@@ -72,10 +78,16 @@ export const SubscriptionProvider = ({ children }) => {
     [isSuperAdmin, plan]
   );
 
+  const hasActiveSubscription = Boolean(stripeSubscriptionId) && stripeSubscriptionStatus === 'active';
+
   const value = {
     plan,
     planStatus,
     planExpiresAt,
+    stripeCustomerId,
+    stripeSubscriptionId,
+    stripeSubscriptionStatus,
+    hasActiveSubscription,
     limits,
     monthlyOrders,
     userCount,

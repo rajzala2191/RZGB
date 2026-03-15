@@ -1,6 +1,64 @@
 import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+/** Call a Supabase Edge Function with the current user's JWT. */
+async function callEdgeFunction(name, body) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token ?? SUPABASE_ANON_KEY}`,
+      apikey: SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? `Edge function ${name} failed`);
+  return json;
+}
+
+/**
+ * Start a Stripe Checkout session for a plan upgrade.
+ * Returns { url } to redirect the browser to.
+ */
+export const createCheckoutSession = async ({ workspaceId, plan, annual = false }) => {
+  try {
+    const { url } = await callEdgeFunction('stripe-checkout', {
+      workspaceId,
+      plan,
+      annual,
+      successUrl: `${window.location.origin}/control-centre/settings?stripe=success`,
+      cancelUrl: `${window.location.origin}/pricing`,
+    });
+    return { url, error: null };
+  } catch (err) {
+    return { url: null, error: err };
+  }
+};
+
+/**
+ * Open the Stripe Customer Portal for subscription management.
+ * Returns { url } to redirect the browser to.
+ */
+export const createPortalSession = async ({ workspaceId }) => {
+  try {
+    const { url } = await callEdgeFunction('stripe-portal', {
+      workspaceId,
+      returnUrl: `${window.location.origin}/control-centre/settings`,
+    });
+    return { url, error: null };
+  } catch (err) {
+    return { url: null, error: err };
+  }
+};
+
 /**
  * Fetch workspace plan info (plan, status, expires_at).
  * Uses the regular supabase client so RLS applies.
@@ -8,7 +66,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 export const fetchWorkspacePlan = async (workspaceId) =>
   supabase
     .from('workspaces')
-    .select('id, name, plan, plan_status, plan_expires_at, plan_upgraded_at')
+    .select('id, name, plan, plan_status, plan_expires_at, plan_upgraded_at, stripe_customer_id, stripe_subscription_id, stripe_subscription_status')
     .eq('id', workspaceId)
     .single();
 

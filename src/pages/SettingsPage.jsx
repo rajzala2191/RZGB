@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/customSupabaseClient';
 import ControlCentreLayout from '@/components/ControlCentreLayout';
@@ -8,6 +8,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { Save, Shield, Mail, Bell, Monitor, Loader2, MessageSquare, Users, LifeBuoy, ChevronRight, Palette, Webhook, X, Plus, CheckCircle2, ChevronDown, ChevronUp, RefreshCw, AlertTriangle, Zap, Crown, ArrowRight } from 'lucide-react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { PLAN_LABELS, PLAN_ORDER, getPlanLimits } from '@/lib/planLimits';
+import { createPortalSession, createCheckoutSession } from '@/services/subscriptionService';
+import { useAuth } from '@/contexts/AuthContext';
 import { saveSlackWebhookUrl, saveSlackChannel } from '@/services/slackService';
 import { fetchDeliveriesForWebhook, retryDelivery, fetchAndFirePendingRetries } from '@/services/webhookService';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -24,7 +26,10 @@ const PLAN_ACCENT = { free: '#6b7280', starter: '#FF6B35', growth: '#3b82f6', en
 const SettingsPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { plan, planStatus, monthlyOrders, userCount, limits } = useSubscription();
+  const location = useLocation();
+  const { workspaceId } = useAuth();
+  const { plan, planStatus, monthlyOrders, userCount, limits, hasActiveSubscription, refresh: refreshSubscription } = useSubscription();
+  const [billingLoading, setBillingLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -54,6 +59,21 @@ const SettingsPage = () => {
     alert_admins: true,
     email_notifications: true
   });
+
+  // Handle Stripe redirect-back
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('stripe') === 'success') {
+      toast({
+        title: 'Subscription activated!',
+        description: 'Your plan has been upgraded. Enjoy your new features.',
+        className: 'bg-emerald-600 border-emerald-700 text-white',
+      });
+      refreshSubscription();
+      // Clean up URL param
+      window.history.replaceState({}, '', location.pathname);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -86,6 +106,34 @@ const SettingsPage = () => {
 
     fetchSettings();
   }, []);
+
+  const handleManageBilling = async () => {
+    if (!workspaceId) return;
+    setBillingLoading(true);
+    try {
+      const { url, error } = await createPortalSession({ workspaceId });
+      if (error) throw error;
+      if (url) window.location.href = url;
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
+  const handleUpgradeClick = async (targetPlan) => {
+    if (!workspaceId) return;
+    setBillingLoading(true);
+    try {
+      const { url, error } = await createCheckoutSession({ workspaceId, plan: targetPlan });
+      if (error) throw error;
+      if (url) window.location.href = url;
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setBillingLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -273,14 +321,28 @@ const SettingsPage = () => {
                   </p>
                 </div>
               </div>
-              {plan !== 'enterprise' && (
-                <button
-                  onClick={() => navigate('/pricing')}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white flex-shrink-0 transition-all active:scale-[0.98]"
-                  style={{ background: PLAN_ACCENT[plan] ?? '#FF6B35' }}>
-                  Upgrade <ArrowRight size={14} />
-                </button>
-              )}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {hasActiveSubscription && (
+                  <button
+                    onClick={handleManageBilling}
+                    disabled={billingLoading}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-60"
+                    style={{ background: 'var(--surface-raised)', color: 'var(--heading)', border: '1px solid var(--edge)' }}>
+                    {billingLoading ? <Loader2 size={14} className="animate-spin" /> : null}
+                    Manage Billing
+                  </button>
+                )}
+                {plan !== 'enterprise' && !hasActiveSubscription && (
+                  <button
+                    onClick={() => handleUpgradeClick(plan === 'free' ? 'starter' : 'growth')}
+                    disabled={billingLoading}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98] disabled:opacity-60"
+                    style={{ background: PLAN_ACCENT[plan] ?? '#FF6B35' }}>
+                    {billingLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+                    Upgrade
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Usage bars */}
