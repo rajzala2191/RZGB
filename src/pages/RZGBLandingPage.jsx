@@ -4,6 +4,8 @@ import {
   Factory, Shield, Award, Truck, ArrowUpRight, ArrowRight,
   CheckCircle2, Zap, Package, Layers,
 } from 'lucide-react';
+import { RZGB_SITE_NAME, RZGB_TAGLINE, RZGB_LEGAL_NAME, RZGB_FAVICON, RZGB_PAGE_TITLE } from '@/lib/rzgbBranding';
+import RZGBLogo from '@/components/RZGBLogo';
 
 /* ─── Design tokens ───────────────────────────────────────────────────────── */
 const glass   = 'bg-white/80 backdrop-blur-xl border border-gray-200/80 shadow-sm';
@@ -193,19 +195,19 @@ export default function RZGBLandingPage() {
   const formRef = useRef(null);
 
   useEffect(() => {
-    document.title = 'RZ Global Solutions | Global Supply of Component Parts & Precision Castings';
+    document.title = RZGB_PAGE_TITLE;
 
     const prevFavicon = document.querySelector("link[rel~='icon']");
     const prevHref = prevFavicon?.href;
     const link = prevFavicon || document.createElement('link');
-    link.rel = 'icon'; link.type = 'image/jpeg'; link.href = '/rz-global-favicon.jpg';
+    link.rel = 'icon'; link.type = 'image/jpeg'; link.href = RZGB_FAVICON;
     if (!prevFavicon) document.head.appendChild(link);
 
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
 
     return () => {
-      document.title = 'Zaproc | Manufacturing Procurement Platform';
+      document.title = 'Vrocure | Global Procurement Platform';
       if (link) { link.rel = 'icon'; link.type = 'image/x-icon'; link.href = prevHref || '/favicon.ico'; }
       window.removeEventListener('scroll', onScroll);
     };
@@ -227,12 +229,10 @@ export default function RZGBLandingPage() {
           <div className="flex items-center justify-between h-[68px]">
 
             <a href="#" className="flex items-center gap-3 flex-shrink-0">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center shadow-md shadow-orange-500/30">
-                <span className="text-white font-black text-sm">RZ</span>
-              </div>
+              <RZGBLogo size={36} />
               <div className="leading-none">
-                <p className="text-sm font-bold text-gray-900 tracking-tight">RZ Global Solutions</p>
-                <p className="text-[10px] text-gray-400 font-medium">Precision Parts Supply</p>
+                <p className="text-sm font-bold text-gray-900 tracking-tight">{RZGB_SITE_NAME}</p>
+                <p className="text-[10px] text-gray-400 font-medium">{RZGB_TAGLINE}</p>
               </div>
             </a>
 
@@ -294,7 +294,7 @@ export default function RZGBLandingPage() {
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-500 leading-relaxed max-w-2xl mb-12">
-            RZ Global Solutions bridges Indian manufacturing excellence with global industries — delivering defect-free products backed by a verified supply chain.
+            {RZGB_SITE_NAME} bridges Indian manufacturing excellence with global industries — delivering defect-free products backed by a verified supply chain.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-20">
@@ -590,10 +590,8 @@ export default function RZGBLandingPage() {
           <div className="flex flex-col md:flex-row justify-between gap-10 mb-10">
             <div className="max-w-xs">
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center shadow-md shadow-orange-600/30">
-                  <span className="text-white font-black text-sm leading-none">RZ</span>
-                </div>
-                <span className="text-white font-black text-sm tracking-tight">RZ Global Solutions</span>
+                <RZGBLogo size={32} className="shadow-md shadow-orange-600/30" />
+                <span className="text-white font-black text-sm tracking-tight">{RZGB_SITE_NAME}</span>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Bridging Indian manufacturing excellence with global industries. Defect-free component parts and precision castings.
@@ -625,16 +623,16 @@ export default function RZGBLandingPage() {
 
           <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
             <div className="flex flex-col sm:flex-row items-center gap-2 text-xs text-gray-600">
-              <span>© {new Date().getFullYear()} RZ Global Solutions Limited</span>
+              <span>© {new Date().getFullYear()} {RZGB_LEGAL_NAME}</span>
               <span className="hidden sm:block opacity-50">·</span>
               <span>Registered in England &amp; Wales · No. 16718910</span>
             </div>
             <div className="flex items-center gap-4">
               <a href="#" className="text-xs text-gray-600 hover:text-gray-400 transition-colors">Terms</a>
               <a href="#" className="text-xs text-gray-600 hover:text-gray-400 transition-colors">Privacy</a>
-              <a href="https://zaproc.co.uk" target="_blank" rel="noopener noreferrer"
+              <a href="https://vrocure.co.uk" target="_blank" rel="noopener noreferrer"
                 className="text-xs text-gray-600 hover:text-gray-400 transition-colors border border-gray-700 rounded-full px-3 py-1">
-                Powered by Zaproc
+                Powered by Vrocure
               </a>
             </div>
           </div>
