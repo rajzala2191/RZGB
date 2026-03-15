@@ -30,6 +30,11 @@ export function getLogoForBackground(background, variant = 'primary') {
 /** Brand orange hex (use for non-Tailwind contexts). */
 export const VROCURE_BRAND_ORANGE = '#FF6B35';
 
+/** Favicon and iOS icons for Vrocure (vrocure.co.uk + portal). Theme-reactive. */
+export const VROCURE_FAVICON = '/logos/vrocure-mark-dark.svg';
+export const VROCURE_APPLE_TOUCH_LIGHT = '/logos/apple-touch-icon-light.svg';
+export const VROCURE_APPLE_TOUCH_DARK = '/logos/apple-touch-icon-dark.svg';
+
 /** Default social links. Replace with real URLs when you have profiles. */
 export const VROCURE_SOCIALS = [
   { id: 'twitter', label: 'X (Twitter)', href: 'https://twitter.com/vrocure', icon: 'x' },

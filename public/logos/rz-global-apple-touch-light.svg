@@ -1,0 +1,12 @@
+<!-- RZ Global Solutions  iOS icon for light system theme. 180×180 -->
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" fill="#f8fafc"/>
+  <rect x="30" y="30" width="120" height="120" rx="24" fill="url(#rzgLight)"/>
+  <text x="90" y="108" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="48" font-weight="800" fill="#0f172a">RZ</text>
+  <defs>
+    <linearGradient id="rzgLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+  </defs>
+</svg>

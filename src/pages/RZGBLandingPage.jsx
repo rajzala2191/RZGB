@@ -4,7 +4,7 @@ import {
   Factory, Shield, Award, Truck, ArrowUpRight, ArrowRight,
   CheckCircle2, Zap, Package, Layers,
 } from 'lucide-react';
-import { RZGB_SITE_NAME, RZGB_TAGLINE, RZGB_LEGAL_NAME, RZGB_FAVICON, RZGB_PAGE_TITLE } from '@/lib/rzgbBranding';
+import { RZGB_SITE_NAME, RZGB_TAGLINE, RZGB_LEGAL_NAME, RZGB_PAGE_TITLE } from '@/lib/rzgbBranding';
 import RZGBLogo from '@/components/RZGBLogo';
 
 /* ─── Design tokens ───────────────────────────────────────────────────────── */
@@ -196,19 +196,10 @@ export default function RZGBLandingPage() {
 
   useEffect(() => {
     document.title = RZGB_PAGE_TITLE;
-
-    const prevFavicon = document.querySelector("link[rel~='icon']");
-    const prevHref = prevFavicon?.href;
-    const link = prevFavicon || document.createElement('link');
-    link.rel = 'icon'; link.type = 'image/jpeg'; link.href = RZGB_FAVICON;
-    if (!prevFavicon) document.head.appendChild(link);
-
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
-
     return () => {
       document.title = 'Vrocure | Global Procurement Platform';
-      if (link) { link.rel = 'icon'; link.type = 'image/x-icon'; link.href = prevHref || '/favicon.ico'; }
       window.removeEventListener('scroll', onScroll);
     };
   }, []);

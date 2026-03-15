@@ -8,6 +8,7 @@ import { SupplierProvider } from '@/contexts/SupplierContext';
 import { ClientProvider } from '@/contexts/ClientContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
+import FaviconSwitcher from '@/components/FaviconSwitcher';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import DomainGuard from '@/components/DomainGuard';
@@ -147,6 +148,7 @@ function App() {
               <SupplierProvider>
                 <ClientProvider>
                   <ScrollToTop />
+                  <FaviconSwitcher />
                   <DemoBanner />
                   <DomainGuard>
                   <Suspense fallback={<PageLoader />}>

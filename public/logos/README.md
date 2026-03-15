@@ -12,10 +12,12 @@ Everything you need in one place:
 | `apple-touch-icon-light.svg` | **iOS icon (light)** — 180×180, light background; used when system theme is light |
 | `apple-touch-icon-dark.svg` | **iOS icon (dark)** — 180×180, dark background; used when system theme is dark |
 | `apple-touch-icon-source.svg` | **iOS fallback** — single 180×180 source (dark); export to `public/apple-touch-icon.png` for fallback |
+| `rz-global-apple-touch-light.svg` | **RZ Global iOS (light)** — 180×180 for rzglobalsolutions.co.uk when system theme is light |
+| `rz-global-apple-touch-dark.svg` | **RZ Global iOS (dark)** — 180×180 for rzglobalsolutions.co.uk when system theme is dark |
 
-The site uses **theme-reactive** icons: `index.html` links light/dark SVGs with `media="(prefers-color-scheme: light|dark)"`. Fallback: `apple-touch-icon.png`. For best iOS support, export the two SVGs to PNG and point the same `media` links to those PNGs.
+**Domain-aware favicons:** `FaviconSwitcher` (in App) sets favicon + theme-reactive iOS icons by hostname: **rzglobalsolutions.co.uk** → RZ Global favicon + RZ Global apple-touch (light/dark); **vrocure.co.uk** and **portal** → Vrocure favicon + Vrocure apple-touch (light/dark).
 
-**In code:** `src/lib/vrocureBranding.js` — `VROCURE_LOGOS`, `getLogoForBackground('light'|'dark', 'primary'|'subtle')`  
-**Social links:** same file — `VROCURE_SOCIALS`; component `@/components/SocialLinks`
+**In code:** `src/lib/vrocureBranding.js` — `VROCURE_LOGOS`, `getLogoForBackground('light'|'dark', 'primary'|'subtle')`; `src/lib/rzgbBranding.js` — RZ Global favicon + apple-touch paths.  
+**Social links:** `vrocureBranding.js` — `VROCURE_SOCIALS`; component `@/components/SocialLinks`
 
-URLs: use `/logos/vrocure-mark-light.svg` etc. (or full URL in production).
+URLs: use `/logos/...` (or full URL in production).
