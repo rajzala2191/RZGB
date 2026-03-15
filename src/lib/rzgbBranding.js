@@ -7,7 +7,7 @@ export const RZGB_SITE_NAME = 'RZ Global Solutions';
 export const RZGB_TAGLINE = 'Precision Parts Supply';
 export const RZGB_LEGAL_NAME = 'RZ Global Solutions Limited';
 export const RZGB_FAVICON = '/rz-global-favicon.jpg';
-/** iOS app icon (theme-reactive). Use for rzglobalsolutions.co.uk only. */
+/** iOS app icon (theme-reactive). Use for rzglobalsolutions.co.uk only. Export SVGs to PNGs for iOS; or use SVG (iOS may fall back to cached). */
 export const RZGB_APPLE_TOUCH_LIGHT = '/logos/rz-global-apple-touch-light.svg';
 export const RZGB_APPLE_TOUCH_DARK = '/logos/rz-global-apple-touch-dark.svg';
 /** Optional: set to a path (e.g. '/rz-global-logo.png') to use an image logo; otherwise the RZ mark is used. */

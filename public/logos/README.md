@@ -8,12 +8,15 @@ Everything you need in one place:
 | `vrocure-mark-dark.svg` | **Light backgrounds** (white, gray-50) — dark slate mark |
 | `vrocure-mark-orange.svg` | **Light backgrounds** — brand orange (#FF6B35), primary emphasis |
 | `vrocure-mark-slate.svg` | **Any background** — subtle/secondary (slate-500) |
+| `vrocure-favicon.svg` | **Browser tab favicon** — orange background + white mark, visible on light and dark tabs |
 | `og-image.svg` | **Social sharing** — 1200×630 Open Graph / Twitter card image |
 | `apple-touch-icon-light.svg` | **iOS icon (light)** — 180×180, light background; used when system theme is light |
 | `apple-touch-icon-dark.svg` | **iOS icon (dark)** — 180×180, dark background; used when system theme is dark |
 | `apple-touch-icon-source.svg` | **iOS fallback** — single 180×180 source (dark); export to `public/apple-touch-icon.png` for fallback |
 | `rz-global-apple-touch-light.svg` | **RZ Global iOS (light)** — 180×180 for rzglobalsolutions.co.uk when system theme is light |
 | `rz-global-apple-touch-dark.svg` | **RZ Global iOS (dark)** — 180×180 for rzglobalsolutions.co.uk when system theme is dark |
+
+**iOS home screen:** iOS uses PNG for the icon. Build runs `scripts/generate-apple-touch-pngs.js` to generate `apple-touch-icon-light.png`, `apple-touch-icon-dark.png`, and `public/apple-touch-icon.png` from the SVGs. Links use `?v=2`; remove the home screen shortcut and add again to see the new icon.
 
 **Domain-aware favicons:** `FaviconSwitcher` (in App) sets favicon + theme-reactive iOS icons by hostname: **rzglobalsolutions.co.uk** → RZ Global favicon + RZ Global apple-touch (light/dark); **vrocure.co.uk** and **portal** → Vrocure favicon + Vrocure apple-touch (light/dark).
 

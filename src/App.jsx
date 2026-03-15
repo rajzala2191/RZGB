@@ -37,6 +37,7 @@ const PricingPage      = lazy(() => import('@/pages/PricingPage'));
 const RoadmapPage      = lazy(() => import('@/pages/RoadmapPage'));
 const RequestDemoPage  = lazy(() => import('@/pages/RequestDemoPage'));
 const ThemeDemoPage    = lazy(() => import('@/pages/ThemeDemoPage'));
+const LogosPage        = lazy(() => import('@/pages/LogosPage'));
 const VrocureLogos     = lazy(() => import('@/components/VrocureLogo'));
 
 // Demo
@@ -159,6 +160,7 @@ function App() {
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/roadmap" element={<RoadmapPage />} />
                     <Route path="/theme-demo" element={<ThemeDemoPage />} />
+                    <Route path="/logos" element={<LogosPage />} />
                     <Route path="/logo" element={<VrocureLogos />} />
                     <Route path="/request-demo" element={<RequestDemoPage />} />
                     <Route path="/login" element={<LoginPage />} />
