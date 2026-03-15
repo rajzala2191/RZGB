@@ -7,7 +7,7 @@ import OAuthCompletionView from '@/features/auth/presentational/OAuthCompletionV
 
 export default function OAuthCompletionContainer() {
   const navigate = useNavigate();
-  const { currentUser, oauthUser, needsOAuthCompletion, clearOAuthCompletion, refreshProfile } = useAuth();
+  const { currentUser, oauthUser, needsOAuthCompletion, clearOAuthCompletion, refreshProfile, workspaceStatus, onboardingStatus, workspaceId } = useAuth();
   const { toast } = useToast();
 
   const [businessName, setBusinessName] = useState('');
@@ -16,12 +16,25 @@ export default function OAuthCompletionContainer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // If user already has a complete profile, redirect away
+  // If user already has a complete profile (e.g. landed here by mistake), redirect to correct destination
   useEffect(() => {
-    if (currentUser && !needsOAuthCompletion) {
+    if (!currentUser || needsOAuthCompletion) return;
+    if (workspaceStatus === null) {
+      if (!workspaceId) navigate('/control-centre', { replace: true }); // super_admin etc.
+      return;
+    }
+    if (workspaceStatus === 'pending') {
+      if (onboardingStatus === 'not_started' || onboardingStatus === null) {
+        navigate('/onboarding', { replace: true });
+      } else if (onboardingStatus === 'completed') {
+        navigate('/pending-approval', { replace: true });
+      } else {
+        navigate('/control-centre', { replace: true });
+      }
+    } else {
       navigate('/control-centre', { replace: true });
     }
-  }, [currentUser, needsOAuthCompletion, navigate]);
+  }, [currentUser, needsOAuthCompletion, workspaceStatus, onboardingStatus, workspaceId, navigate]);
 
   const user = oauthUser || currentUser;
   const name = user?.user_metadata?.full_name || user?.user_metadata?.name || '';
@@ -36,20 +49,24 @@ export default function OAuthCompletionContainer() {
     setLoading(true);
     setError('');
     try {
+      const raw = website.trim();
+      const websiteValue = raw
+        ? (raw.match(/^https?:\/\//i) ? raw : `https://${raw}`)
+        : undefined;
       const { error: provErr } = await createSignupWorkspaceAndProfile({
         userId: user.id,
         email,
         fullName: name,
         businessName: businessName.trim(),
         phone: phone.trim(),
-        website: website.trim() || undefined,
+        website: websiteValue,
       });
       if (provErr) throw provErr;
 
       await refreshProfile();
+      toast({ title: 'Almost there!', description: 'Complete onboarding to activate your workspace.' });
+      navigate('/onboarding', { replace: true });
       clearOAuthCompletion();
-      toast({ title: 'Workspace ready!', description: 'Welcome to Vrocure.' });
-      navigate('/control-centre', { replace: true });
     } catch (err) {
       setError(err.message || 'Setup failed. Please try again.');
     } finally {

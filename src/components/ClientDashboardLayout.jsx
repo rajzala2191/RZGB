@@ -32,7 +32,7 @@ export default function ClientDashboardLayout({ children }) {
 
   const handleLogout = async () => {
     if (currentUser) await logout();
-    navigate('/login');
+    window.location.assign('/login');
   };
 
   return (

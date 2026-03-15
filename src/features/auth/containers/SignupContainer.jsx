@@ -40,13 +40,17 @@ export default function SignupContainer() {
     setLoading(true);
     setError('');
     try {
+      const raw = website.trim();
+      const websiteValue = raw
+        ? (raw.match(/^https?:\/\//i) ? raw : `https://${raw}`)
+        : undefined;
       const { error: signUpError } = await signUp({
         email: email.trim().toLowerCase(),
         password,
         fullName: fullName.trim(),
         businessName: businessName.trim(),
         phone: phone.trim(),
-        website: website.trim() || undefined,
+        website: websiteValue,
       });
       if (signUpError) throw signUpError;
       toast({ title: 'Welcome to Vrocure!', description: 'Your workspace is ready.' });

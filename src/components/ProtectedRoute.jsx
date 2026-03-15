@@ -7,7 +7,8 @@ import { Loader2 } from 'lucide-react';
 const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingCheck = false }) => {
   const {
     currentUser, userRole, isSuperAdmin, isCustomerAdmin, adminScope,
-    workspaceStatus, onboardingStatus, loading,
+    workspaceStatus, onboardingStatus, loading, needsOAuthCompletion,
+    workspaceId,
   } = useAuth();
   const location = useLocation();
   const [mfaVerified, setMfaVerified] = useState(null);
@@ -26,7 +27,9 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
   }, [currentUser, userRole]);
 
   const mfaApplies = userRole === 'admin';
-  if (loading || (currentUser && !userRole) || (mfaApplies && mfaLoading)) {
+  // Admin with workspace must wait for workspaceStatus/onboardingStatus before gating (prevents race → control-centre buffering)
+  const adminAwaitingWorkspaceStatus = userRole === 'admin' && workspaceId && workspaceStatus === null;
+  if (loading || (currentUser && !userRole) || (mfaApplies && mfaLoading) || adminAwaitingWorkspaceStatus) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="flex flex-col items-center gap-4">
@@ -39,6 +42,11 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
 
   if (!currentUser) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Google OAuth users without profile must complete setup first
+  if (needsOAuthCompletion) {
+    return <Navigate to="/oauth-completion" state={{ from: location }} replace />;
   }
 
   // Require MFA only for customer admins (control-centre); super_admin can use platform-admin without MFA
@@ -95,6 +103,13 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
       if (location.pathname !== '/pending-approval') {
         return <Navigate to="/pending-approval" replace />;
       }
+    }
+  }
+
+  // Block archived (rejected) workspace admins from portal
+  if (userRole === 'admin' && workspaceStatus === 'archived') {
+    if (location.pathname !== '/pending-approval') {
+      return <Navigate to="/pending-approval" replace />;
     }
   }
 

@@ -218,9 +218,11 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       setProfileError(null);
-      await signOut();
+      setNeedsOAuthCompletion(false);
+      setOauthUser(null);
       setCurrentUser(null);
       clearProfileState();
+      await signOut({ scope: 'global' });
     } catch (error) {
       console.error('AuthContext: Error logging out:', error.message);
     }

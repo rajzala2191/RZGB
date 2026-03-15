@@ -39,7 +39,7 @@ const SupplierHubLayout = ({ children }) => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    window.location.assign('/login');
   };
 
   return (

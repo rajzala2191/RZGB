@@ -71,7 +71,7 @@ function PlatformAdminLayout() {
 
   const handleLogout = async () => {
     if (currentUser) await logout();
-    navigate('/login');
+    window.location.assign('/login');
   };
 
   const isActive = (item) =>

@@ -363,14 +363,14 @@ export default function SignupView({
                         <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--caption)' }} />
                         <input
                           id="website"
-                          type="url"
+                          type="text"
                           value={website}
                           onChange={onWebsiteChange}
                           className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm transition-all focus:outline-none"
                           style={inputStyle}
                           onFocus={handleFocus}
                           onBlur={handleBlur}
-                          placeholder="https://acmeltd.com"
+                          placeholder="example.com"
                         />
                       </div>
                     </div>

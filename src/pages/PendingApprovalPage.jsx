@@ -65,6 +65,7 @@ export default function PendingApprovalPage() {
       navigate('/control-centre', { replace: true });
       return;
     }
+    // archived = rejected; stay on this page (ProtectedRoute redirects here)
     if (workspaceId) {
       fetchWorkspaceById(workspaceId).then(({ data }) => {
         if (data?.onboarding_data) setOnboardingData(data.onboarding_data);
@@ -113,22 +114,31 @@ export default function PendingApprovalPage() {
         >
           <div className="text-center mb-6">
             <h1 className="text-xl font-bold" style={{ color: 'var(--heading)' }}>
-              Application Submitted
+              {workspaceStatus === 'archived' ? 'Application Not Approved' : 'Application Submitted'}
             </h1>
             <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--body)' }}>
-              Your workspace is under review. Our team will verify your details and activate your account.
+              {workspaceStatus === 'archived'
+                ? 'Your application was not approved. Please contact support if you believe this was an error.'
+                : 'Your workspace is under review. Our team will verify your details and activate your account.'}
             </p>
           </div>
 
           {/* Status banner */}
           <div
             className="flex items-center gap-3 rounded-xl px-4 py-3 mb-5"
-            style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}
+            style={{
+              background: workspaceStatus === 'archived' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
+              border: workspaceStatus === 'archived' ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(245,158,11,0.3)',
+            }}
           >
-            <Clock size={16} style={{ color: '#f59e0b' }} />
+            <Clock size={16} style={{ color: workspaceStatus === 'archived' ? '#ef4444' : '#f59e0b' }} />
             <div>
-              <p className="text-xs font-bold" style={{ color: '#f59e0b' }}>Awaiting approval</p>
-              <p className="text-xs" style={{ color: 'var(--body)' }}>Typically reviewed within 24 hours</p>
+              <p className="text-xs font-bold" style={{ color: workspaceStatus === 'archived' ? '#ef4444' : '#f59e0b' }}>
+                {workspaceStatus === 'archived' ? 'Not approved' : 'Awaiting approval'}
+              </p>
+              <p className="text-xs" style={{ color: 'var(--body)' }}>
+                {workspaceStatus === 'archived' ? 'Contact support for more information' : 'Typically reviewed within 24 hours'}
+              </p>
             </div>
           </div>
 
@@ -174,7 +184,7 @@ export default function PendingApprovalPage() {
 
           {/* Sign out */}
           <button
-            onClick={async () => { await logout(); navigate('/login'); }}
+            onClick={async () => { await logout(); window.location.assign('/login'); }}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all"
             style={{ border: '1px solid var(--edge)', color: 'var(--body)', background: 'transparent' }}
           >
