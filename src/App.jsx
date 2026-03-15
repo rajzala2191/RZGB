@@ -18,7 +18,7 @@ import LoginPage from '@/pages/LoginPage';
 
 // Landing & Demo
 import LandingPage from '@/pages/LandingPage';
-import VrocureLogos from '../logo.jsx';
+import VrocureLogos from '@/components/VrocureLogo';
 import HowItWorksPage from '@/pages/HowItWorksPage';
 import DemoEntryPage from '@/pages/demo/DemoEntryPage';
 import { DemoProvider } from '@/contexts/DemoContext';
