@@ -11,6 +11,7 @@ import {
   signUpWithEmail,
   signInWithGoogle as signInWithGoogleService,
 } from '@/services/authService';
+import { supabase } from '@/lib/customSupabaseClient';
 import { createSignupWorkspaceAndProfile } from '@/services/workspaceService';
 import { getLandingUrl, isPortalDomain } from '@/lib/portalConfig';
 
@@ -248,7 +249,7 @@ export const AuthProvider = ({ children }) => {
           businessName,
           phone,
           website,
-        });
+        }, supabase);
         if (provErr) throw provErr;
       }
       return { data, error: null };

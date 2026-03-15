@@ -78,7 +78,7 @@ export default function OAuthCompletionContainer() {
         businessName: businessName.trim(),
         phone: phone.trim(),
         website: websiteValue,
-      });
+      }, supabase);
       if (provErr) throw provErr;
 
       await refreshProfile();

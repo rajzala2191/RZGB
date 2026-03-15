@@ -14,6 +14,31 @@ export const createWorkspace = async ({ name, settings }) => {
     .single();
 };
 
+/**
+ * Call the signup RPC with the user's Supabase client (bypasses RLS via SECURITY DEFINER).
+ * Use this from the frontend when the service role key is not available so workspace insert does not hit RLS.
+ */
+export const createSignupWorkspaceAndProfileRpc = async (userSupabase, {
+  userId,
+  email,
+  fullName,
+  businessName,
+  phone,
+  website,
+}) => {
+  const { data, error } = await userSupabase.rpc('create_signup_workspace_and_profile', {
+    p_user_id: userId,
+    p_email: email,
+    p_full_name: fullName,
+    p_business_name: businessName || '',
+    p_phone: phone || null,
+    p_website: website || null,
+  });
+  if (error) return { data: null, error };
+  const workspaceId = data?.workspace_id ?? null;
+  return { data: workspaceId ? { workspaceId } : null, error: null };
+};
+
 export const fetchAllWorkspaces = async () =>
   supabaseAdmin
     .from('workspaces')
@@ -88,18 +113,14 @@ export const setUserAdminScope = async (userId, scope) =>
 
 /**
  * Provision a workspace + admin profile for a self-signup user.
- * Uses supabaseAdmin (service role) to bypass RLS.
- * Performs a manual rollback of the workspace if profile insert fails.
+ * Prefers RPC with user's client (works when service role key is not in browser); falls back to supabaseAdmin.
  */
-export const createSignupWorkspaceAndProfile = async ({
-  userId,
-  email,
-  fullName,
-  businessName,
-  phone,
-  website,
-}) => {
-  // 1. Create workspace with free plan defaults
+export const createSignupWorkspaceAndProfile = async (params, userSupabase = null) => {
+  if (userSupabase) {
+    return createSignupWorkspaceAndProfileRpc(userSupabase, params);
+  }
+  // Service-role path (bypasses RLS)
+  const { userId, email, fullName, businessName, phone, website } = params;
   const wsSlug = slugify(businessName) + '-' + Math.floor(1000 + Math.random() * 9000);
   const { data: ws, error: wsErr } = await supabaseAdmin
     .from('workspaces')
@@ -117,7 +138,6 @@ export const createSignupWorkspaceAndProfile = async ({
 
   if (wsErr) return { data: null, error: wsErr };
 
-  // 2. Create profile — id must match auth.users.id
   const { error: profErr } = await supabaseAdmin
     .from('profiles')
     .insert([{
@@ -135,7 +155,6 @@ export const createSignupWorkspaceAndProfile = async ({
     }]);
 
   if (profErr) {
-    // Rollback workspace to avoid orphaned rows
     await supabaseAdmin.from('workspaces').delete().eq('id', ws.id);
     return { data: null, error: profErr };
   }
