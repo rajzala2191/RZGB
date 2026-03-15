@@ -6,6 +6,7 @@ import { getDefaultRedirectForRole } from '@/lib/accessPolicy';
 import { Loader2, RefreshCw } from 'lucide-react';
 
 const VERIFY_TIMEOUT_MS = 12_000;
+const MFA_CHECK_TIMEOUT_MS = 6_000;
 
 const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingCheck = false }) => {
   const {
@@ -24,10 +25,18 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
     if (!currentUser || userRole !== 'admin') return;
     if (localStorage.getItem('rzgb-demo-session')) { setMfaVerified(true); return; }
     setMfaLoading(true);
-    supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data }) => {
-      setMfaVerified(data?.currentLevel === 'aal2');
+    let done = false;
+    const finish = (verified) => {
+      if (done) return;
+      done = true;
+      setMfaVerified(verified);
       setMfaLoading(false);
-    });
+    };
+    supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data }) => {
+      finish(data?.currentLevel === 'aal2');
+    }).catch(() => finish(false));
+    const t = setTimeout(() => finish(false), MFA_CHECK_TIMEOUT_MS);
+    return () => { clearTimeout(t); done = true; };
   }, [currentUser, userRole]);
 
   const mfaApplies = userRole === 'admin';
