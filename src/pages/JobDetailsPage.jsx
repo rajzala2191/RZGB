@@ -9,6 +9,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { ROLES, getDefaultRedirectForRole } from '@/lib/accessPolicy';
 import {
   Loader2, ArrowLeft, AlertTriangle, Package,
   Layers, Hash, Calendar, ShieldCheck, Truck,
@@ -198,7 +199,7 @@ export default function JobDetailsPage() {
           <p className="font-semibold mb-1" style={{ color: textPrimary }}>Job not found</p>
           <p className="text-sm mb-5" style={{ color: textMuted }}>{error}</p>
           <button
-            onClick={() => navigate('/supplier-hub')}
+            onClick={() => navigate(getDefaultRedirectForRole(ROLES.SUPPLIER))}
             className="w-full py-2.5 rounded-xl text-sm font-semibold text-white"
             style={{ background: 'var(--brand)' }}
           >
@@ -220,7 +221,7 @@ export default function JobDetailsPage() {
 
         {/* Back */}
         <button
-          onClick={() => navigate('/supplier-hub')}
+          onClick={() => navigate(getDefaultRedirectForRole(ROLES.SUPPLIER))}
           className="flex items-center gap-2 text-sm font-semibold transition-opacity hover:opacity-70"
           style={{ color: textMuted }}
         >

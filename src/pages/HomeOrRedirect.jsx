@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { isRZGBDomain } from '@/lib/portalConfig';
+import { getDefaultRedirectForRole } from '@/lib/accessPolicy';
 import LandingPage from '@/pages/LandingPage';
 import RZGBLandingPage from '@/pages/RZGBLandingPage';
 
@@ -17,10 +18,8 @@ export default function HomeOrRedirect() {
 
   useEffect(() => {
     if (!loading && currentUser && userRole) {
-      if (userRole === 'super_admin') navigate('/platform-admin', { replace: true });
-      else if (userRole === 'admin') navigate('/control-centre', { replace: true });
-      else if (userRole === 'client') navigate('/client-dashboard', { replace: true });
-      else if (userRole === 'supplier') navigate('/supplier-hub', { replace: true });
+      const target = getDefaultRedirectForRole(userRole);
+      if (target) navigate(target, { replace: true });
     }
   }, [loading, currentUser, userRole, navigate]);
 

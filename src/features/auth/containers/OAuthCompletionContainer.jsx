@@ -5,6 +5,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 import { getSession } from '@/services/authService';
 import { createSignupWorkspaceAndProfile } from '@/services/workspaceService';
+import { ROLES, getDefaultRedirectForRole } from '@/lib/accessPolicy';
 import OAuthCompletionView from '@/features/auth/presentational/OAuthCompletionView';
 
 export default function OAuthCompletionContainer() {
@@ -24,11 +25,11 @@ export default function OAuthCompletionContainer() {
     supabase.auth.refreshSession().catch(() => {});
   }, [needsOAuthCompletion]);
 
-  // If user already has a complete profile (e.g. landed here by mistake), redirect to correct destination
+  // If user already has a complete profile (e.g. landed here by mistake), redirect to correct destination (access policy)
   useEffect(() => {
     if (!currentUser || needsOAuthCompletion) return;
     if (workspaceStatus === null) {
-      if (!workspaceId) navigate('/control-centre', { replace: true }); // super_admin etc.
+      if (!workspaceId) navigate(getDefaultRedirectForRole(ROLES.SUPER_ADMIN), { replace: true });
       return;
     }
     if (workspaceStatus === 'pending') {
@@ -37,10 +38,10 @@ export default function OAuthCompletionContainer() {
       } else if (onboardingStatus === 'completed') {
         navigate('/pending-approval', { replace: true });
       } else {
-        navigate('/control-centre', { replace: true });
+        navigate(getDefaultRedirectForRole(ROLES.ADMIN), { replace: true });
       }
     } else {
-      navigate('/control-centre', { replace: true });
+      navigate(getDefaultRedirectForRole(ROLES.ADMIN), { replace: true });
     }
   }, [currentUser, needsOAuthCompletion, workspaceStatus, onboardingStatus, workspaceId, navigate]);
 

@@ -1,0 +1,70 @@
+---
+description: Strict access policy and rules — roles, routes, RLS, onboarding gates
+alwaysApply: true
+---
+
+# Access Policy — Strict Rules
+
+Access control is enforced in two layers: **frontend (ProtectedRoute)** and **backend (Supabase RLS)**. Both must stay aligned.
+
+---
+
+## Role hierarchy (strict order)
+
+1. **super_admin** — Platform admin; no workspace; access to `/platform-admin` only. Bypasses workspace RLS.
+2. **admin** — Customer/workspace admin; has `workspace_id`; access to `/control-centre/*`. Scoped by `workspace_id` in RLS.
+3. **client** — Workspace client; access to `/client-dashboard/*`. Data scoped by workspace / client_id.
+4. **supplier** — External supplier; access to `/supplier-hub/*`. Data scoped by supplier_id / workspace for bidding.
+
+**Rules:**
+- A user has exactly one role from `profiles.role`. No cross-role access.
+- `admin_scope` on profiles: `'platform'` = treat as super_admin for RLS; `'workspace'` = customer admin.
+- When adding a new protected page, use `ProtectedRoute` with `requiredRole` or `requiredRoles` from `src/lib/accessPolicy.js`. Do not invent new role names.
+
+---
+
+## Route protection (frontend)
+
+- **Source of truth:** `src/lib/accessPolicy.js` — defines `ROLES`, path → role mapping, `getRequiredRole(path)`, `getDefaultRedirectForRole(role)`.
+- **Enforcement:** Every protected route in `App.jsx` must be wrapped with `<ProtectedRoute requiredRole="admin">` (or `requiredRoles={['super_admin']}` for platform-admin). Match the role to `accessPolicy.js`:
+  - `/platform-admin` → `requiredRoles={['super_admin']}`
+  - `/control-centre`, `/control-centre/*` → `requiredRole="admin"`
+  - `/client-dashboard`, `/client-dashboard/*` → `requiredRole="client"`
+  - `/supplier-hub`, `/supplier-hub/*` → `requiredRole="supplier"`; for `/supplier-hub/onboarding` use `skipOnboardingCheck` so suppliers can reach onboarding.
+- **Order of checks in ProtectedRoute (do not reorder):**
+  1. Loading / verifying (session, profile, workspace status, MFA for admin)
+  2. Not logged in → redirect to `/login`
+  3. OAuth completion needed → redirect to `/oauth-completion`
+  4. **Onboarding gates** (any link → onboarding until done): pending workspace admin → `/onboarding`; completed onboarding → `/pending-approval`; archived workspace → `/pending-approval`; supplier not approved → `/supplier-hub/onboarding`
+  5. MFA required for admin (except super_admin) → `/control-centre/settings?mfa=required` unless already on settings
+  6. Role check: user role must be in allowed roles for the route; else redirect to role’s default path or `/login`
+- **Strict:** No route may be protected by a role that can access another role’s area (e.g. admin cannot access `/client-dashboard`; client cannot access `/control-centre`).
+
+---
+
+## Backend (RLS) — strict rules
+
+- **Never bypass RLS** for tenant or user-specific data. All reads/writes that depend on workspace or user must go through RLS.
+- **Service role (`supabaseAdmin`)** is only for operations that RLS intentionally blocks (e.g. creating workspace + profile on signup, updating workspace status, platform-admin actions). Never use service role for reads that a logged-in user could do with the anon key and RLS.
+- **Scoping:**
+  - **super_admin:** Policies use `is_super_admin()` to allow full access where appropriate (e.g. `demo_requests`, platform tables). No `workspace_id` filter for them.
+  - **admin (workspace):** All tenant tables must restrict by `workspace_id = auth_user_workspace_id()`. Pending workspaces are blocked by `workspace_allows_portal_access()` (see migration `20260320000000_pending_workspace_portal_block.sql`).
+  - **client / supplier:** Access only to rows where they are the client or supplier (e.g. `client_id = auth.uid()`, `supplier_id = auth.uid()`), or within workspace visibility as defined by existing policies.
+- When adding a new table that holds tenant or user data, add RLS policies that follow the same pattern (super_admin bypass; admin by workspace_id + workspace_allows_portal_access(); client/supplier by their id or workspace as per design). Do not leave tables without RLS.
+
+---
+
+## Workspace status and onboarding (strict)
+
+- **workspace.status:** `pending` | `active` | `suspended` | `archived`.
+- **Pending workspace:** Admin must complete onboarding then wait on pending-approval. RLS blocks portal data access until workspace is active (`workspace_allows_portal_access()`).
+- **Archived workspace:** Admin sees only pending-approval (rejection message). No access to control-centre data.
+- **Supplier onboarding:** `profiles.onboarding_status` for suppliers must be `'approved'` to access rest of supplier-hub; exception: path `/supplier-hub/onboarding` uses `skipOnboardingCheck`.
+
+---
+
+## Checklist for new or changed access
+
+- [ ] New route: add to `App.jsx` with `ProtectedRoute` and correct `requiredRole` / `requiredRoles`; add path → role to `src/lib/accessPolicy.js` if it’s a new prefix.
+- [ ] New table with tenant/user data: add RLS policies; use `auth_user_workspace_id()` and/or `workspace_allows_portal_access()` and client/supplier id where appropriate.
+- [ ] Change role or hierarchy: update `accessPolicy.js`, `ProtectedRoute` logic, and any RLS that uses `profiles.role` or `is_super_admin()`.

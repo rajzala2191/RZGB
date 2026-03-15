@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
-import { Loader2 } from 'lucide-react';
+import { getDefaultRedirectForRole } from '@/lib/accessPolicy';
+import { Loader2, RefreshCw } from 'lucide-react';
+
+const VERIFY_TIMEOUT_MS = 12_000;
 
 const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingCheck = false }) => {
   const {
@@ -13,6 +16,7 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
   const location = useLocation();
   const [mfaVerified, setMfaVerified] = useState(null);
   const [mfaLoading, setMfaLoading] = useState(false);
+  const [verifyTimedOut, setVerifyTimedOut] = useState(false);
 
   const allowedRoles = requiredRoles || (requiredRole ? [requiredRole] : []);
 
@@ -29,12 +33,44 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
   const mfaApplies = userRole === 'admin';
   // Admin with workspace must wait for workspaceStatus/onboardingStatus before gating (prevents race → control-centre buffering)
   const adminAwaitingWorkspaceStatus = userRole === 'admin' && workspaceId && workspaceStatus === null;
-  if (loading || (currentUser && !userRole) || (mfaApplies && mfaLoading) || adminAwaitingWorkspaceStatus) {
+  const showingSpinner = loading || (currentUser && !userRole) || (mfaApplies && mfaLoading) || adminAwaitingWorkspaceStatus;
+
+  // If we're stuck on "Verifying access..." for too long, show a way out
+  useEffect(() => {
+    setVerifyTimedOut(false);
+    if (!showingSpinner) return;
+    const t = setTimeout(() => setVerifyTimedOut(true), VERIFY_TIMEOUT_MS);
+    return () => clearTimeout(t);
+  }, [showingSpinner]);
+  if (showingSpinner) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-12 h-12 text-[#FF6B35] animate-spin" />
-          <p className="text-slate-600 text-xl">Verifying access...</p>
+          {!verifyTimedOut ? (
+            <>
+              <Loader2 className="w-12 h-12 text-[#FF6B35] animate-spin" />
+              <p className="text-slate-600 text-xl">Verifying access...</p>
+            </>
+          ) : (
+            <>
+              <p className="text-slate-600 text-xl text-center max-w-sm">Verification is taking longer than usual.</p>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#FF6B35] text-white text-sm font-medium hover:opacity-90"
+                >
+                  <RefreshCw className="w-4 h-4" /> Refresh
+                </button>
+                <Link
+                  to="/login"
+                  className="text-slate-600 text-sm hover:underline"
+                >
+                  Back to sign in
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -47,6 +83,32 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
   // Google OAuth users without profile must complete setup first
   if (needsOAuthCompletion) {
     return <Navigate to="/oauth-completion" state={{ from: location }} replace />;
+  }
+
+  // Onboarding gates first: any link they open should send them to onboarding until it's done
+  // Pending workspace admins: must complete onboarding before accessing any app route
+  if (userRole === 'admin' && workspaceStatus === 'pending') {
+    if (onboardingStatus === 'not_started' || onboardingStatus === null) {
+      if (location.pathname !== '/onboarding') {
+        return <Navigate to="/onboarding" state={{ from: location }} replace />;
+      }
+    } else if (onboardingStatus === 'completed') {
+      if (location.pathname !== '/pending-approval') {
+        return <Navigate to="/pending-approval" state={{ from: location }} replace />;
+      }
+    }
+  }
+  // Block archived (rejected) workspace admins from portal
+  if (userRole === 'admin' && workspaceStatus === 'archived') {
+    if (location.pathname !== '/pending-approval') {
+      return <Navigate to="/pending-approval" state={{ from: location }} replace />;
+    }
+  }
+  // Suppliers who haven't completed onboarding go to supplier onboarding
+  if (userRole === 'supplier' && !skipOnboardingCheck && onboardingStatus && onboardingStatus !== 'approved') {
+    if (location.pathname !== '/supplier-hub/onboarding') {
+      return <Navigate to="/supplier-hub/onboarding" state={{ from: location }} replace />;
+    }
   }
 
   // Require MFA only for customer admins (control-centre); super_admin can use platform-admin without MFA
@@ -63,53 +125,21 @@ const ProtectedRoute = ({ children, requiredRole, requiredRoles, skipOnboardingC
 
     if (isPlatformRoute) {
       if (!isSuperAdmin) {
-        if (userRole === 'admin') return <Navigate to="/control-centre" replace />;
-        if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
-        if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
-        return <Navigate to="/login" replace />;
+        const target = getDefaultRedirectForRole(userRole);
+        return <Navigate to={target || '/login'} replace />;
       }
     } else if (isAdminRoute) {
       if (userRole !== 'admin') {
-        if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
-        if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
-        return <Navigate to="/login" replace />;
+        const target = getDefaultRedirectForRole(userRole);
+        return <Navigate to={target || '/login'} replace />;
       }
     } else {
       const hasRole = allowedRoles.includes(userRole);
       const superAdminBypass = isSuperAdmin;
       if (!hasRole && !superAdminBypass) {
-        if (userRole === 'admin') return <Navigate to="/control-centre" replace />;
-        if (userRole === 'client') return <Navigate to="/client-dashboard" replace />;
-        if (userRole === 'supplier') return <Navigate to="/supplier-hub" replace />;
-        return <Navigate to="/login" replace />;
+        const target = getDefaultRedirectForRole(userRole);
+        return <Navigate to={target || '/login'} replace />;
       }
-    }
-  }
-
-  // Gate suppliers who haven't completed their onboarding
-  if (userRole === 'supplier' && !skipOnboardingCheck && onboardingStatus && onboardingStatus !== 'approved') {
-    if (location.pathname !== '/supplier-hub/onboarding') {
-      return <Navigate to="/supplier-hub/onboarding" replace />;
-    }
-  }
-
-  // Gate pending workspace admins: must complete onboarding before accessing the app
-  if (userRole === 'admin' && workspaceStatus === 'pending') {
-    if (onboardingStatus === 'not_started' || onboardingStatus === null) {
-      if (location.pathname !== '/onboarding') {
-        return <Navigate to="/onboarding" replace />;
-      }
-    } else if (onboardingStatus === 'completed') {
-      if (location.pathname !== '/pending-approval') {
-        return <Navigate to="/pending-approval" replace />;
-      }
-    }
-  }
-
-  // Block archived (rejected) workspace admins from portal
-  if (userRole === 'admin' && workspaceStatus === 'archived') {
-    if (location.pathname !== '/pending-approval') {
-      return <Navigate to="/pending-approval" replace />;
     }
   }
 

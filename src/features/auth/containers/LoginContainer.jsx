@@ -9,6 +9,7 @@ import {
   verifyRecoveryOtp,
 } from '@/services/authService';
 import LoginView from '@/features/auth/presentational/LoginView';
+import { getDefaultRedirectForRole } from '@/lib/accessPolicy';
 
 const OTP_LENGTH = Number(import.meta.env.VITE_EMAIL_OTP_LENGTH || 6);
 
@@ -70,11 +71,8 @@ export default function LoginContainer() {
         title: 'Welcome Back',
         description: 'Successfully logged in to RZ Portal.',
       });
-      if (userRole === 'super_admin') navigate('/platform-admin', { replace: true });
-      else if (userRole === 'admin') navigate('/control-centre', { replace: true });
-      else if (userRole === 'client') navigate('/client-dashboard', { replace: true });
-      else if (userRole === 'supplier') navigate('/supplier-hub', { replace: true });
-      else navigate('/', { replace: true });
+      const target = getDefaultRedirectForRole(userRole);
+      navigate(target || '/', { replace: true });
     }
   }, [currentUser, userRole, navigate, showForgotPassword, toast]);
 

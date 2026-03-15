@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, Mail, LogOut, Package, BarChart2, Building2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { ROLES, getDefaultRedirectForRole } from '@/lib/accessPolicy';
 import { useTheme } from '@/contexts/ThemeContext';
 import { fetchWorkspaceById } from '@/services/workspaceService';
 
@@ -62,7 +63,7 @@ export default function PendingApprovalPage() {
       return;
     }
     if (workspaceStatus === 'active') {
-      navigate('/control-centre', { replace: true });
+      navigate(getDefaultRedirectForRole(ROLES.ADMIN), { replace: true });
       return;
     }
     // archived = rejected; stay on this page (ProtectedRoute redirects here)

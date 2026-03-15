@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import FaviconSwitcher from '@/components/FaviconSwitcher';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { ROLES } from '@/lib/accessPolicy';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import DomainGuard from '@/components/DomainGuard';
 import DemoBanner from '@/components/DemoBanner';
@@ -184,7 +185,7 @@ function App() {
                     </Route>
 
                     {/* Platform admin */}
-                    <Route path="/platform-admin" element={<ProtectedRoute requiredRoles={['super_admin']}><PlatformAdminLayout /></ProtectedRoute>}>
+                    <Route path="/platform-admin" element={<ProtectedRoute requiredRoles={[ROLES.SUPER_ADMIN]}><PlatformAdminLayout /></ProtectedRoute>}>
                       <Route index element={<PlatformDashboardPage />} />
                       <Route path="workspaces" element={<PlatformWorkspacesPage />} />
                       <Route path="users" element={<PlatformUsersPage />} />
@@ -198,74 +199,74 @@ function App() {
                     </Route>
 
                     {/* Admin (control centre) */}
-                    <Route path="/control-centre" element={<ProtectedRoute requiredRole="admin"><ControlCentrePage /></ProtectedRoute>} />
-                    <Route path="/control-centre/intake-gate" element={<ProtectedRoute requiredRole="admin"><IntakeGatePage /></ProtectedRoute>} />
-                    <Route path="/control-centre/sanitisation-gate" element={<ProtectedRoute requiredRole="admin"><SanitisationGatePage /></ProtectedRoute>} />
-                    <Route path="/control-centre/sanitisation-gate/review/:orderId" element={<ProtectedRoute requiredRole="admin"><SanitisationReviewPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/document-review" element={<ProtectedRoute requiredRole="admin"><AdminDocumentReview /></ProtectedRoute>} />
-                    <Route path="/control-centre/live-tracking" element={<ProtectedRoute requiredRole="admin"><AdminLiveTracking /></ProtectedRoute>} />
-                    <Route path="/control-centre/supplier-pool" element={<ProtectedRoute requiredRole="admin"><SupplierPoolPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/linkage" element={<ProtectedRoute requiredRole="admin"><LinkageDashboard /></ProtectedRoute>} />
-                    <Route path="/control-centre/sanitisation" element={<ProtectedRoute requiredRole="admin"><SanitisationEngine /></ProtectedRoute>} />
-                    <Route path="/control-centre/audit-vault" element={<ProtectedRoute requiredRole="admin"><AuditVault /></ProtectedRoute>} />
-                    <Route path="/control-centre/users" element={<ProtectedRoute requiredRole="admin"><UserManagementPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/analytics" element={<ProtectedRoute requiredRole="admin"><SystemAnalyticsPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/logs" element={<ProtectedRoute requiredRole="admin"><ActivityLogsPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/settings" element={<ProtectedRoute requiredRole="admin"><SettingsPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/communications" element={<ProtectedRoute requiredRole="admin"><CommunicationsPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/reports" element={<ProtectedRoute requiredRole="admin"><ReportsPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/ncr-management" element={<ProtectedRoute requiredRole="admin"><NCRManagementPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/supplier-management" element={<ProtectedRoute requiredRole="admin"><SupplierManagementPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/shipments" element={<ProtectedRoute requiredRole="admin"><AdminShipmentsPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/manufacturing-processes" element={<ProtectedRoute requiredRole="admin"><ManufacturingProcessesPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/order-preview/:orderId" element={<ProtectedRoute requiredRole="admin"><AdminOrderPreviewPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/account-security" element={<ProtectedRoute requiredRole="admin"><AdminAccountSecurityPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/bid-management" element={<ProtectedRoute requiredRole="admin"><BidManagementPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/bid-comparison/:orderId" element={<ProtectedRoute requiredRole="admin"><BidComparisonPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/purchase-orders" element={<ProtectedRoute requiredRole="admin"><PurchaseOrdersPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/rfq-qanda/:orderId" element={<ProtectedRoute requiredRole="admin"><RFQQandAPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/rfq-templates" element={<ProtectedRoute requiredRole="admin"><RFQTemplatesPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/invoices" element={<ProtectedRoute requiredRole="admin"><AdminInvoicesPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/spend-analytics" element={<ProtectedRoute requiredRole="admin"><SpendAnalyticsPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/approval-workflows" element={<ProtectedRoute requiredRole="admin"><ApprovalWorkflowsPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/contracts" element={<ProtectedRoute requiredRole="admin"><ContractManagementPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/supplier-discovery" element={<ProtectedRoute requiredRole="admin"><SupplierDiscoveryPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/supplier-scorecard" element={<ProtectedRoute requiredRole="admin"><SupplierScorecardPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/supplier-scorecard/:supplierId" element={<ProtectedRoute requiredRole="admin"><SupplierScorecardPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/support" element={<ProtectedRoute requiredRole="admin"><AdminSupportPage /></ProtectedRoute>} />
-                    <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole="admin"><AdminTicketDetailPage /></ProtectedRoute>} />
+                    <Route path="/control-centre" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><ControlCentrePage /></ProtectedRoute>} />
+                    <Route path="/control-centre/intake-gate" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><IntakeGatePage /></ProtectedRoute>} />
+                    <Route path="/control-centre/sanitisation-gate" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SanitisationGatePage /></ProtectedRoute>} />
+                    <Route path="/control-centre/sanitisation-gate/review/:orderId" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SanitisationReviewPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/document-review" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><AdminDocumentReview /></ProtectedRoute>} />
+                    <Route path="/control-centre/live-tracking" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><AdminLiveTracking /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-pool" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SupplierPoolPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/linkage" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><LinkageDashboard /></ProtectedRoute>} />
+                    <Route path="/control-centre/sanitisation" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SanitisationEngine /></ProtectedRoute>} />
+                    <Route path="/control-centre/audit-vault" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><AuditVault /></ProtectedRoute>} />
+                    <Route path="/control-centre/users" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><UserManagementPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/analytics" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SystemAnalyticsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/logs" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><ActivityLogsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/settings" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SettingsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/communications" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><CommunicationsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/reports" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><ReportsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/ncr-management" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><NCRManagementPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-management" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SupplierManagementPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/shipments" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><AdminShipmentsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/manufacturing-processes" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><ManufacturingProcessesPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/order-preview/:orderId" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><AdminOrderPreviewPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/account-security" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><AdminAccountSecurityPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/bid-management" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><BidManagementPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/bid-comparison/:orderId" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><BidComparisonPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/purchase-orders" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><PurchaseOrdersPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/rfq-qanda/:orderId" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><RFQQandAPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/rfq-templates" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><RFQTemplatesPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/invoices" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><AdminInvoicesPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/spend-analytics" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SpendAnalyticsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/approval-workflows" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><ApprovalWorkflowsPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/contracts" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><ContractManagementPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-discovery" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SupplierDiscoveryPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-scorecard" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SupplierScorecardPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/supplier-scorecard/:supplierId" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><SupplierScorecardPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/support" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><AdminSupportPage /></ProtectedRoute>} />
+                    <Route path="/control-centre/support/:ticketId" element={<ProtectedRoute requiredRole={ROLES.ADMIN}><AdminTicketDetailPage /></ProtectedRoute>} />
 
                     {/* Client */}
-                    <Route path="/client-dashboard" element={<ProtectedRoute requiredRole="client"><ClientDashboardPage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/create-order" element={<ProtectedRoute requiredRole="client"><ClientOrderCreationPage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole="client"><OrdersOverviewPage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/orders/:orderId" element={<ProtectedRoute requiredRole="client"><ClientOrderDetailsPage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/orders/:orderId/tracking" element={<ProtectedRoute requiredRole="client"><LiveOrderTracking /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/documents" element={<ProtectedRoute requiredRole="client"><ClientDocumentLibraryPage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/shipping" element={<ProtectedRoute requiredRole="client"><ShippingTrackingPage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/ncr-visibility" element={<ProtectedRoute requiredRole="client"><NCRVisibilityPage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/profile" element={<ProtectedRoute requiredRole="client"><ClientProfilePage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/settings" element={<ProtectedRoute requiredRole="client"><ClientSettingsPage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/support" element={<ProtectedRoute requiredRole="client"><ClientSupportPage /></ProtectedRoute>} />
-                    <Route path="/client-dashboard/support/:ticketId" element={<ProtectedRoute requiredRole="client"><TicketDetailPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><ClientDashboardPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/create-order" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><ClientOrderCreationPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/orders" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><OrdersOverviewPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/orders/:orderId" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><ClientOrderDetailsPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/orders/:orderId/tracking" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><LiveOrderTracking /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/documents" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><ClientDocumentLibraryPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/shipping" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><ShippingTrackingPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/ncr-visibility" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><NCRVisibilityPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/profile" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><ClientProfilePage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/settings" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><ClientSettingsPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/support" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><ClientSupportPage /></ProtectedRoute>} />
+                    <Route path="/client-dashboard/support/:ticketId" element={<ProtectedRoute requiredRole={ROLES.CLIENT}><TicketDetailPage /></ProtectedRoute>} />
 
                     {/* Supplier */}
-                    <Route path="/supplier-hub" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/dashboard" element={<ProtectedRoute requiredRole="supplier"><SupplierDashboard /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/orders" element={<ProtectedRoute requiredRole="supplier"><SupplierOrderManager /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/awarded" element={<ProtectedRoute requiredRole="supplier"><SupplierOrderManager /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/job-tracking/:rz_job_id" element={<ProtectedRoute requiredRole="supplier"><JobDetailsPage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole="supplier"><SupplierDocumentsPortal /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole="supplier"><NCRReportingPage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/profile" element={<ProtectedRoute requiredRole="supplier"><SupplierProfilePage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/bidding" element={<ProtectedRoute requiredRole="supplier"><SupplierBiddingPage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/purchase-orders" element={<ProtectedRoute requiredRole="supplier"><SupplierPurchaseOrdersPage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/invoices" element={<ProtectedRoute requiredRole="supplier"><SupplierInvoicesPage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/settings" element={<ProtectedRoute requiredRole="supplier"><SupplierSettingsPage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/capabilities" element={<ProtectedRoute requiredRole="supplier"><SupplierCapabilitiesPage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/onboarding" element={<ProtectedRoute requiredRole="supplier" skipOnboardingCheck><SupplierOnboardingPage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole="supplier"><SupplierSupportPage /></ProtectedRoute>} />
-                    <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole="supplier"><TicketDetailPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierDashboard /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/dashboard" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierDashboard /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/orders" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierOrderManager /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/awarded" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierOrderManager /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/job-tracking/:rz_job_id" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><JobDetailsPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/documents" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierDocumentsPortal /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/ncr" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><NCRReportingPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/profile" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierProfilePage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/bidding" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierBiddingPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/purchase-orders" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierPurchaseOrdersPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/invoices" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierInvoicesPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/settings" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierSettingsPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/capabilities" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierCapabilitiesPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/onboarding" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER} skipOnboardingCheck><SupplierOnboardingPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/support" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><SupplierSupportPage /></ProtectedRoute>} />
+                    <Route path="/supplier-hub/support/:ticketId" element={<ProtectedRoute requiredRole={ROLES.SUPPLIER}><TicketDetailPage /></ProtectedRoute>} />
                   </Routes>
                   </Suspense>
                   </DomainGuard>

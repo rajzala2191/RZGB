@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import SignupView from '@/features/auth/presentational/SignupView';
+import { getDefaultRedirectForRole } from '@/lib/accessPolicy';
 
 export default function SignupContainer() {
   const navigate = useNavigate();
@@ -18,16 +19,11 @@ export default function SignupContainer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Redirect already-logged-in users to their dashboard
+  // Redirect already-logged-in users to their dashboard (access policy)
   useEffect(() => {
     if (currentUser && userRole) {
-      if (userRole === 'super_admin' || (userRole === 'admin')) {
-        navigate('/control-centre', { replace: true });
-      } else if (userRole === 'client') {
-        navigate('/client-dashboard', { replace: true });
-      } else if (userRole === 'supplier') {
-        navigate('/supplier-hub', { replace: true });
-      }
+      const target = getDefaultRedirectForRole(userRole);
+      if (target) navigate(target, { replace: true });
     }
   }, [currentUser, userRole, navigate]);
 

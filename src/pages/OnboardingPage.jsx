@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { ROLES, getDefaultRedirectForRole } from '@/lib/accessPolicy';
 import OnboardingWizard from '@/features/onboarding/OnboardingWizard';
 import { Loader2 } from 'lucide-react';
 
@@ -13,7 +14,7 @@ export default function OnboardingPage() {
     if (!currentUser) {
       navigate('/login', { replace: true });
     } else if (workspaceStatus === 'active') {
-      navigate('/control-centre', { replace: true });
+      navigate(getDefaultRedirectForRole(ROLES.ADMIN), { replace: true });
     }
   }, [currentUser, workspaceStatus, loading, navigate]);
 

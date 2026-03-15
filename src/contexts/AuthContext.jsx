@@ -187,7 +187,8 @@ export const AuthProvider = ({ children }) => {
       fetchWorkspaceStatus(workspaceId).then(({ data }) => {
         if (!cancelled) setWorkspaceStatus(data?.status || null);
       }).catch(() => {
-        if (!cancelled) setWorkspaceStatus(null);
+        // Fallback so admin isn't stuck on "Verifying access..." forever (e.g. RLS or network failure)
+        if (!cancelled) setWorkspaceStatus('pending');
       });
     } else {
       setWorkspaceStatus(null);
